@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaming — VexlowHQ</title>
+<meta name="description" content="Releases, updates, guides, consoles, and mobile games.">
+<link rel="stylesheet" href="../../css/style.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+</head>
+<body data-category="gaming">
+
+<div class="mobile-topbar">
+  <a class="logo-chip" href="../../index.html" aria-label="Go to VexlowHQ Home"><img src="../../img/vexlow-logo.png" alt="VexlowHQ"></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</div>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <a class="logo-chip" href="../../index.html" aria-label="Go to VexlowHQ Home"><img src="../../img/vexlow-logo.png" alt="VexlowHQ"></a>
+    </div>
+
+    <div class="search-wrap">
+      <label class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="siteSearchInput" placeholder="Search VexlowHQ..." autocomplete="off">
+      </label>
+      <div class="search-results" id="siteSearchResults"></div>
+    </div>
+
+    <nav class="side-group" id="categoryNav">
+      <span class="side-label">Categories</span>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../index.html" data-cat="index"><span class="ic">🏠</span>Home</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/trending/index.html" data-cat="trending"><span class="ic">🌍</span>Trending</a>
+          <button type="button" class="cat-expand" data-target="sub-trending" aria-label="Show Trending subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-trending">
+          <a href="../../categoria/trending/index.html">Viral</a><a href="../../categoria/trending/index.html">Records</a><a href="../../categoria/trending/index.html">Major Events</a><a href="../../categoria/trending/index.html">Social Trends</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/ai/index.html" data-cat="ai"><span class="ic">🤖</span>AI</a>
+          <button type="button" class="cat-expand" data-target="sub-ai" aria-label="Show AI subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-ai">
+          <a href="../../categoria/ai/index.html">New Models</a><a href="../../categoria/ai/index.html">Tools</a><a href="../../categoria/ai/index.html">Tutorials</a><a href="../../categoria/ai/index.html">Comparisons</a><a href="../../categoria/ai/index.html">Prompts</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/technology/index.html" data-cat="technology"><span class="ic">💻</span>Technology</a>
+          <button type="button" class="cat-expand" data-target="sub-technology" aria-label="Show Technology subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-technology">
+          <a href="../../categoria/technology/index.html">Phones</a><a href="../../categoria/technology/index.html">Computers</a><a href="../../categoria/technology/index.html">Apps</a><a href="../../categoria/technology/index.html">Software</a><a href="../../categoria/technology/index.html">Gadgets</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/science/index.html" data-cat="science"><span class="ic">🚀</span>Science &amp; Space</a>
+          <button type="button" class="cat-expand" data-target="sub-science" aria-label="Show Science &amp; Space subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-science">
+          <a href="../../categoria/science/index.html">NASA</a><a href="../../categoria/science/index.html">SpaceX</a><a href="../../categoria/science/index.html">Discoveries</a><a href="../../categoria/science/index.html">Medicine</a><a href="../../categoria/science/index.html">Nature</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/gaming/index.html" data-cat="gaming"><span class="ic">🎮</span>Gaming</a>
+          <button type="button" class="cat-expand" data-target="sub-gaming" aria-label="Show Gaming subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-gaming">
+          <a href="../../categoria/gaming/index.html">Releases</a><a href="../../categoria/gaming/index.html">Updates</a><a href="../../categoria/gaming/index.html">Guides</a><a href="../../categoria/gaming/index.html">Consoles</a><a href="../../categoria/gaming/index.html">Mobile</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Entertainment</a>
+          <button type="button" class="cat-expand" data-target="sub-entertainment" aria-label="Show Entertainment subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-entertainment">
+          <a href="../../categoria/entertainment/index.html">Movies</a><a href="../../categoria/entertainment/index.html">TV Series</a><a href="../../categoria/entertainment/index.html">Streaming</a><a href="../../categoria/entertainment/index.html">Music</a><a href="../../categoria/entertainment/index.html">Celebrities</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/sports/index.html" data-cat="sports"><span class="ic">⚽</span>Sports</a>
+          <button type="button" class="cat-expand" data-target="sub-sports" aria-label="Show Sports subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-sports">
+          <a href="../../categoria/sports/index.html">Soccer</a><a href="../../categoria/sports/index.html">World Cup</a><a href="../../categoria/sports/index.html">NBA</a><a href="../../categoria/sports/index.html">Formula 1</a><a href="../../categoria/sports/index.html">Records</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/world/index.html" data-cat="world"><span class="ic">🌎</span>World</a>
+          <button type="button" class="cat-expand" data-target="sub-world" aria-label="Show World subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-world">
+          <a href="../../categoria/world/index.html">Odd News</a><a href="../../categoria/world/index.html">Economy</a><a href="../../categoria/world/index.html">Current Events</a><a href="../../categoria/world/index.html">Culture</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/curiosities/index.html" data-cat="curiosities"><span class="ic">💡</span>Curiosities</a>
+          <button type="button" class="cat-expand" data-target="sub-curiosities" aria-label="Show Curiosities subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-curiosities">
+          <a href="../../categoria/curiosities/index.html">Did You Know?</a><a href="../../categoria/curiosities/index.html">Rankings</a><a href="../../categoria/curiosities/index.html">Inventions</a><a href="../../categoria/curiosities/index.html">Places</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/guides/index.html" data-cat="guides"><span class="ic">📚</span>Guides</a>
+          <button type="button" class="cat-expand" data-target="sub-guides" aria-label="Show Guides subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-guides">
+          <a href="../../categoria/guides/index.html">ChatGPT</a><a href="../../categoria/guides/index.html">Make Money</a><a href="../../categoria/guides/index.html">AI Tools</a><a href="../../categoria/guides/index.html">Tutorials</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/social/index.html" data-cat="social"><span class="ic">📱</span>Social Media</a>
+          <button type="button" class="cat-expand" data-target="sub-social" aria-label="Show Social Media subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-social">
+          <a href="../../categoria/social/index.html">TikTok</a><a href="../../categoria/social/index.html">Instagram</a><a href="../../categoria/social/index.html">YouTube</a><a href="../../categoria/social/index.html">X</a><a href="../../categoria/social/index.html">Twitch</a>
+        </div>
+      </div>
+
+      <div class="cat-item">
+        <div class="cat-row">
+          <a class="cat-link" href="../../categoria/business/index.html" data-cat="business"><span class="ic">💰</span>Business</a>
+          <button type="button" class="cat-expand" data-target="sub-business" aria-label="Show Business subtopics">▸</button>
+        </div>
+        <div class="cat-sub" id="sub-business">
+          <a href="../../categoria/business/index.html">Startups</a><a href="../../categoria/business/index.html">Crypto</a><a href="../../categoria/business/index.html">Investing</a><a href="../../categoria/business/index.html">Marketing</a>
+        </div>
+      </div>
+    </nav>
+
+    <nav class="side-group">
+      <span class="side-label">Latest Posts</span>
+      <div class="filter-row" id="filterRow">
+        <button type="button" class="filter-chip active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="ai">🤖 AI</button>
+        <button type="button" class="filter-chip" data-filter="technology">💻 Technology</button>
+        <button type="button" class="filter-chip" data-filter="science">🚀 Science</button>
+        <button type="button" class="filter-chip" data-filter="gaming">🎮 Gaming</button>
+        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Entertainment</button>
+        <button type="button" class="filter-chip" data-filter="sports">⚽ Sports</button>
+        <button type="button" class="filter-chip" data-filter="world">🌎 World</button>
+        <button type="button" class="filter-chip" data-filter="curiosities">💡 Curiosities</button>
+        <button type="button" class="filter-chip" data-filter="guides">📚 Guides</button>
+        <button type="button" class="filter-chip" data-filter="social">📱 Social</button>
+        <button type="button" class="filter-chip" data-filter="business">💰 Business</button>
+      </div>
+      <div class="latest-list" id="latestList"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="light">Light</button>
+        <button type="button" data-theme-btn="dark">Dark</button>
+        <button type="button" data-theme-btn="auto" class="active">Auto</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a><span class="sep">/</span><span class="current">Gaming</span>
+    </nav>
+
+    <div class="category-header">
+      <span class="ic-badge">🎮</span>
+      <div>
+        <h1>🎮 Gaming</h1>
+        <p>Releases, updates, guides, consoles, and mobile games.</p>
+        <span class="count" id="categoryCount">Loading…</span>
+      </div>
+    </div>
+
+    <div class="topic-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="topicSearch" placeholder="Search a topic by name...">
+    </div>
+    <p class="topic-no-results" id="topicNoResults">We couldn't find a topic with that name.</p>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>⭐ Popular</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="callofduty.html"><span class="ic">🎮</span><h3>Call Of Duty</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="gtavi.html"><span class="ic">🎮</span><h3>GTA VI</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="fortnite.html"><span class="ic">🎮</span><h3>Fortnite</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="roblox.html"><span class="ic">🎮</span><h3>Roblox</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="counterstrike2.html"><span class="ic">🎮</span><h3>Counter-Strike 2</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="leagueoflegends.html"><span class="ic">🎮</span><h3>League of Legends</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="valorant.html"><span class="ic">🎮</span><h3>Valorant</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="easportsfc27.html"><span class="ic">🎮</span><h3>EA Sports FC 27 (FIFA)</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="marvelrivals.html"><span class="ic">🎮</span><h3>Marvel Rivals</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="apexlegends.html"><span class="ic">🎮</span><h3>Apex Legends</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="pubg.html"><span class="ic">🎮</span><h3>PUBG</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="rainbowsixsiege.html"><span class="ic">🎮</span><h3>Rainbow Six Siege</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="helldivers2.html"><span class="ic">🎮</span><h3>Helldivers 2</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="battlefield6.html"><span class="ic">🎮</span><h3>Battlefield 6</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="residentevilrequiem.html"><span class="ic">🎮</span><h3>Resident Evil Requiem</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="eldenring.html"><span class="ic">🎮</span><h3>Elden Ring</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="assassinscreed.html"><span class="ic">🎮</span><h3>Assassin's Creed</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="monsterhunterwilds.html"><span class="ic">🎮</span><h3>Monster Hunter Wilds</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="diablo4.html"><span class="ic">🎮</span><h3>Diablo IV</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="minecraft.html"><span class="ic">🎮</span><h3>Minecraft</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Nintendo</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="pokemon.html"><span class="ic">🎮</span><h3>Pokémon</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="mariokart.html"><span class="ic">🎮</span><h3>Mario Kart</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="zelda.html"><span class="ic">🎮</span><h3>Zelda</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="animalcrossing.html"><span class="ic">🎮</span><h3>Animal Crossing</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="supersmashbros.html"><span class="ic">🎮</span><h3>Super Smash Bros.</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="splatoon.html"><span class="ic">🎮</span><h3>Splatoon</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="kirby.html"><span class="ic">🎮</span><h3>Kirby</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="metroid.html"><span class="ic">🎮</span><h3>Metroid</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="donkeykong.html"><span class="ic">🎮</span><h3>Donkey Kong</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="pikmin.html"><span class="ic">🎮</span><h3>Pikmin</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>MMORPG</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="worldofwarcraft.html"><span class="ic">🎮</span><h3>World of Warcraft</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="finalfantasyxiv.html"><span class="ic">🎮</span><h3>Final Fantasy XIV</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="runescape.html"><span class="ic">🎮</span><h3>RuneScape</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="blackdesert.html"><span class="ic">🎮</span><h3>Black Desert</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="throneandliberty.html"><span class="ic">🎮</span><h3>Throne and Liberty</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="lostark.html"><span class="ic">🎮</span><h3>Lost Ark</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Mobile Games</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="clashroyale.html"><span class="ic">🎮</span><h3>Clash Royale</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="clashofclans.html"><span class="ic">🎮</span><h3>Clash of Clans</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="brawlstars.html"><span class="ic">🎮</span><h3>Brawl Stars</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="freefire.html"><span class="ic">🎮</span><h3>Free Fire</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="pubgmobile.html"><span class="ic">🎮</span><h3>PUBG Mobile</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="mobilelegends.html"><span class="ic">🎮</span><h3>Mobile Legends</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="pokemongo.html"><span class="ic">🎮</span><h3>Pokémon GO</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="monopolygo.html"><span class="ic">🎮</span><h3>Monopoly GO</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="candycrush.html"><span class="ic">🎮</span><h3>Candy Crush</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="stumbleguys.html"><span class="ic">🎮</span><h3>Stumble Guys</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Survival</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="rust.html"><span class="ic">🎮</span><h3>Rust</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="ark.html"><span class="ic">🎮</span><h3>ARK</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="dayz.html"><span class="ic">🎮</span><h3>DayZ</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="sonsoftheforest.html"><span class="ic">🎮</span><h3>Sons of the Forest</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="valheim.html"><span class="ic">🎮</span><h3>Valheim</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="subnautica.html"><span class="ic">🎮</span><h3>Subnautica</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="theforest.html"><span class="ic">🎮</span><h3>The Forest</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="7daystodie.html"><span class="ic">🎮</span><h3>7 Days to Die</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Sandbox / Building</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="minecraft.html"><span class="ic">🎮</span><h3>Minecraft</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="roblox.html"><span class="ic">🎮</span><h3>Roblox</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="terraria.html"><span class="ic">🎮</span><h3>Terraria</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="legofortnite.html"><span class="ic">🎮</span><h3>LEGO Fortnite</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="corekeeper.html"><span class="ic">🎮</span><h3>Core Keeper</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Horror</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="deadbydaylight.html"><span class="ic">🎮</span><h3>Dead by Daylight</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="phasmophobia.html"><span class="ic">🎮</span><h3>Phasmophobia</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="silenthill.html"><span class="ic">🎮</span><h3>Silent Hill</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="residentevil.html"><span class="ic">🎮</span><h3>Resident Evil</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="fivenightsatfreddys.html"><span class="ic">🎮</span><h3>Five Nights at Freddy's</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="outlast.html"><span class="ic">🎮</span><h3>Outlast</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-top:0;">
+      <div class="section-head"><h2>Sports Games</h2></div>
+      <div class="guides-grid">
+        <a class="guide-card" href="easportsfc.html"><span class="ic">🎮</span><h3>EA Sports FC</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="nba2k.html"><span class="ic">🎮</span><h3>NBA 2K</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="maddennfl.html"><span class="ic">🎮</span><h3>Madden NFL</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="wwe2k.html"><span class="ic">🎮</span><h3>WWE 2K</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="mlbtheshow.html"><span class="ic">🎮</span><h3>MLB The Show</h3><p>See full coverage</p></a>
+        <a class="guide-card" href="rocketleague.html"><span class="ic">🎮</span><h3>Rocket League</h3><p>See full coverage</p></a>
+      </div>
+    </div>
+
+
+
+    <div class="home-section" style="margin-top: 32px;">
+      <div class="ad-slot">Advertisement · in-feed responsive</div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo-chip" href="../../index.html" aria-label="Go to VexlowHQ Home"><img src="../../img/vexlow-logo.png" alt="VexlowHQ"></a>
+          <p>The most interesting stuff on the internet, every day. Discovery, not just news.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Categories</h4>
+          <a href="../../categoria/trending/index.html">Trending</a>
+          <a href="../../categoria/ai/index.html">AI</a>
+          <a href="../../categoria/technology/index.html">Technology</a>
+          <a href="../../categoria/science/index.html">Science &amp; Space</a>
+          <a href="../../categoria/gaming/index.html">Gaming</a>
+        </div>
+        <div class="footer-col">
+          <h4>More categories</h4>
+          <a href="../../categoria/entertainment/index.html">Entertainment</a>
+          <a href="../../categoria/sports/index.html">Sports</a>
+          <a href="../../categoria/world/index.html">World</a>
+          <a href="../../categoria/curiosities/index.html">Curiosities</a>
+          <a href="../../categoria/guides/index.html">Guides</a>
+          <a href="../../categoria/social/index.html">Social Media</a>
+          <a href="../../categoria/business/index.html">Business</a>
+        </div>
+        <div class="footer-col">
+          <h4>Trust</h4>
+          <a href="../../about-vexlowhq.html">About VexlowHQ</a>
+          <a href="../../editorial-policy.html">Editorial Policy</a>
+          <a href="../../contact.html">Contact</a>
+          <a href="../../advertise.html">Advertise With Us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="../../privacy.html">Privacy</a>
+          <a href="../../terms.html">Terms</a>
+          <a href="../../cookies.html">Cookies</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 VexlowHQ. All rights reserved.</span>
+        <span class="socials">
+          <a href="#">X</a><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">TikTok</a>
+        </span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<script src="../../data/articulos.js"></script>
+<script src="../../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="techGlow" cx="70%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#3D8BFF" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#3D8BFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="techBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#141A2A"/>
+      <stop offset="100%" stop-color="#0E1116"/>
+    </linearGradient>
+    <linearGradient id="chipFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1B2233"/>
+      <stop offset="100%" stop-color="#141926"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#techBg)"/>
+  <rect width="1600" height="900" fill="url(#techGlow)"/>
+
+  <!-- device silhouettes -->
+  <rect x="920" y="120" width="380" height="520" rx="28" fill="#171D2C" stroke="#262C3A" stroke-width="2"/>
+  <rect x="960" y="170" width="300" height="420" rx="6" fill="#0E1116"/>
+  <rect x="1080" y="620" width="260" height="150" rx="16" fill="#171D2C" stroke="#262C3A" stroke-width="2"/>
+
+  <!-- chip in the center -->
+  <rect x="1000" y="300" width="140" height="140" rx="10" fill="url(#chipFace)" stroke="#3D8BFF" stroke-width="1.5"/>
+  <rect x="1030" y="330" width="80" height="80" rx="4" fill="#0E1116" stroke="#6BA4FF" stroke-width="1"/>
+
+  <!-- circuit traces -->
+  <g stroke="#3D8BFF" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M1000 330 H900 V260"/>
+    <path d="M1000 380 H880"/>
+    <path d="M1140 330 H1240 V220"/>
+    <path d="M1140 400 H1260 V470"/>
+    <path d="M1070 300 V220 H1180"/>
+    <path d="M1070 440 V520 H960"/>
+  </g>
+  <g fill="#FFB020">
+    <circle cx="900" cy="260" r="5"/>
+    <circle cx="880" cy="380" r="5"/>
+    <circle cx="1240" cy="220" r="5"/>
+    <circle cx="1260" cy="470" r="5"/>
+  </g>
+  <g fill="#6BA4FF">
+    <circle cx="1180" cy="220" r="4"/>
+    <circle cx="960" cy="520" r="4"/>
+  </g>
+</svg>

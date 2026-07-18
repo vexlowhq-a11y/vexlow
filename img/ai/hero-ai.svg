@@ -1,0 +1,55 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="aiGlow" cx="68%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#3D8BFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#3D8BFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="aiBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12172A"/>
+      <stop offset="100%" stop-color="#0E1116"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#aiBg)"/>
+  <rect width="1600" height="900" fill="url(#aiGlow)"/>
+
+  <g stroke="#3D8BFF" stroke-width="1.5" opacity="0.55">
+    <line x1="980" y1="220" x2="1120" y2="300"/>
+    <line x1="980" y1="220" x2="900" y2="340"/>
+    <line x1="1120" y1="300" x2="1230" y2="260"/>
+    <line x1="1120" y1="300" x2="1150" y2="430"/>
+    <line x1="900" y1="340" x2="1000" y2="450"/>
+    <line x1="900" y1="340" x2="770" y2="300"/>
+    <line x1="1150" y1="430" x2="1000" y2="450"/>
+    <line x1="1000" y1="450" x2="1080" y2="560"/>
+    <line x1="770" y1="300" x2="820" y2="180"/>
+    <line x1="1230" y1="260" x2="1340" y2="340"/>
+    <line x1="1340" y1="340" x2="1300" y2="470"/>
+    <line x1="1300" y1="470" x2="1150" y2="430"/>
+    <line x1="1080" y1="560" x2="1220" y2="600"/>
+    <line x1="820" y1="180" x2="700" y2="230"/>
+  </g>
+
+  <g fill="#6BA4FF">
+    <circle cx="980" cy="220" r="6"/>
+    <circle cx="1120" cy="300" r="8"/>
+    <circle cx="900" cy="340" r="6"/>
+    <circle cx="1230" cy="260" r="5"/>
+    <circle cx="1150" cy="430" r="7"/>
+    <circle cx="1000" cy="450" r="6"/>
+    <circle cx="770" cy="300" r="5"/>
+    <circle cx="820" cy="180" r="4"/>
+    <circle cx="1340" cy="340" r="5"/>
+    <circle cx="1300" cy="470" r="6"/>
+    <circle cx="1080" cy="560" r="8"/>
+    <circle cx="1220" cy="600" r="5"/>
+    <circle cx="700" cy="230" r="4"/>
+  </g>
+
+  <g fill="#FFB020">
+    <circle cx="1120" cy="300" r="4"/>
+    <circle cx="1080" cy="560" r="4"/>
+  </g>
+
+  <circle cx="1120" cy="300" r="16" fill="none" stroke="#3D8BFF" stroke-width="1" opacity="0.4"/>
+  <circle cx="1080" cy="560" r="14" fill="none" stroke="#FFB020" stroke-width="1" opacity="0.4"/>
+</svg>

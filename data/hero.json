@@ -1,0 +1,38 @@
+[
+  {
+    "category": "gaming",
+    "chip": "🎮 Gaming",
+    "title": "GTA 6: Rockstar Keeps the Mystery Alive as Fans Wait for Trailer 3",
+    "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
+    "image": "img/gaming/GtaVI/gta6.jfif",
+    "textColor": "#ffffff",
+    "href": "categoria/gaming/gta6-trailer3-rockstar-mystery.html"
+  },
+  {
+    "category": "sports",
+    "chip": "⚽ Sports",
+    "title": "Argentina and Spain Set to Meet in the World Cup 2026 Final",
+    "dek": "The 2026 World Cup now has its finalists. Argentina and Spain face off on July 19 for the title.",
+    "image": "img/sports/6186f0a3-26e0-42b2-b6c0-4c5685febd4d-1-1.png",
+    "textColor": "#ffffff",
+    "href": "categoria/sports/world-cup-final-argentina-spain.html"
+  },
+  {
+    "category": "gaming",
+    "chip": "🎮 Gaming",
+    "title": "Roblox Introduces AI-Based Game Creation Feature in Mobile App",
+    "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
+    "image": "img/gaming/roblox-header-1.webp",
+    "textColor": "#ffffff",
+    "href": "gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
+  },
+  {
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "Google Introduces Personalized AI Avatars for Custom Video Creation",
+    "dek": "With the new update to Google Vids, users can produce videos featuring their own digital likenesses using cutting-edge AI technology.",
+    "image": "img/ai/premium-photo-1764687926809-1f4ce4f422a5-1.avif",
+    "textColor": "#ffffff",
+    "href": "ai/google-introduces-personalized-ai-avatars-for-custom-video-c.html"
+  }
+]

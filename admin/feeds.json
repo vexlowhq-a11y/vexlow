@@ -1,0 +1,14 @@
+[
+  { "category": "ai", "url": "https://techcrunch.com/category/artificial-intelligence/feed/" },
+  { "category": "ai", "url": "https://venturebeat.com/category/ai/feed/" },
+  { "category": "technology", "url": "https://techcrunch.com/feed/" },
+  { "category": "technology", "url": "https://www.theverge.com/rss/index.xml" },
+  { "category": "science", "url": "https://www.space.com/feeds/all" },
+  { "category": "science", "url": "https://www.nasa.gov/feed/" },
+  { "category": "gaming", "url": "https://www.ign.com/rss/articles/feed" },
+  { "category": "gaming", "url": "https://kotaku.com/rss" },
+  { "category": "entertainment", "url": "https://variety.com/feed/" },
+  { "category": "sports", "url": "https://www.espn.com/espn/rss/news" },
+  { "category": "world", "url": "https://feeds.bbci.co.uk/news/world/rss.xml" },
+  { "category": "business", "url": "https://www.cnbc.com/id/10001147/device/rss/rss.html" }
+]

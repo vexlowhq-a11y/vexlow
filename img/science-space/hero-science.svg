@@ -1,0 +1,51 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="planetGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFC257"/>
+      <stop offset="55%" stop-color="#FF8A3D"/>
+      <stop offset="100%" stop-color="#3D2A0E"/>
+    </radialGradient>
+    <linearGradient id="spaceBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101830"/>
+      <stop offset="100%" stop-color="#0E1116"/>
+    </linearGradient>
+    <linearGradient id="rocketBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ECEEF2"/>
+      <stop offset="100%" stop-color="#9AA0AC"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#spaceBg)"/>
+
+  <!-- stars -->
+  <g fill="#ECEEF2">
+    <circle cx="180" cy="120" r="2"/>
+    <circle cx="260" cy="300" r="1.5"/>
+    <circle cx="140" cy="500" r="2"/>
+    <circle cx="360" cy="180" r="1.5"/>
+    <circle cx="500" cy="560" r="2"/>
+    <circle cx="620" cy="140" r="1.5"/>
+    <circle cx="760" cy="620" r="2"/>
+    <circle cx="1420" cy="180" r="2"/>
+    <circle cx="1500" cy="420" r="1.5"/>
+    <circle cx="1350" cy="620" r="2"/>
+    <circle cx="1250" cy="120" r="1.5"/>
+    <circle cx="90" cy="700" r="2"/>
+  </g>
+
+  <!-- orbit ring -->
+  <ellipse cx="1150" cy="330" rx="230" ry="90" fill="none" stroke="#6BA4FF" stroke-width="1.5" opacity="0.4" transform="rotate(-18 1150 330)"/>
+
+  <!-- planet -->
+  <circle cx="1150" cy="330" r="150" fill="url(#planetGrad)"/>
+  <ellipse cx="1150" cy="330" rx="150" ry="150" fill="#0E1116" opacity="0.25" clip-path="inset(0 0 0 65%)"/>
+
+  <!-- rocket -->
+  <g transform="translate(560,760) rotate(-38)">
+    <path d="M0 -140 C 34 -100 34 -20 0 40 C -34 -20 -34 -100 0 -140 Z" fill="url(#rocketBody)"/>
+    <path d="M0 -140 C 14 -120 14 -90 0 -70 C -14 -90 -14 -120 0 -140 Z" fill="#3D8BFF"/>
+    <path d="M-20 10 L-55 55 L-14 40 Z" fill="#FFB020"/>
+    <path d="M20 10 L55 55 L14 40 Z" fill="#FFB020"/>
+    <circle cx="0" cy="-40" r="14" fill="#0E1116" stroke="#6BA4FF" stroke-width="2"/>
+    <path d="M-10 45 L0 110 L10 45 Z" fill="#FFC257" opacity="0.85"/>
+  </g>
+</svg>

@@ -1,0 +1,1123 @@
+{
+  "gaming": [
+    [
+      "⭐ Popular",
+      [
+        [
+          "callofduty",
+          "Call Of Duty"
+        ],
+        [
+          "gtavi",
+          "GTA VI"
+        ],
+        [
+          "fortnite",
+          "Fortnite"
+        ],
+        [
+          "roblox",
+          "Roblox"
+        ],
+        [
+          "counterstrike2",
+          "Counter-Strike 2"
+        ],
+        [
+          "leagueoflegends",
+          "League of Legends"
+        ],
+        [
+          "valorant",
+          "Valorant"
+        ],
+        [
+          "easportsfc27",
+          "EA Sports FC 27 (FIFA)"
+        ],
+        [
+          "marvelrivals",
+          "Marvel Rivals"
+        ],
+        [
+          "apexlegends",
+          "Apex Legends"
+        ],
+        [
+          "pubg",
+          "PUBG"
+        ],
+        [
+          "rainbowsixsiege",
+          "Rainbow Six Siege"
+        ],
+        [
+          "helldivers2",
+          "Helldivers 2"
+        ],
+        [
+          "battlefield6",
+          "Battlefield 6"
+        ],
+        [
+          "residentevilrequiem",
+          "Resident Evil Requiem"
+        ],
+        [
+          "eldenring",
+          "Elden Ring"
+        ],
+        [
+          "assassinscreed",
+          "Assassin's Creed"
+        ],
+        [
+          "monsterhunterwilds",
+          "Monster Hunter Wilds"
+        ],
+        [
+          "diablo4",
+          "Diablo IV"
+        ],
+        [
+          "minecraft",
+          "Minecraft"
+        ]
+      ]
+    ],
+    [
+      "Nintendo",
+      [
+        [
+          "pokemon",
+          "Pokémon"
+        ],
+        [
+          "mariokart",
+          "Mario Kart"
+        ],
+        [
+          "zelda",
+          "Zelda"
+        ],
+        [
+          "animalcrossing",
+          "Animal Crossing"
+        ],
+        [
+          "supersmashbros",
+          "Super Smash Bros."
+        ],
+        [
+          "splatoon",
+          "Splatoon"
+        ],
+        [
+          "kirby",
+          "Kirby"
+        ],
+        [
+          "metroid",
+          "Metroid"
+        ],
+        [
+          "donkeykong",
+          "Donkey Kong"
+        ],
+        [
+          "pikmin",
+          "Pikmin"
+        ]
+      ]
+    ],
+    [
+      "MMORPG",
+      [
+        [
+          "worldofwarcraft",
+          "World of Warcraft"
+        ],
+        [
+          "finalfantasyxiv",
+          "Final Fantasy XIV"
+        ],
+        [
+          "runescape",
+          "RuneScape"
+        ],
+        [
+          "blackdesert",
+          "Black Desert"
+        ],
+        [
+          "throneandliberty",
+          "Throne and Liberty"
+        ],
+        [
+          "lostark",
+          "Lost Ark"
+        ]
+      ]
+    ],
+    [
+      "Mobile Games",
+      [
+        [
+          "clashroyale",
+          "Clash Royale"
+        ],
+        [
+          "clashofclans",
+          "Clash of Clans"
+        ],
+        [
+          "brawlstars",
+          "Brawl Stars"
+        ],
+        [
+          "freefire",
+          "Free Fire"
+        ],
+        [
+          "pubgmobile",
+          "PUBG Mobile"
+        ],
+        [
+          "mobilelegends",
+          "Mobile Legends"
+        ],
+        [
+          "pokemongo",
+          "Pokémon GO"
+        ],
+        [
+          "monopolygo",
+          "Monopoly GO"
+        ],
+        [
+          "candycrush",
+          "Candy Crush"
+        ],
+        [
+          "stumbleguys",
+          "Stumble Guys"
+        ]
+      ]
+    ],
+    [
+      "Survival",
+      [
+        [
+          "rust",
+          "Rust"
+        ],
+        [
+          "ark",
+          "ARK"
+        ],
+        [
+          "dayz",
+          "DayZ"
+        ],
+        [
+          "sonsoftheforest",
+          "Sons of the Forest"
+        ],
+        [
+          "valheim",
+          "Valheim"
+        ],
+        [
+          "subnautica",
+          "Subnautica"
+        ],
+        [
+          "theforest",
+          "The Forest"
+        ],
+        [
+          "7daystodie",
+          "7 Days to Die"
+        ]
+      ]
+    ],
+    [
+      "Sandbox / Building",
+      [
+        [
+          "minecraft",
+          "Minecraft"
+        ],
+        [
+          "roblox",
+          "Roblox"
+        ],
+        [
+          "terraria",
+          "Terraria"
+        ],
+        [
+          "legofortnite",
+          "LEGO Fortnite"
+        ],
+        [
+          "corekeeper",
+          "Core Keeper"
+        ]
+      ]
+    ],
+    [
+      "Horror",
+      [
+        [
+          "deadbydaylight",
+          "Dead by Daylight"
+        ],
+        [
+          "phasmophobia",
+          "Phasmophobia"
+        ],
+        [
+          "silenthill",
+          "Silent Hill"
+        ],
+        [
+          "residentevil",
+          "Resident Evil"
+        ],
+        [
+          "fivenightsatfreddys",
+          "Five Nights at Freddy's"
+        ],
+        [
+          "outlast",
+          "Outlast"
+        ]
+      ]
+    ],
+    [
+      "Sports Games",
+      [
+        [
+          "easportsfc",
+          "EA Sports FC"
+        ],
+        [
+          "nba2k",
+          "NBA 2K"
+        ],
+        [
+          "maddennfl",
+          "Madden NFL"
+        ],
+        [
+          "wwe2k",
+          "WWE 2K"
+        ],
+        [
+          "mlbtheshow",
+          "MLB The Show"
+        ],
+        [
+          "rocketleague",
+          "Rocket League"
+        ]
+      ]
+    ]
+  ],
+  "ai": [
+    [
+      "🏢 Companies & Models",
+      [
+        [
+          "openai",
+          "OpenAI"
+        ],
+        [
+          "anthropic",
+          "Anthropic"
+        ],
+        [
+          "googleai",
+          "Google AI"
+        ],
+        [
+          "metaai",
+          "Meta AI"
+        ],
+        [
+          "xai",
+          "xAI"
+        ],
+        [
+          "perplexity",
+          "Perplexity"
+        ],
+        [
+          "deepseek",
+          "DeepSeek"
+        ]
+      ]
+    ],
+    [
+      "🛠️ Tools",
+      [
+        [
+          "chatbots",
+          "Chatbots"
+        ],
+        [
+          "generadoresdeimagen",
+          "Image Generators"
+        ],
+        [
+          "generadoresdevideo",
+          "Video Generators"
+        ],
+        [
+          "musicaia",
+          "AI Music"
+        ],
+        [
+          "vozia",
+          "AI Voice"
+        ],
+        [
+          "codigoia",
+          "AI Coding"
+        ],
+        [
+          "productividadia",
+          "AI Productivity"
+        ]
+      ]
+    ],
+    [
+      "📘 Guides",
+      [
+        [
+          "comousarchatgpt",
+          "How to Use ChatGPT"
+        ],
+        [
+          "mejoresprompts",
+          "Best Prompts"
+        ],
+        [
+          "automatizaciones",
+          "Automations"
+        ],
+        [
+          "agentesia",
+          "AI Agents"
+        ],
+        [
+          "comparativasia",
+          "Model Comparisons"
+        ]
+      ]
+    ],
+    [
+      "🆕 New",
+      [
+        [
+          "semiconductores",
+          "Semiconductors"
+        ],
+        [
+          "regulacionia",
+          "AI Regulation"
+        ],
+        [
+          "roboticaia",
+          "AI Robotics"
+        ]
+      ]
+    ]
+  ],
+  "technology": [
+    [
+      "📱 Phone Brands",
+      [
+        [
+          "apple",
+          "Apple"
+        ],
+        [
+          "samsung",
+          "Samsung"
+        ],
+        [
+          "googlepixel",
+          "Google Pixel"
+        ],
+        [
+          "xiaomi",
+          "Xiaomi"
+        ]
+      ]
+    ],
+    [
+      "💻 Operating Systems",
+      [
+        [
+          "windows",
+          "Windows"
+        ],
+        [
+          "macos",
+          "macOS"
+        ],
+        [
+          "android",
+          "Android"
+        ],
+        [
+          "linux",
+          "Linux"
+        ]
+      ]
+    ],
+    [
+      "🔒 Internet & Security",
+      [
+        [
+          "ciberseguridad",
+          "Cybersecurity"
+        ],
+        [
+          "internet",
+          "Internet"
+        ],
+        [
+          "cloud",
+          "Cloud"
+        ],
+        [
+          "privacidad",
+          "Data Privacy"
+        ],
+        [
+          "googlesoftware",
+          "Google / Software"
+        ]
+      ]
+    ],
+    [
+      "⌨️ Development & Gadgets",
+      [
+        [
+          "programacion",
+          "Programming"
+        ],
+        [
+          "gadgets",
+          "Gadgets"
+        ],
+        [
+          "wearables",
+          "Wearables"
+        ],
+        [
+          "hardware",
+          "Hardware"
+        ]
+      ]
+    ]
+  ],
+  "science": [
+    [
+      "🚀 Space Exploration",
+      [
+        [
+          "nasa",
+          "NASA"
+        ],
+        [
+          "spacex",
+          "SpaceX"
+        ],
+        [
+          "artemis",
+          "Artemis"
+        ],
+        [
+          "eei",
+          "International Space Station"
+        ],
+        [
+          "blueorigin",
+          "Blue Origin"
+        ]
+      ]
+    ],
+    [
+      "🪐 Astronomy",
+      [
+        [
+          "exoplanetas",
+          "Exoplanets"
+        ],
+        [
+          "agujerosnegros",
+          "Black Holes"
+        ],
+        [
+          "jameswebb",
+          "James Webb Telescope"
+        ],
+        [
+          "sistemasolar",
+          "Solar System"
+        ]
+      ]
+    ],
+    [
+      "🧬 Science & Medicine",
+      [
+        [
+          "biologia",
+          "Biology"
+        ],
+        [
+          "fisicacuantica",
+          "Quantum Physics"
+        ],
+        [
+          "medicina",
+          "Medicine"
+        ],
+        [
+          "iaciencia",
+          "AI in Science"
+        ]
+      ]
+    ],
+    [
+      "🌋 Nature & Climate",
+      [
+        [
+          "cambioclimatico",
+          "Climate Change"
+        ],
+        [
+          "desastresnaturales",
+          "Natural Disasters"
+        ],
+        [
+          "oceanos",
+          "Oceans"
+        ],
+        [
+          "vidasilvestre",
+          "Wildlife"
+        ]
+      ]
+    ]
+  ],
+  "entertainment": [
+    [
+      "📺 Streaming",
+      [
+        [
+          "netflix",
+          "Netflix"
+        ],
+        [
+          "disneyplus",
+          "Disney+"
+        ],
+        [
+          "hbomax",
+          "HBO Max"
+        ],
+        [
+          "amazonprime",
+          "Amazon Prime Video"
+        ],
+        [
+          "appletv",
+          "Apple TV+"
+        ]
+      ]
+    ],
+    [
+      "🎬 Movies & Series",
+      [
+        [
+          "estrenos",
+          "New Releases"
+        ],
+        [
+          "serieslimitadas",
+          "Limited Series"
+        ],
+        [
+          "oscars",
+          "Oscars"
+        ],
+        [
+          "emmys",
+          "Emmys"
+        ]
+      ]
+    ],
+    [
+      "🎵 Music",
+      [
+        [
+          "pop",
+          "Pop"
+        ],
+        [
+          "hiphop",
+          "Hip-Hop & Rap"
+        ],
+        [
+          "conciertos",
+          "Concerts & Tours"
+        ],
+        [
+          "grammys",
+          "Grammy Awards"
+        ]
+      ]
+    ],
+    [
+      "⭐ Celebrities",
+      [
+        [
+          "farandula",
+          "Celebrity News"
+        ],
+        [
+          "relacionesfamosos",
+          "Celebrity Relationships"
+        ],
+        [
+          "modacelebridades",
+          "Celebrity Fashion"
+        ]
+      ]
+    ]
+  ],
+  "sports": [
+    [
+      "⚽ Soccer",
+      [
+        [
+          "premierleague",
+          "Premier League"
+        ],
+        [
+          "championsleague",
+          "Champions League"
+        ],
+        [
+          "mundial",
+          "World Cup"
+        ],
+        [
+          "laliga",
+          "La Liga"
+        ],
+        [
+          "copaamerica",
+          "Copa América"
+        ]
+      ]
+    ],
+    [
+      "🏀 Basketball",
+      [
+        [
+          "nba",
+          "NBA"
+        ],
+        [
+          "nbafinals",
+          "NBA Finals"
+        ],
+        [
+          "basquetinternacional",
+          "International Basketball"
+        ]
+      ]
+    ],
+    [
+      "🏎️ Motorsports",
+      [
+        [
+          "formula1",
+          "Formula 1"
+        ],
+        [
+          "motogp",
+          "MotoGP"
+        ],
+        [
+          "nascar",
+          "NASCAR"
+        ]
+      ]
+    ],
+    [
+      "🥊 Other Sports",
+      [
+        [
+          "ufc",
+          "UFC / MMA"
+        ],
+        [
+          "tenis",
+          "Tennis"
+        ],
+        [
+          "juegosolimpicos",
+          "Olympic Games"
+        ]
+      ]
+    ]
+  ],
+  "world": [
+    [
+      "🏛️ Politics & Economy",
+      [
+        [
+          "elecciones",
+          "Elections"
+        ],
+        [
+          "mercados",
+          "Financial Markets"
+        ],
+        [
+          "inflacion",
+          "Inflation"
+        ],
+        [
+          "comerciointernacional",
+          "International Trade"
+        ]
+      ]
+    ],
+    [
+      "🌍 Society & Culture",
+      [
+        [
+          "derechoshumanos",
+          "Human Rights"
+        ],
+        [
+          "migracion",
+          "Migration"
+        ],
+        [
+          "tradiciones",
+          "Traditions & Culture"
+        ]
+      ]
+    ],
+    [
+      "🌪️ Climate & Environment",
+      [
+        [
+          "cambioclimatico",
+          "Climate Change"
+        ],
+        [
+          "desastresnaturales",
+          "Natural Disasters"
+        ],
+        [
+          "sostenibilidad",
+          "Sustainability"
+        ]
+      ]
+    ]
+  ],
+  "curiosities": [
+    [
+      "🐾 Animals",
+      [
+        [
+          "datosanimales",
+          "Animal Facts"
+        ],
+        [
+          "especiesraras",
+          "Rare Species"
+        ],
+        [
+          "recordsanimales",
+          "Animal Records"
+        ]
+      ]
+    ],
+    [
+      "📜 History",
+      [
+        [
+          "datoshistoricos",
+          "Historical Facts"
+        ],
+        [
+          "misteriosdelpasado",
+          "Mysteries of the Past"
+        ],
+        [
+          "civilizacionesantiguas",
+          "Ancient Civilizations"
+        ]
+      ]
+    ],
+    [
+      "🔬 Curious Science",
+      [
+        [
+          "datoscientificos",
+          "Science Facts"
+        ],
+        [
+          "experimentoscuriosos",
+          "Curious Experiments"
+        ]
+      ]
+    ],
+    [
+      "🏆 Records & Rankings",
+      [
+        [
+          "recordsguinness",
+          "Guinness Records"
+        ],
+        [
+          "lugaresincreibles",
+          "Amazing Places"
+        ],
+        [
+          "rankingsinsolitos",
+          "Unusual Rankings"
+        ]
+      ]
+    ]
+  ],
+  "guides": [
+    [
+      "💻 Technology",
+      [
+        [
+          "guiasia",
+          "AI Guides"
+        ],
+        [
+          "trucoscelular",
+          "Phone Tips & Tricks"
+        ],
+        [
+          "softwareguias",
+          "Software Guides"
+        ]
+      ]
+    ],
+    [
+      "💰 Money",
+      [
+        [
+          "ganardineroonline",
+          "Making Money Online"
+        ],
+        [
+          "finanzaspersonales",
+          "Personal Finance"
+        ],
+        [
+          "inversionprincipiantes",
+          "Investing for Beginners"
+        ]
+      ]
+    ],
+    [
+      "🏠 Daily Life",
+      [
+        [
+          "productividad",
+          "Productivity"
+        ],
+        [
+          "organizacion",
+          "Organization"
+        ],
+        [
+          "recetasrapidas",
+          "Quick Recipes"
+        ]
+      ]
+    ],
+    [
+      "📈 Marketing & Business",
+      [
+        [
+          "seobasico",
+          "SEO Basics"
+        ],
+        [
+          "redessocialesnegocios",
+          "Social Media for Business"
+        ],
+        [
+          "freelance",
+          "Freelancing"
+        ]
+      ]
+    ]
+  ],
+  "social": [
+    [
+      "📱 Main Platforms",
+      [
+        [
+          "tiktok",
+          "TikTok"
+        ],
+        [
+          "instagram",
+          "Instagram"
+        ],
+        [
+          "youtube",
+          "YouTube"
+        ],
+        [
+          "facebook",
+          "Facebook"
+        ]
+      ]
+    ],
+    [
+      "💬 Messaging",
+      [
+        [
+          "whatsapp",
+          "WhatsApp"
+        ],
+        [
+          "telegram",
+          "Telegram"
+        ],
+        [
+          "discord",
+          "Discord"
+        ]
+      ]
+    ],
+    [
+      "🎥 Live Streaming",
+      [
+        [
+          "twitch",
+          "Twitch"
+        ],
+        [
+          "youtubelive",
+          "YouTube Live"
+        ],
+        [
+          "kick",
+          "Kick"
+        ]
+      ]
+    ],
+    [
+      "🆕 Emerging",
+      [
+        [
+          "x",
+          "X (Twitter)"
+        ],
+        [
+          "threads",
+          "Threads"
+        ],
+        [
+          "bereal",
+          "BeReal"
+        ]
+      ]
+    ]
+  ],
+  "business": [
+    [
+      "💹 Finance & Crypto",
+      [
+        [
+          "criptomonedas",
+          "Cryptocurrency"
+        ],
+        [
+          "bolsadevalores",
+          "Stock Market"
+        ],
+        [
+          "finanzaspersonales",
+          "Personal Finance"
+        ],
+        [
+          "seguros",
+          "Insurance"
+        ]
+      ]
+    ],
+    [
+      "🚀 Startups & Entrepreneurship",
+      [
+        [
+          "startups",
+          "Startups"
+        ],
+        [
+          "inversionesvc",
+          "Venture Capital"
+        ],
+        [
+          "emprendimiento",
+          "Entrepreneurship"
+        ]
+      ]
+    ],
+    [
+      "📊 Digital Marketing",
+      [
+        [
+          "marketingdigital",
+          "Digital Marketing"
+        ],
+        [
+          "ecommerce",
+          "E-commerce"
+        ],
+        [
+          "redessociales",
+          "Social Media for Business"
+        ]
+      ]
+    ],
+    [
+      "🏢 Companies",
+      [
+        [
+          "grandesempresas",
+          "Big Companies"
+        ],
+        [
+          "fusionesadquisiciones",
+          "Mergers & Acquisitions"
+        ],
+        [
+          "mercadolaboral",
+          "Job Market"
+        ]
+      ]
+    ]
+  ]
+}

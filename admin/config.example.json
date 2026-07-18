@@ -1,0 +1,6 @@
+{
+  "draftProvider": "openai",
+  "openaiApiKey": "",
+  "draftModel": "gpt-4o-mini",
+  "anthropicApiKey": ""
+}

@@ -1,0 +1,14 @@
+# Nunca subir las API keys del panel de administración
+admin/config.json
+
+# Cache de Python
+admin/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Basura del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Documentos internos de estrategia — no van al repo público
+docs/

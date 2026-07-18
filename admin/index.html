@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administración — VexlowHQ</title>
+<link rel="stylesheet" href="/site/css/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="admin-shell">
+  <header class="admin-header">
+    <div class="admin-header-brand">
+      <span class="logo-chip"><img src="/site/img/vexlow-logo.png" alt="VexlowHQ"></span>
+      <div>
+        <h1>Panel de administración</h1>
+        <p>Los cambios se guardan directo en los archivos del sitio. Nada de copiar y pegar código.</p>
+      </div>
+    </div>
+    <a class="btn-primary" href="/site/" target="_blank" rel="noopener">Ver el sitio ↗</a>
+  </header>
+
+  <nav class="admin-tabs" id="adminTabs">
+    <button type="button" class="admin-tab active" data-tab="hero">Carrusel principal</button>
+    <button type="button" class="admin-tab" data-tab="articles">Últimas publicadas</button>
+    <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="admin-panel active" id="panel-hero">
+    <p class="admin-lede">Estas son las diapositivas grandes de arriba de la Home, con los puntitos abajo. El orden acá define el orden de los puntos.</p>
+
+    <div class="admin-list" id="heroList"></div>
+
+    <form class="admin-form" id="heroForm">
+      <h3 id="heroFormTitle">Agregar diapositiva</h3>
+      <div class="form-grid">
+        <label>Categoría
+          <select id="heroCategory" required></select>
+        </label>
+        <label class="span-2">Título
+          <input type="text" id="heroTitleInput" placeholder="Título grande de la diapositiva" required>
+        </label>
+        <label class="span-2">Texto debajo del título
+          <textarea id="heroDekInput" rows="2" placeholder="Uno o dos renglones de contexto" required></textarea>
+        </label>
+        <label class="span-2">Imagen de fondo
+          <input type="file" id="heroImageUpload" accept="image/*">
+          <span class="admin-hint" id="heroImageStatus">Sin imagen (usa el color de la categoría).</span>
+          <button type="button" class="btn-secondary" id="heroImageRemoveBtn" hidden>Quitar imagen</button>
+        </label>
+        <label class="span-2">Color del texto
+          <div class="color-palette" id="heroColorPalette"></div>
+        </label>
+        <label>Al hacer clic, va a
+          <input type="text" id="heroHrefInput" placeholder="gaming/index.html">
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Guardar diapositiva</button>
+        <button type="button" class="btn-secondary" id="heroCancelBtn" hidden>Cancelar edición</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ ARTICLES ============ -->
+  <section class="admin-panel" id="panel-articles">
+    <p class="admin-lede">Acá se publican las noticias completas: al guardar con "Cuerpo" cargado, se genera directamente la página del artículo dentro de <code>categoria/{categoría}/{slug}.html</code>, con carrusel, sidebar y "Últimas noticias" ya enlazados. No hace falta pedírselo a nadie.</p>
+
+    <div class="admin-filters">
+      <label>Filtrar por categoría
+        <select id="filterCategory">
+          <option value="">Todas las categorías</option>
+        </select>
+      </label>
+      <label>Filtrar por tema
+        <select id="filterTopic">
+          <option value="">Todos los temas</option>
+        </select>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filterTrendingOnly">
+        Solo Trending ⭐
+      </label>
+      <span class="admin-filter-count" id="filterCount"></span>
+    </div>
+
+    <div class="admin-list" id="articlesList"></div>
+
+    <form class="admin-form" id="articleForm">
+      <h3 id="articleFormTitle">Agregar artículo</h3>
+      <div class="form-grid">
+        <label>Categoría
+          <select id="articleCategory" required></select>
+        </label>
+        <label>Tema (opcional)
+          <select id="articleTopic">
+            <option value="">Sin tema específico</option>
+          </select>
+        </label>
+        <div class="new-topic-row span-2" id="newTopicRow" hidden>
+          <select id="newTopicGroup"></select>
+          <input type="text" id="newTopicGroupName" placeholder="Nombre de la sección nueva" hidden>
+          <input type="text" id="newTopicLabel" placeholder="Nombre del tema nuevo (ej. Starfield)">
+          <button type="button" class="btn-secondary" id="newTopicCreateBtn">Crear tema</button>
+        </div>
+        <div class="topic-manager span-2" id="topicManager"></div>
+        <label class="span-2">Título
+          <input type="text" id="articleTitle" placeholder="Título de la noticia" required>
+        </label>
+        <label class="span-2">Slug (nombre del archivo .html — se genera solo desde el título, se puede editar)
+          <input type="text" id="articleSlug" placeholder="mi-noticia-de-ejemplo">
+        </label>
+        <label class="span-2">Resumen (dek — aparece debajo del título)
+          <textarea id="articleDek" rows="2" placeholder="Uno o dos renglones que resuman la noticia"></textarea>
+        </label>
+        <label class="span-2">Imagen destacada (se muestra en la nota y en las tarjetas — si no subís nada, se usa el ícono de la categoría)
+          <input type="file" id="articleImageUpload" accept="image/*">
+          <span class="admin-hint" id="articleImageStatus">Sin imagen (usa el ícono de la categoría).</span>
+          <button type="button" class="btn-secondary" id="articleImageRemoveBtn" hidden>Quitar imagen</button>
+        </label>
+        <label class="span-2">Video destacado (opcional — pegá un link de YouTube; si cargás video, se muestra en vez de la imagen)
+          <input type="text" id="articleVideoUrl" placeholder="https://www.youtube.com/watch?v=...">
+        </label>
+        <label>Fecha
+          <input type="date" id="articleDate" required>
+        </label>
+        <label>Tiempo de lectura
+          <input type="text" id="articleReadTime" placeholder="5 min">
+        </label>
+        <label class="span-2 checkbox-label">
+          <input type="checkbox" id="articleTrending">
+          Marcar como Trending ⭐ (aparece en Trending y en el Top 5 del inicio)
+        </label>
+        <label class="span-2">Cuerpo del artículo (dejalo vacío si solo querés que aparezca en el listado sin página propia)
+          <textarea id="articleBody" rows="12" placeholder="Escribí el artículo acá. Separá los párrafos con una línea en blanco.
+
+## Un subtítulo así crea un h2
+
+- Un guion al principio de la línea
+- crea un ítem de lista
+
+Escribí [publicidad] solo en una línea para meter un espacio publicitario ahí."></textarea>
+        </label>
+      </div>
+      <p class="admin-hint" id="topicHint"></p>
+      <p class="admin-hint" id="articlePreviewLink"></p>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Guardar artículo</button>
+        <button type="button" class="btn-secondary" id="articleCancelBtn" hidden>Cancelar edición</button>
+        <button type="button" class="btn-secondary" id="regenerateBtn">Regenerar categorías y temas</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ BORRADORES SUGERIDOS ============ -->
+  <section class="admin-panel" id="panel-drafts">
+    <p class="admin-lede">Busca titulares recientes en feeds RSS de noticias (configurados en <code>admin/feeds.json</code>) y redacta un artículo original para cada uno con IA — nunca copia el texto de la fuente. Quedan acá como borrador: revisalos, editalos si hace falta, y usá "Usar este borrador" para pasarlos al formulario de "Últimas publicadas" y publicarlos.</p>
+
+    <div class="form-actions" style="margin-bottom: 20px;">
+      <button type="button" class="btn-primary" id="fetchDraftsBtn">Buscar temas nuevos</button>
+      <span class="admin-hint" id="draftsFetchStatus"></span>
+    </div>
+
+    <div class="admin-list" id="draftsList"></div>
+  </section>
+
+  <div class="admin-toast" id="adminToast"></div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
