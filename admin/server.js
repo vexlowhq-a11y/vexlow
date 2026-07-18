@@ -447,6 +447,34 @@ var server = http.createServer(function (req, res) {
       return sendJSON(res, 200, { ok: true, removed: removed });
     });
   }
+  if (urlPath === '/api/deploy' && req.method === 'POST') {
+    (async function () {
+      function runGit(args) {
+        return new Promise(function (resolve, reject) {
+          var proc = spawn('git', args, { cwd: ROOT });
+          var out = '';
+          proc.stdout.on('data', function (d) { out += d.toString('utf8'); });
+          proc.stderr.on('data', function (d) { out += d.toString('utf8'); });
+          proc.on('error', reject);
+          proc.on('close', function (code) { resolve({ code: code, output: out }); });
+        });
+      }
+      try {
+        var add = await runGit(['add', '-A']);
+        var commit = await runGit(['commit', '-m', 'Actualización desde el panel de administración — ' + new Date().toISOString()]);
+        var nothingToCommit = commit.output.toLowerCase().indexOf('nothing to commit') !== -1;
+        if (nothingToCommit) {
+          return sendJSON(res, 200, { ok: true, nothingToCommit: true, output: 'No había cambios nuevos para publicar.' });
+        }
+        var push = await runGit(['push', 'origin', 'main']);
+        var full = '--- git add ---\n' + add.output + '\n--- git commit ---\n' + commit.output + '\n--- git push ---\n' + push.output;
+        return sendJSON(res, push.code === 0 ? 200 : 500, { ok: push.code === 0, output: full });
+      } catch (e) {
+        return sendJSON(res, 500, { ok: false, error: e.message });
+      }
+    })();
+    return;
+  }
   if (urlPath === '/api/regenerate' && req.method === 'POST') {
     var py = spawn('python', [path.join(ADMIN_DIR, 'generate_pages.py')], { cwd: ROOT });
     var out = '';

@@ -9,6 +9,27 @@
   var articleEditIndex = null;
   var pendingDraft = null; // { slug, sourceUrl, sourceTitle } cuando el artículo en el formulario viene de un borrador
 
+  /* ---- Publicar cambios en internet (git add + commit + push) ---- */
+  var deployBtn = document.getElementById('deployBtn');
+  deployBtn.addEventListener('click', function () {
+    deployBtn.disabled = true;
+    var originalText = deployBtn.textContent;
+    deployBtn.textContent = 'Publicando… (puede tardar un minuto)';
+    postJSON('/api/deploy', {}).then(function (result) {
+      deployBtn.disabled = false;
+      deployBtn.textContent = originalText;
+      if (result.nothingToCommit) {
+        toast('No había cambios nuevos para publicar');
+      } else {
+        toast('¡Listo! Los cambios ya se subieron — el sitio se va a actualizar en unos minutos.');
+      }
+    }).catch(function (err) {
+      deployBtn.disabled = false;
+      deployBtn.textContent = originalText;
+      toast(err.message || 'No se pudo publicar los cambios', true);
+    });
+  });
+
   /* ---- Tabs ---- */
   document.querySelectorAll('.admin-tab').forEach(function (tab) {
     tab.addEventListener('click', function () {

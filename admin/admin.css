@@ -15,6 +15,7 @@ body { padding: 0; }
   margin-bottom: 24px;
 }
 .admin-header-brand { display: flex; align-items: center; gap: 14px; }
+.admin-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .admin-header-brand h1 { font-size: 1.4rem; }
 .admin-header-brand p { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
 
