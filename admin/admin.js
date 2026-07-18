@@ -981,21 +981,22 @@
       fetchDraftsBtn.disabled = false;
       if (result.noApiKey) {
         draftsFetchStatus.textContent = '';
-        toast('Falta configurar la API key de Anthropic en admin/config.json para poder redactar borradores.', true);
+        toast('Falta configurar la API key en admin/config.json para poder redactar borradores.', true);
         return;
       }
       draftsFetchStatus.textContent = '';
-      var msg = result.added + ' borrador(es) nuevo(s)';
-      if (result.errors && result.errors.length) msg += ' — ' + result.errors.length + ' error(es)';
-      toast(msg, result.added === 0 && result.errors.length > 0);
+      var errorList = result.errors || [];
+      var msg = (result.added || 0) + ' borrador(es) nuevo(s)';
+      if (errorList.length) msg += ' — ' + errorList.length + ' error(es): ' + errorList.map(function (e) { return e.error; }).join(' | ');
+      toast(msg, (result.added || 0) === 0 && errorList.length > 0);
       return getJSON('/api/drafts').then(function (list) {
         draftsData = list;
         renderDraftsList();
       });
-    }).catch(function () {
+    }).catch(function (err) {
       fetchDraftsBtn.disabled = false;
       draftsFetchStatus.textContent = '';
-      toast('No se pudo buscar temas nuevos', true);
+      toast('No se pudo buscar temas nuevos: ' + (err && err.message || 'error desconocido'), true);
     });
   });
 

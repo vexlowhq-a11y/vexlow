@@ -84,7 +84,8 @@ function todayISO() {
 // (en vez de fallar ítem por ítem).
 async function fetchNewDrafts() {
   var cfg = draft.loadConfig();
-  if (!cfg.anthropicApiKey) {
+  var apiKey = cfg.draftProvider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
+  if (!apiKey) {
     return { added: 0, skipped: 0, errors: [], noApiKey: true };
   }
 
