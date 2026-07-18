@@ -12,7 +12,7 @@ const VEXLOW_HERO = [
     "chip": "🎮 Gaming",
     "title": "GTA 6: Rockstar Keeps the Mystery Alive as Fans Wait for Trailer 3",
     "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
-    "image": "img/gaming/GtaVI/gta6.jfif",
+    "image": "img/gaming/screenshot-1.jpg",
     "textColor": "#ffffff",
     "href": "categoria/gaming/gta6-trailer3-rockstar-mystery.html"
   },
