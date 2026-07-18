@@ -243,6 +243,13 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
 </head>
 <body data-category="{slug}">
 
@@ -305,6 +312,13 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
 </head>
 <body data-category="{cat_slug}" data-topic="{topic_slug}">
 
@@ -422,6 +436,13 @@ ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
 </head>
 <body data-category="{cat_slug}">
 
@@ -483,6 +504,13 @@ STATIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
 </head>
 <body data-static-slug="{slug}">
 
