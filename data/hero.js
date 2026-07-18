@@ -14,7 +14,7 @@ const VEXLOW_HERO = [
     "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
     "image": "img/gaming/screenshot-1.jpg",
     "textColor": "#ffffff",
-    "href": "categoria/gaming/gta6-trailer3-rockstar-mystery.html"
+    "href": "https://vexlowhq.com/categoria/gaming/gta6-trailer3-rockstar-mystery.html"
   },
   {
     "category": "sports",
@@ -32,7 +32,7 @@ const VEXLOW_HERO = [
     "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
     "image": "img/gaming/roblox-header-1.webp",
     "textColor": "#ffffff",
-    "href": "gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
+    "href": "https://vexlowhq.com/categoria/gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
   },
   {
     "category": "ai",
@@ -41,6 +41,6 @@ const VEXLOW_HERO = [
     "dek": "With the new update to Google Vids, users can produce videos featuring their own digital likenesses using cutting-edge AI technology.",
     "image": "img/ai/premium-photo-1764687926809-1f4ce4f422a5-1.avif",
     "textColor": "#ffffff",
-    "href": "ai/google-introduces-personalized-ai-avatars-for-custom-video-c.html"
+    "href": "https://vexlowhq.com/categoria/ai/google-introduces-personalized-ai-avatars-for-custom-video-c.html"
   }
 ];
