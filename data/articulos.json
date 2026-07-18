@@ -299,7 +299,7 @@
     "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
     "image": "img/gaming/roblox-header.webp",
     "videoUrl": "",
-    "trending": false,
+    "trending": true,
     "body": "Roblox has rolled out an innovative feature in its mobile app called \"Build,\" enabling users to create basic games using a simple text prompt. This development aims to enhance user engagement by allowing even those without coding experience to participate in game creation.\n\n## Simplified Game Development\n\nThe Build feature harnesses the power of artificial intelligence to interpret user prompts and automatically generate gaming elements. For example, a user could type in a conceptual idea, and the AI would facilitate the creation of corresponding game mechanics, environments, or characters. This move is in line with current trends in the gaming industry, where accessibility and user-generated content are increasingly prioritized.\n\nThis initiative follows a growing demand for more intuitive game design tools that do not require extensive programming knowledge. By streamlining the creation process, Roblox is looking to attract a broader audience and foster a more inclusive creative environment.\n\n## Potential Impacts and Future Prospects\n\nThe introduction of this AI-driven feature could significantly impact the Roblox community. It allows enthusiasts, including younger users and novice developers, to experiment with game design without the steep learning curve usually associated with software development.\n\n- This could lead to an increase in user-generated content, enriching the Roblox ecosystem.\n- The democratization of game creation may also inspire innovative concepts and gameplay ideas.\n- If successful, Roblox could set a precedent for other platforms to adopt similar AI tools, further altering the landscape of game development.\n\nAs the gaming industry progresses, the combination of AI technologies with user-centric design could define the future of interactive entertainment. The ongoing evolution of platforms like Roblox will be crucial in shaping how games are built and played in the coming years.\n\n[publicidad]  \nRoblox’s Build feature signifies a shift towards a more collaborative and user-driven approach to game development, reflecting broader trends in the tech world where AI tools are being leveraged to foster creativity and innovation. \n\nWith the new capabilities provided by AI, it will be interesting to observe how players utilize this technology to bring their imaginative ideas to life. ",
     "href": "categoria/gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
   },
@@ -730,5 +730,23 @@
     "sourceUrl": "https://www.theverge.com/tech/966964/emtb-riders-are-not-cheaters",
     "sourceTitle": "Fine, electric mountain bikes don’t suck",
     "href": "categoria/technology/the-rise-of-electric-mountain-bikes-challenging-traditional-.html"
+  },
+  {
+    "title": "AMI Labs CEO Dismisses 'Superintelligence' Label for AI",
+    "category": "ai",
+    "categoryLabel": "AI",
+    "icon": "🤖",
+    "date": "2026-07-18",
+    "readTime": "3 min",
+    "topic": "xai",
+    "slug": "ami-labs-ceo-dismisses-superintelligence-label-for-ai",
+    "dek": "Alexandre LeBrun of AMI Labs critiques the common pursuit of AGI and superintelligence in AI discussions.",
+    "image": "",
+    "videoUrl": "",
+    "trending": false,
+    "body": "In a recent discussion, Alexandre LeBrun, the CEO of AMI Labs, has expressed reservations regarding the terms 'superintelligence' and 'artificial general intelligence' (AGI) commonly used in the AI community. The startup, related to renowned AI researcher Yann LeCun, focuses on developing advanced AI models but seeks to distance itself from the sensationalized aspirations of achieving superintelligence.\n\n## Understanding AMI Labs' Position\n\nLeBrun's stance comes at a time when many in the technology sector are fiercely pursuing the goal to create systems that replicate human cognitive capabilities, often referred to as AGI. Many prominent players in the field emphasize this pursuit as the ultimate aspiration of artificial intelligence development. However, LeBrun believes that these labels can mislead the public and create unrealistic expectations about the current state and capabilities of AI technologies.\n\nBy refraining from using the term 'superintelligence,' LeBrun underscores a critical viewpoint regarding the ongoing discourse in AI. He suggests that while advancements are occurring rapidly, the term may exaggerate existing capabilities, potentially hindering productive discussions around ethical considerations, safety, and the practical uses of AI.\n\n## Implications for AI Development\n\nLeBrun's comments highlight a growing divide within the industry regarding how progress and intentions in AI should be communicated. The use of provocative terms like 'superintelligence' can drive engagement but may also lead to confusion among non-expert audiences and regulators. As AI technologies continue to evolve, there is a pressing need for clarity and responsibility in how the industry approaches language surrounding these advancements.\n\nIn an era marked by significant advancements in machine learning and automation, AMI Labs offers an alternative perspective that emphasizes a more grounded approach to AI development. By focusing on the actual functionalities and ethical implications without resorting to exaggerated language, the company aims to contribute to a more nuanced understanding of AI technologies.\n\nOverall, Alexandre LeBrun's viewpoint raises essential questions about how the AI community should articulate its goals and progress, particularly as the race to harness AI capabilities intensifies.\n\n[publicidad]",
+    "sourceUrl": "https://techcrunch.com/2026/07/16/why-ami-labs-alexandre-lebrun-wont-call-his-ai-agi-or-superintelligence/",
+    "sourceTitle": "Why AMI Labs’ Alexandre LeBrun won’t call his AI ‘AGI’ or ‘superintelligence’",
+    "href": "categoria/ai/ami-labs-ceo-dismisses-superintelligence-label-for-ai.html"
   }
 ]
