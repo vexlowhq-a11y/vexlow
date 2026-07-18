@@ -27,6 +27,7 @@ TOPICS_FILE = os.path.join(DATA_DIR, "topics.json")
 ARTICULOS_JSON = os.path.join(DATA_DIR, "articulos.json")
 ARTICULOS_ASSET = "data/articulos.js"
 SOURCE_INDEX = os.path.join(PROJECT, "index.html")
+SITE_URL = "https://vexlowhq.com"
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".jfif", ".gif", ".webp", ".avif", ".svg"}
 
 CATEGORY_SLUGS = [
@@ -237,6 +238,10 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 <title>{label} — VexlowHQ</title>
 <meta name="description" content="{desc}">
 <link rel="stylesheet" href="{asset_prefix}css/style.css">
+<link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
 </head>
 <body data-category="{slug}">
@@ -295,6 +300,10 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <title>{topic_label} — {cat_label} — VexlowHQ</title>
 <meta name="description" content="{meta_desc}">
 <link rel="stylesheet" href="{asset_prefix}css/style.css">
+<link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
 </head>
 <body data-category="{cat_slug}" data-topic="{topic_slug}">
@@ -393,6 +402,10 @@ ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
 <title>{title} — VexlowHQ</title>
 <meta name="description" content="{dek}">
 <link rel="stylesheet" href="{asset_prefix}css/style.css">
+<link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
 </head>
 <body data-category="{cat_slug}">
@@ -450,6 +463,10 @@ STATIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <title>{title} — VexlowHQ</title>
 <meta name="description" content="{desc}">
 <link rel="stylesheet" href="{asset_prefix}css/style.css">
+<link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
 </head>
 <body data-static-slug="{slug}">
@@ -532,6 +549,10 @@ def generate():
     asset_prefix_page = "../../"  # para páginas de categoría/tema/artículo (2 niveles adentro)
     asset_prefix_root = ""  # para páginas estáticas / index (en la raíz)
 
+    import datetime
+    today = datetime.date.today().isoformat()
+    sitemap_urls = [("/", today, "daily")]
+
     print("\nGenerando páginas de categoría y de tema...\n")
     os.makedirs(CATEGORIA_DIR, exist_ok=True)
 
@@ -605,6 +626,7 @@ def generate():
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(page)
         print("categoría:", out_path, "({} temas)".format(len(flat_topics)))
+        sitemap_urls.append(("/categoria/{}/".format(slug), today, "daily"))
 
         for t in flat_topics:
             topic_page = TOPIC_PAGE_TEMPLATE.format(
@@ -620,6 +642,7 @@ def generate():
             topic_path = os.path.join(cat_dir, t["slug"] + ".html")
             with open(topic_path, "w", encoding="utf-8") as f:
                 f.write(topic_page)
+            sitemap_urls.append(("/categoria/{}/{}.html".format(slug, t["slug"]), today, "weekly"))
 
     print("\nGenerando artículos...\n")
     with open(ARTICULOS_JSON, "r", encoding="utf-8") as f:
@@ -666,6 +689,7 @@ def generate():
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(page)
         print("artículo:", out_path)
+        sitemap_urls.append(("/categoria/{}/{}.html".format(cat["slug"], art["slug"]), art.get("date", today), "monthly"))
 
     print("\nGenerando páginas estáticas...\n")
     for page in STATIC_PAGES:
@@ -680,6 +704,25 @@ def generate():
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(html)
         print("página:", out_path)
+        sitemap_urls.append(("/{}.html".format(slug), today, "yearly"))
+
+    write_sitemap(sitemap_urls)
+
+
+def write_sitemap(urls):
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for path, lastmod, changefreq in urls:
+        lines.append("  <url>")
+        lines.append("    <loc>{}{}</loc>".format(SITE_URL, path))
+        lines.append("    <lastmod>{}</lastmod>".format(lastmod))
+        lines.append("    <changefreq>{}</changefreq>".format(changefreq))
+        lines.append("  </url>")
+    lines.append("</urlset>")
+    out_path = os.path.join(PROJECT, "sitemap.xml")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print("\nsitemap.xml:", out_path, "({} URLs)".format(len(urls)))
 
 
 def parse_simple_body(text):

@@ -238,7 +238,7 @@ function parseBody(text) {
   return blocks;
 }
 
-var AD_SLOT_HTML = '      <div class="ad-slot" style="margin: 30px 0;">Espacio publicitario · in-article</div>\n';
+var AD_SLOT_HTML = '      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>\n';
 
 function renderBodyHtml(bodyText) {
   var blocks = parseBody(bodyText);
