@@ -339,10 +339,21 @@ function youtubeEmbedUrl(url) {
   return m ? 'https://www.youtube.com/embed/' + m[1] : null;
 }
 
-/* El banner de la nota: video (YouTube) > imagen destacada > ícono de la
+/* Primero prueba si es un link de YouTube (arma la URL de embed canónica).
+   Si no, y el link ya es una URL http(s) válida, se usa directo como src
+   del iframe — así funcionan links de embed de Vimeo, JWPlayer, etc. */
+function videoEmbedUrl(url) {
+  if (!url) return null;
+  var yt = youtubeEmbedUrl(url);
+  if (yt) return yt;
+  var trimmed = String(url).trim();
+  return /^https?:\/\//.test(trimmed) ? trimmed : null;
+}
+
+/* El banner de la nota: video > imagen destacada > ícono de la
    categoría sobre fondo de color, en ese orden de prioridad. */
 function bannerHtmlFor(article, cat) {
-  var embedUrl = youtubeEmbedUrl(article.videoUrl);
+  var embedUrl = videoEmbedUrl(article.videoUrl);
   if (embedUrl) {
     return '      <div class="article-banner video-wrap">\n' +
       '        <iframe src="' + embedUrl + '" title="' + article.title.replace(/"/g, '&quot;') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n' +

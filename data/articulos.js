@@ -1,11 +1,3 @@
-/*
-  ARTÍCULOS — fuente de "Últimas publicadas" y de las páginas de categoría
-  ==========================================================================
-  GENERADO AUTOMÁTICAMENTE por el panel de administración
-  (admin/index.html). No lo edites a mano: los cambios se van a
-  perder la próxima vez que guardes algo desde el panel.
-  La fuente real es data/articulos.json.
-*/
 const VEXLOW_ARTICLES = [
   {
     "title": "Argentina and Spain Set to Meet in the World Cup 2026 Final",
@@ -468,5 +460,23 @@ const VEXLOW_ARTICLES = [
     "trending": false,
     "body": "Japan has made a noteworthy advancement in space technology with its successful testing of the RV-X, an experimental reusable rocket prototype. This marks the first time the nation has conducted flight tests on such a vehicle, aligning with global trends towards reusable space vehicles that aim to reduce costs and increase accessibility for space missions.\n\nThe RV-X is designed to be a reusable launch system that can perform multiple missions, which could propel Japan further into the competitive landscape of space exploration and satellite deployment. This innovation reflects a growing emphasis on reusability within the aerospace industry, similar to initiatives undertaken by companies like SpaceX and Blue Origin.\n\nAchieving a successful launch and landing not only showcases Japan’s capabilities in rocketry but also has implications for future missions. By focusing on reusable technology, Japan is potentially paving the way for more sustainable space operations that could handle significant payloads while minimizing environmental impact. Moreover, this development could enhance collaboration opportunities with other nations and private entities engaged in space exploration.\n\nThe RV-X's achievement underscores the importance of innovation in space technology as countries continue to vie for dominance in the space sector. As other nations develop their own reusable rockets, Japan’s advancements may inspire further investments in research and development, leading to an exciting new chapter in global space exploration efforts.\n\n[publicidad]\n\nIn essence, Japan’s successful prototype test represents not just a technical milestone, but a strategic move in enhancing its presence in the international space community. Looking ahead, the implications of this technology can significantly alter the dynamics of space missions, particularly in reducing costs associated with launching satellites and other payloads into orbit. As more nations and private companies develop similar technologies, the future of space travel may become increasingly focused on reusability and sustainability.",
     "href": "categoria/science/japan-successfully-tests-rv-x-reusable-rocket-prototype.html"
+  },
+  {
+    "title": "TikTok Trials AI Likeness Detection Tool for Creators",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "icon": "📱",
+    "date": "2026-07-18",
+    "readTime": "3 min",
+    "topic": "tiktok",
+    "slug": "tiktok-trials-ai-likeness-detection-tool-for-creators",
+    "dek": "The social media platform is piloting a new feature that allows creators to identify and report AI-generated likenesses.",
+    "image": "",
+    "videoUrl": "",
+    "trending": true,
+    "body": "TikTok is rolling out a trial of an AI likeness detection tool, inviting select creators in the United States to opt into the program. This initiative aims to help users identify content that may have been generated using artificial intelligence technology. The news, highlighted by social media consultant Matt Navarra, reflects TikTok's ongoing efforts to enhance content authenticity and tackle the challenges presented by AI-generated media.\n\n## A New Frontier in Content Authenticity\n\nWith the rise of AI capabilities, social media platforms face increasing scrutiny regarding content authenticity. TikTok's forthcoming tool appears to be a proactive measure to address this challenge. By enabling creators to report AI-generated likenesses, TikTok may help ensure that users can differentiate between genuine content and that which has been artificially created.\n\nZachary Kizer, a spokesperson for TikTok in the US, confirmed that this feature is currently available to a select group of creators. The move aligns with similar efforts from YouTube, which is also exploring AI detection tools to safeguard content integrity within its ecosystem.\n\n## Implications for Creators and Viewers\n\nThe ability to identify AI-generated content could have significant implications for both creators and their audiences. It reinforces the importance of transparency in content creation, while also empowering creators to protect their original works from imitation or misuse. The tool's opt-in nature allows users to choose their level of engagement with AI detection, catering to varying comfort levels with technology.\n\nAs the test progresses, the outcomes may influence TikTok's development of broader policies regarding AI-generated content and its implications for community standards. Observers will be keen to see how this tool not only impacts the creator landscape but also shapes viewer perceptions of authenticity in digital media.\n\nTikTok's initiative is a part of a larger trend across various platforms aiming to navigate the complexities of AI in social media, indicating a shift towards more responsible management of digital interactions and content creation practices.\n\n[publicidad]  \n\nWith increasing conversations around data privacy and the implications of AI usage, this tool can potentially lead to deeper discussions about the role of technology in shaping online experiences. As TikTok and other platforms innovate, the need for transparent, ethical guidelines will grow ever more critical for the industry as a whole.",
+    "sourceUrl": "https://www.theverge.com/tech/967486/tiktok-ai-likeness-detection-tool",
+    "sourceTitle": "TikTok is testing an AI likeness detection tool",
+    "href": "categoria/social/tiktok-trials-ai-likeness-detection-tool-for-creators.html"
   }
 ];

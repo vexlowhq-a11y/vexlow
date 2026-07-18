@@ -381,8 +381,23 @@ def youtube_embed_url(url):
     return "https://www.youtube.com/embed/" + m.group(1) if m else None
 
 
+def video_embed_url(url):
+    """ Primero prueba si es un link de YouTube (arma la URL de embed
+        canónica). Si no, y el link ya es una URL http(s) válida, se usa
+        directo como src del iframe — así funcionan links de embed de
+        Vimeo, JWPlayer, y otros reproductores de video. """
+    if not url:
+        return None
+    yt = youtube_embed_url(url)
+    if yt:
+        return yt
+    if re.match(r"^https?://", url.strip()):
+        return url.strip()
+    return None
+
+
 def banner_html_for(art, cat, asset_prefix):
-    embed_url = youtube_embed_url(art.get("videoUrl") or art.get("video"))
+    embed_url = video_embed_url(art.get("videoUrl") or art.get("video"))
     if embed_url:
         return (
             '      <div class="article-banner video-wrap">\n'
