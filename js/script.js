@@ -362,11 +362,14 @@
   var categoryGrid = document.getElementById('categoryGrid');
   var pageCategory = document.body.getAttribute('data-category');
   var pageTopic = document.body.getAttribute('data-topic');
+  var pageSubtopic = document.body.getAttribute('data-subtopic');
 
   if (categoryGrid && pageCategory && typeof VEXLOW_ARTICLES !== 'undefined') {
     var allSorted = articlesSortedByDate();
     var pageItems;
-    if (pageTopic) {
+    if (pageTopic && pageSubtopic) {
+      pageItems = allSorted.filter(function (a) { return a.category === pageCategory && a.topic === pageTopic && a.subtopic === pageSubtopic; });
+    } else if (pageTopic) {
       pageItems = allSorted.filter(function (a) { return a.category === pageCategory && a.topic === pageTopic; });
     } else if (pageCategory === 'trending') {
       pageItems = trendingArticles();

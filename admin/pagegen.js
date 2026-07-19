@@ -16,6 +16,7 @@
     - "## Texto" al principio de una línea = subtítulo (h2).
     - Líneas seguidas que empiezan con "- " = lista.
     - Una línea que diga exactamente "[publicidad]" = espacio publicitario.
+    - "![alt](ruta)" en su propia línea = imagen suelta en medio del cuerpo.
 */
 
 const fs = require('fs');
@@ -42,13 +43,13 @@ const CATEGORIES = [
 const CATEGORY_BY_SLUG = {};
 CATEGORIES.forEach(function (c) { CATEGORY_BY_SLUG[c.slug] = c; });
 
-const MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
-  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December'];
 
-function formatDateEs(iso) {
+function formatDateEn(iso) {
   var parts = iso.split('-');
   var y = parts[0], m = parts[1], d = parts[2];
-  return String(parseInt(d, 10)) + ' de ' + MESES_ES[parseInt(m, 10) - 1] + ' de ' + y;
+  return MONTHS_EN[parseInt(m, 10) - 1] + ' ' + String(parseInt(d, 10)) + ', ' + y;
 }
 
 function loadTopicGroups() {
@@ -74,7 +75,7 @@ function topicLabelFor(catSlug, topicSlug) {
 function topicSlugify(label) {
   return String(label)
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]/g, '')
     .slice(0, 40);
 }
@@ -176,6 +177,92 @@ function deleteTopic(categorySlug, slug) {
   return { slug: slug };
 }
 
+/* =====================================================================
+   SUBTEMAS — un nivel más adentro de un tema (ej. "Trailers" dentro de
+   "GTA VI" dentro de Gaming). Mismo patrón que los temas de arriba, pero
+   sin grupos (el tema ya cumple ese rol) y con clave compuesta
+   "categoria/temaSlug" en vez de solo la categoría.
+   ===================================================================== */
+
+const SUBTOPICS_FILE = path.join(DATA_DIR, 'subtopics.json');
+
+function loadSubtopics() {
+  try {
+    return JSON.parse(fs.readFileSync(SUBTOPICS_FILE, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+function saveSubtopics(data) {
+  fs.writeFileSync(SUBTOPICS_FILE, JSON.stringify(data, null, 2) + '\n', 'utf8');
+}
+function subtopicKey(categorySlug, topicSlug) { return categorySlug + '/' + topicSlug; }
+
+function subtopicLabelFor(catSlug, topicSlug, subtopicSlug) {
+  if (!subtopicSlug) return null;
+  var items = loadSubtopics()[subtopicKey(catSlug, topicSlug)] || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i][0] === subtopicSlug) return items[i][1];
+  }
+  return null;
+}
+
+function addSubtopic(categorySlug, topicSlug, label) {
+  if (!CATEGORY_BY_SLUG[categorySlug]) throw new Error('Categoría desconocida: ' + categorySlug);
+  if (!topicLabelFor(categorySlug, topicSlug)) throw new Error('No se encontró ese tema en esta categoría');
+
+  var slug = topicSlugify(label);
+  if (!slug) throw new Error('El nombre del subtema no generó un slug válido');
+
+  var key = subtopicKey(categorySlug, topicSlug);
+  var all = loadSubtopics();
+  var items = all[key] || [];
+  if (items.some(function (it) { return it[0] === slug; })) {
+    throw new Error('Ya existe un subtema con ese nombre en este tema');
+  }
+
+  items.push([slug, label]);
+  all[key] = items;
+  saveSubtopics(all);
+  return { slug: slug, label: label };
+}
+
+function renameSubtopic(categorySlug, topicSlug, slug, newLabel) {
+  if (!newLabel || !newLabel.trim()) throw new Error('El nuevo nombre no puede estar vacío');
+  var key = subtopicKey(categorySlug, topicSlug);
+  var all = loadSubtopics();
+  var items = all[key] || [];
+  var found = items.find(function (it) { return it[0] === slug; });
+  if (!found) throw new Error('No se encontró ese subtema');
+  found[1] = newLabel.trim();
+  all[key] = items;
+  saveSubtopics(all);
+  return { slug: slug, label: newLabel.trim() };
+}
+
+/* Saca un subtema de data/subtopics.json y borra su página HTML si existe.
+   No toca los artículos que lo tengan asignado — eso se valida antes,
+   desde server.js. */
+function deleteSubtopic(categorySlug, topicSlug, slug) {
+  var cat = CATEGORY_BY_SLUG[categorySlug];
+  if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
+
+  var key = subtopicKey(categorySlug, topicSlug);
+  var all = loadSubtopics();
+  var items = all[key] || [];
+  var idx = items.findIndex(function (it) { return it[0] === slug; });
+  if (idx === -1) throw new Error('No se encontró ese subtema');
+  items.splice(idx, 1);
+  if (items.length === 0) delete all[key];
+  else all[key] = items;
+  saveSubtopics(all);
+
+  var subtopicPage = path.join(CATEGORIA_DIR, cat.slug, topicSlug + '-' + slug + '.html');
+  if (fs.existsSync(subtopicPage)) fs.unlinkSync(subtopicPage);
+
+  return { slug: slug };
+}
+
 function loadSidebarFooter() {
   var indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   var sidebarStart = indexHtml.indexOf('<div class="mobile-topbar">');
@@ -187,7 +274,7 @@ function loadSidebarFooter() {
   return { sidebar: localize(sidebarBlockRoot), footer: localize(footerBlockRoot) };
 }
 
-var STATIC_PAGE_SLUGS = ['sobre-vexlowhq', 'politica-editorial', 'contacto', 'anunciate', 'privacidad', 'terminos', 'cookies'];
+var STATIC_PAGE_SLUGS = ['about-vexlowhq', 'editorial-policy', 'contact', 'advertise', 'privacy', 'terms', 'cookies'];
 
 function localize(html) {
   html = html.split('href="index.html"').join('href="../../index.html"');
@@ -221,6 +308,8 @@ function parseBody(text) {
     if (line === '') { flushParagraph(); i++; continue; }
     if (/^##\s+/.test(line)) { flushParagraph(); blocks.push({ type: 'h2', text: line.replace(/^##\s+/, '') }); i++; continue; }
     if (/^\[publicidad\]$/i.test(line)) { flushParagraph(); blocks.push({ type: 'ad' }); i++; continue; }
+    var imgMatch = /^!\[(.*?)\]\((\S+)\)$/.exec(line);
+    if (imgMatch) { flushParagraph(); blocks.push({ type: 'img', alt: imgMatch[1], src: imgMatch[2] }); i++; continue; }
     if (/^-\s+/.test(line)) {
       flushParagraph();
       var items = [];
@@ -240,40 +329,63 @@ function parseBody(text) {
 
 var AD_SLOT_HTML = '      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>\n';
 
+/* "**texto**" -> <strong>texto</strong>, dentro de párrafos, subtítulos,
+   ítems de lista y pies de foto (nunca dentro del atributo alt). */
+function applyInline(text) {
+  return String(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 function renderBodyHtml(bodyText) {
   var blocks = parseBody(bodyText);
   var html = '';
   blocks.forEach(function (b) {
-    if (b.type === 'p') html += '      <p>' + b.text + '</p>\n';
-    else if (b.type === 'h2') html += '      <h2>' + b.text + '</h2>\n';
+    if (b.type === 'p') html += '      <p>' + applyInline(b.text) + '</p>\n';
+    else if (b.type === 'h2') html += '      <h2>' + applyInline(b.text) + '</h2>\n';
     else if (b.type === 'ul') {
       html += '      <ul>\n';
-      b.items.forEach(function (it) { html += '        <li>' + it + '</li>\n'; });
+      b.items.forEach(function (it) { html += '        <li>' + applyInline(it) + '</li>\n'; });
       html += '      </ul>\n';
     } else if (b.type === 'ad') {
       html += AD_SLOT_HTML;
+    } else if (b.type === 'img') {
+      var altEsc = (b.alt || '').replace(/"/g, '&quot;');
+      html += '      <figure class="article-inline-image"><img src="../../' + b.src + '" alt="' + altEsc + '" loading="lazy">';
+      if (b.alt) html += '<figcaption>' + applyInline(b.alt) + '</figcaption>';
+      html += '</figure>\n';
     }
   });
   return html;
 }
 
 var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
-'<html lang="es">\n' +
+'<html lang="en">\n' +
 '<head>\n' +
 '<meta charset="UTF-8">\n' +
 '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
 '<title>{title} — VexlowHQ</title>\n' +
 '<meta name="description" content="{dek}">\n' +
 '<link rel="stylesheet" href="../../css/style.css">\n' +
+'<link rel="icon" type="image/x-icon" href="../../favicon.ico">\n' +
+'<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">\n' +
+'<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">\n' +
+'<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">\n' +
+'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>\n' +
+'<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>\n' +
+'<script>\n' +
+'  window.dataLayer = window.dataLayer || [];\n' +
+'  function gtag(){dataLayer.push(arguments);}\n' +
+'  gtag(\'js\', new Date());\n' +
+'  gtag(\'config\', \'G-20Z63KYZ3K\');\n' +
+'</script>\n' +
 '</head>\n' +
-'<body data-category="{catSlug}">\n' +
+'<body data-category="{catSlug}"{subtopicAttr}>\n' +
 '\n' +
 '{sidebar}\n' +
 '\n' +
 '  <main>\n' +
 '\n' +
 '    <nav class="breadcrumb">\n' +
-'      <a href="../../index.html">Inicio</a><span class="sep">/</span><a href="index.html">{catLabel}</a>{topicCrumb}<span class="sep">/</span><span class="current">{titleShort}</span>\n' +
+'      <a href="../../index.html">Home</a><span class="sep">/</span><a href="index.html">{catLabel}</a>{topicCrumb}<span class="sep">/</span><span class="current">{titleShort}</span>\n' +
 '    </nav>\n' +
 '\n' +
 '    <article class="article-page">\n' +
@@ -281,7 +393,7 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '      <h1>{title}</h1>\n' +
 '      <p class="dek">{dek}</p>\n' +
 '      <div class="article-meta">\n' +
-'        <span>Redacción VexlowHQ</span><span class="dot">·</span><span>{dateLabel}</span><span class="dot">·</span><span>{readTime}</span>\n' +
+'        <span>VexlowHQ Staff</span><span class="dot">·</span><span>{dateLabel}</span><span class="dot">·</span><span>{readTime}</span>\n' +
 '      </div>\n' +
 '\n' +
 '{bannerHtml}\n' +
@@ -289,16 +401,16 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '{bodyHtml}      </div>\n' +
 '\n' +
 '      <div class="article-share">\n' +
-'        <span>Compartir</span>\n' +
-'        <a href="#" data-share="x" aria-label="Compartir en X">X</a>\n' +
-'        <a href="#" data-share="whatsapp" aria-label="Compartir en WhatsApp">W</a>\n' +
-'        <a href="#" data-share="facebook" aria-label="Compartir en Facebook">F</a>\n' +
-'        <a href="#" data-share="copy" aria-label="Copiar link">🔗</a>\n' +
+'        <span>Share</span>\n' +
+'        <a href="#" data-share="x" aria-label="Share on X">X</a>\n' +
+'        <a href="#" data-share="whatsapp" aria-label="Share on WhatsApp">W</a>\n' +
+'        <a href="#" data-share="facebook" aria-label="Share on Facebook">F</a>\n' +
+'        <a href="#" data-share="copy" aria-label="Copy link">🔗</a>\n' +
 '      </div>\n' +
 '\n' +
 '      <div class="article-continue">\n' +
-'        <p>¿Querés más noticias sobre <strong>{topicLabel}</strong>?</p>\n' +
-'        <a class="see-all" href="{topicHref}">Ver toda la cobertura →</a>\n' +
+'        <p>Want more news about <strong>{topicLabel}</strong>?</p>\n' +
+'        <a class="see-all" href="{topicHref}">See full coverage →</a>\n' +
 '      </div>\n' +
 '    </article>\n' +
 '\n' +
@@ -327,7 +439,7 @@ function articleFilePath(article) {
 function slugify(title) {
   return String(title)
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 60);
@@ -381,6 +493,17 @@ function generateArticleFile(article) {
     topicLabel = cat.label;
   }
 
+  // Subtema (un nivel más adentro de un tema, ej. "Trailers" dentro de
+  // "GTA VI") — si está asignado, se agrega como cuarto nivel del
+  // breadcrumb y pasa a ser el destino de "Want more news about...".
+  var subtopicSlug = article.subtopic || '';
+  var subtopicLabel = (topicSlug && subtopicSlug) ? subtopicLabelFor(cat.slug, topicSlug, subtopicSlug) : null;
+  if (topicSlug && subtopicSlug && subtopicLabel) {
+    topicCrumb += '<span class="sep">/</span><a href="' + topicSlug + '-' + subtopicSlug + '.html">' + subtopicLabel + '</a>';
+    topicLabel = subtopicLabel;
+    topicHref = topicSlug + '-' + subtopicSlug + '.html';
+  }
+
   var title = article.title;
   var titleShort = title.length <= 40 ? title : title.slice(0, 37) + '...';
 
@@ -391,13 +514,14 @@ function generateArticleFile(article) {
     catSlug: cat.slug,
     catLabel: cat.label,
     catIcon: cat.icon,
-    dateLabel: formatDateEs(article.date),
+    dateLabel: formatDateEn(article.date),
     readTime: article.readTime || '',
     bannerHtml: bannerHtmlFor(article, cat),
     bodyHtml: renderBodyHtml(article.body),
     topicCrumb: topicCrumb,
     topicLabel: topicLabel,
     topicHref: topicHref,
+    subtopicAttr: '',
     sidebar: blocks.sidebar,
     footer: blocks.footer
   });
@@ -426,6 +550,11 @@ module.exports = {
   listGroupNames: listGroupNames,
   renameTopic: renameTopic,
   deleteTopic: deleteTopic,
+  loadSubtopics: loadSubtopics,
+  subtopicLabelFor: subtopicLabelFor,
+  addSubtopic: addSubtopic,
+  renameSubtopic: renameSubtopic,
+  deleteSubtopic: deleteSubtopic,
   slugify: slugify,
   generateArticleFile: generateArticleFile,
   deleteArticleFile: deleteArticleFile

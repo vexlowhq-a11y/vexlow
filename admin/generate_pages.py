@@ -24,6 +24,7 @@ IMG_DIR = os.path.join(PROJECT, "img")
 DATA_DIR = os.path.join(PROJECT, "data")
 CATEGORIA_DIR = os.path.join(PROJECT, "categoria")
 TOPICS_FILE = os.path.join(DATA_DIR, "topics.json")
+SUBTOPICS_FILE = os.path.join(DATA_DIR, "subtopics.json")
 ARTICULOS_JSON = os.path.join(DATA_DIR, "articulos.json")
 ARTICULOS_ASSET = "data/articulos.js"
 SOURCE_INDEX = os.path.join(PROJECT, "index.html")
@@ -220,6 +221,24 @@ def img_thumbs_for(cat):
     return thumbs
 
 
+# Igual que img_thumbs_for, pero un nivel más adentro: img/{folder}/{topic_slug}/{subtopic_slug}/
+def subtopic_img_thumbs_for(cat, topic_slug):
+    folder = cat.get("img_folder", cat["slug"])
+    base = os.path.join(IMG_DIR, folder, topic_slug)
+    thumbs = {}
+    if not os.path.isdir(base):
+        return thumbs
+    for entry in sorted(os.listdir(base)):
+        full = os.path.join(base, entry)
+        if not os.path.isdir(full):
+            continue
+        for f in sorted(os.listdir(full)):
+            if os.path.splitext(f)[1].lower() in IMAGE_EXT:
+                thumbs[entry.lower()] = "img/{}/{}/{}/{}".format(folder, topic_slug, entry, f)
+                break
+    return thumbs
+
+
 def find_topics_auto(cat):
     thumbs = img_thumbs_for(cat)
     topics = []
@@ -320,14 +339,14 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
   gtag('config', 'G-20Z63KYZ3K');
 </script>
 </head>
-<body data-category="{cat_slug}" data-topic="{topic_slug}">
+<body data-category="{cat_slug}" data-topic="{topic_slug}"{subtopic_attr}>
 
 {sidebar_block}
 
   <main>
 
     <nav class="breadcrumb">
-      <a href="../../index.html">{home}</a><span class="sep">/</span><a href="index.html">{cat_label}</a><span class="sep">/</span><span class="current">{topic_label}</span>
+      <a href="../../index.html">{home}</a><span class="sep">/</span><a href="index.html">{cat_label}</a>{parent_crumb}<span class="sep">/</span><span class="current">{topic_label}</span>
     </nav>
 
     <div class="category-header">
@@ -339,11 +358,7 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
 
-    <div class="home-section" id="noticias">
-      <div class="section-head"><h2>{latest_news}</h2></div>
-      <div class="rail-grid" id="categoryGrid"></div>
-    </div>
-
+{content_block}
     <div class="home-section" style="margin-top: 32px;">
       <div class="ad-slot">{ad_infeed}</div>
     </div>
@@ -359,6 +374,18 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+# Contenido por defecto de una página de tema/subtema: la grilla plana de
+# artículos, llenada en el cliente por js/script.js según data-category/
+# data-topic/data-subtopic. Se usa siempre en subtemas (nivel hoja) y en
+# temas que todavía no tienen subtemas propios.
+ARTICLES_GRID_BLOCK = (
+    '    <div class="home-section" id="noticias">\n'
+    '      <div class="section-head"><h2>{latest_news}</h2></div>\n'
+    '      <div class="rail-grid" id="categoryGrid"></div>\n'
+    '    </div>\n'
+    '\n'
+)
+
 
 def thumb_or_icon_html(thumb, icon, asset_prefix):
     if thumb:
@@ -369,22 +396,35 @@ def thumb_or_icon_html(thumb, icon, asset_prefix):
 AD_SLOT_HTML_TPL = '      <div class="ad-slot" style="margin: 30px 0;">{}</div>\n'
 
 
-def render_article_body(body, default_ad_text="Advertisement · in-article"):
+def apply_inline(text):
+    """ "**texto**" -> <strong>texto</strong>, dentro de párrafos, subtítulos,
+        ítems de lista y pies de foto (nunca dentro del atributo alt). """
+    return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+
+
+def render_article_body(body, default_ad_text="Advertisement · in-article", asset_prefix=""):
     html = ""
     for block in body:
         kind, content = block[0], block[1]
         ad_text = block[2] if len(block) > 2 else default_ad_text
         if kind == "p":
-            html += "      <p>{}</p>\n".format(content)
+            html += "      <p>{}</p>\n".format(apply_inline(content))
         elif kind == "h2":
-            html += "      <h2>{}</h2>\n".format(content)
+            html += "      <h2>{}</h2>\n".format(apply_inline(content))
         elif kind == "ul":
             html += "      <ul>\n"
             for item in content:
-                html += "        <li>{}</li>\n".format(item)
+                html += "        <li>{}</li>\n".format(apply_inline(item))
             html += "      </ul>\n"
         elif kind == "ad":
             html += AD_SLOT_HTML_TPL.format(ad_text)
+        elif kind == "img":
+            alt, src = content
+            alt_esc = alt.replace('"', "&quot;")
+            html += '      <figure class="article-inline-image"><img src="{}{}" alt="{}" loading="lazy">'.format(asset_prefix, src, alt_esc)
+            if alt:
+                html += "<figcaption>{}</figcaption>".format(apply_inline(alt))
+            html += "</figure>\n"
     return html
 
 
@@ -582,11 +622,26 @@ def generate():
     with open(TOPICS_FILE, "r", encoding="utf-8") as f:
         topic_groups = json.load(f)
 
+    try:
+        with open(SUBTOPICS_FILE, "r", encoding="utf-8") as f:
+            subtopics_data = json.load(f)
+    except (IOError, OSError):
+        subtopics_data = {}
+
     def topic_label_for(cat_slug, topic_slug):
         for group_name, items in topic_groups.get(cat_slug, []):
             for slug, label in items:
                 if slug == topic_slug:
                     return label
+        return None
+
+    def subtopics_for(cat_slug, topic_slug):
+        return subtopics_data.get("{}/{}".format(cat_slug, topic_slug), [])
+
+    def subtopic_label_for(cat_slug, topic_slug, subtopic_slug):
+        for slug, label in subtopics_for(cat_slug, topic_slug):
+            if slug == subtopic_slug:
+                return label
         return None
 
     asset_prefix_page = "../../"  # para páginas de categoría/tema/artículo (2 niveles adentro)
@@ -672,12 +727,27 @@ def generate():
         sitemap_urls.append(("/categoria/{}/".format(slug), today, "daily"))
 
         for t in flat_topics:
+            sub_items = subtopics_for(slug, t["slug"])
+
+            if sub_items:
+                sub_thumbs = subtopic_img_thumbs_for(cat, t["slug"])
+                sub_cards = ""
+                for sub_slug, sub_label in sub_items:
+                    sub_cards += TOPIC_CARD_TEMPLATE.format(
+                        slug=t["slug"] + "-" + sub_slug, label=sub_label,
+                        thumb_or_icon=thumb_or_icon_html(sub_thumbs.get(sub_slug), cat["icon"], asset_prefix_page),
+                        view_more=strings["view_more_cards"],
+                    )
+                content_block = TOPICS_GROUP_SECTION_TEMPLATE.format(group_name=strings["topics_we_cover"], topic_cards=sub_cards)
+            else:
+                content_block = ARTICLES_GRID_BLOCK.format(latest_news=strings["latest_news"])
+
             topic_page = TOPIC_PAGE_TEMPLATE.format(
                 topic_label=t["label"], topic_slug=t["slug"],
                 cat_label=label, cat_slug=slug, cat_icon=cat["icon"],
                 sidebar_block=sidebar_block, footer_block=footer_block,
                 home=strings["home"], loading=strings["loading"], ad_infeed=strings["ad_infeed"],
-                latest_news=strings["latest_news"],
+                content_block=content_block, subtopic_attr="", parent_crumb="",
                 everything_about=strings["everything_about"].format(topic=t["label"]),
                 meta_desc=strings["all_coverage_of"].format(topic=t["label"]),
                 asset_prefix=asset_prefix_page, articulos_asset=ARTICULOS_ASSET,
@@ -686,6 +756,24 @@ def generate():
             with open(topic_path, "w", encoding="utf-8") as f:
                 f.write(topic_page)
             sitemap_urls.append(("/categoria/{}/{}.html".format(slug, t["slug"]), today, "weekly"))
+
+            parent_crumb_html = '<span class="sep">/</span><a href="{}.html">{}</a>'.format(t["slug"], t["label"])
+            for sub_slug, sub_label in sub_items:
+                sub_page = TOPIC_PAGE_TEMPLATE.format(
+                    topic_label=sub_label, topic_slug=t["slug"],
+                    cat_label=label, cat_slug=slug, cat_icon=cat["icon"],
+                    sidebar_block=sidebar_block, footer_block=footer_block,
+                    home=strings["home"], loading=strings["loading"], ad_infeed=strings["ad_infeed"],
+                    content_block=ARTICLES_GRID_BLOCK.format(latest_news=strings["latest_news"]),
+                    subtopic_attr=' data-subtopic="{}"'.format(sub_slug), parent_crumb=parent_crumb_html,
+                    everything_about=strings["everything_about"].format(topic=sub_label),
+                    meta_desc=strings["all_coverage_of"].format(topic=sub_label),
+                    asset_prefix=asset_prefix_page, articulos_asset=ARTICULOS_ASSET,
+                )
+                sub_path = os.path.join(cat_dir, t["slug"] + "-" + sub_slug + ".html")
+                with open(sub_path, "w", encoding="utf-8") as f:
+                    f.write(sub_page)
+                sitemap_urls.append(("/categoria/{}/{}-{}.html".format(slug, t["slug"], sub_slug), today, "weekly"))
 
     print("\nGenerando artículos...\n")
     with open(ARTICULOS_JSON, "r", encoding="utf-8") as f:
@@ -710,6 +798,16 @@ def generate():
         elif not topic_label:
             topic_label = cat["label"]
 
+        # Subtema (un nivel más adentro de un tema) — si está asignado, se
+        # agrega como cuarto nivel del breadcrumb y pasa a ser el destino
+        # de "Want more news about...".
+        subtopic_slug = art.get("subtopic")
+        subtopic_label = subtopic_label_for(art["category"], topic_slug, subtopic_slug) if (topic_slug and subtopic_slug) else None
+        if topic_slug and subtopic_slug and subtopic_label:
+            topic_crumb += '<span class="sep">/</span><a href="{}-{}.html">{}</a>'.format(topic_slug, subtopic_slug, subtopic_label)
+            topic_label = subtopic_label
+            topic_href = "{}-{}.html".format(topic_slug, subtopic_slug)
+
         title_short = art["title"] if len(art["title"]) <= 40 else art["title"][:37] + "..."
         body_blocks = art["body"]
         if isinstance(body_blocks, str):
@@ -720,7 +818,7 @@ def generate():
             cat_slug=cat["slug"], cat_label=cat["label"], cat_icon=cat["icon"],
             date_label=format_date(art["date"]), read_time=art.get("readTime", ""),
             banner_html=banner_html_for(art, cat, asset_prefix_page),
-            body_html=render_article_body(body_blocks, strings["ad_inarticle"]),
+            body_html=render_article_body(body_blocks, strings["ad_inarticle"], asset_prefix_page),
             topic_crumb=topic_crumb, topic_label=topic_label, topic_href=topic_href,
             sidebar_block=sidebar_block, footer_block=footer_block,
             home=strings["home"], byline=strings["byline"], share=strings["share"],
@@ -796,6 +894,12 @@ def parse_simple_body(text):
         if line.lower() == "[publicidad]":
             flush()
             blocks.append(("ad", None))
+            i += 1
+            continue
+        img_match = re.match(r'^!\[(.*?)\]\((\S+)\)$', line)
+        if img_match:
+            flush()
+            blocks.append(("img", (img_match.group(1), img_match.group(2))))
             i += 1
             continue
         if line.startswith("- "):

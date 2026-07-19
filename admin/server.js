@@ -131,6 +131,33 @@ function listTopics() {
   return result;
 }
 
+// Subtemas — un nivel más adentro de un tema (ej. "Trailers" dentro de
+// "GTA VI"). Mismo patrón que listTopics/topicThumbPath, una carpeta de
+// imagen más adentro.
+function subtopicThumbPath(cat, topicSlug, subSlug) {
+  var folder = cat.imgFolder || cat.slug;
+  var dir = path.join(IMG_DIR, folder, topicSlug, subSlug);
+  var files;
+  try { files = fs.readdirSync(dir); } catch (e) { return null; }
+  var found = files.find(function (f) { return IMAGE_EXT.has(path.extname(f).toLowerCase()); });
+  return found ? 'img/' + folder + '/' + topicSlug + '/' + subSlug + '/' + found : null;
+}
+
+function listSubtopics() {
+  var all = pagegen.loadSubtopics();
+  var result = {};
+  Object.keys(all).forEach(function (key) {
+    var parts = key.split('/');
+    var cat = CATEGORIES.find(function (c) { return c.slug === parts[0]; });
+    var topicSlug = parts[1];
+    result[key] = all[key].map(function (pair) {
+      var slug = pair[0], label = pair[1];
+      return { slug: slug, label: label, thumb: cat ? subtopicThumbPath(cat, topicSlug, slug) : null };
+    });
+  });
+  return result;
+}
+
 function listImages() {
   var results = [];
   function walk(dir, relBase) {
@@ -267,6 +294,41 @@ function removeTopicImage(category, topicSlug) {
   return true;
 }
 
+function subtopicImageDir(category, topicSlug, subtopicSlug) {
+  var cat = CATEGORIES.find(function (c) { return c.slug === category; });
+  if (!cat) throw new Error('Categoría desconocida: ' + category);
+  if (!TOPIC_SLUG_RE.test(topicSlug)) throw new Error('Tema inválido: ' + topicSlug);
+  if (!TOPIC_SLUG_RE.test(subtopicSlug)) throw new Error('Subtema inválido: ' + subtopicSlug);
+  var folder = cat.imgFolder || cat.slug;
+  return path.join(IMG_DIR, folder, topicSlug, subtopicSlug);
+}
+
+function uploadSubtopicImage(category, topicSlug, subtopicSlug, filename, dataBase64) {
+  var buffer = Buffer.from(dataBase64, 'base64');
+  if (buffer.length === 0) throw new Error('El archivo llegó vacío');
+  if (buffer.length > MAX_UPLOAD_BYTES) throw new Error('La imagen pesa más de 8 MB');
+
+  var dir = subtopicImageDir(category, topicSlug, subtopicSlug);
+  if (fs.existsSync(dir)) {
+    fs.readdirSync(dir).forEach(function (f) { fs.unlinkSync(path.join(dir, f)); });
+  } else {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  var parts = sanitizeFilename(filename);
+  var finalName = parts.base + parts.ext;
+  fs.writeFileSync(path.join(dir, finalName), buffer);
+  return path.relative(ROOT, path.join(dir, finalName)).split(path.sep).join('/');
+}
+
+function removeSubtopicImage(category, topicSlug, subtopicSlug) {
+  var dir = subtopicImageDir(category, topicSlug, subtopicSlug);
+  if (!fs.existsSync(dir)) return false;
+  fs.readdirSync(dir).forEach(function (f) { fs.unlinkSync(path.join(dir, f)); });
+  fs.rmdirSync(dir);
+  return true;
+}
+
 var server = http.createServer(function (req, res) {
   var urlPath = decodeURIComponent(req.url.split('?')[0]);
 
@@ -353,15 +415,96 @@ var server = http.createServer(function (req, res) {
       var articles = [];
       try { articles = readJSON(path.join(DATA_DIR, 'articulos.json')); } catch (e) { articles = []; }
       var usedBy = articles.filter(function (a) { return a.category === data.category && a.topic === data.slug; });
-      if (usedBy.length) {
+      var subtopicCount = (pagegen.loadSubtopics()[data.category + '/' + data.slug] || []).length;
+      if (usedBy.length || subtopicCount) {
+        var msgParts = [];
+        if (usedBy.length) msgParts.push(usedBy.length + ' artículo(s)');
+        if (subtopicCount) msgParts.push(subtopicCount + ' subtema(s)');
         return sendJSON(res, 409, {
-          error: usedBy.length + ' artículo(s) todavía usan este tema. Cambialos de tema o borralos antes de eliminarlo.',
+          error: 'Este tema todavía tiene ' + msgParts.join(' y ') + '. Movelos o eliminalos antes de borrar el tema.',
           articles: usedBy.map(function (a) { return a.title; })
         });
       }
       try {
         var removed = pagegen.deleteTopic(data.category, data.slug);
         return sendJSON(res, 200, { ok: true, topic: removed });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/upload-subtopic-image' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.category || !data.topicSlug || !data.subtopicSlug || !data.filename || !data.dataBase64) {
+        return sendJSON(res, 400, { error: 'Faltan datos (categoría, tema, subtema, nombre de archivo o imagen)' });
+      }
+      try {
+        var savedPath = uploadSubtopicImage(data.category, data.topicSlug, data.subtopicSlug, data.filename, data.dataBase64);
+        return sendJSON(res, 200, { ok: true, path: savedPath });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/upload-subtopic-image' && req.method === 'DELETE') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.category || !data.topicSlug || !data.subtopicSlug) {
+        return sendJSON(res, 400, { error: 'Faltan datos (categoría, tema o subtema)' });
+      }
+      try {
+        var removed = removeSubtopicImage(data.category, data.topicSlug, data.subtopicSlug);
+        return sendJSON(res, 200, { ok: true, removed: removed });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/subtopics' && req.method === 'GET') {
+    return sendJSON(res, 200, listSubtopics());
+  }
+  if (urlPath === '/api/subtopics' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.category || !data.topic || !data.label) {
+        return sendJSON(res, 400, { error: 'Faltan datos (categoría, tema o nombre del subtema)' });
+      }
+      try {
+        var created = pagegen.addSubtopic(data.category, data.topic, data.label);
+        return sendJSON(res, 200, { ok: true, subtopic: created });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/subtopics' && req.method === 'PATCH') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.category || !data.topic || !data.slug || !data.label) {
+        return sendJSON(res, 400, { error: 'Faltan datos (categoría, tema, subtema o nuevo nombre)' });
+      }
+      try {
+        var renamed = pagegen.renameSubtopic(data.category, data.topic, data.slug, data.label);
+        return sendJSON(res, 200, { ok: true, subtopic: renamed });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/subtopics' && req.method === 'DELETE') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.category || !data.topic || !data.slug) {
+        return sendJSON(res, 400, { error: 'Faltan datos (categoría, tema o subtema)' });
+      }
+      var articles = [];
+      try { articles = readJSON(path.join(DATA_DIR, 'articulos.json')); } catch (e) { articles = []; }
+      var usedBy = articles.filter(function (a) { return a.category === data.category && a.topic === data.topic && a.subtopic === data.slug; });
+      if (usedBy.length) {
+        return sendJSON(res, 409, {
+          error: usedBy.length + ' artículo(s) todavía usan este subtema. Cambialos de subtema o borralos antes de eliminarlo.',
+          articles: usedBy.map(function (a) { return a.title; })
+        });
+      }
+      try {
+        var removed = pagegen.deleteSubtopic(data.category, data.topic, data.slug);
+        return sendJSON(res, 200, { ok: true, subtopic: removed });
       } catch (e) {
         return sendJSON(res, 400, { error: e.message });
       }

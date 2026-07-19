@@ -2,6 +2,7 @@
   var categories = [];
   var topicsByCategory = {};
   var topicGroupsRaw = {};
+  var subtopicsByTopicKey = {};
   var heroData = [];
   var articlesData = [];
   var draftsData = [];
@@ -333,6 +334,9 @@
   var articleImageRemoveBtn = document.getElementById('articleImageRemoveBtn');
   var articleVideoUrl = document.getElementById('articleVideoUrl');
   var articleBody = document.getElementById('articleBody');
+  var inlineImageUpload = document.getElementById('inlineImageUpload');
+  var inlineImageBtn = document.getElementById('inlineImageBtn');
+  var inlineImageStatus = document.getElementById('inlineImageStatus');
   var articleCurrentImage = '';
   var newTopicRow = document.getElementById('newTopicRow');
   var newTopicGroup = document.getElementById('newTopicGroup');
@@ -340,8 +344,15 @@
   var newTopicLabel = document.getElementById('newTopicLabel');
   var newTopicCreateBtn = document.getElementById('newTopicCreateBtn');
   var topicManager = document.getElementById('topicManager');
+  var subtopicFieldWrap = document.getElementById('subtopicFieldWrap');
+  var articleSubtopic = document.getElementById('articleSubtopic');
+  var newSubtopicRow = document.getElementById('newSubtopicRow');
+  var newSubtopicLabel = document.getElementById('newSubtopicLabel');
+  var newSubtopicCreateBtn = document.getElementById('newSubtopicCreateBtn');
+  var subtopicManager = document.getElementById('subtopicManager');
   var articleCancelBtn = document.getElementById('articleCancelBtn');
   var regenerateBtn = document.getElementById('regenerateBtn');
+  var filterName = document.getElementById('filterName');
   var filterCategory = document.getElementById('filterCategory');
   var filterTopic = document.getElementById('filterTopic');
   var filterTrendingOnly = document.getElementById('filterTrendingOnly');
@@ -364,6 +375,7 @@
 
   function articleHrefFor(a) {
     if (a.body && a.body.trim()) return 'categoria/' + a.category + '/' + a.slug + '.html';
+    if (a.topic && a.subtopic) return 'categoria/' + a.category + '/' + a.topic + '-' + a.subtopic + '.html';
     if (a.topic) return 'categoria/' + a.category + '/' + a.topic + '.html';
     return 'categoria/' + a.category + '/index.html';
   }
@@ -405,6 +417,54 @@
   articleImageRemoveBtn.addEventListener('click', function () {
     articleCurrentImage = '';
     updateArticleImageStatus();
+  });
+
+  /* Imágenes sueltas dentro del cuerpo del artículo (distintas de la
+     imagen destacada de arriba): se suben con el mismo endpoint de
+     siempre y se insertan como "![alt](ruta)" en el cursor del textarea;
+     parseBody/render_article_body (pagegen.js y generate_pages.py) ya
+     saben convertir esa línea en un <figure><img>. */
+  function insertAtCursor(textarea, text) {
+    var start = textarea.selectionStart == null ? textarea.value.length : textarea.selectionStart;
+    var end = textarea.selectionEnd == null ? textarea.value.length : textarea.selectionEnd;
+    var value = textarea.value;
+    textarea.value = value.slice(0, start) + text + value.slice(end);
+    var pos = start + text.length;
+    textarea.selectionStart = textarea.selectionEnd = pos;
+    textarea.focus();
+  }
+
+  inlineImageBtn.addEventListener('click', function () {
+    if (!articleCategory.value) { toast('Elegí primero una categoría', true); return; }
+    inlineImageUpload.click();
+  });
+
+  inlineImageUpload.addEventListener('change', function () {
+    var file = inlineImageUpload.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var dataUrl = reader.result;
+      var base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      inlineImageStatus.textContent = 'Subiendo imagen…';
+      postJSON('/api/upload-image', {
+        category: articleCategory.value,
+        filename: file.name,
+        dataBase64: base64
+      }).then(function (result) {
+        var alt = window.prompt('Descripción de la imagen (opcional, queda como texto alternativo):', '') || '';
+        var markdown = '\n![' + alt.replace(/[\[\]]/g, '') + '](' + result.path + ')\n';
+        insertAtCursor(articleBody, markdown);
+        inlineImageStatus.textContent = 'Imagen insertada: ' + result.path.replace(/^img\//, '');
+        toast('Imagen agregada al cuerpo');
+      }).catch(function (err) {
+        inlineImageStatus.textContent = '';
+        toast(err.message || 'No se pudo subir la imagen', true);
+      }).finally(function () {
+        inlineImageUpload.value = '';
+      });
+    };
+    reader.readAsDataURL(file);
   });
 
   function refreshTopicOptions(selectSlug) {
@@ -584,11 +644,203 @@
     });
   }
 
+  /* =====================================================
+     SUBTEMAS — un nivel más adentro de un tema (ej. "Trailers" dentro de
+     "GTA VI"). Mismo patrón que los temas de arriba, sin grupos (el tema
+     ya cumple ese rol), clave compuesta categoría+tema.
+     ===================================================== */
+  function subtopicKeyFor() { return articleCategory.value + '/' + articleTopic.value; }
+  function hasRealTopicSelected() { return !!articleTopic.value && articleTopic.value !== '__new__'; }
+
+  function refreshSubtopicOptions(selectSlug) {
+    var isReal = hasRealTopicSelected();
+    subtopicFieldWrap.hidden = !isReal;
+    newSubtopicRow.hidden = true;
+    if (!isReal) {
+      articleSubtopic.innerHTML = '';
+      subtopicManager.innerHTML = '';
+      return;
+    }
+    var subtopics = subtopicsByTopicKey[subtopicKeyFor()] || [];
+    articleSubtopic.innerHTML = '';
+    var noneOpt = document.createElement('option');
+    noneOpt.value = '';
+    noneOpt.textContent = 'Sin subtema específico';
+    articleSubtopic.appendChild(noneOpt);
+    subtopics.forEach(function (st) {
+      var opt = document.createElement('option');
+      opt.value = st.slug;
+      opt.textContent = st.label;
+      articleSubtopic.appendChild(opt);
+    });
+    var newOpt = document.createElement('option');
+    newOpt.value = '__new__';
+    newOpt.textContent = '+ Crear subtema nuevo…';
+    articleSubtopic.appendChild(newOpt);
+    if (selectSlug) articleSubtopic.value = selectSlug;
+  }
+
+  function refreshSubtopics() {
+    return getJSON('/api/subtopics').then(function (list) { subtopicsByTopicKey = list; });
+  }
+
+  function renderSubtopicManager() {
+    subtopicManager.innerHTML = '';
+    if (!hasRealTopicSelected()) return;
+    var key = subtopicKeyFor();
+    var category = articleCategory.value;
+    var topicSlug = articleTopic.value;
+    var subtopics = subtopicsByTopicKey[key] || [];
+    if (!subtopics.length) return;
+    var row = document.createElement('div');
+    row.className = 'topic-manager-group';
+    subtopics.forEach(function (st) {
+      var slug = st.slug, label = st.label;
+      var hasThumb = !!st.thumb;
+
+      var chip = document.createElement('span');
+      chip.className = 'topic-chip' + (hasThumb ? ' has-thumb' : '');
+      var text = document.createElement('span');
+      text.textContent = label;
+      var renameBtn = document.createElement('button');
+      renameBtn.type = 'button'; renameBtn.title = 'Renombrar'; renameBtn.textContent = '✎';
+      renameBtn.addEventListener('click', function () { renameSubtopicPrompt(slug, label); });
+
+      var imgInput = document.createElement('input');
+      imgInput.type = 'file'; imgInput.accept = 'image/*'; imgInput.hidden = true;
+      imgInput.addEventListener('change', function () {
+        var file = imgInput.files[0];
+        if (!file) return;
+        uploadSubtopicImage(category, topicSlug, slug, file);
+      });
+      var imgBtn = document.createElement('button');
+      imgBtn.type = 'button';
+      imgBtn.title = hasThumb ? 'Cambiar imagen del subtema' : 'Subir imagen para este subtema';
+      imgBtn.textContent = '🖼️';
+      imgBtn.addEventListener('click', function () { imgInput.click(); });
+
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button'; delBtn.title = 'Eliminar subtema'; delBtn.textContent = '×'; delBtn.className = 'danger';
+      delBtn.addEventListener('click', function () { deleteSubtopicConfirm(slug, label); });
+
+      chip.appendChild(text);
+      chip.appendChild(renameBtn);
+      chip.appendChild(imgInput);
+      chip.appendChild(imgBtn);
+      if (hasThumb) {
+        var removeImgBtn = document.createElement('button');
+        removeImgBtn.type = 'button'; removeImgBtn.title = 'Quitar imagen del subtema'; removeImgBtn.textContent = '🗑'; removeImgBtn.className = 'danger';
+        removeImgBtn.addEventListener('click', function () { removeSubtopicImageConfirm(category, topicSlug, slug, label); });
+        chip.appendChild(removeImgBtn);
+      }
+      chip.appendChild(delBtn);
+      row.appendChild(chip);
+    });
+    subtopicManager.appendChild(row);
+  }
+
+  function uploadSubtopicImage(category, topicSlug, slug, file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var dataUrl = reader.result;
+      var base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      toast('Subiendo imagen del subtema…');
+      postJSON('/api/upload-subtopic-image', {
+        category: category, topicSlug: topicSlug, subtopicSlug: slug, filename: file.name, dataBase64: base64
+      }).then(function () {
+        toast('Imagen del subtema guardada');
+        return refreshSubtopics();
+      }).then(function () {
+        renderSubtopicManager();
+        return postJSON('/api/regenerate', {});
+      }).catch(function (err) {
+        toast(err.message || 'No se pudo subir la imagen del subtema', true);
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeSubtopicImageConfirm(category, topicSlug, slug, label) {
+    if (!window.confirm('¿Quitar la imagen del subtema "' + label + '"?')) return;
+    deleteJSON('/api/upload-subtopic-image', { category: category, topicSlug: topicSlug, subtopicSlug: slug }).then(function () {
+      toast('Imagen del subtema eliminada');
+      return refreshSubtopics();
+    }).then(function () {
+      renderSubtopicManager();
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo quitar la imagen del subtema', true);
+    });
+  }
+
+  function renameSubtopicPrompt(slug, currentLabel) {
+    var newLabel = window.prompt('Nuevo nombre para "' + currentLabel + '":', currentLabel);
+    if (newLabel === null) return;
+    newLabel = newLabel.trim();
+    if (!newLabel || newLabel === currentLabel) return;
+    apiRequest('PATCH', '/api/subtopics', { category: articleCategory.value, topic: articleTopic.value, slug: slug, label: newLabel }).then(function () {
+      toast('Subtema renombrado a "' + newLabel + '"');
+      return refreshSubtopics();
+    }).then(function () {
+      renderSubtopicManager();
+      refreshSubtopicOptions(articleSubtopic.value === slug ? slug : undefined);
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo renombrar el subtema', true);
+    });
+  }
+
+  function deleteSubtopicConfirm(slug, label) {
+    if (!window.confirm('¿Eliminar el subtema "' + label + '"? Se borra también su página, si tiene una.')) return;
+    apiRequest('DELETE', '/api/subtopics', { category: articleCategory.value, topic: articleTopic.value, slug: slug }).then(function () {
+      toast('Subtema "' + label + '" eliminado');
+      return refreshSubtopics();
+    }).then(function () {
+      renderSubtopicManager();
+      refreshSubtopicOptions();
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo eliminar el subtema', true);
+    });
+  }
+
+  articleSubtopic.addEventListener('change', function () {
+    newSubtopicRow.hidden = articleSubtopic.value !== '__new__';
+    if (!newSubtopicRow.hidden) newSubtopicLabel.focus();
+  });
+
+  newSubtopicCreateBtn.addEventListener('click', function () {
+    var label = newSubtopicLabel.value.trim();
+    if (!label) { toast('Escribí un nombre para el subtema', true); return; }
+    if (!hasRealTopicSelected()) { toast('Elegí primero un tema', true); return; }
+    newSubtopicCreateBtn.disabled = true;
+    newSubtopicCreateBtn.textContent = 'Creando…';
+    postJSON('/api/subtopics', { category: articleCategory.value, topic: articleTopic.value, label: label }).then(function (result) {
+      return refreshSubtopics().then(function () {
+        refreshSubtopicOptions(result.subtopic.slug);
+        renderSubtopicManager();
+        newSubtopicRow.hidden = true;
+        newSubtopicLabel.value = '';
+        toast('Subtema creado: ' + result.subtopic.label + '. Regenerando sus páginas…');
+        return postJSON('/api/regenerate', {});
+      });
+    }).then(function () {
+      toast('Subtema "' + label + '" listo');
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo crear el subtema', true);
+    }).finally(function () {
+      newSubtopicCreateBtn.disabled = false;
+      newSubtopicCreateBtn.textContent = 'Crear subtema';
+    });
+  });
+
   articleCategory.addEventListener('change', function () {
     refreshTopicOptions();
     newTopicRow.hidden = true;
     populateNewTopicGroupSelect();
     renderTopicManager();
+    refreshSubtopicOptions();
+    renderSubtopicManager();
   });
 
   articleTopic.addEventListener('change', function () {
@@ -598,6 +850,8 @@
       newTopicGroupName.hidden = true;
       newTopicLabel.focus();
     }
+    refreshSubtopicOptions();
+    renderSubtopicManager();
   });
 
   newTopicCreateBtn.addEventListener('click', function () {
@@ -667,6 +921,8 @@
       populateNewTopicGroupSelect();
       renderTopicManager();
       if (filterTopic.value) articleTopic.value = filterTopic.value;
+      refreshSubtopicOptions();
+      renderSubtopicManager();
     }
   }
 
@@ -680,11 +936,14 @@
     prefillFormFromFilter();
   });
   filterTrendingOnly.addEventListener('change', renderArticlesList);
+  filterName.addEventListener('input', renderArticlesList);
 
   function sortedArticlesWithIndex() {
+    var nameQuery = filterName.value.trim().toLowerCase();
     return articlesData
       .map(function (a, i) { return { a: a, i: i }; })
       .filter(function (entry) {
+        if (nameQuery && (entry.a.title || '').toLowerCase().indexOf(nameQuery) === -1) return false;
         if (filterCategory.value && entry.a.category !== filterCategory.value) return false;
         if (filterTopic.value && entry.a.topic !== filterTopic.value) return false;
         if (filterTrendingOnly.checked && !entry.a.trending) return false;
@@ -698,12 +957,48 @@
     saveArticles(articlesData[i].trending ? 'Marcado como Trending' : 'Quitado de Trending');
   }
 
+  /* ---- Selección en lote (para borrar varios artículos de una) ---- */
+  var selectedArticleKeys = new Set();
+  var bulkSelectAll = document.getElementById('bulkSelectAll');
+  var bulkSelectedCount = document.getElementById('bulkSelectedCount');
+  var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+
+  function articleKey(a) { return a.category + '/' + a.slug; }
+
+  function updateBulkBar(visibleEntries) {
+    var count = selectedArticleKeys.size;
+    bulkSelectedCount.textContent = count ? count + ' seleccionado(s)' : '';
+    bulkDeleteBtn.hidden = count === 0;
+    var visibleKeys = visibleEntries.map(function (entry) { return articleKey(entry.a); });
+    bulkSelectAll.checked = visibleKeys.length > 0 && visibleKeys.every(function (k) { return selectedArticleKeys.has(k); });
+  }
+
+  bulkSelectAll.addEventListener('change', function () {
+    var entries = sortedArticlesWithIndex();
+    if (bulkSelectAll.checked) {
+      entries.forEach(function (entry) { selectedArticleKeys.add(articleKey(entry.a)); });
+    } else {
+      entries.forEach(function (entry) { selectedArticleKeys.delete(articleKey(entry.a)); });
+    }
+    renderArticlesList();
+  });
+
+  bulkDeleteBtn.addEventListener('click', function () {
+    var count = selectedArticleKeys.size;
+    if (!count) return;
+    if (!window.confirm('¿Eliminar ' + count + ' artículo(s)? Si tenían página propia, también se borran los archivos .html.')) return;
+    articlesData = articlesData.filter(function (a) { return !selectedArticleKeys.has(articleKey(a)); });
+    selectedArticleKeys.clear();
+    saveArticles(count + ' artículo(s) eliminado(s)');
+  });
+
   function renderArticlesList() {
     var entries = sortedArticlesWithIndex();
     filterCount.textContent = articlesData.length
       ? entries.length + (entries.length === 1 ? ' artículo' : ' artículos')
       : '';
     articlesList.innerHTML = '';
+    updateBulkBar(entries);
     if (entries.length === 0) {
       articlesList.innerHTML = '<div class="admin-empty">' +
         (articlesData.length === 0 ? 'Todavía no hay artículos.' : 'Ningún artículo coincide con este filtro.') +
@@ -715,6 +1010,16 @@
       var meta = categoryMeta(a.category);
       var row = document.createElement('div');
       row.className = 'admin-item';
+
+      var selectBox = document.createElement('input');
+      selectBox.type = 'checkbox';
+      selectBox.className = 'bulk-select';
+      selectBox.checked = selectedArticleKeys.has(articleKey(a));
+      selectBox.addEventListener('change', function () {
+        if (selectBox.checked) selectedArticleKeys.add(articleKey(a));
+        else selectedArticleKeys.delete(articleKey(a));
+        updateBulkBar(entries);
+      });
 
       var trendBtn = document.createElement('button');
       trendBtn.type = 'button';
@@ -755,6 +1060,7 @@
       actions.appendChild(editBtn);
       actions.appendChild(delBtn);
 
+      row.appendChild(selectBox);
       row.appendChild(trendBtn);
       row.appendChild(thumb);
       row.appendChild(info);
@@ -773,6 +1079,8 @@
     renderTopicManager();
     newTopicRow.hidden = true;
     articleTopic.value = a.topic || '';
+    refreshSubtopicOptions(a.subtopic || undefined);
+    renderSubtopicManager();
     articleDate.value = a.date;
     articleTitle.value = a.title;
     articleSlug.value = a.slug || '';
@@ -784,6 +1092,7 @@
     articleReadTime.value = a.readTime || '';
     articleTrending.checked = !!a.trending;
     articleBody.value = a.body || '';
+    inlineImageStatus.textContent = '';
     articleCancelBtn.hidden = false;
     articleForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -793,10 +1102,13 @@
     pendingDraft = null;
     articleForm.reset();
     refreshTopicOptions();
+    refreshSubtopicOptions();
+    renderSubtopicManager();
     articleDate.value = todayISO();
     articleSlug.dataset.auto = 'true';
     articleCurrentImage = '';
     updateArticleImageStatus();
+    inlineImageStatus.textContent = '';
     articleFormTitle.textContent = 'Agregar artículo';
     articleCancelBtn.hidden = true;
     prefillFormFromFilter();
@@ -805,6 +1117,7 @@
 
   function deleteArticle(i) {
     if (!confirm('¿Eliminar este artículo? Si tenía página propia, también se borra el archivo .html.')) return;
+    selectedArticleKeys.delete(articleKey(articlesData[i]));
     articlesData.splice(i, 1);
     saveArticles('Artículo eliminado');
   }
@@ -828,6 +1141,7 @@
     var meta = categoryMeta(articleCategory.value);
     var slug = articleSlug.value.trim() || slugify(articleTitle.value);
     var topicValue = articleTopic.value === '__new__' ? '' : articleTopic.value;
+    var subtopicValue = (topicValue && articleSubtopic.value !== '__new__') ? articleSubtopic.value : '';
     var article = {
       title: articleTitle.value.trim(),
       category: articleCategory.value,
@@ -836,6 +1150,7 @@
       date: articleDate.value,
       readTime: articleReadTime.value.trim(),
       topic: topicValue,
+      subtopic: subtopicValue,
       slug: slug,
       dek: articleDek.value.trim(),
       image: articleCurrentImage,
@@ -947,6 +1262,8 @@
     renderTopicManager();
     newTopicRow.hidden = true;
     articleTopic.value = d.topic || '';
+    refreshSubtopicOptions(d.subtopic || undefined);
+    renderSubtopicManager();
     articleDate.value = d.date || todayISO();
     articleTitle.value = d.title;
     articleSlug.value = d.slug || '';
@@ -1007,7 +1324,8 @@
     getJSON('/api/topic-groups'),
     getJSON('/api/hero'),
     getJSON('/api/articles'),
-    getJSON('/api/drafts')
+    getJSON('/api/drafts'),
+    getJSON('/api/subtopics')
   ]).then(function (results) {
     categories = results[0];
     topicsByCategory = results[1];
@@ -1015,12 +1333,15 @@
     heroData = results[3];
     articlesData = results[4];
     draftsData = results[5];
+    subtopicsByTopicKey = results[6];
 
     fillSelect(heroCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });
     fillSelect(articleCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });
     refreshTopicOptions();
     populateNewTopicGroupSelect();
     renderTopicManager();
+    refreshSubtopicOptions();
+    renderSubtopicManager();
 
     contentCategories().forEach(function (c) {
       var opt = document.createElement('option');
