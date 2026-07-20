@@ -123,7 +123,33 @@ async function fetchNewDrafts() {
     return true;
   });
 
-  candidates = candidates.slice(0, MAX_NEW_DRAFTS);
+  // Repartir entre categorías (uno de cada por turno) en vez de tomar
+  // "los primeros N en aparecer" — si no, las categorías con feeds que
+  // publican mucho (ej. IA) tapan a las demás.
+  var byCategory = {};
+  var categoryOrder = [];
+  candidates.forEach(function (item) {
+    if (!byCategory[item.category]) {
+      byCategory[item.category] = [];
+      categoryOrder.push(item.category);
+    }
+    byCategory[item.category].push(item);
+  });
+  var balanced = [];
+  var round = 0;
+  while (balanced.length < candidates.length) {
+    var addedThisRound = false;
+    for (var c = 0; c < categoryOrder.length; c++) {
+      var bucket = byCategory[categoryOrder[c]];
+      if (round < bucket.length) {
+        balanced.push(bucket[round]);
+        addedThisRound = true;
+      }
+    }
+    if (!addedThisRound) break;
+    round++;
+  }
+  candidates = balanced.slice(0, MAX_NEW_DRAFTS);
 
   var added = 0;
   var errors = fetched.errors.slice();
