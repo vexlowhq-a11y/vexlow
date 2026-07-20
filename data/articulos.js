@@ -858,12 +858,10 @@ const VEXLOW_ARTICLES = [
     "subtopic": "",
     "slug": "jensen-huang-s-japan-visit-sparks-exciting-tech-deals-across",
     "dek": "NVIDIA's CEO strengthens ties with Japan's technology landscape during a pivotal visit.",
-    "image": "",
+    "image": "img/ai/ea33bb50-4d1f-448c-b5bf-248cec278e1e.png",
     "videoUrl": "",
     "trending": true,
     "body": "Jensen Huang, the CEO of NVIDIA, has recently concluded a significant visit to Japan, marking a crucial engagement with various components of the country's vibrant tech ecosystem. This trip is poised to have far-reaching implications for both NVIDIA and Japan's technological future.\n\n## Implications of Huang's Deals\n\nDuring his stay in Tokyo, Huang secured deals that extend across Japan's entire technology landscape. This encompasses collaborations in artificial intelligence, gaming, and potentially next-generation hardware development. Such partnerships not only bolster NVIDIA's presence in the Asian market but also align with Japan's ongoing efforts to innovate and enhance its tech capabilities.\n\nThese developments emphasize a growing trend of international collaboration in the tech sector, particularly as countries strive to remain competitive in an increasingly interconnected global economy. For Japan, attracting investment and expertise from industry leaders like NVIDIA is vital for not only sustaining economic growth but also for nurturing local startups and established companies alike.\n\n[publicidad]\n\n## What’s Next for NVIDIA and Japan?\n\nMoving forward, the focus will likely be on how these collaborations will materialize. There is a palpable anticipation regarding joint projects, particularly in sectors where NVIDIA's expertise in graphics processing units and AI technologies can be combined with Japanese innovation.\n\nThe long-term outcomes of these agreements could reshape various industry segments, paving the way for advancements such as enhanced gaming experiences, AI-driven solutions in robotics, and improvements in computing infrastructure. Japan has been making significant strides in AI technology, and Huang's investment establishes a collaborative framework that could lead to breakthroughs in this field.\n\nWhile Jensen Huang's visit marks a critical moment for NVIDIA and Japan, the tech world will be keenly observing how these relationships evolve and the innovations that may result from this partnership.",
-    "sourceUrl": "https://techcrunch.com/2026/07/19/what-to-watch-for-after-jensen-huangs-japan-visit/",
-    "sourceTitle": "What to watch for after Jensen Huang’s Japan visit",
     "href": "categoria/ai/jensen-huang-s-japan-visit-sparks-exciting-tech-deals-across.html"
   },
   {
