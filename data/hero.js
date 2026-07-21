@@ -10,11 +10,11 @@ const VEXLOW_HERO = [
   {
     "category": "gaming",
     "chip": "🎮 Gaming",
-    "title": "GTA 6: Rockstar Keeps the Mystery Alive as Fans Wait for Trailer 3",
-    "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
-    "image": "img/gaming/screenshot-1.jpg",
+    "title": "Roblox Introduces AI-Based Game Creation Feature in Mobile App",
+    "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
+    "image": "img/gaming/roblox-header-1.webp",
     "textColor": "#ffffff",
-    "href": "https://vexlowhq.com/categoria/gaming/gta6-trailer3-rockstar-mystery.html"
+    "href": "https://vexlowhq.com/categoria/gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
   },
   {
     "category": "sports",
@@ -28,19 +28,19 @@ const VEXLOW_HERO = [
   {
     "category": "gaming",
     "chip": "🎮 Gaming",
-    "title": "Roblox Introduces AI-Based Game Creation Feature in Mobile App",
-    "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
-    "image": "img/gaming/roblox-header-1.webp",
+    "title": "GTA 6: Rockstar Keeps the Mystery Alive as Fans Wait for Trailer 3",
+    "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
+    "image": "img/gaming/screenshot-1.jpg",
     "textColor": "#ffffff",
-    "href": "https://vexlowhq.com/categoria/gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
+    "href": "https://vexlowhq.com/categoria/gaming/gta6-trailer3-rockstar-mystery.html"
   },
   {
     "category": "ai",
     "chip": "🤖 AI",
-    "title": "Google Introduces Personalized AI Avatars for Custom Video Creation",
-    "dek": "With the new update to Google Vids, users can produce videos featuring their own digital likenesses using cutting-edge AI technology.",
-    "image": "img/ai/premium-photo-1764687926809-1f4ce4f422a5-1.avif",
-    "textColor": "#ffffff",
-    "href": "https://vexlowhq.com/categoria/ai/google-introduces-personalized-ai-avatars-for-custom-video-c.html"
+    "title": "Wedotv Expands Its Reach in India Through Samsung TV Plus Partnership",
+    "dek": "The FAST channel provider wedotv enters the Indian market by partnering with Samsung TV Plus, offering a diverse range of channels.",
+    "image": "img/ai/watermarked-img-479528215683911900.jpg",
+    "textColor": "#FFB020",
+    "href": "ai/index.html"
   }
 ];
