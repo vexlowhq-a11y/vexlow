@@ -10,24 +10,6 @@ const VEXLOW_HERO = [
   {
     "category": "gaming",
     "chip": "🎮 Gaming",
-    "title": "Roblox Introduces AI-Based Game Creation Feature in Mobile App",
-    "dek": "The gaming platform's new 'Build' feature allows users to create games using just a text prompt, democratizing game development.",
-    "image": "img/gaming/roblox-header-1.webp",
-    "textColor": "#ffffff",
-    "href": "https://vexlowhq.com/categoria/gaming/roblox-introduces-ai-based-game-creation-feature-in-mobile-a.html"
-  },
-  {
-    "category": "sports",
-    "chip": "⚽ Sports",
-    "title": "Jensen Huang's Japan Visit Sparks Exciting Tech Deals Across the Ecosystem",
-    "dek": "NVIDIA's CEO strengthens ties with Japan's technology landscape during a pivotal visit.",
-    "image": "img/sports/ea33bb50-4d1f-448c-b5bf-248cec278e1e.png",
-    "textColor": "#ffffff",
-    "href": "https://vexlowhq.com/categoria/ai/jensen-huang-s-japan-visit-sparks-exciting-tech-deals-across.html"
-  },
-  {
-    "category": "gaming",
-    "chip": "🎮 Gaming",
     "title": "GTA 6: Rockstar Keeps the Mystery Alive as Fans Wait for Trailer 3",
     "dek": "Pre-orders are already open and the release date remains locked for November 19, but the third trailer still hasn't dropped.",
     "image": "img/gaming/screenshot-1.jpg",
@@ -42,5 +24,32 @@ const VEXLOW_HERO = [
     "image": "img/ai/watermarked-img-479528215683911900.jpg",
     "textColor": "#FFB020",
     "href": "https://vexlowhq.com/categoria/entertainment/wedotv-expands-its-reach-in-india-through-samsung-tv-plus-pa.html"
+  },
+  {
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "Anthropic Secures $1.5 Billion Copyright Settlement Approval",
+    "dek": "Anthropic's recent $1.5 billion settlement marks a significant step in AI copyright disputes, though larger legal questions remain unresolved.",
+    "image": "img/ai/screenshot-2.jpg",
+    "textColor": "#0E1116",
+    "href": "https://vexlowhq.com/categoria/ai/anthropic-secures-1-5-billion-copyright-settlement-approval.html"
+  },
+  {
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "Jack Dorsey Launches Buzz: A New Group Chat Platform Merging Teams and AI",
+    "dek": "Buzz, the latest venture from Jack Dorsey, aims to redefine workplace communication by integrating AI agents into group chats.",
+    "image": "img/ai/watermarked-img-3772326242357920586-1.jpg",
+    "textColor": "#ffffff",
+    "href": "ai/index.html"
+  },
+  {
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "LeBron James' Future Remains Uncertain as Rich Paul Confirms No Rush for Decision",
+    "dek": "LeBron James' agent, Rich Paul, shares insights on the star's free agency plans, emphasizing that there is no immediate pressure for a decision.",
+    "image": "img/ai/screenshot-3.jpg",
+    "textColor": "auto",
+    "href": "https://vexlowhq.com/categoria/sports/lebron-james-future-remains-uncertain-as-rich-paul-confirms-.html"
   }
 ];
