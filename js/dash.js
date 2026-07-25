@@ -35,6 +35,69 @@
   var spikeImg = new Image();
   spikeImg.src = imgPrefix + 'spike.png';
   var SPIKE_NATIVE_W = 15, SPIKE_NATIVE_H = 11;
+  var enemyImg = new Image();
+  enemyImg.src = imgPrefix + 'enemy.png';
+  var ENEMY_NATIVE_W = 22, ENEMY_NATIVE_H = 27;
+
+  /* ---- Zonas de fondo: cada tanto puntaje cambia el paisaje (ciudad,
+     bosque, desierto...) para que se sienta que el personaje va
+     avanzando de verdad, no solo corriendo en el lugar. Todo dibujado
+     a mano en canvas (rectángulos/triángulos), sin depender de más
+     imágenes. ---- */
+  var ZONE_LENGTH = 450;
+  var ZONES = [
+    { name: 'city', sky: ['#141b2e', '#26314d'], shape: 'building', shapeColor: 'rgba(10,14,26,.55)' },
+    { name: 'forest', sky: ['#0f2318', '#1c3d28'], shape: 'tree', shapeColor: 'rgba(8,26,16,.5)' },
+    { name: 'desert', sky: ['#2c1d10', '#4a3018'], shape: 'dune', shapeColor: 'rgba(20,12,6,.4)' },
+    { name: 'night', sky: ['#0a0e1c', '#161c33'], shape: 'mountain', shapeColor: 'rgba(6,8,18,.55)' }
+  ];
+  var scenery = [];
+  var zoneIndex = -1;
+
+  function makeSceneryPiece(zone, x) {
+    if (zone.shape === 'building') {
+      return { x: x, w: 32 + Math.random() * 26, h: 55 + Math.random() * 110 };
+    }
+    if (zone.shape === 'tree') {
+      return { x: x, w: 22 + Math.random() * 16, h: 45 + Math.random() * 65 };
+    }
+    if (zone.shape === 'mountain') {
+      return { x: x, w: 70 + Math.random() * 60, h: 60 + Math.random() * 90 };
+    }
+    return { x: x, w: 26 + Math.random() * 30, h: 20 + Math.random() * 30 };
+  }
+
+  function reseedScenery(zone) {
+    scenery = [];
+    var x = 0;
+    while (x < W + 220) {
+      scenery.push(makeSceneryPiece(zone, x));
+      x += 90 + Math.random() * 90;
+    }
+  }
+
+  function drawSceneryPiece(zone, s) {
+    ctx.fillStyle = zone.shapeColor;
+    var baseY = GROUND_Y;
+    if (zone.shape === 'tree') {
+      ctx.fillRect(s.x + s.w / 2 - 3, baseY - s.h * 0.4, 6, s.h * 0.4);
+      ctx.beginPath();
+      ctx.moveTo(s.x, baseY - s.h * 0.35);
+      ctx.lineTo(s.x + s.w / 2, baseY - s.h);
+      ctx.lineTo(s.x + s.w, baseY - s.h * 0.35);
+      ctx.closePath();
+      ctx.fill();
+    } else if (zone.shape === 'mountain' || zone.shape === 'dune') {
+      ctx.beginPath();
+      ctx.moveTo(s.x, baseY);
+      ctx.lineTo(s.x + s.w / 2, baseY - s.h);
+      ctx.lineTo(s.x + s.w, baseY);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.fillRect(s.x, baseY - s.h, s.w, s.h);
+    }
+  }
 
   var scoreEl = document.getElementById('dashScore');
   var bestEl = document.getElementById('dashBest');
@@ -252,6 +315,8 @@
     animFrame = 0;
     animTimer = 0;
     hitFrame = 0;
+    zoneIndex = 0;
+    reseedScenery(ZONES[0]);
     scoreEl.textContent = 'Score: 0';
     overlayText.textContent = 'Tap or press Space to start';
     overlay.classList.remove('hidden');
@@ -323,6 +388,14 @@
      seguidos en vez de uno solo — obliga a saltar antes y calcular mejor,
      sin depender solo de subir la velocidad hasta hacerlo injugable. */
   function spawnObstacle() {
+    /* El robot es un obstáculo solo (nunca en grupo) para que siga
+       siendo justo — los grupos de picos ya suben la dificultad. */
+    if (score > 200 && Math.random() < 0.22) {
+      var eScale = 1.05 + Math.random() * 0.35;
+      obstacles.push({ x: W + 20, w: ENEMY_NATIVE_W * eScale, h: ENEMY_NATIVE_H * eScale, type: 'enemy' });
+      return;
+    }
+
     var clusterChance = score > 1200 ? 0.55 : score > 500 ? 0.32 : score > 150 ? 0.12 : 0;
     var clusterSize = 1;
     var r = Math.random();
@@ -331,7 +404,7 @@
     var scale = 2.6 + Math.random() * 0.8;
     var w = SPIKE_NATIVE_W * scale, h = SPIKE_NATIVE_H * scale;
     for (var i = 0; i < clusterSize; i++) {
-      obstacles.push({ x: W + 20 + i * (w + 6), w: w, h: h });
+      obstacles.push({ x: W + 20 + i * (w + 6), w: w, h: h, type: 'spike' });
     }
   }
 
@@ -346,6 +419,21 @@
       player.y = GROUND_Y - PLAYER_SIZE;
       player.vy = 0;
       player.onGround = true;
+    }
+
+    var newZoneIndex = Math.floor(score / ZONE_LENGTH) % ZONES.length;
+    if (newZoneIndex !== zoneIndex) {
+      zoneIndex = newZoneIndex;
+      reseedScenery(ZONES[zoneIndex]);
+    }
+    var parallax = speed * 0.45;
+    for (var s = scenery.length - 1; s >= 0; s--) {
+      scenery[s].x -= parallax * dt;
+      if (scenery[s].x < -140) scenery.splice(s, 1);
+    }
+    var rightmost = scenery.length ? scenery[scenery.length - 1].x : -999;
+    if (rightmost < W + 60) {
+      scenery.push(makeSceneryPiece(ZONES[zoneIndex], rightmost + 90 + Math.random() * 90));
     }
 
     distanceSinceSpawn += speed * dt;
@@ -417,16 +505,27 @@
   }
 
   function draw() {
-    ctx.clearRect(0, 0, W, H);
+    var zone = ZONES[Math.max(zoneIndex, 0)];
+    var grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    grad.addColorStop(0, zone.sky[0]);
+    grad.addColorStop(1, zone.sky[1]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    for (var s = 0; s < scenery.length; s++) drawSceneryPiece(zone, scenery[s]);
 
     ctx.fillStyle = 'rgba(120,130,150,.25)';
     ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
     ctx.fillStyle = 'rgba(120,130,150,.5)';
     ctx.fillRect(0, GROUND_Y, W, 2);
 
-    if (spikeImg.complete && spikeImg.naturalWidth) {
-      for (var j = 0; j < obstacles.length; j++) {
-        var o = obstacles[j];
+    for (var j = 0; j < obstacles.length; j++) {
+      var o = obstacles[j];
+      if (o.type === 'enemy') {
+        if (enemyImg.complete && enemyImg.naturalWidth) {
+          ctx.drawImage(enemyImg, 0, 0, ENEMY_NATIVE_W, ENEMY_NATIVE_H, o.x, GROUND_Y - o.h, o.w, o.h);
+        }
+      } else if (spikeImg.complete && spikeImg.naturalWidth) {
         ctx.drawImage(spikeImg, 0, 0, SPIKE_NATIVE_W, SPIKE_NATIVE_H, o.x, GROUND_Y - o.h, o.w, o.h);
       }
     }
