@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Trivia — VexlowHQ Play</title>
-<meta name="description" content="One quick trivia question a day, picked from AI, gaming, science, entertainment and more. Come back tomorrow for a new one.">
+<title>Our Games — VexlowHQ</title>
+<meta name="description" content="Quick, addictive games to take a break — a new trivia question every day, plus more games on the way.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
@@ -54,7 +54,7 @@
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="../../play/index.html" data-cat="play"><span class="ic">🎯</span>Play Trivia</a>
+          <a class="cat-link" href="../../play/index.html" data-cat="play"><span class="ic">🎮</span>Games</a>
         </div>
       </div>
 
@@ -210,16 +210,27 @@
   <main>
 
     <nav class="breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Play</span>
+      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Games</span>
     </nav>
 
     <article class="article-page">
-      <h1>🎯 VexlowHQ Play</h1>
-      <p class="play-intro">One trivia question a day, picked from the stuff we cover — AI, gaming, science, entertainment and more. Answer once, come back tomorrow for a new one.</p>
+      <h1>🎮 Our Games</h1>
+      <p class="play-intro">Quick, addictive games to take a break — a new trivia question every day, plus more on the way.</p>
 
-      <div id="triviaGame">Loading today's question…</div>
+      <div class="games-grid">
+        <a class="game-card" href="trivia.html">
+          <span class="game-card-icon">🧠</span>
+          <span class="game-card-title">Daily Trivia</span>
+          <span class="game-card-desc">One quick question a day about AI, gaming, science, entertainment and more.</span>
+        </a>
+        <a class="game-card" href="dash.html">
+          <span class="game-card-icon">🔺</span>
+          <span class="game-card-title">Vex Dash</span>
+          <span class="game-card-desc">Tap to jump, dodge the spikes, beat your best score.</span>
+        </a>
+      </div>
 
-      <div class="play-more">More games coming soon.</div>
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
     <footer class="site-footer">
@@ -273,6 +284,5 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
-<script src="../js/play.js"></script>
 </body>
 </html>

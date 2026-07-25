@@ -587,12 +587,74 @@ STATIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 """
 
 
-PLAY_PAGE_TEMPLATE = """<!DOCTYPE html>
+PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Trivia — VexlowHQ Play</title>
+<title>Our Games — VexlowHQ</title>
+<meta name="description" content="Quick, addictive games to take a break — a new trivia question every day, plus more games on the way.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Games</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🎮 Our Games</h1>
+      <p class="play-intro">Quick, addictive games to take a break — a new trivia question every day, plus more on the way.</p>
+
+      <div class="games-grid">
+        <a class="game-card" href="trivia.html">
+          <span class="game-card-icon">🧠</span>
+          <span class="game-card-title">Daily Trivia</span>
+          <span class="game-card-desc">One quick question a day about AI, gaming, science, entertainment and more.</span>
+        </a>
+        <a class="game-card" href="dash.html">
+          <span class="game-card-icon">🔺</span>
+          <span class="game-card-title">Vex Dash</span>
+          <span class="game-card-desc">Tap to jump, dodge the spikes, beat your best score.</span>
+        </a>
+      </div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+</body>
+</html>
+"""
+
+PLAY_TRIVIA_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Trivia — VexlowHQ Games</title>
 <meta name="description" content="One quick trivia question a day, picked from AI, gaming, science, entertainment and more. Come back tomorrow for a new one.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
@@ -615,16 +677,16 @@ PLAY_PAGE_TEMPLATE = """<!DOCTYPE html>
   <main>
 
     <nav class="breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Play</span>
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Daily Trivia</span>
     </nav>
 
     <article class="article-page">
-      <h1>🎯 VexlowHQ Play</h1>
+      <h1>🧠 Daily Trivia</h1>
       <p class="play-intro">One trivia question a day, picked from the stuff we cover — AI, gaming, science, entertainment and more. Answer once, come back tomorrow for a new one.</p>
 
       <div id="triviaGame">Loading today's question…</div>
 
-      <div class="play-more">More games coming soon.</div>
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
     </article>
 
 {footer_block}
@@ -635,6 +697,70 @@ PLAY_PAGE_TEMPLATE = """<!DOCTYPE html>
 <script src="../{articulos_asset}"></script>
 <script src="../js/script.js"></script>
 <script src="../js/play.js"></script>
+</body>
+</html>
+"""
+
+PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vex Dash — VexlowHQ Games</title>
+<meta name="description" content="Tap to jump, dodge the spikes, beat your best score. A quick, addictive runner game — free to play, no download.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Vex Dash</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🔺 Vex Dash</h1>
+      <p class="play-intro">Tap or click to jump. Dodge the spikes, survive as long as you can. Tap once to start.</p>
+
+      <div class="dash-wrap">
+        <canvas id="dashCanvas" width="800" height="360" aria-label="Vex Dash game"></canvas>
+        <div class="dash-hud">
+          <span id="dashScore">Score: 0</span>
+          <span id="dashBest">Best: 0</span>
+          <button type="button" id="dashMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="dash-overlay" id="dashOverlay">
+          <p id="dashOverlayText">Tap or press Space to start</p>
+        </div>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/dash.js"></script>
 </body>
 </html>
 """
@@ -908,17 +1034,22 @@ def generate():
         print("página:", out_path)
         sitemap_urls.append(("/{}.html".format(slug), today, "yearly"))
 
-    print("\nGenerando página de Play...\n")
+    print("\nGenerando páginas de Games (hub, trivia, dash)...\n")
     play_dir = os.path.join(PROJECT, "play")
     os.makedirs(play_dir, exist_ok=True)
-    play_html = PLAY_PAGE_TEMPLATE.format(
-        sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
-    )
-    play_path = os.path.join(play_dir, "index.html")
-    with open(play_path, "w", encoding="utf-8") as f:
-        f.write(play_html)
-    print("página:", play_path)
-    sitemap_urls.append(("/play/index.html", today, "weekly"))
+    for filename, template, freq in (
+        ("index.html", PLAY_HUB_TEMPLATE, "weekly"),
+        ("trivia.html", PLAY_TRIVIA_TEMPLATE, "weekly"),
+        ("dash.html", PLAY_DASH_TEMPLATE, "monthly"),
+    ):
+        page_html = template.format(
+            sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
+        )
+        page_path = os.path.join(play_dir, filename)
+        with open(page_path, "w", encoding="utf-8") as f:
+            f.write(page_html)
+        print("página:", page_path)
+        sitemap_urls.append(("/play/{}".format(filename), today, freq))
 
     write_sitemap(sitemap_urls)
 

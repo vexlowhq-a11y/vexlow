@@ -565,6 +565,44 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .trivia-streak { margin-top: 10px; font-size: 13px; color: var(--text-muted); }
 .play-intro { max-width: 560px; margin: 0 auto 24px; text-align: center; color: var(--text-muted); font-size: 13.5px; }
 .play-more { max-width: 560px; margin: 28px auto 0; text-align: center; font-size: 12.5px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: var(--radius-m); padding: 16px; }
+.play-more a { color: var(--blue); font-weight: 700; }
+
+/* ---- Games hub (play/index.html) ---- */
+.games-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+  max-width: 640px; margin: 0 auto;
+}
+.game-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-l);
+  padding: 28px 20px; box-shadow: var(--shadow); color: var(--text); cursor: pointer;
+}
+.game-card:hover { border-color: var(--blue-fill); transform: translateY(-2px); }
+.game-card-icon { font-size: 2.2rem; }
+.game-card-title { font-family: 'Manrope'; font-weight: 800; font-size: 1.05rem; }
+.game-card-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.4; }
+
+/* ---- Vex Dash (play/dash.html) ---- */
+.dash-wrap { max-width: 800px; margin: 0 auto; position: relative; }
+#dashCanvas {
+  width: 100%; height: auto; aspect-ratio: 800 / 360; display: block;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border); border-radius: var(--radius-l); touch-action: none;
+}
+.dash-hud {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-muted);
+}
+.dash-mute {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+  width: 32px; height: 32px; font-size: 15px; cursor: pointer; line-height: 1;
+}
+.dash-overlay {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  text-align: center; background: rgba(0, 0, 0, .45); border-radius: var(--radius-l);
+  color: #fff; font-family: 'Manrope'; font-weight: 700; font-size: 15px; padding: 20px; cursor: pointer;
+}
+.dash-overlay.hidden { display: none; }
 .article-continue {
   margin-top: 40px; padding: 22px; border-radius: var(--radius-m);
   background: var(--surface-1); border: 1px solid var(--border);

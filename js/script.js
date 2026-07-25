@@ -237,6 +237,49 @@
     heroMain.addEventListener('mouseenter', stopHeroAutoplay);
     heroMain.addEventListener('mouseleave', startHeroAutoplay);
 
+    /* Swipe táctil: en celular, deslizar el dedo sobre la imagen cambia
+       de slide, sin depender de tocar los puntitos. Si el dedo se movió
+       lo suficiente como para contar como swipe, se cancela el click
+       (heroMain es un <a>) para no navegar sin querer al artículo. */
+    var heroTouchStartX = 0, heroTouchStartY = 0, heroTouchActive = false, heroSwiped = false;
+    var SWIPE_THRESHOLD = 40;
+
+    heroMain.addEventListener('touchstart', function (e) {
+      if (!e.touches || e.touches.length !== 1) return;
+      heroTouchActive = true;
+      heroSwiped = false;
+      heroTouchStartX = e.touches[0].clientX;
+      heroTouchStartY = e.touches[0].clientY;
+      stopHeroAutoplay();
+    }, { passive: true });
+
+    heroMain.addEventListener('touchmove', function (e) {
+      if (!heroTouchActive || !e.touches || e.touches.length !== 1) return;
+      var dx = e.touches[0].clientX - heroTouchStartX;
+      var dy = e.touches[0].clientY - heroTouchStartY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) e.preventDefault();
+    }, { passive: false });
+
+    heroMain.addEventListener('touchend', function (e) {
+      if (!heroTouchActive) return;
+      heroTouchActive = false;
+      var touch = e.changedTouches && e.changedTouches[0];
+      var dx = touch ? touch.clientX - heroTouchStartX : 0;
+      if (Math.abs(dx) > SWIPE_THRESHOLD) {
+        heroSwiped = true;
+        if (dx < 0) showHeroSlide((heroIndex + 1) % HERO_SLIDES.length);
+        else showHeroSlide((heroIndex - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+      }
+      startHeroAutoplay();
+    });
+
+    heroMain.addEventListener('click', function (e) {
+      if (heroSwiped) {
+        e.preventDefault();
+        heroSwiped = false;
+      }
+    });
+
     showHeroSlide(0);
     startHeroAutoplay();
   }
