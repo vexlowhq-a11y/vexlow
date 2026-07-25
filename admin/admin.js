@@ -3,6 +3,7 @@
   var topicsByCategory = {};
   var topicGroupsRaw = {};
   var subtopicsByTopicKey = {};
+  var reactionsBySlug = {}; // { slug: {like, fire, dislike} } — traído del sitio en vivo, solo para mostrar en el listado
   var heroData = [];
   var articlesData = [];
   var draftsData = [];
@@ -356,6 +357,7 @@
   var filterCategory = document.getElementById('filterCategory');
   var filterTopic = document.getElementById('filterTopic');
   var filterTrendingOnly = document.getElementById('filterTrendingOnly');
+  var filterSort = document.getElementById('filterSort');
   var filterCount = document.getElementById('filterCount');
 
   function slugify(title) {
@@ -937,10 +939,17 @@
   });
   filterTrendingOnly.addEventListener('change', renderArticlesList);
   filterName.addEventListener('input', renderArticlesList);
+  if (filterSort) filterSort.addEventListener('change', renderArticlesList);
+
+  function totalReactions(slug) {
+    var r = reactionsBySlug[slug];
+    if (!r) return 0;
+    return (r.like || 0) + (r.fire || 0) - (r.dislike || 0);
+  }
 
   function sortedArticlesWithIndex() {
     var nameQuery = filterName.value.trim().toLowerCase();
-    return articlesData
+    var entries = articlesData
       .map(function (a, i) { return { a: a, i: i }; })
       .filter(function (entry) {
         if (nameQuery && (entry.a.title || '').toLowerCase().indexOf(nameQuery) === -1) return false;
@@ -948,8 +957,11 @@
         if (filterTopic.value && entry.a.topic !== filterTopic.value) return false;
         if (filterTrendingOnly.checked && !entry.a.trending) return false;
         return true;
-      })
-      .sort(function (x, y) { return new Date(y.a.date) - new Date(x.a.date); });
+      });
+    if (filterSort && filterSort.value === 'popular') {
+      return entries.sort(function (x, y) { return totalReactions(y.a.slug) - totalReactions(x.a.slug); });
+    }
+    return entries.sort(function (x, y) { return new Date(y.a.date) - new Date(x.a.date); });
   }
 
   function toggleTrending(i) {
@@ -1039,7 +1051,9 @@
       info.querySelector('.ttl').textContent = a.title;
       var topicLabel = a.topic ? (topicsByCategory[a.category] || []).find(function (t) { return t.slug === a.topic; }) : null;
       var hasPage = !!(a.body && a.body.trim());
-      info.querySelector('.meta').textContent = (a.categoryLabel || meta.label) + (topicLabel ? ' · ' + topicLabel.label : '') + ' · ' + a.date + ' · ' + (a.readTime || '') + (hasPage ? ' · con página propia' : ' · solo en el listado');
+      var r = reactionsBySlug[a.slug];
+      var reactionsText = r ? ' · 👍' + (r.like || 0) + ' 🔥' + (r.fire || 0) + ' 👎' + (r.dislike || 0) : '';
+      info.querySelector('.meta').textContent = (a.categoryLabel || meta.label) + (topicLabel ? ' · ' + topicLabel.label : '') + ' · ' + a.date + ' · ' + (a.readTime || '') + (hasPage ? ' · con página propia' : ' · solo en el listado') + reactionsText;
 
       var actions = document.createElement('div');
       actions.className = 'item-actions';
@@ -1317,6 +1331,16 @@
     });
   });
 
+  /* ---- Reacciones del sitio en vivo (solo para mostrar popularidad acá) ---- */
+  function loadReactions() {
+    fetch('https://vexlowhq.com/api/react?all=1')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data) { reactionsBySlug = data; renderArticlesList(); }
+      })
+      .catch(function () { /* el sitio en vivo no respondió: seguimos sin datos de popularidad */ });
+  }
+
   /* ---- Init ---- */
   Promise.all([
     getJSON('/api/categories'),
@@ -1355,6 +1379,7 @@
     renderHeroList();
     renderArticlesList();
     renderDraftsList();
+    loadReactions();
   }).catch(function () {
     toast('No se pudo conectar con el panel. Fijate que server.js esté corriendo.', true);
   });

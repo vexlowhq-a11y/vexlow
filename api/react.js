@@ -3,6 +3,9 @@
   páginas de artículo. Guarda los contadores en Redis (Vercel Redis).
 
   GET  /api/react?slug=mi-articulo        -> { like, fire, dislike }
+  GET  /api/react?all=1                   -> { "slug-1": {like,fire,dislike}, ... }
+       (todos los artículos con al menos una reacción — la usa el panel
+       de administración para mostrar qué está gustando más)
   POST /api/react  { slug, reaction, visitorId } -> alterna la reacción
        (si el visitorId ya la había puesto, la saca y resta; si no,
        la suma) y devuelve los contadores actualizados + si quedó
@@ -33,18 +36,34 @@ function normalizeCounts(raw) {
 }
 
 module.exports = async function handler(req, res) {
-  var body = req.body || {};
-  var slugSource = req.method === 'POST' ? body.slug : (req.query && req.query.slug);
-  var slug = String(slugSource || '').trim().slice(0, 200);
-  if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
-    return res.status(400).json({ error: 'Falta o es inválido el slug' });
-  }
+  if (req.method === 'GET') res.setHeader('Access-Control-Allow-Origin', '*');
 
   var redis;
   try {
     redis = await getClient();
   } catch (e) {
     return res.status(500).json({ error: 'No se pudo conectar a Redis' });
+  }
+
+  if (req.method === 'GET' && req.query && req.query.all) {
+    try {
+      var keys = await redis.keys('reactions:*');
+      var result = {};
+      for (var i = 0; i < keys.length; i++) {
+        var raw = await redis.hGetAll(keys[i]);
+        result[keys[i].slice('reactions:'.length)] = normalizeCounts(raw);
+      }
+      return res.status(200).json(result);
+    } catch (e) {
+      return res.status(500).json({ error: 'Error leyendo reacciones' });
+    }
+  }
+
+  var body = req.body || {};
+  var slugSource = req.method === 'POST' ? body.slug : (req.query && req.query.slug);
+  var slug = String(slugSource || '').trim().slice(0, 200);
+  if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
+    return res.status(400).json({ error: 'Falta o es inválido el slug' });
   }
 
   var key = 'reactions:' + slug;
