@@ -75,17 +75,6 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  if (req.method === 'DELETE') {
-    try {
-      var keys = await redis.keys('trivia_voted:' + day);
-      if (keys.length) await redis.del(keys);
-      await redis.del(key);
-      return res.status(200).json({ ok: true });
-    } catch (e) {
-      return res.status(500).json({ error: 'Error limpiando la trivia' });
-    }
-  }
-
   res.setHeader('Allow', 'GET, POST');
   return res.status(405).json({ error: 'Método no permitido' });
 };
