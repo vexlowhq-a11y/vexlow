@@ -85,18 +85,6 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  if (req.method === 'DELETE') {
-    var delVisitorId = String((req.query && req.query.visitorId) || '').trim().slice(0, 100);
-    if (!delVisitorId) return res.status(400).json({ error: 'Falta visitorId' });
-    try {
-      await redis.zRem(BOARD_KEY, delVisitorId);
-      await redis.hDel(NAMES_KEY, delVisitorId);
-      return res.status(200).json({ ok: true });
-    } catch (e) {
-      return res.status(500).json({ error: 'Error borrando' });
-    }
-  }
-
-  res.setHeader('Allow', 'GET, POST, DELETE');
+  res.setHeader('Allow', 'GET, POST');
   return res.status(405).json({ error: 'Método no permitido' });
 };
