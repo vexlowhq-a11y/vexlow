@@ -506,6 +506,13 @@ ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
       <div class="article-body">
 {body_html}      </div>
 
+      <div class="article-reactions" data-article-slug="{slug}">
+        <span>React</span>
+        <button type="button" class="reaction-btn" data-reaction="like" aria-label="Like this article">👍 <span class="reaction-count" data-count="like">0</span></button>
+        <button type="button" class="reaction-btn" data-reaction="fire" aria-label="Fire reaction">🔥 <span class="reaction-count" data-count="fire">0</span></button>
+        <button type="button" class="reaction-btn" data-reaction="mindblown" aria-label="Mind blown reaction">🤯 <span class="reaction-count" data-count="mindblown">0</span></button>
+      </div>
+
       <div class="article-share">
         <span>{share}</span>
         <a href="#" data-share="x" aria-label="Share on X">X</a>
@@ -814,7 +821,7 @@ def generate():
             body_blocks = parse_simple_body(body_blocks)
 
         page = ARTICLE_PAGE_TEMPLATE.format(
-            title=art["title"], title_short=title_short, dek=art.get("dek", ""),
+            title=art["title"], title_short=title_short, slug=art["slug"], dek=art.get("dek", ""),
             cat_slug=cat["slug"], cat_label=cat["label"], cat_icon=cat["icon"],
             date_label=format_date(art["date"]), read_time=art.get("readTime", ""),
             banner_html=banner_html_for(art, cat, asset_prefix_page),

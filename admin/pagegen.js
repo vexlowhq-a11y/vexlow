@@ -400,6 +400,13 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '      <div class="article-body">\n' +
 '{bodyHtml}      </div>\n' +
 '\n' +
+'      <div class="article-reactions" data-article-slug="{slug}">\n' +
+'        <span>React</span>\n' +
+'        <button type="button" class="reaction-btn" data-reaction="like" aria-label="Like this article">👍 <span class="reaction-count" data-count="like">0</span></button>\n' +
+'        <button type="button" class="reaction-btn" data-reaction="fire" aria-label="Fire reaction">🔥 <span class="reaction-count" data-count="fire">0</span></button>\n' +
+'        <button type="button" class="reaction-btn" data-reaction="mindblown" aria-label="Mind blown reaction">🤯 <span class="reaction-count" data-count="mindblown">0</span></button>\n' +
+'      </div>\n' +
+'\n' +
 '      <div class="article-share">\n' +
 '        <span>Share</span>\n' +
 '        <a href="#" data-share="x" aria-label="Share on X">X</a>\n' +
@@ -510,6 +517,7 @@ function generateArticleFile(article) {
   var html = fill(ARTICLE_PAGE_TEMPLATE, {
     title: title,
     titleShort: titleShort,
+    slug: article.slug,
     dek: article.dek || '',
     catSlug: cat.slug,
     catLabel: cat.label,

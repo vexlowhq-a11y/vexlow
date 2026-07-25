@@ -560,6 +560,63 @@
     });
   }
 
+  /* ---- Reacciones (página de artículo) ---- */
+  var reactionsBlock = document.querySelector('.article-reactions');
+  if (reactionsBlock) {
+    var slug = reactionsBlock.getAttribute('data-article-slug');
+    var visitorId = null;
+    try {
+      visitorId = localStorage.getItem('vexlow_vid');
+      if (!visitorId) {
+        visitorId = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+        localStorage.setItem('vexlow_vid', visitorId);
+      }
+    } catch (e) { /* localStorage no disponible (modo privado, etc.) */ }
+
+    var reactedKey = 'vexlow_reacted_' + slug;
+    var reactedSet = {};
+    try { reactedSet = JSON.parse(localStorage.getItem(reactedKey) || '{}'); } catch (e) {}
+
+    function paintCounts(counts) {
+      reactionsBlock.querySelectorAll('.reaction-count').forEach(function (el) {
+        var key = el.getAttribute('data-count');
+        if (counts && typeof counts[key] === 'number') el.textContent = counts[key];
+      });
+    }
+    function paintReacted() {
+      reactionsBlock.querySelectorAll('.reaction-btn').forEach(function (btn) {
+        var kind = btn.getAttribute('data-reaction');
+        btn.classList.toggle('reacted', !!reactedSet[kind]);
+      });
+    }
+    paintReacted();
+
+    if (slug) {
+      fetch('/api/react?slug=' + encodeURIComponent(slug))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (counts) { if (counts) paintCounts(counts); })
+        .catch(function () {});
+    }
+
+    reactionsBlock.querySelectorAll('.reaction-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var kind = btn.getAttribute('data-reaction');
+        if (!slug || !visitorId || reactedSet[kind]) return;
+        reactedSet[kind] = true;
+        try { localStorage.setItem(reactedKey, JSON.stringify(reactedSet)); } catch (e) {}
+        paintReacted();
+        fetch('/api/react', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: slug, reaction: kind, visitorId: visitorId })
+        })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (counts) { if (counts) paintCounts(counts); })
+          .catch(function () {});
+      });
+    });
+  }
+
   /* ---- Botones de compartir (página de artículo) ---- */
   var articleShare = document.querySelector('.article-share');
   if (articleShare) {
