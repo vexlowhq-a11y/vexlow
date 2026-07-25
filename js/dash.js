@@ -99,7 +99,16 @@
   function loadLeaderboard() {
     fetch('/api/dash?visitorId=' + encodeURIComponent(visitorId))
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(renderLeaderboard)
+      .then(function (data) {
+        renderLeaderboard(data);
+        /* Si el mejor puntaje local (localStorage) es de antes de que
+           existiera esta tabla de posiciones — o quedó afuera por algún
+           fallo de red puntual — nunca llegó a guardarse en el servidor.
+           Lo sincronizamos acá para que no quede "perdido". */
+        if (data && best > 0 && (!data.you || best > data.you.score)) {
+          submitScore(best);
+        }
+      })
       .catch(function () {});
   }
 
