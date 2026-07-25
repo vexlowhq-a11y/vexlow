@@ -82,6 +82,10 @@
         [
           "minecraft",
           "Minecraft"
+        ],
+        [
+          "dcgames",
+          "DC Games"
         ]
       ]
     ],
@@ -323,6 +327,15 @@
           "Rocket League"
         ]
       ]
+    ],
+    [
+      "Hardware",
+      [
+        [
+          "gaminghardware",
+          "Gaming Hardware"
+        ]
+      ]
     ]
   ],
   "ai": [
@@ -552,6 +565,10 @@
         [
           "spacelaunches",
           "Space Launches"
+        ],
+        [
+          "spacedefense",
+          "Space Defense"
         ]
       ]
     ],
@@ -617,6 +634,15 @@
           "Wildlife"
         ]
       ]
+    ],
+    [
+      "🌿 Nature & Climate",
+      [
+        [
+          "cleanenergy",
+          "Clean Energy"
+        ]
+      ]
     ]
   ],
   "entertainment": [
@@ -642,6 +668,10 @@
         [
           "appletv",
           "Apple TV+"
+        ],
+        [
+          "fastchannels",
+          "FAST Channels"
         ]
       ]
     ],
@@ -663,6 +693,10 @@
         [
           "emmys",
           "Emmys"
+        ],
+        [
+          "filmfestivals",
+          "Film Festivals"
         ]
       ]
     ],
@@ -732,6 +766,10 @@
         [
           "restoftheworld",
           "Rest of the world"
+        ],
+        [
+          "nfl",
+          "NFL"
         ]
       ]
     ],
@@ -783,6 +821,10 @@
         [
           "juegosolimpicos",
           "Olympic Games"
+        ],
+        [
+          "mlb",
+          "MLB"
         ]
       ]
     ]
@@ -1050,6 +1092,10 @@
         [
           "bereal",
           "BeReal"
+        ],
+        [
+          "socialmediaregulation",
+          "Social Media Regulation"
         ]
       ]
     ]
@@ -1090,6 +1136,10 @@
         [
           "emprendimiento",
           "Entrepreneurship"
+        ],
+        [
+          "biotechnology",
+          "Biotechnology"
         ]
       ]
     ],
