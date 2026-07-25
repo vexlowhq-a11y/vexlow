@@ -278,6 +278,7 @@ var STATIC_PAGE_SLUGS = ['about-vexlowhq', 'editorial-policy', 'contact', 'adver
 
 function localize(html) {
   html = html.split('href="index.html"').join('href="../../index.html"');
+  html = html.split('href="play/index.html"').join('href="../../play/index.html"');
   html = html.split('src="img/').join('src="../../img/');
   html = html.split("url('img/").join("url('../../img/");
   CATEGORIES.forEach(function (cat) {

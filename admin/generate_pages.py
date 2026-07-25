@@ -587,6 +587,59 @@ STATIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 """
 
 
+PLAY_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Trivia — VexlowHQ Play</title>
+<meta name="description" content="One quick trivia question a day, picked from AI, gaming, science, entertainment and more. Come back tomorrow for a new one.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Play</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🎯 VexlowHQ Play</h1>
+      <p class="play-intro">One trivia question a day, picked from the stuff we cover — AI, gaming, science, entertainment and more. Answer once, come back tomorrow for a new one.</p>
+
+      <div id="triviaGame">Loading today's question…</div>
+
+      <div class="play-more">More games coming soon.</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/play.js"></script>
+</body>
+</html>
+"""
+
+
 def format_date(iso):
     y, m, d = iso.split("-")
     month = UI_STRINGS["months"][int(m) - 1]
@@ -598,6 +651,7 @@ def localize(html):
         igual, las páginas de categoria/tema/artículo están 2 carpetas
         adentro de la raíz). """
     html = html.replace('href="index.html"', 'href="../../index.html"')
+    html = html.replace('href="play/index.html"', 'href="../../play/index.html"')
     html = html.replace('src="img/', 'src="../../img/')
     html = html.replace("url('img/", "url('../../img/")
     for cat in CATEGORY_SLUGS:
@@ -853,6 +907,18 @@ def generate():
             f.write(html)
         print("página:", out_path)
         sitemap_urls.append(("/{}.html".format(slug), today, "yearly"))
+
+    print("\nGenerando página de Play...\n")
+    play_dir = os.path.join(PROJECT, "play")
+    os.makedirs(play_dir, exist_ok=True)
+    play_html = PLAY_PAGE_TEMPLATE.format(
+        sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
+    )
+    play_path = os.path.join(play_dir, "index.html")
+    with open(play_path, "w", encoding="utf-8") as f:
+        f.write(play_html)
+    print("página:", play_path)
+    sitemap_urls.append(("/play/index.html", today, "weekly"))
 
     write_sitemap(sitemap_urls)
 
