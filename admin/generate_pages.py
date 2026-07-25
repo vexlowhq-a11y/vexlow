@@ -748,6 +748,12 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="dashLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="dashYouRank" hidden></p>
+      </div>
+
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>

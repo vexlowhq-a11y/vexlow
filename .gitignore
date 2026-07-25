@@ -10,5 +10,8 @@ admin/__pycache__/
 .DS_Store
 Thumbs.db
 
+# Dependencias de node (Vercel las instala solo en el deploy)
+node_modules/
+
 # Documentos internos de estrategia — no van al repo público
 docs/

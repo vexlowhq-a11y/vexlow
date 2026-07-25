@@ -1,9 +1,11 @@
 /*
   Vex Dash (play/dash.html) — corredor infinito simple tipo Geometry Dash.
-  Tap/click/espacio para saltar, esquivar los picos, la velocidad sube con
-  el puntaje. Todo el audio se genera con Web Audio API (osciladores, sin
-  archivos de sonido externos) para no depender de licencias de terceros.
-  Mejor puntaje guardado en localStorage, sin leaderboard en este v1.
+  Tap/click/espacio para saltar, esquivar los picos, la velocidad y la
+  frecuencia de picos en grupo suben con el puntaje. Todo el audio se
+  genera con Web Audio API (osciladores, sin archivos de sonido externos)
+  para no depender de licencias de terceros. Mejor puntaje personal en
+  localStorage, y una tabla de posiciones global vía Redis (api/dash.js,
+  mismo patrón que las reacciones y la trivia).
 */
 (function () {
   var canvas = document.getElementById('dashCanvas');
@@ -18,13 +20,96 @@
   var muteBtn = document.getElementById('dashMute');
   var overlay = document.getElementById('dashOverlay');
   var overlayText = document.getElementById('dashOverlayText');
+  var lbList = document.getElementById('dashLeaderboardList');
+  var lbYou = document.getElementById('dashYouRank');
 
   var BEST_KEY = 'vexlow_dash_best';
   var MUTE_KEY = 'vexlow_dash_muted';
+  var NAME_KEY = 'vexlow_dash_name';
+  var VID_KEY = 'vexlow_vid';
   var best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
   var muted = localStorage.getItem(MUTE_KEY) === '1';
   bestEl.textContent = 'Best: ' + best;
   muteBtn.textContent = muted ? '🔇' : '🔊';
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function getVisitorId() {
+    var id = null;
+    try {
+      id = localStorage.getItem(VID_KEY);
+      if (!id) {
+        id = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+        localStorage.setItem(VID_KEY, id);
+      }
+    } catch (e) { /* localStorage no disponible */ }
+    return id;
+  }
+  var visitorId = getVisitorId();
+
+  /* ---- Tabla de posiciones global ---- */
+  function renderLeaderboard(data) {
+    if (!lbList || !data) return;
+    if (!data.top || !data.top.length) {
+      lbList.innerHTML = '<li class="dash-lb-empty">No scores yet — be the first!</li>';
+    } else {
+      lbList.innerHTML = data.top.map(function (row, i) {
+        var isYou = data.you && (i + 1) === data.you.rank;
+        return '<li class="dash-lb-row' + (isYou ? ' dash-lb-you-row' : '') + '">' +
+          '<span class="dash-lb-rank">' + (i + 1) + '</span>' +
+          '<span class="dash-lb-name">' + escapeHtml(row.name) + '</span>' +
+          '<span class="dash-lb-score">' + row.score + '</span></li>';
+      }).join('');
+    }
+    if (lbYou) {
+      if (data.you && data.you.rank > 10) {
+        lbYou.hidden = false;
+        lbYou.textContent = 'Your rank: #' + data.you.rank + ' (' + data.you.score + ' pts)';
+      } else {
+        lbYou.hidden = true;
+      }
+    }
+  }
+
+  function loadLeaderboard() {
+    fetch('/api/dash?visitorId=' + encodeURIComponent(visitorId))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(renderLeaderboard)
+      .catch(function () {});
+  }
+
+  function submitScore(finalScore) {
+    if (!visitorId || finalScore <= 0) return;
+    var name = null;
+    try { name = localStorage.getItem(NAME_KEY); } catch (e) {}
+    if (!name) {
+      name = (window.prompt('New best! Enter your name for the leaderboard (max 14 characters):', 'Player') || 'Player').trim().slice(0, 14) || 'Player';
+      try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
+    }
+    fetch('/api/dash', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, score: finalScore, visitorId: visitorId })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(renderLeaderboard)
+      .catch(function () {});
+  }
+
+  if (lbYou) {
+    lbYou.addEventListener('click', function () {
+      var current = null;
+      try { current = localStorage.getItem(NAME_KEY); } catch (e) {}
+      var name = (window.prompt('Change your leaderboard name (max 14 characters):', current || 'Player') || '').trim().slice(0, 14);
+      if (name) {
+        try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
+      }
+    });
+  }
 
   /* ---- Sonido: todo sintetizado, nada de audio grabado ---- */
   var audioCtx = null;
@@ -84,6 +169,8 @@
   var GRAVITY = 0.0022;
   var JUMP_VELOCITY = -0.85;
   var BASE_SPEED = 0.32;
+  var MAX_SPEED_SCORE = 6000;
+  var SPEED_RATE = 0.00008;
 
   var player, obstacles, speed, score, distanceSinceSpawn, nextSpawnGap, state, lastTime, scoreMilestone;
 
@@ -126,21 +213,32 @@
       localStorage.setItem(BEST_KEY, String(best));
       bestEl.textContent = 'Best: ' + best;
       overlayText.textContent = 'New best! ' + finalScore + ' — tap to retry';
+      submitScore(finalScore);
     } else {
       overlayText.textContent = 'Score: ' + finalScore + ' — tap to retry';
     }
     overlay.classList.remove('hidden');
   }
 
+  /* Cuanto más puntaje, más chance de que salga un grupo de 2-3 picos
+     seguidos en vez de uno solo — obliga a saltar antes y calcular mejor,
+     sin depender solo de subir la velocidad hasta hacerlo injugable. */
   function spawnObstacle() {
-    var h = 26 + Math.random() * 22;
-    obstacles.push({ x: W + 20, w: 26, h: h });
+    var clusterChance = score > 1200 ? 0.55 : score > 500 ? 0.32 : score > 150 ? 0.12 : 0;
+    var clusterSize = 1;
+    var r = Math.random();
+    if (r < clusterChance * 0.35) clusterSize = 3;
+    else if (r < clusterChance) clusterSize = 2;
+    for (var i = 0; i < clusterSize; i++) {
+      var h = 26 + Math.random() * 22;
+      obstacles.push({ x: W + 20 + i * 32, w: 26, h: h });
+    }
   }
 
   function update(dt) {
     if (state !== 'playing') return;
 
-    speed = BASE_SPEED + Math.min(score, 4000) * 0.00006;
+    speed = BASE_SPEED + Math.min(score, MAX_SPEED_SCORE) * SPEED_RATE;
 
     player.vy += GRAVITY * dt;
     player.y += player.vy * dt;
@@ -156,8 +254,8 @@
     if (distanceSinceSpawn >= nextSpawnGap) {
       spawnObstacle();
       distanceSinceSpawn = 0;
-      nextSpawnGap = 260 + Math.random() * 160 - Math.min(score, 3000) * 0.03;
-      if (nextSpawnGap < 140) nextSpawnGap = 140;
+      nextSpawnGap = 260 + Math.random() * 160 - Math.min(score, 3000) * 0.025;
+      if (nextSpawnGap < 150) nextSpawnGap = 150;
     }
 
     for (var i = obstacles.length - 1; i >= 0; i--) {
@@ -238,4 +336,5 @@
 
   resetGame();
   requestAnimationFrame(loop);
+  loadLeaderboard();
 })();
