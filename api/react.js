@@ -30,7 +30,9 @@ function normalizeCounts(raw) {
 }
 
 module.exports = async function handler(req, res) {
-  var slug = String((req.query && req.query.slug) || '').trim().slice(0, 200);
+  var body = req.body || {};
+  var slugSource = req.method === 'POST' ? body.slug : (req.query && req.query.slug);
+  var slug = String(slugSource || '').trim().slice(0, 200);
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
     return res.status(400).json({ error: 'Falta o es inválido el slug' });
   }
@@ -54,7 +56,6 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    var body = req.body || {};
     var reaction = String(body.reaction || '');
     var visitorId = String(body.visitorId || '').trim().slice(0, 100);
     if (REACTIONS.indexOf(reaction) === -1 || !visitorId) {
