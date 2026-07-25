@@ -75,6 +75,17 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  if (req.method === 'DELETE') {
+    try {
+      var keys = await redis.keys('reacted:' + slug + ':*');
+      if (keys.length) await redis.del(keys);
+      await redis.del(key);
+      return res.status(200).json({ ok: true, cleared: keys.length + 1 });
+    } catch (e) {
+      return res.status(500).json({ error: 'Error limpiando reacciones' });
+    }
+  }
+
   res.setHeader('Allow', 'GET, POST');
   return res.status(405).json({ error: 'Método no permitido' });
 };
