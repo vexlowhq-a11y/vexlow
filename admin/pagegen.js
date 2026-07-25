@@ -404,7 +404,7 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '        <span>React</span>\n' +
 '        <button type="button" class="reaction-btn" data-reaction="like" aria-label="Like this article">👍 <span class="reaction-count" data-count="like">0</span></button>\n' +
 '        <button type="button" class="reaction-btn" data-reaction="fire" aria-label="Fire reaction">🔥 <span class="reaction-count" data-count="fire">0</span></button>\n' +
-'        <button type="button" class="reaction-btn" data-reaction="mindblown" aria-label="Mind blown reaction">🤯 <span class="reaction-count" data-count="mindblown">0</span></button>\n' +
+'        <button type="button" class="reaction-btn" data-reaction="dislike" aria-label="Dislike this article">👎 <span class="reaction-count" data-count="dislike">0</span></button>\n' +
 '      </div>\n' +
 '\n' +
 '      <div class="article-share">\n' +

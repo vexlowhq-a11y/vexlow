@@ -2,14 +2,16 @@
   API de reacciones por artículo — usado por js/script.js en las
   páginas de artículo. Guarda los contadores en Redis (Vercel Redis).
 
-  GET  /api/react?slug=mi-articulo        -> { like, fire, mindblown }
-  POST /api/react  { slug, reaction, visitorId } -> incrementa (una vez
-       por visitorId+reaction) y devuelve los contadores actualizados.
+  GET  /api/react?slug=mi-articulo        -> { like, fire, dislike }
+  POST /api/react  { slug, reaction, visitorId } -> alterna la reacción
+       (si el visitorId ya la había puesto, la saca y resta; si no,
+       la suma) y devuelve los contadores actualizados + si quedó
+       activa ({ ...counts, active: true|false }).
 */
 
 const { createClient } = require('redis');
 
-const REACTIONS = ['like', 'fire', 'mindblown'];
+const REACTIONS = ['like', 'fire', 'dislike'];
 
 let clientPromise = null;
 function getClient() {
@@ -24,7 +26,8 @@ function getClient() {
 function normalizeCounts(raw) {
   var counts = {};
   REACTIONS.forEach(function (r) {
-    counts[r] = parseInt((raw && raw[r]) || '0', 10) || 0;
+    var n = parseInt((raw && raw[r]) || '0', 10) || 0;
+    counts[r] = n < 0 ? 0 : n;
   });
   return counts;
 }
@@ -64,12 +67,20 @@ module.exports = async function handler(req, res) {
     try {
       var dedupeKey = 'reacted:' + slug + ':' + visitorId;
       var already = await redis.sIsMember(dedupeKey, reaction);
-      if (!already) {
+      var active;
+      if (already) {
+        await redis.hIncrBy(key, reaction, -1);
+        await redis.sRem(dedupeKey, reaction);
+        active = false;
+      } else {
         await redis.hIncrBy(key, reaction, 1);
         await redis.sAdd(dedupeKey, reaction);
+        active = true;
       }
       var updated = await redis.hGetAll(key);
-      return res.status(200).json(normalizeCounts(updated));
+      var payload = normalizeCounts(updated);
+      payload.active = active;
+      return res.status(200).json(payload);
     } catch (e) {
       return res.status(500).json({ error: 'Error guardando la reacción' });
     }

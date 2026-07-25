@@ -601,18 +601,23 @@
     reactionsBlock.querySelectorAll('.reaction-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var kind = btn.getAttribute('data-reaction');
-        if (!slug || !visitorId || reactedSet[kind]) return;
-        reactedSet[kind] = true;
-        try { localStorage.setItem(reactedKey, JSON.stringify(reactedSet)); } catch (e) {}
-        paintReacted();
+        if (!slug || !visitorId || btn.disabled) return;
+        btn.disabled = true;
         fetch('/api/react', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: slug, reaction: kind, visitorId: visitorId })
         })
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (counts) { if (counts) paintCounts(counts); })
-          .catch(function () {});
+          .then(function (result) {
+            if (!result) return;
+            if (result.active) { reactedSet[kind] = true; } else { delete reactedSet[kind]; }
+            try { localStorage.setItem(reactedKey, JSON.stringify(reactedSet)); } catch (e) {}
+            paintReacted();
+            paintCounts(result);
+          })
+          .catch(function () {})
+          .then(function () { btn.disabled = false; });
       });
     });
   }
