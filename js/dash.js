@@ -12,8 +12,29 @@
   if (!canvas) return;
 
   var ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
   var W = canvas.width, H = canvas.height;
   var GROUND_Y = H - 50;
+
+  /* ---- Sprites: personaje y picos (CraftPix.net, freebie license — uso
+     comercial permitido, sin atribución obligatoria) ---- */
+  var scriptEl = document.currentScript || document.querySelector('script[src$="js/dash.js"]');
+  var imgPrefix = ((scriptEl && scriptEl.getAttribute('src')) || 'js/dash.js').replace(/js\/dash\.js(\?.*)?$/, '') + 'img/dash/';
+  function loadSheet(name, frameW, frameH, frames) {
+    var img = new Image();
+    img.src = imgPrefix + name;
+    return { img: img, frameW: frameW, frameH: frameH, frames: frames };
+  }
+  var SPRITES = {
+    idle: loadSheet('player-idle.png', 32, 32, 11),
+    run: loadSheet('player-run.png', 32, 32, 12),
+    jump: loadSheet('player-jump.png', 32, 32, 1),
+    fall: loadSheet('player-fall.png', 32, 32, 1),
+    hit: loadSheet('player-hit.png', 32, 32, 7)
+  };
+  var spikeImg = new Image();
+  spikeImg.src = imgPrefix + 'spike.png';
+  var SPIKE_NATIVE_W = 15, SPIKE_NATIVE_H = 11;
 
   var scoreEl = document.getElementById('dashScore');
   var bestEl = document.getElementById('dashBest');
@@ -173,9 +194,10 @@
   var SPEED_RATE = 0.00008;
 
   var player, obstacles, speed, score, distanceSinceSpawn, nextSpawnGap, state, lastTime, scoreMilestone;
+  var animFrame = 0, animTimer = 0, hitFrame = 0;
 
   function resetGame() {
-    player = { x: 90, y: GROUND_Y - PLAYER_SIZE, vy: 0, rot: 0, onGround: true };
+    player = { x: 90, y: GROUND_Y - PLAYER_SIZE, vy: 0, onGround: true };
     obstacles = [];
     speed = BASE_SPEED;
     score = 0;
@@ -184,6 +206,9 @@
     nextSpawnGap = 260 + Math.random() * 140;
     state = 'ready';
     lastTime = null;
+    animFrame = 0;
+    animTimer = 0;
+    hitFrame = 0;
     scoreEl.textContent = 'Score: 0';
     overlayText.textContent = 'Tap or press Space to start';
     overlay.classList.remove('hidden');
@@ -229,9 +254,10 @@
     var r = Math.random();
     if (r < clusterChance * 0.35) clusterSize = 3;
     else if (r < clusterChance) clusterSize = 2;
+    var scale = 2.6 + Math.random() * 0.8;
+    var w = SPIKE_NATIVE_W * scale, h = SPIKE_NATIVE_H * scale;
     for (var i = 0; i < clusterSize; i++) {
-      var h = 26 + Math.random() * 22;
-      obstacles.push({ x: W + 20 + i * 32, w: 26, h: h });
+      obstacles.push({ x: W + 20 + i * (w + 6), w: w, h: h });
     }
   }
 
@@ -247,8 +273,6 @@
       player.vy = 0;
       player.onGround = true;
     }
-    if (!player.onGround) player.rot += 0.012 * dt;
-    else player.rot = 0;
 
     distanceSinceSpawn += speed * dt;
     if (distanceSinceSpawn >= nextSpawnGap) {
@@ -283,6 +307,41 @@
     }
   }
 
+  var ANIM_FRAME_MS = 70;
+
+  function currentSheet() {
+    if (state === 'gameover') return SPRITES.hit;
+    if (state === 'ready') return SPRITES.idle;
+    if (!player.onGround) return player.vy < 0 ? SPRITES.jump : SPRITES.fall;
+    return SPRITES.run;
+  }
+
+  function advanceAnim(dt) {
+    var sheet = currentSheet();
+    if (sheet.frames <= 1) { animFrame = 0; return; }
+    animTimer += dt;
+    if (animTimer >= ANIM_FRAME_MS) {
+      animTimer = 0;
+      if (state === 'gameover') {
+        if (hitFrame < sheet.frames - 1) hitFrame++;
+        animFrame = hitFrame;
+      } else {
+        animFrame = (animFrame + 1) % sheet.frames;
+      }
+    } else if (state === 'gameover') {
+      animFrame = hitFrame;
+    }
+  }
+
+  function drawSprite(sheet) {
+    if (!sheet.img.complete || !sheet.img.naturalWidth) return;
+    var frame = Math.min(animFrame, sheet.frames - 1);
+    ctx.drawImage(
+      sheet.img, frame * sheet.frameW, 0, sheet.frameW, sheet.frameH,
+      player.x, player.y, PLAYER_SIZE, PLAYER_SIZE
+    );
+  }
+
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
@@ -291,24 +350,14 @@
     ctx.fillStyle = 'rgba(120,130,150,.5)';
     ctx.fillRect(0, GROUND_Y, W, 2);
 
-    ctx.fillStyle = '#E5484D';
-    for (var j = 0; j < obstacles.length; j++) {
-      var o = obstacles[j];
-      var baseY = GROUND_Y;
-      ctx.beginPath();
-      ctx.moveTo(o.x, baseY);
-      ctx.lineTo(o.x + o.w / 2, baseY - o.h);
-      ctx.lineTo(o.x + o.w, baseY);
-      ctx.closePath();
-      ctx.fill();
+    if (spikeImg.complete && spikeImg.naturalWidth) {
+      for (var j = 0; j < obstacles.length; j++) {
+        var o = obstacles[j];
+        ctx.drawImage(spikeImg, 0, 0, SPIKE_NATIVE_W, SPIKE_NATIVE_H, o.x, GROUND_Y - o.h, o.w, o.h);
+      }
     }
 
-    ctx.save();
-    ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
-    ctx.rotate(player.rot);
-    ctx.fillStyle = '#3D8BFF';
-    ctx.fillRect(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
-    ctx.restore();
+    drawSprite(currentSheet());
   }
 
   function loop(time) {
@@ -316,6 +365,7 @@
     var dt = Math.min(time - lastTime, 40);
     lastTime = time;
     update(dt);
+    advanceAnim(dt);
     draw();
     requestAnimationFrame(loop);
   }
