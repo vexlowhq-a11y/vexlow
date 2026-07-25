@@ -43,6 +43,10 @@
   var overlayText = document.getElementById('dashOverlayText');
   var lbList = document.getElementById('dashLeaderboardList');
   var lbYou = document.getElementById('dashYouRank');
+  var nameModal = document.getElementById('dashNameModal');
+  var nameInput = document.getElementById('dashNameInput');
+  var nameSaveBtn = document.getElementById('dashNameSave');
+  var nameSkipBtn = document.getElementById('dashNameSkip');
 
   var BEST_KEY = 'vexlow_dash_best';
   var MUTE_KEY = 'vexlow_dash_muted';
@@ -71,6 +75,31 @@
     return id;
   }
   var visitorId = getVisitorId();
+
+  /* ---- Ventana propia para pedir el nombre (reemplaza window.prompt) ---- */
+  var nameModalCallback = null;
+  function openNameModal(prefill, onDone) {
+    if (!nameModal) { onDone('Player'); return; }
+    nameInput.value = prefill || '';
+    nameModalCallback = onDone;
+    nameModal.classList.remove('hidden');
+    setTimeout(function () { nameInput.focus(); }, 0);
+  }
+  function commitName(rawValue) {
+    var name = String(rawValue || '').trim().slice(0, 14) || 'Player';
+    try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
+    nameModal.classList.add('hidden');
+    var cb = nameModalCallback;
+    nameModalCallback = null;
+    if (cb) cb(name);
+  }
+  if (nameModal) {
+    nameSaveBtn.addEventListener('click', function () { commitName(nameInput.value); });
+    nameSkipBtn.addEventListener('click', function () { commitName('Player'); });
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); commitName(nameInput.value); }
+    });
+  }
 
   /* ---- Tabla de posiciones global ---- */
   function renderLeaderboard(data) {
@@ -112,14 +141,7 @@
       .catch(function () {});
   }
 
-  function submitScore(finalScore) {
-    if (!visitorId || finalScore <= 0) return;
-    var name = null;
-    try { name = localStorage.getItem(NAME_KEY); } catch (e) {}
-    if (!name) {
-      name = (window.prompt('New best! Enter your name for the leaderboard (max 14 characters):', 'Player') || 'Player').trim().slice(0, 14) || 'Player';
-      try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
-    }
+  function doSubmit(name, finalScore) {
     fetch('/api/dash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -130,14 +152,22 @@
       .catch(function () {});
   }
 
+  function submitScore(finalScore) {
+    if (!visitorId || finalScore <= 0) return;
+    var name = null;
+    try { name = localStorage.getItem(NAME_KEY); } catch (e) {}
+    if (!name) {
+      openNameModal('', function (chosenName) { doSubmit(chosenName, finalScore); });
+    } else {
+      doSubmit(name, finalScore);
+    }
+  }
+
   if (lbYou) {
     lbYou.addEventListener('click', function () {
       var current = null;
       try { current = localStorage.getItem(NAME_KEY); } catch (e) {}
-      var name = (window.prompt('Change your leaderboard name (max 14 characters):', current || 'Player') || '').trim().slice(0, 14);
-      if (name) {
-        try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
-      }
+      openNameModal(current || '', function () { loadLeaderboard(); });
     });
   }
 
@@ -224,7 +254,16 @@
   }
 
   function jump() {
-    if (state === 'ready') { startGame(); return; }
+    if (state === 'ready') {
+      var storedName = null;
+      try { storedName = localStorage.getItem(NAME_KEY); } catch (e) {}
+      if (!storedName) {
+        openNameModal('', function () { startGame(); });
+      } else {
+        startGame();
+      }
+      return;
+    }
     if (state === 'gameover') { resetGame(); return; }
     if (state === 'playing' && player.onGround) {
       player.vy = JUMP_VELOCITY;

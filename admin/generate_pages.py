@@ -748,6 +748,18 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="dash-name-modal hidden" id="dashNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Vex Dash leaderboard.</p>
+          <input type="text" id="dashNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="dashNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="dashNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
       <div class="dash-leaderboard">
         <h3>🏆 Top Scores</h3>
         <ol class="dash-leaderboard-list" id="dashLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>

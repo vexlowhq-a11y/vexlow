@@ -620,6 +620,33 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .dash-lb-name { flex: 1; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash-lb-score { font-family: 'IBM Plex Mono', monospace; color: var(--blue); }
 .dash-lb-you { text-align: center; font-size: 12.5px; color: var(--text-muted); margin-top: 10px; cursor: pointer; text-decoration: underline; }
+
+.dash-name-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .55); padding: 20px;
+}
+.dash-name-modal.hidden { display: none; }
+.dash-name-card {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-l);
+  box-shadow: var(--shadow); padding: 28px; max-width: 340px; width: 100%; text-align: center;
+}
+.dash-name-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+.dash-name-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+.dash-name-input {
+  width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m);
+  padding: 12px 14px; font-family: 'Manrope'; font-size: 15px; font-weight: 700; color: var(--text);
+  text-align: center; margin-bottom: 16px;
+}
+.dash-name-input:focus { outline: none; border-color: var(--blue-fill); }
+.dash-name-actions { display: flex; gap: 10px; }
+.dash-name-skip, .dash-name-save {
+  flex: 1; border-radius: 999px; padding: 11px 14px; font-family: 'Manrope'; font-size: 13.5px; font-weight: 700; cursor: pointer;
+}
+.dash-name-skip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); }
+.dash-name-skip:hover { border-color: var(--text-muted); }
+.dash-name-save { background: var(--blue); border: 1px solid var(--blue); color: #fff; }
+.dash-name-save:hover { opacity: .9; }
 .article-continue {
   margin-top: 40px; padding: 22px; border-radius: var(--radius-m);
   background: var(--surface-1); border: 1px solid var(--border);
