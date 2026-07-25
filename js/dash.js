@@ -47,8 +47,12 @@
   var nameInput = document.getElementById('dashNameInput');
   var nameSaveBtn = document.getElementById('dashNameSave');
   var nameSkipBtn = document.getElementById('dashNameSkip');
+  var adBreak = document.getElementById('dashAdBreak');
+  var adBreakContinueBtn = document.getElementById('dashAdBreakContinue');
 
   var BEST_KEY = 'vexlow_dash_best';
+  var PLAYS_KEY = 'vexlow_dash_plays';
+  var AD_BREAK_INTERVAL = 3;
   var MUTE_KEY = 'vexlow_dash_muted';
   var NAME_KEY = 'vexlow_dash_name';
   var VID_KEY = 'vexlow_vid';
@@ -290,7 +294,29 @@
     } else {
       overlayText.textContent = 'Score: ' + finalScore + ' — tap to retry';
     }
-    overlay.classList.remove('hidden');
+
+    /* Cada AD_BREAK_INTERVAL partidas, en vez del cartel normal de
+       "tap to retry" mostramos una pausa con espacio para anuncio.
+       Por ahora es el mismo placeholder .ad-slot que el resto del
+       sitio (todavía no está aprobado AdSense) — cuando lo aprueben,
+       ese div se reemplaza por el <ins class="adsbygoogle"> real. */
+    var plays = parseInt(localStorage.getItem(PLAYS_KEY) || '0', 10) || 0;
+    plays++;
+    try { localStorage.setItem(PLAYS_KEY, String(plays)); } catch (e) {}
+    if (adBreak && plays % AD_BREAK_INTERVAL === 0) {
+      state = 'adbreak';
+      adBreak.classList.remove('hidden');
+    } else {
+      overlay.classList.remove('hidden');
+    }
+  }
+
+  if (adBreakContinueBtn) {
+    adBreakContinueBtn.addEventListener('click', function () {
+      adBreak.classList.add('hidden');
+      state = 'gameover';
+      overlay.classList.remove('hidden');
+    });
   }
 
   /* Cuanto más puntaje, más chance de que salga un grupo de 2-3 picos

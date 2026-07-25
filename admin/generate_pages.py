@@ -760,6 +760,14 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="dash-name-modal hidden" id="dashAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="dashAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
       <div class="dash-leaderboard">
         <h3>🏆 Top Scores</h3>
         <ol class="dash-leaderboard-list" id="dashLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
