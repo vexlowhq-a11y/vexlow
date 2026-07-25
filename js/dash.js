@@ -39,28 +39,15 @@
   enemyImg.src = imgPrefix + 'enemy.png';
   var ENEMY_NATIVE_W = 22, ENEMY_NATIVE_H = 27;
 
-  /* ---- Zonas de fondo: cada tanto puntaje cambia el paisaje (ciudad,
-     bosque, desierto...) para que se sienta que el personaje va
-     avanzando de verdad, no solo corriendo en el lugar. La zona
-     "forest" usa capas reales (CraftPix.net, freebie license) con
-     scroll en paralaje; el resto se dibuja a mano en canvas. ---- */
-  var ZONE_LENGTH = 450;
-  var ZONES = [
-    { name: 'city', sky: ['#141b2e', '#26314d'], shape: 'building', shapeColor: 'rgba(10,14,26,.55)' },
-    { name: 'forest', mode: 'layers' },
-    { name: 'desert', sky: ['#2c1d10', '#4a3018'], shape: 'dune', shapeColor: 'rgba(20,12,6,.4)' },
-    { name: 'night', sky: ['#0a0e1c', '#161c33'], shape: 'mountain', shapeColor: 'rgba(6,8,18,.55)' }
-  ];
-  var scenery = [];
-  var zoneIndex = -1;
-
-  /* ---- Capas de fondo del bosque (paralaje real, no dibujado a mano) ---- */
+  /* ---- Fondo: capas reales del bosque (CraftPix.net, freebie license)
+     en paralaje, en vez del canvas negro. Solo el cielo y los árboles
+     (lejanos y cercanos) — a propósito NO se usa la capa de pasto del
+     pack para no pisar el piso del juego, que queda intacto. ---- */
   var FOREST_NATIVE_W = 576, FOREST_NATIVE_H = 324;
   var FOREST_LAYERS = [
     { img: new Image(), src: 'forest/bg-sky.png', factor: 0.05 },
     { img: new Image(), src: 'forest/bg-far.png', factor: 0.22 },
-    { img: new Image(), src: 'forest/bg-mid.png', factor: 0.45 },
-    { img: new Image(), src: 'forest/bg-ground.png', factor: 0.8 }
+    { img: new Image(), src: 'forest/bg-mid.png', factor: 0.45 }
   ];
   FOREST_LAYERS.forEach(function (l) { l.img.src = imgPrefix + l.src; l.offset = 0; });
 
@@ -74,51 +61,6 @@
       for (var x = -off - tileW; x < W + tileW; x += tileW) {
         ctx.drawImage(layer.img, 0, 0, FOREST_NATIVE_W, FOREST_NATIVE_H, x, 0, tileW, H);
       }
-    }
-  }
-
-  function makeSceneryPiece(zone, x) {
-    if (zone.shape === 'building') {
-      return { x: x, w: 32 + Math.random() * 26, h: 55 + Math.random() * 110 };
-    }
-    if (zone.shape === 'tree') {
-      return { x: x, w: 22 + Math.random() * 16, h: 45 + Math.random() * 65 };
-    }
-    if (zone.shape === 'mountain') {
-      return { x: x, w: 70 + Math.random() * 60, h: 60 + Math.random() * 90 };
-    }
-    return { x: x, w: 26 + Math.random() * 30, h: 20 + Math.random() * 30 };
-  }
-
-  function reseedScenery(zone) {
-    scenery = [];
-    var x = 0;
-    while (x < W + 220) {
-      scenery.push(makeSceneryPiece(zone, x));
-      x += 90 + Math.random() * 90;
-    }
-  }
-
-  function drawSceneryPiece(zone, s) {
-    ctx.fillStyle = zone.shapeColor;
-    var baseY = GROUND_Y;
-    if (zone.shape === 'tree') {
-      ctx.fillRect(s.x + s.w / 2 - 3, baseY - s.h * 0.4, 6, s.h * 0.4);
-      ctx.beginPath();
-      ctx.moveTo(s.x, baseY - s.h * 0.35);
-      ctx.lineTo(s.x + s.w / 2, baseY - s.h);
-      ctx.lineTo(s.x + s.w, baseY - s.h * 0.35);
-      ctx.closePath();
-      ctx.fill();
-    } else if (zone.shape === 'mountain' || zone.shape === 'dune') {
-      ctx.beginPath();
-      ctx.moveTo(s.x, baseY);
-      ctx.lineTo(s.x + s.w / 2, baseY - s.h);
-      ctx.lineTo(s.x + s.w, baseY);
-      ctx.closePath();
-      ctx.fill();
-    } else {
-      ctx.fillRect(s.x, baseY - s.h, s.w, s.h);
     }
   }
 
@@ -338,8 +280,6 @@
     animFrame = 0;
     animTimer = 0;
     hitFrame = 0;
-    zoneIndex = 0;
-    reseedScenery(ZONES[0]);
     scoreEl.textContent = 'Score: 0';
     overlayText.textContent = 'Tap or press Space to start';
     overlay.classList.remove('hidden');
@@ -444,25 +384,8 @@
       player.onGround = true;
     }
 
-    var newZoneIndex = Math.floor(score / ZONE_LENGTH) % ZONES.length;
-    if (newZoneIndex !== zoneIndex) {
-      zoneIndex = newZoneIndex;
-      if (ZONES[zoneIndex].mode !== 'layers') reseedScenery(ZONES[zoneIndex]);
-    }
-    if (ZONES[zoneIndex].mode === 'layers') {
-      for (var li = 0; li < FOREST_LAYERS.length; li++) {
-        FOREST_LAYERS[li].offset += FOREST_LAYERS[li].factor * speed * dt;
-      }
-    } else {
-      var parallax = speed * 0.45;
-      for (var s = scenery.length - 1; s >= 0; s--) {
-        scenery[s].x -= parallax * dt;
-        if (scenery[s].x < -140) scenery.splice(s, 1);
-      }
-      var rightmost = scenery.length ? scenery[scenery.length - 1].x : -999;
-      if (rightmost < W + 60) {
-        scenery.push(makeSceneryPiece(ZONES[zoneIndex], rightmost + 90 + Math.random() * 90));
-      }
+    for (var li = 0; li < FOREST_LAYERS.length; li++) {
+      FOREST_LAYERS[li].offset += FOREST_LAYERS[li].factor * speed * dt;
     }
 
     distanceSinceSpawn += speed * dt;
@@ -534,23 +457,14 @@
   }
 
   function draw() {
-    var zone = ZONES[Math.max(zoneIndex, 0)];
-    if (zone.mode === 'layers') {
-      drawForestLayers();
-    } else {
-      var grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-      grad.addColorStop(0, zone.sky[0]);
-      grad.addColorStop(1, zone.sky[1]);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
+    drawForestLayers();
 
-      for (var s = 0; s < scenery.length; s++) drawSceneryPiece(zone, scenery[s]);
-
-      ctx.fillStyle = 'rgba(120,130,150,.25)';
-      ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-      ctx.fillStyle = 'rgba(120,130,150,.5)';
-      ctx.fillRect(0, GROUND_Y, W, 2);
-    }
+    /* El piso queda exactamente igual que antes de tocar el fondo —
+       la capa de pasto del pack de fondos no se usa a propósito. */
+    ctx.fillStyle = 'rgba(120,130,150,.25)';
+    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+    ctx.fillStyle = 'rgba(120,130,150,.5)';
+    ctx.fillRect(0, GROUND_Y, W, 2);
 
     for (var j = 0; j < obstacles.length; j++) {
       var o = obstacles[j];
