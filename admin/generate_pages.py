@@ -849,6 +849,13 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="snake-dpad">
+        <button type="button" class="snake-dpad-btn snake-dpad-up" data-dx="0" data-dy="-1" aria-label="Up"><img src="../img/snake/arrow-up.png" alt=""></button>
+        <button type="button" class="snake-dpad-btn snake-dpad-left" data-dx="-1" data-dy="0" aria-label="Left"><img src="../img/snake/arrow-left.png" alt=""></button>
+        <button type="button" class="snake-dpad-btn snake-dpad-right" data-dx="1" data-dy="0" aria-label="Right"><img src="../img/snake/arrow-right.png" alt=""></button>
+        <button type="button" class="snake-dpad-btn snake-dpad-down" data-dx="0" data-dy="1" aria-label="Down"><img src="../img/snake/arrow-down.png" alt=""></button>
+      </div>
+
       <div class="dash-name-modal hidden" id="snakeNameModal">
         <div class="dash-name-card">
           <h3>🏆 Enter your name</h3>

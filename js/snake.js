@@ -1,12 +1,14 @@
 /*
   Neon Snake Survival (play/snake.html) — snake clásico con estética
-  neón. Todo dibujado a mano en canvas (glow con shadowBlur), sin
-  ninguna imagen externa. Sonido sintetizado con Web Audio API, igual
-  que Vex Dash. Mejor puntaje personal en localStorage y tabla de
-  posiciones global vía Redis (api/snake.js, mismo patrón que
-  api/dash.js). El nombre para la tabla de posiciones usa la MISMA
-  clave que Vex Dash a propósito, para que sea un solo nombre de
-  jugador compartido entre los dos juegos.
+  neón. El tablero, la grilla y el cuerpo se dibujan a mano en canvas
+  (glow con shadowBlur); la cabeza, la comida y el destello al comer
+  usan sprites neón que el usuario generó con ChatGPT (img/snake/).
+  Sonido sintetizado con Web Audio API, igual que Vex Dash. Mejor
+  puntaje personal en localStorage y tabla de posiciones global vía
+  Redis (api/snake.js, mismo patrón que api/dash.js). El nombre para
+  la tabla de posiciones usa la MISMA clave que Vex Dash a propósito,
+  para que sea un solo nombre de jugador compartido entre los dos
+  juegos.
 */
 (function () {
   var canvas = document.getElementById('snakeCanvas');
@@ -16,6 +18,17 @@
   var W = canvas.width, H = canvas.height;
   var CELL = 20;
   var COLS = W / CELL, ROWS = H / CELL;
+
+  var scriptEl = document.currentScript || document.querySelector('script[src*="js/snake.js"]');
+  var imgPrefix = ((scriptEl && scriptEl.getAttribute('src')) || 'js/snake.js').replace(/js\/snake\.js(\?.*)?$/, '') + 'img/snake/';
+  function loadImg(name) {
+    var img = new Image();
+    img.src = imgPrefix + name;
+    return img;
+  }
+  var headImg = loadImg('head.png');
+  var foodImg = loadImg('food.png');
+  var sparkleImg = loadImg('sparkle.png');
 
   var scoreEl = document.getElementById('snakeScore');
   var bestEl = document.getElementById('snakeBest');
@@ -208,7 +221,7 @@
   var BASE_TICK_MS = 140;
   var MIN_TICK_MS = 70;
 
-  var snake, dir, pendingDir, food, score, tickMs, tickAcc, state, lastTime;
+  var snake, dir, pendingDir, food, score, tickMs, tickAcc, state, lastTime, particles;
 
   function randomFoodCell() {
     var cell;
@@ -227,6 +240,7 @@
     tickMs = BASE_TICK_MS;
     tickAcc = 0;
     food = randomFoodCell();
+    particles = [];
     state = 'ready';
     lastTime = null;
     scoreEl.textContent = 'Score: 0';
@@ -316,6 +330,7 @@
       score += 10;
       scoreEl.textContent = 'Score: ' + score;
       playEat();
+      particles.push({ x: food.x, y: food.y, born: performance.now() });
       food = randomFoodCell();
       tickMs = Math.max(MIN_TICK_MS, BASE_TICK_MS - score * 0.4);
     } else {
@@ -360,25 +375,66 @@
     ctx.restore();
   }
 
+  function drawFood(time) {
+    var cx = food.x * CELL + CELL / 2, cy = food.y * CELL + CELL / 2;
+    if (foodImg.complete && foodImg.naturalWidth) {
+      var pulse = 1 + Math.sin(time / 180) * 0.08;
+      var size = CELL * 1.5 * pulse;
+      ctx.drawImage(foodImg, cx - size / 2, cy - size / 2, size, size);
+    } else {
+      ctx.save();
+      ctx.shadowColor = '#ff2fd0';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#ff2fd0';
+      ctx.beginPath();
+      ctx.arc(cx, cy, CELL / 2 - 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function drawHead() {
+    var head = snake[0];
+    var cx = head.x * CELL + CELL / 2, cy = head.y * CELL + CELL / 2;
+    if (!headImg.complete || !headImg.naturalWidth) { drawGlowRect(head.x, head.y, '#B6FFF6', 16); return; }
+    var angle = Math.atan2(dir.dy, dir.dx);
+    var size = CELL * 1.9;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
+    ctx.restore();
+  }
+
+  var PARTICLE_LIFETIME = 380;
+  function drawParticles(time) {
+    if (!sparkleImg.complete || !sparkleImg.naturalWidth) return;
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      var age = time - p.born;
+      if (age > PARTICLE_LIFETIME) { particles.splice(i, 1); continue; }
+      var t = age / PARTICLE_LIFETIME;
+      var size = CELL * (1.5 + t * 2.2);
+      var cx = p.x * CELL + CELL / 2, cy = p.y * CELL + CELL / 2;
+      ctx.save();
+      ctx.globalAlpha = 1 - t;
+      ctx.drawImage(sparkleImg, cx - size / 2, cy - size / 2, size, size);
+      ctx.restore();
+    }
+  }
+
   function draw(time) {
     ctx.fillStyle = '#05060a';
     ctx.fillRect(0, 0, W, H);
     drawGrid();
 
-    var pulse = 3 + Math.sin(time / 180) * 2;
-    ctx.save();
-    ctx.shadowColor = '#ff2fd0';
-    ctx.shadowBlur = 14 + pulse;
-    ctx.fillStyle = '#ff2fd0';
-    ctx.beginPath();
-    ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL / 2 - 3 + pulse * 0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    drawFood(time);
 
-    for (var i = snake.length - 1; i >= 0; i--) {
-      var s = snake[i];
-      drawGlowRect(s.x, s.y, i === 0 ? '#B6FFF6' : '#00FFF2', i === 0 ? 16 : 10);
+    for (var i = snake.length - 1; i >= 1; i--) {
+      drawGlowRect(snake[i].x, snake[i].y, '#39FF6A', 10);
     }
+    drawHead();
+    drawParticles(time);
   }
 
   function loop(time) {
@@ -430,6 +486,14 @@
   overlay.addEventListener('touchend', function (e) { e.preventDefault(); onTouchEnd(e); }, { passive: false });
   canvas.addEventListener('mousedown', function () { beginOrTurn(dir.dx, dir.dy); });
   overlay.addEventListener('mousedown', function () { beginOrTurn(dir.dx, dir.dy); });
+
+  /* ---- D-pad en pantalla (sprites del usuario, img/snake/) ---- */
+  document.querySelectorAll('.snake-dpad-btn').forEach(function (btn) {
+    var dx = parseInt(btn.getAttribute('data-dx'), 10);
+    var dy = parseInt(btn.getAttribute('data-dy'), 10);
+    btn.addEventListener('touchstart', function (e) { e.preventDefault(); beginOrTurn(dx, dy); }, { passive: false });
+    btn.addEventListener('mousedown', function (e) { e.preventDefault(); beginOrTurn(dx, dy); });
+  });
 
   resetGame();
   requestAnimationFrame(loop);

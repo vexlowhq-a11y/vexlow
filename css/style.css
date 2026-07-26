@@ -604,6 +604,22 @@ main { min-width: 0; padding: 26px 32px 90px; }
 }
 .dash-overlay.hidden { display: none; }
 
+/* ---- Neon Snake (play/snake.html) — D-pad en pantalla ---- */
+.snake-dpad {
+  max-width: 168px; margin: 14px auto 0; display: grid;
+  grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px);
+  justify-content: center; gap: 8px;
+}
+.snake-dpad-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.snake-dpad-btn img { width: 44px; height: 44px; }
+.snake-dpad-up { grid-column: 2; grid-row: 1; }
+.snake-dpad-left { grid-column: 1; grid-row: 2; }
+.snake-dpad-right { grid-column: 3; grid-row: 2; }
+.snake-dpad-down { grid-column: 2; grid-row: 2; }
+
 .dash-letters {
   max-width: 800px; margin: 14px auto 0; display: flex; align-items: center;
   justify-content: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted);
