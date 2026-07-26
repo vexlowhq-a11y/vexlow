@@ -40,10 +40,10 @@
   var ENEMY_NATIVE_W = 22, ENEMY_NATIVE_H = 27;
 
   /* ---- Zonas de fondo: cada ZONE_LENGTH puntos cambia el paisaje
-     (bosque de día, bosque al atardecer, ciudad, playa...) para que
-     se sienta que el personaje avanza de verdad. Las zonas con arte
-     real (CraftPix.net, freebie license) tiledan capas en paralaje;
-     las que todavía no tienen arte usan figuras dibujadas a mano
+     (bosque al atardecer, ciudad, playa...) para que se sienta que
+     el personaje avanza de verdad. Las zonas con arte real
+     (CraftPix.net, freebie license) tiledan capas en paralaje; las
+     que todavía no tienen arte usan figuras dibujadas a mano
      mientras tanto. El piso (ver draw()) es un color sólido fijo que
      NO depende de la zona, así nunca cambia ni se mezcla con el fondo. */
   var NATIVE_W = 576, NATIVE_H = 324;
@@ -54,12 +54,7 @@
   }
   var ZONE_LENGTH = 400;
   var ZONES = [
-    { name: 'forest', mode: 'layers', layers: [
-      makeLayer('forest/bg-sky.png', 0.05),
-      makeLayer('forest/bg-far.png', 0.22),
-      makeLayer('forest/bg-mid.png', 0.45)
-    ] },
-    { name: 'forest-dark', mode: 'layers', layers: [
+    { name: 'forest-dusk', mode: 'layers', layers: [
       makeLayer('forest-dark/bg-sky.png', 0.05),
       makeLayer('forest-dark/bg-far.png', 0.3)
     ] },
