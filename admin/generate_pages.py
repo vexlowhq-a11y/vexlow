@@ -18,6 +18,7 @@ No hace falta instalar nada, usa solo la librería estándar de Python.
 import json
 import os
 import re
+import time
 
 PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG_DIR = os.path.join(PROJECT, "img")
@@ -786,7 +787,7 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
 
 <script src="../{articulos_asset}"></script>
 <script src="../js/script.js"></script>
-<script src="../js/dash.js"></script>
+<script src="../js/dash.js?v={cache_bust}"></script>
 </body>
 </html>
 """
@@ -1070,6 +1071,7 @@ def generate():
     ):
         page_html = template.format(
             sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
+            cache_bust=str(int(time.time())),
         )
         page_path = os.path.join(play_dir, filename)
         with open(page_path, "w", encoding="utf-8") as f:

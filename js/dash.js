@@ -18,7 +18,7 @@
 
   /* ---- Sprites: personaje y picos (CraftPix.net, freebie license — uso
      comercial permitido, sin atribución obligatoria) ---- */
-  var scriptEl = document.currentScript || document.querySelector('script[src$="js/dash.js"]');
+  var scriptEl = document.currentScript || document.querySelector('script[src*="js/dash.js"]');
   var imgPrefix = ((scriptEl && scriptEl.getAttribute('src')) || 'js/dash.js').replace(/js\/dash\.js(\?.*)?$/, '') + 'img/dash/';
   function loadSheet(name, frameW, frameH, frames) {
     var img = new Image();
