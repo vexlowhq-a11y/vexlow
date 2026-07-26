@@ -584,7 +584,7 @@ main { min-width: 0; padding: 26px 32px 90px; }
 
 /* ---- Vex Dash (play/dash.html) ---- */
 .dash-wrap { max-width: 800px; margin: 0 auto; position: relative; }
-#dashCanvas {
+#dashCanvas, #snakeCanvas {
   width: 100%; height: auto; aspect-ratio: 800 / 360; display: block;
   background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
   border: 1px solid var(--border); border-radius: var(--radius-l); touch-action: none;
