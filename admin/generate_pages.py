@@ -749,6 +749,11 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="dash-letters">
+        <span class="dash-letters-label">Jump to collect the letters:</span>
+        <span class="dash-letters-tiles" id="dashLettersTiles"></span>
+      </div>
+
       <div class="dash-name-modal hidden" id="dashNameModal">
         <div class="dash-name-card">
           <h3>🏆 Enter your name</h3>

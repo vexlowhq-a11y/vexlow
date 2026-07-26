@@ -120,6 +120,8 @@
   var nameSkipBtn = document.getElementById('dashNameSkip');
   var adBreak = document.getElementById('dashAdBreak');
   var adBreakContinueBtn = document.getElementById('dashAdBreakContinue');
+  var lettersTilesEl = document.getElementById('dashLettersTiles');
+  var lettersWrapEl = lettersTilesEl && lettersTilesEl.closest('.dash-letters');
 
   var BEST_KEY = 'vexlow_dash_best';
   var PLAYS_KEY = 'vexlow_dash_plays';
@@ -127,6 +129,32 @@
   var MUTE_KEY = 'vexlow_dash_muted';
   var NAME_KEY = 'vexlow_dash_name';
   var VID_KEY = 'vexlow_vid';
+
+  /* ---- Letras coleccionables: van formando "VEXLOWHQ" salto a salto.
+     El progreso se guarda en localStorage — no se pierde entre partidas
+     ni entre visitas, así crece la ganas de volver a jugar para
+     completar la palabra. ---- */
+  var LETTERS_WORD = 'VEXLOWHQ';
+  var LETTERS_KEY = 'vexlow_dash_letters';
+  var collectedLetters = '';
+  try { collectedLetters = localStorage.getItem(LETTERS_KEY) || ''; } catch (e) {}
+
+  function renderLetterTiles() {
+    if (!lettersTilesEl) return;
+    lettersTilesEl.innerHTML = LETTERS_WORD.split('').map(function (ch) {
+      var found = collectedLetters.indexOf(ch) !== -1;
+      return '<span class="dash-letter-tile' + (found ? ' found' : '') + '">' + ch + '</span>';
+    }).join('');
+    if (lettersWrapEl) lettersWrapEl.classList.toggle('done', collectedLetters.length >= LETTERS_WORD.length);
+  }
+  renderLetterTiles();
+
+  function collectLetter(ch) {
+    if (collectedLetters.indexOf(ch) !== -1) return;
+    collectedLetters += ch;
+    try { localStorage.setItem(LETTERS_KEY, collectedLetters); } catch (e) {}
+    renderLetterTiles();
+  }
   var best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
   var muted = localStorage.getItem(MUTE_KEY) === '1';
   bestEl.textContent = 'Best: ' + best;
@@ -292,6 +320,7 @@
     noise.start();
   }
   function playPoint() { beep(880, 1046, 0.08, 'sine', 0.08); }
+  function playCollect() { beep(1100, 1500, 0.1, 'square', 0.1); }
 
   muteBtn.addEventListener('click', function () {
     muted = !muted;
@@ -309,10 +338,16 @@
 
   var player, obstacles, speed, score, distanceSinceSpawn, nextSpawnGap, state, lastTime, scoreMilestone;
   var animFrame = 0, animTimer = 0, hitFrame = 0;
+  var letters, distanceSinceLetter, nextLetterGap;
+  var LETTER_SIZE = 26;
+  var LETTER_HEIGHT = 78;
 
   function resetGame() {
     player = { x: 90, y: GROUND_Y - PLAYER_SIZE, vy: 0, onGround: true };
     obstacles = [];
+    letters = [];
+    distanceSinceLetter = 0;
+    nextLetterGap = 320 + Math.random() * 220;
     speed = BASE_SPEED;
     score = 0;
     scoreMilestone = 0;
@@ -415,6 +450,17 @@
     }
   }
 
+  /* Solo aparecen letras que todavía no juntaste — si ya está completa
+     "VEXLOWHQ" en este dispositivo, no se generan más. Flotan altas
+     a propósito, para que agarrarlas requiera saltar bien, como una
+     moneda de plataformero, no que se junten solas corriendo. */
+  function spawnLetter() {
+    if (collectedLetters.length >= LETTERS_WORD.length) return;
+    var missing = LETTERS_WORD.split('').filter(function (ch) { return collectedLetters.indexOf(ch) === -1; });
+    var ch = missing[Math.floor(Math.random() * missing.length)];
+    letters.push({ x: W + 20, ch: ch });
+  }
+
   function update(dt) {
     if (state !== 'playing') return;
 
@@ -456,6 +502,24 @@
       if (px + ps - pad > ox && px + pad < ox + ow && py + ps - pad > oy) {
         endGame();
         return;
+      }
+    }
+
+    distanceSinceLetter += speed * dt;
+    if (distanceSinceLetter >= nextLetterGap) {
+      spawnLetter();
+      distanceSinceLetter = 0;
+      nextLetterGap = 320 + Math.random() * 220;
+    }
+    var letterY = GROUND_Y - LETTER_HEIGHT;
+    for (var k = letters.length - 1; k >= 0; k--) {
+      var L = letters[k];
+      L.x -= speed * dt;
+      if (L.x < -40) { letters.splice(k, 1); continue; }
+      if (px + ps > L.x && px < L.x + LETTER_SIZE && py + ps > letterY && py < letterY + LETTER_SIZE) {
+        collectLetter(L.ch);
+        playCollect();
+        letters.splice(k, 1);
       }
     }
 
@@ -523,6 +587,20 @@
       } else if (spikeImg.complete && spikeImg.naturalWidth) {
         ctx.drawImage(spikeImg, 0, 0, SPIKE_NATIVE_W, SPIKE_NATIVE_H, o.x, GROUND_Y - o.h, o.w, o.h);
       }
+    }
+
+    var letterY = GROUND_Y - LETTER_HEIGHT;
+    for (var k = 0; k < letters.length; k++) {
+      var L = letters[k];
+      ctx.fillStyle = '#F4B740';
+      ctx.beginPath();
+      ctx.arc(L.x + LETTER_SIZE / 2, letterY + LETTER_SIZE / 2, LETTER_SIZE / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#1b2029';
+      ctx.font = 'bold 15px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(L.ch, L.x + LETTER_SIZE / 2, letterY + LETTER_SIZE / 2 + 1);
     }
 
     drawSprite(currentSheet());
