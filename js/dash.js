@@ -40,12 +40,11 @@
   var ENEMY_NATIVE_W = 22, ENEMY_NATIVE_H = 27;
 
   /* ---- Zonas de fondo: cada ZONE_LENGTH puntos cambia el paisaje
-     (bosque al atardecer, ciudad, playa...) para que se sienta que
-     el personaje avanza de verdad. Las zonas con arte real
-     (CraftPix.net, freebie license) tiledan capas en paralaje; las
-     que todavía no tienen arte usan figuras dibujadas a mano
-     mientras tanto. El piso (ver draw()) es un color sólido fijo que
-     NO depende de la zona, así nunca cambia ni se mezcla con el fondo. */
+     para que se sienta que el personaje avanza de verdad. Todas las
+     zonas son variantes reales del mismo pack de CraftPix.net
+     ("Forest and Trees", freebie license) tiledas en paralaje. El
+     piso (ver draw()) es un color sólido fijo que NO depende de la
+     zona, así nunca cambia ni se mezcla con el fondo. */
   var NATIVE_W = 576, NATIVE_H = 324;
   function makeLayer(src, factor) {
     var img = new Image();
@@ -54,66 +53,57 @@
   }
   var ZONE_LENGTH = 400;
   var ZONES = [
-    { name: 'forest-dusk', mode: 'layers', layers: [
+    { name: 'forest-dusk', layers: [
       makeLayer('forest-dark/bg-sky.png', 0.05),
       makeLayer('forest-dark/bg-far.png', 0.3)
     ] },
-    { name: 'city', mode: 'shapes', sky: ['#141b2e', '#3a4966'], shape: 'building', shapeColor: 'rgba(15,20,32,.6)' },
-    { name: 'beach', mode: 'shapes', sky: ['#2a7fb0', '#8fd6e8'], shape: 'palm', shapeColor: 'rgba(20,70,45,.55)' }
+    { name: 'forest-green', layers: [
+      makeLayer('forest-green/bg-1.png', 0.05),
+      makeLayer('forest-green/bg-2.png', 0.2),
+      makeLayer('forest-green/bg-3.png', 0.35),
+      makeLayer('forest-green/bg-4.png', 0.55)
+    ] },
+    { name: 'forest-pine', layers: [
+      makeLayer('forest-pine/bg-1.png', 0.05),
+      makeLayer('forest-pine/bg-2.png', 0.2),
+      makeLayer('forest-pine/bg-3.png', 0.35),
+      makeLayer('forest-pine/bg-4.png', 0.55)
+    ] },
+    { name: 'forest-night', layers: [
+      makeLayer('forest-night/bg-1.png', 0.05),
+      makeLayer('forest-night/bg-2.png', 0.2),
+      makeLayer('forest-night/bg-3.png', 0.35),
+      makeLayer('forest-night/bg-4.png', 0.55)
+    ] },
+    { name: 'forest-shore', layers: [
+      makeLayer('forest-shore/bg-1.png', 0.05),
+      makeLayer('forest-shore/bg-2.png', 0.2),
+      makeLayer('forest-shore/bg-3.png', 0.35),
+      makeLayer('forest-shore/bg-4.png', 0.55)
+    ] },
+    { name: 'forest-lake', layers: [
+      makeLayer('forest-lake/bg-1.png', 0.05),
+      makeLayer('forest-lake/bg-2.png', 0.2),
+      makeLayer('forest-lake/bg-3.png', 0.35),
+      makeLayer('forest-lake/bg-4.png', 0.55)
+    ] }
   ];
   var zoneIndex = 0;
-  var scenery = [];
-
-  function makeSceneryPiece(zone, x) {
-    if (zone.shape === 'building') return { x: x, w: 32 + Math.random() * 26, h: 55 + Math.random() * 110 };
-    if (zone.shape === 'palm') return { x: x, w: 16 + Math.random() * 8, h: 55 + Math.random() * 35 };
-    return { x: x, w: 26 + Math.random() * 30, h: 20 + Math.random() * 30 };
-  }
-  function reseedScenery(zone) {
-    scenery = [];
-    var x = 0;
-    while (x < W + 220) {
-      scenery.push(makeSceneryPiece(zone, x));
-      x += 90 + Math.random() * 90;
-    }
-  }
-  function drawSceneryPiece(zone, s) {
-    ctx.fillStyle = zone.shapeColor;
-    var baseY = GROUND_Y;
-    if (zone.shape === 'palm') {
-      ctx.fillRect(s.x + s.w / 2 - 3, baseY - s.h, 6, s.h);
-      ctx.beginPath();
-      ctx.ellipse(s.x + s.w / 2, baseY - s.h, s.w, s.w * 0.55, 0, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      ctx.fillRect(s.x, baseY - s.h, s.w, s.h);
-    }
-  }
 
   function enterZone(idx) {
     zoneIndex = idx;
-    if (ZONES[idx].mode !== 'layers') reseedScenery(ZONES[idx]);
   }
 
   function drawZoneBackground(zone) {
-    if (zone.mode === 'layers') {
-      var scale = H / NATIVE_H;
-      var tileW = NATIVE_W * scale;
-      for (var li = 0; li < zone.layers.length; li++) {
-        var layer = zone.layers[li];
-        if (!layer.img.complete || !layer.img.naturalWidth) continue;
-        var off = layer.offset % tileW;
-        for (var x = -off - tileW; x < W + tileW; x += tileW) {
-          ctx.drawImage(layer.img, 0, 0, NATIVE_W, NATIVE_H, x, 0, tileW, H);
-        }
+    var scale = H / NATIVE_H;
+    var tileW = NATIVE_W * scale;
+    for (var li = 0; li < zone.layers.length; li++) {
+      var layer = zone.layers[li];
+      if (!layer.img.complete || !layer.img.naturalWidth) continue;
+      var off = layer.offset % tileW;
+      for (var x = -off - tileW; x < W + tileW; x += tileW) {
+        ctx.drawImage(layer.img, 0, 0, NATIVE_W, NATIVE_H, x, 0, tileW, H);
       }
-    } else {
-      var grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, zone.sky[0]);
-      grad.addColorStop(1, zone.sky[1]);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-      for (var s = 0; s < scenery.length; s++) drawSceneryPiece(zone, scenery[s]);
     }
   }
 
@@ -441,20 +431,8 @@
     var newZoneIndex = Math.floor(score / ZONE_LENGTH) % ZONES.length;
     if (newZoneIndex !== zoneIndex) enterZone(newZoneIndex);
     var currentZone = ZONES[zoneIndex];
-    if (currentZone.mode === 'layers') {
-      for (var li = 0; li < currentZone.layers.length; li++) {
-        currentZone.layers[li].offset += currentZone.layers[li].factor * speed * dt;
-      }
-    } else {
-      var parallax = speed * 0.45;
-      for (var s = scenery.length - 1; s >= 0; s--) {
-        scenery[s].x -= parallax * dt;
-        if (scenery[s].x < -140) scenery.splice(s, 1);
-      }
-      var rightmost = scenery.length ? scenery[scenery.length - 1].x : -999;
-      if (rightmost < W + 60) {
-        scenery.push(makeSceneryPiece(currentZone, rightmost + 90 + Math.random() * 90));
-      }
+    for (var li = 0; li < currentZone.layers.length; li++) {
+      currentZone.layers[li].offset += currentZone.layers[li].factor * speed * dt;
     }
 
     distanceSinceSpawn += speed * dt;
