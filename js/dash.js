@@ -338,16 +338,22 @@
 
   var player, obstacles, speed, score, distanceSinceSpawn, nextSpawnGap, state, lastTime, scoreMilestone;
   var animFrame = 0, animTimer = 0, hitFrame = 0;
-  var letters, distanceSinceLetter, nextLetterGap;
+  var letters, letterCheckpoints;
   var LETTER_SIZE = 26;
   var LETTER_HEIGHT = 78;
+  var LETTER_SPACING = 350;
 
   function resetGame() {
     player = { x: 90, y: GROUND_Y - PLAYER_SIZE, vy: 0, onGround: true };
     obstacles = [];
     letters = [];
-    distanceSinceLetter = 0;
-    nextLetterGap = 320 + Math.random() * 220;
+    /* Cada letra tiene un punto fijo del recorrido (mismo puntaje,
+       partida tras partida) — no aparecen al azar. Si ya la juntaste
+       antes, ese punto queda vacío para siempre; si todavía te falta,
+       vuelve a aparecer ahí cada vez que juegues. */
+    letterCheckpoints = LETTERS_WORD.split('').map(function (ch, i) {
+      return { ch: ch, at: LETTER_SPACING * (i + 1), spawned: false };
+    });
     speed = BASE_SPEED;
     score = 0;
     scoreMilestone = 0;
@@ -450,15 +456,21 @@
     }
   }
 
-  /* Solo aparecen letras que todavía no juntaste — si ya está completa
-     "VEXLOWHQ" en este dispositivo, no se generan más. Flotan altas
-     a propósito, para que agarrarlas requiera saltar bien, como una
-     moneda de plataformero, no que se junten solas corriendo. */
-  function spawnLetter() {
-    if (collectedLetters.length >= LETTERS_WORD.length) return;
-    var missing = LETTERS_WORD.split('').filter(function (ch) { return collectedLetters.indexOf(ch) === -1; });
-    var ch = missing[Math.floor(Math.random() * missing.length)];
-    letters.push({ x: W + 20, ch: ch });
+  /* Cada letra vive en un punto fijo del recorrido (checkpoint por
+     puntaje). Al pasar ese punto: si ya la juntaste en una partida
+     anterior, no aparece nada (ese lugar queda "vacío" para siempre);
+     si todavía te falta, aparece flotando ahí — siempre en el mismo
+     lugar, partida tras partida — y hay que saltar para agarrarla. */
+  function checkLetterCheckpoints() {
+    for (var ci = 0; ci < letterCheckpoints.length; ci++) {
+      var cp = letterCheckpoints[ci];
+      if (!cp.spawned && score >= cp.at) {
+        cp.spawned = true;
+        if (collectedLetters.indexOf(cp.ch) === -1) {
+          letters.push({ x: W + 20, ch: cp.ch });
+        }
+      }
+    }
   }
 
   function update(dt) {
@@ -505,12 +517,7 @@
       }
     }
 
-    distanceSinceLetter += speed * dt;
-    if (distanceSinceLetter >= nextLetterGap) {
-      spawnLetter();
-      distanceSinceLetter = 0;
-      nextLetterGap = 320 + Math.random() * 220;
-    }
+    checkLetterCheckpoints();
     var letterY = GROUND_Y - LETTER_HEIGHT;
     for (var k = letters.length - 1; k >= 0; k--) {
       var L = letters[k];
