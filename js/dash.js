@@ -39,28 +39,86 @@
   enemyImg.src = imgPrefix + 'enemy.png';
   var ENEMY_NATIVE_W = 22, ENEMY_NATIVE_H = 27;
 
-  /* ---- Fondo: capas reales del bosque (CraftPix.net, freebie license)
-     en paralaje, en vez del canvas negro. Solo el cielo y los árboles
-     (lejanos y cercanos) — a propósito NO se usa la capa de pasto del
-     pack para no pisar el piso del juego, que queda intacto. ---- */
-  var FOREST_NATIVE_W = 576, FOREST_NATIVE_H = 324;
-  var FOREST_LAYERS = [
-    { img: new Image(), src: 'forest/bg-sky.png', factor: 0.05 },
-    { img: new Image(), src: 'forest/bg-far.png', factor: 0.22 },
-    { img: new Image(), src: 'forest/bg-mid.png', factor: 0.45 }
+  /* ---- Zonas de fondo: cada ZONE_LENGTH puntos cambia el paisaje
+     (bosque de día, bosque al atardecer, ciudad, playa...) para que
+     se sienta que el personaje avanza de verdad. Las zonas con arte
+     real (CraftPix.net, freebie license) tiledan capas en paralaje;
+     las que todavía no tienen arte usan figuras dibujadas a mano
+     mientras tanto. El piso (ver draw()) es un color sólido fijo que
+     NO depende de la zona, así nunca cambia ni se mezcla con el fondo. */
+  var NATIVE_W = 576, NATIVE_H = 324;
+  function makeLayer(src, factor) {
+    var img = new Image();
+    img.src = imgPrefix + src;
+    return { img: img, factor: factor, offset: 0 };
+  }
+  var ZONE_LENGTH = 400;
+  var ZONES = [
+    { name: 'forest', mode: 'layers', layers: [
+      makeLayer('forest/bg-sky.png', 0.05),
+      makeLayer('forest/bg-far.png', 0.22),
+      makeLayer('forest/bg-mid.png', 0.45)
+    ] },
+    { name: 'forest-dark', mode: 'layers', layers: [
+      makeLayer('forest-dark/bg-sky.png', 0.05),
+      makeLayer('forest-dark/bg-far.png', 0.3)
+    ] },
+    { name: 'city', mode: 'shapes', sky: ['#141b2e', '#3a4966'], shape: 'building', shapeColor: 'rgba(15,20,32,.6)' },
+    { name: 'beach', mode: 'shapes', sky: ['#2a7fb0', '#8fd6e8'], shape: 'palm', shapeColor: 'rgba(20,70,45,.55)' }
   ];
-  FOREST_LAYERS.forEach(function (l) { l.img.src = imgPrefix + l.src; l.offset = 0; });
+  var zoneIndex = 0;
+  var scenery = [];
 
-  function drawForestLayers() {
-    var scale = H / FOREST_NATIVE_H;
-    var tileW = FOREST_NATIVE_W * scale;
-    for (var li = 0; li < FOREST_LAYERS.length; li++) {
-      var layer = FOREST_LAYERS[li];
-      if (!layer.img.complete || !layer.img.naturalWidth) continue;
-      var off = layer.offset % tileW;
-      for (var x = -off - tileW; x < W + tileW; x += tileW) {
-        ctx.drawImage(layer.img, 0, 0, FOREST_NATIVE_W, FOREST_NATIVE_H, x, 0, tileW, H);
+  function makeSceneryPiece(zone, x) {
+    if (zone.shape === 'building') return { x: x, w: 32 + Math.random() * 26, h: 55 + Math.random() * 110 };
+    if (zone.shape === 'palm') return { x: x, w: 16 + Math.random() * 8, h: 55 + Math.random() * 35 };
+    return { x: x, w: 26 + Math.random() * 30, h: 20 + Math.random() * 30 };
+  }
+  function reseedScenery(zone) {
+    scenery = [];
+    var x = 0;
+    while (x < W + 220) {
+      scenery.push(makeSceneryPiece(zone, x));
+      x += 90 + Math.random() * 90;
+    }
+  }
+  function drawSceneryPiece(zone, s) {
+    ctx.fillStyle = zone.shapeColor;
+    var baseY = GROUND_Y;
+    if (zone.shape === 'palm') {
+      ctx.fillRect(s.x + s.w / 2 - 3, baseY - s.h, 6, s.h);
+      ctx.beginPath();
+      ctx.ellipse(s.x + s.w / 2, baseY - s.h, s.w, s.w * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(s.x, baseY - s.h, s.w, s.h);
+    }
+  }
+
+  function enterZone(idx) {
+    zoneIndex = idx;
+    if (ZONES[idx].mode !== 'layers') reseedScenery(ZONES[idx]);
+  }
+
+  function drawZoneBackground(zone) {
+    if (zone.mode === 'layers') {
+      var scale = H / NATIVE_H;
+      var tileW = NATIVE_W * scale;
+      for (var li = 0; li < zone.layers.length; li++) {
+        var layer = zone.layers[li];
+        if (!layer.img.complete || !layer.img.naturalWidth) continue;
+        var off = layer.offset % tileW;
+        for (var x = -off - tileW; x < W + tileW; x += tileW) {
+          ctx.drawImage(layer.img, 0, 0, NATIVE_W, NATIVE_H, x, 0, tileW, H);
+        }
       }
+    } else {
+      var grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, zone.sky[0]);
+      grad.addColorStop(1, zone.sky[1]);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+      for (var s = 0; s < scenery.length; s++) drawSceneryPiece(zone, scenery[s]);
     }
   }
 
@@ -280,6 +338,7 @@
     animFrame = 0;
     animTimer = 0;
     hitFrame = 0;
+    enterZone(0);
     scoreEl.textContent = 'Score: 0';
     overlayText.textContent = 'Tap or press Space to start';
     overlay.classList.remove('hidden');
@@ -384,8 +443,23 @@
       player.onGround = true;
     }
 
-    for (var li = 0; li < FOREST_LAYERS.length; li++) {
-      FOREST_LAYERS[li].offset += FOREST_LAYERS[li].factor * speed * dt;
+    var newZoneIndex = Math.floor(score / ZONE_LENGTH) % ZONES.length;
+    if (newZoneIndex !== zoneIndex) enterZone(newZoneIndex);
+    var currentZone = ZONES[zoneIndex];
+    if (currentZone.mode === 'layers') {
+      for (var li = 0; li < currentZone.layers.length; li++) {
+        currentZone.layers[li].offset += currentZone.layers[li].factor * speed * dt;
+      }
+    } else {
+      var parallax = speed * 0.45;
+      for (var s = scenery.length - 1; s >= 0; s--) {
+        scenery[s].x -= parallax * dt;
+        if (scenery[s].x < -140) scenery.splice(s, 1);
+      }
+      var rightmost = scenery.length ? scenery[scenery.length - 1].x : -999;
+      if (rightmost < W + 60) {
+        scenery.push(makeSceneryPiece(currentZone, rightmost + 90 + Math.random() * 90));
+      }
     }
 
     distanceSinceSpawn += speed * dt;
@@ -457,13 +531,14 @@
   }
 
   function draw() {
-    drawForestLayers();
+    drawZoneBackground(ZONES[zoneIndex]);
 
-    /* El piso queda exactamente igual que antes de tocar el fondo —
-       la capa de pasto del pack de fondos no se usa a propósito. */
-    ctx.fillStyle = 'rgba(120,130,150,.25)';
+    /* El piso es un color sólido y fijo — no depende de la zona ni
+       del fondo, así que nunca cambia ni se mezcla con el paisaje,
+       sea cual sea la zona que esté de fondo en cada momento. */
+    ctx.fillStyle = '#1b2029';
     ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-    ctx.fillStyle = 'rgba(120,130,150,.5)';
+    ctx.fillStyle = '#3a4152';
     ctx.fillRect(0, GROUND_Y, W, 2);
 
     for (var j = 0; j < obstacles.length; j++) {
