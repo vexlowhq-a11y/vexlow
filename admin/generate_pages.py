@@ -634,6 +634,11 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
           <span class="game-card-title">Vex Dash</span>
           <span class="game-card-desc">Tap to jump, dodge the spikes, beat your best score.</span>
         </a>
+        <a class="game-card" href="snake.html">
+          <span class="game-card-icon">🐍</span>
+          <span class="game-card-title">Neon Snake Survival</span>
+          <span class="game-card-desc">Swipe to steer, eat the orbs, don't run into yourself.</span>
+        </a>
       </div>
 
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
@@ -793,6 +798,96 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
 <script src="../{articulos_asset}"></script>
 <script src="../js/script.js"></script>
 <script src="../js/dash.js?v={cache_bust}"></script>
+</body>
+</html>
+"""
+
+PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Snake Survival — VexlowHQ Games</title>
+<meta name="description" content="Classic snake with a neon glow. Swipe or use arrow keys, eat the orbs, don't hit yourself. Free to play, no download.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Neon Snake Survival</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🐍 Neon Snake Survival</h1>
+      <p class="play-intro">Swipe or use the arrow keys. Eat the orbs, don't run into yourself. Tap once to start.</p>
+
+      <div class="dash-wrap">
+        <canvas id="snakeCanvas" width="800" height="360" aria-label="Neon Snake Survival game"></canvas>
+        <div class="dash-hud">
+          <span id="snakeScore">Score: 0</span>
+          <span id="snakeBest">Best: 0</span>
+          <button type="button" id="snakeMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="dash-overlay" id="snakeOverlay">
+          <p id="snakeOverlayText">Tap or press Space to start</p>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="snakeNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Neon Snake leaderboard.</p>
+          <input type="text" id="snakeNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="snakeNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="snakeNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="snakeAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="snakeAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="snakeLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="snakeYouRank" hidden></p>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/snake.js?v={cache_bust}"></script>
 </body>
 </html>
 """
@@ -1073,6 +1168,7 @@ def generate():
         ("index.html", PLAY_HUB_TEMPLATE, "weekly"),
         ("trivia.html", PLAY_TRIVIA_TEMPLATE, "weekly"),
         ("dash.html", PLAY_DASH_TEMPLATE, "monthly"),
+        ("snake.html", PLAY_SNAKE_TEMPLATE, "monthly"),
     ):
         page_html = template.format(
             sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,

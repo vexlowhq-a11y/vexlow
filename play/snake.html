@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vex Dash — VexlowHQ Games</title>
-<meta name="description" content="Tap to jump, dodge the spikes, beat your best score. A quick, addictive runner game — free to play, no download.">
+<title>Neon Snake Survival — VexlowHQ Games</title>
+<meta name="description" content="Classic snake with a neon glow. Swipe or use arrow keys, eat the orbs, don't hit yourself. Free to play, no download.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
@@ -210,54 +210,49 @@
   <main>
 
     <nav class="breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Vex Dash</span>
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Neon Snake Survival</span>
     </nav>
 
     <article class="article-page">
-      <h1>🔺 Vex Dash</h1>
-      <p class="play-intro">Tap or click to jump. Dodge the spikes, survive as long as you can. Tap once to start.</p>
+      <h1>🐍 Neon Snake Survival</h1>
+      <p class="play-intro">Swipe or use the arrow keys. Eat the orbs, don't run into yourself. Tap once to start.</p>
 
       <div class="dash-wrap">
-        <canvas id="dashCanvas" width="800" height="360" aria-label="Vex Dash game"></canvas>
+        <canvas id="snakeCanvas" width="800" height="360" aria-label="Neon Snake Survival game"></canvas>
         <div class="dash-hud">
-          <span id="dashScore">Score: 0</span>
-          <span id="dashBest">Best: 0</span>
-          <button type="button" id="dashMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+          <span id="snakeScore">Score: 0</span>
+          <span id="snakeBest">Best: 0</span>
+          <button type="button" id="snakeMute" class="dash-mute" aria-label="Mute sound">🔊</button>
         </div>
-        <div class="dash-overlay" id="dashOverlay">
-          <p id="dashOverlayText">Tap or press Space to start</p>
+        <div class="dash-overlay" id="snakeOverlay">
+          <p id="snakeOverlayText">Tap or press Space to start</p>
         </div>
       </div>
 
-      <div class="dash-letters">
-        <span class="dash-letters-label">Jump to collect the letters:</span>
-        <span class="dash-letters-tiles" id="dashLettersTiles"></span>
-      </div>
-
-      <div class="dash-name-modal hidden" id="dashNameModal">
+      <div class="dash-name-modal hidden" id="snakeNameModal">
         <div class="dash-name-card">
           <h3>🏆 Enter your name</h3>
-          <p>This is what shows up on the Vex Dash leaderboard.</p>
-          <input type="text" id="dashNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <p>This is what shows up on the Neon Snake leaderboard.</p>
+          <input type="text" id="snakeNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
           <div class="dash-name-actions">
-            <button type="button" id="dashNameSkip" class="dash-name-skip">Skip</button>
-            <button type="button" id="dashNameSave" class="dash-name-save">Save &amp; Play</button>
+            <button type="button" id="snakeNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="snakeNameSave" class="dash-name-save">Save &amp; Play</button>
           </div>
         </div>
       </div>
 
-      <div class="dash-name-modal hidden" id="dashAdBreak">
+      <div class="dash-name-modal hidden" id="snakeAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
           <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
-          <button type="button" id="dashAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+          <button type="button" id="snakeAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
 
       <div class="dash-leaderboard">
         <h3>🏆 Top Scores</h3>
-        <ol class="dash-leaderboard-list" id="dashLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
-        <p class="dash-lb-you" id="dashYouRank" hidden></p>
+        <ol class="dash-leaderboard-list" id="snakeLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="snakeYouRank" hidden></p>
       </div>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
@@ -316,6 +311,6 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
-<script src="../js/dash.js?v=1785079998"></script>
+<script src="../js/snake.js?v=1785079998"></script>
 </body>
 </html>
