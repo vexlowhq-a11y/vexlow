@@ -620,6 +620,41 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .snake-dpad-right { grid-column: 3; grid-row: 2; }
 .snake-dpad-down { grid-column: 2; grid-row: 2; }
 
+/* ---- Echo Clone (play/echo.html) ---- */
+.echo-hud { flex-wrap: wrap; row-gap: 6px; }
+.echo-cyclebar {
+  height: 5px; border-radius: 999px; background: var(--surface-2);
+  overflow: hidden; margin-top: 6px;
+}
+.echo-cyclebar-fill {
+  height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue-fill), #B983FF);
+  border-radius: 999px; transition: width .05s linear;
+}
+.echo-panel { text-align: center; max-width: 320px; }
+.echo-panel.hidden { display: none; }
+.echo-logo {
+  font-family: 'Manrope'; font-weight: 800; font-size: 1.4rem; margin-bottom: 6px;
+  text-shadow: 0 0 14px rgba(61,139,255,.7);
+}
+.echo-tagline { font-size: 13px; opacity: .85; margin-bottom: 10px; }
+.echo-menu-stats { font-size: 12.5px; margin-bottom: 16px; opacity: .9; }
+.echo-menu-actions { display: flex; flex-direction: column; gap: 8px; }
+.echo-panel h3 { margin-bottom: 8px; }
+.echo-panel p { font-size: 13.5px; margin-bottom: 16px; opacity: .9; }
+.echo-skins-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.echo-skin-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m);
+  padding: 8px 10px; font-family: 'Manrope'; font-size: 11px; color: var(--text); cursor: pointer; min-width: 64px;
+}
+.echo-skin-btn.selected { border-color: var(--blue-fill); background: rgba(61,139,255,.15); }
+.echo-skin-swatch { width: 22px; height: 22px; border-radius: 5px; }
+.echo-go-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; text-align: left;
+  font-size: 12.5px; margin-bottom: 16px; font-family: 'IBM Plex Mono', monospace;
+}
+.echo-go-stats span:nth-child(odd) { opacity: .7; }
+
 .dash-letters {
   max-width: 800px; margin: 14px auto 0; display: flex; align-items: center;
   justify-content: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted);

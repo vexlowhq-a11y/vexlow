@@ -639,6 +639,11 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
           <span class="game-card-title">Neon Snake Survival</span>
           <span class="game-card-desc">Swipe to steer, eat the orbs, don't run into yourself.</span>
         </a>
+        <a class="game-card" href="echo.html">
+          <span class="game-card-icon">⏱️</span>
+          <span class="game-card-title">Echo Clone</span>
+          <span class="game-card-desc">Tap to jump — your run loops back as an echo that hits switches for you.</span>
+        </a>
       </div>
 
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
@@ -895,6 +900,131 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
 <script src="../{articulos_asset}"></script>
 <script src="../js/script.js"></script>
 <script src="../js/snake.js?v={cache_bust}"></script>
+</body>
+</html>
+"""
+
+PLAY_ECHO_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo Clone — VexlowHQ Games</title>
+<meta name="description" content="Tap to jump. Every 5 seconds your run becomes a looping echo clone that keeps hitting switches for you. A quick, addictive runner — free to play, no download.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Echo Clone</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>⏱️ Echo Clone</h1>
+      <p class="play-intro">Tap to jump. Every 5 seconds, your last run becomes a looping echo that keeps hitting switches for you. Tap once to start.</p>
+
+      <div class="dash-wrap">
+        <canvas id="echoCanvas" width="800" height="360" aria-label="Echo Clone game"></canvas>
+        <div class="dash-hud echo-hud">
+          <span id="echoScore">Score: 0</span>
+          <span id="echoBest">Best: 0</span>
+          <span id="echoCoins">🪙 0</span>
+          <span id="echoClones">Echoes: 0</span>
+          <span id="echoMulti">x1</span>
+          <button type="button" id="echoMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="echo-cyclebar"><div class="echo-cyclebar-fill" id="echoCycleFill"></div></div>
+
+        <div class="dash-overlay" id="echoOverlay">
+          <div class="echo-panel" id="echoPanelMenu">
+            <h2 class="echo-logo">⏱️ ECHO CLONE</h2>
+            <p class="echo-tagline">Tap to jump. Your run repeats itself as a looping echo.</p>
+            <p class="echo-menu-stats">Best: <strong id="echoMenuBest">0</strong> &nbsp;·&nbsp; Coins: <strong id="echoMenuCoins">0</strong></p>
+            <div class="echo-menu-actions">
+              <button type="button" class="dash-name-save" id="echoPlayBtn">▶ Play</button>
+              <button type="button" class="dash-name-skip" id="echoTutorialBtn">How to play</button>
+              <button type="button" class="dash-name-skip" id="echoSkinsBtn">Skins</button>
+            </div>
+          </div>
+
+          <div class="echo-panel hidden" id="echoPanelTutorial">
+            <h3 id="echoTutStepTitle">1 / 5</h3>
+            <p id="echoTutStepText">Tap to jump.</p>
+            <button type="button" class="dash-name-save" id="echoTutNextBtn">Next ▶</button>
+          </div>
+
+          <div class="echo-panel hidden" id="echoPanelSkins">
+            <h3>Skins</h3>
+            <div class="echo-skins-list" id="echoSkinsList"></div>
+            <button type="button" class="dash-name-skip" id="echoSkinsBackBtn">← Back</button>
+          </div>
+
+          <div class="echo-panel hidden" id="echoPanelGameOver">
+            <h3 id="echoGoTitle">Score: 0</h3>
+            <div class="echo-go-stats" id="echoGoStats"></div>
+            <div class="echo-menu-actions">
+              <button type="button" class="dash-name-save" id="echoRestartBtn">↻ Restart</button>
+              <button type="button" class="dash-name-skip" id="echoMenuBtn">Menu</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="echoNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Echo Clone leaderboard.</p>
+          <input type="text" id="echoNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="echoNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="echoNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="echoAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="echoAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="echoLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="echoYouRank" hidden></p>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/echo.js?v={cache_bust}"></script>
 </body>
 </html>
 """
@@ -1176,6 +1306,7 @@ def generate():
         ("trivia.html", PLAY_TRIVIA_TEMPLATE, "weekly"),
         ("dash.html", PLAY_DASH_TEMPLATE, "monthly"),
         ("snake.html", PLAY_SNAKE_TEMPLATE, "monthly"),
+        ("echo.html", PLAY_ECHO_TEMPLATE, "monthly"),
     ):
         page_html = template.format(
             sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
