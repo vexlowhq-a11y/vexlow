@@ -573,13 +573,16 @@ main { min-width: 0; padding: 26px 32px 90px; }
   max-width: 640px; margin: 0 auto;
 }
 .game-card {
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
   background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-l);
-  padding: 28px 20px; box-shadow: var(--shadow); color: var(--text); cursor: pointer;
+  padding: 14px 14px 18px; box-shadow: var(--shadow); color: var(--text); cursor: pointer;
+  overflow: hidden; transition: transform .15s ease, border-color .15s ease;
 }
 .game-card:hover { border-color: var(--blue-fill); transform: translateY(-2px); }
-.game-card-icon { font-size: 2.2rem; }
-.game-card-title { font-family: 'Manrope'; font-weight: 800; font-size: 1.05rem; }
+.game-card-cover {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--radius-m);
+  display: block;
+}
 .game-card-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.4; }
 
 /* ---- Vex Dash (play/dash.html) ---- */
