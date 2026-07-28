@@ -326,6 +326,7 @@ TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{topic_label} — {cat_label} — VexlowHQ</title>
 <meta name="description" content="{meta_desc}">
+<meta name="robots" content="noindex, follow">
 <link rel="stylesheet" href="{asset_prefix}css/style.css">
 <link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
@@ -1361,7 +1362,8 @@ def generate():
             topic_path = os.path.join(cat_dir, t["slug"] + ".html")
             with open(topic_path, "w", encoding="utf-8") as f:
                 f.write(topic_page)
-            sitemap_urls.append(("/categoria/{}/{}.html".format(slug, t["slug"]), today, "weekly"))
+            # noindex (ver TOPIC_PAGE_TEMPLATE): no tiene sentido sumarla al
+            # sitemap si le pedimos a Google que no la indexe.
 
             parent_crumb_html = '<span class="sep">/</span><a href="{}.html">{}</a>'.format(t["slug"], t["label"])
             for sub_slug, sub_label in sub_items:
@@ -1379,7 +1381,7 @@ def generate():
                 sub_path = os.path.join(cat_dir, t["slug"] + "-" + sub_slug + ".html")
                 with open(sub_path, "w", encoding="utf-8") as f:
                     f.write(sub_page)
-                sitemap_urls.append(("/categoria/{}/{}-{}.html".format(slug, t["slug"], sub_slug), today, "weekly"))
+                # noindex (ver TOPIC_PAGE_TEMPLATE): no la sumamos al sitemap.
 
     print("\nGenerando artículos...\n")
     with open(ARTICULOS_JSON, "r", encoding="utf-8") as f:
