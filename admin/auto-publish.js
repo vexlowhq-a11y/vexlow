@@ -244,7 +244,17 @@ async function main() {
       errors.push({ error: 'generate_pages.py: ' + e.message });
     }
     try {
-      deployResult = await deploy.deploy('Publicación automática — ' + new Date().toISOString());
+      // Solo lo que el bot puede haber tocado — nunca "-A" acá, para no
+      // arrastrar cambios sueltos sin relación que haya en el repo
+      // (ver admin/deploy.js).
+      var deployPaths = [
+        'data/articulos.json', 'data/articulos.js',
+        'data/hero.json', 'data/hero.js',
+        'data/topics.json',
+        'data/automation-log.json',
+        'categoria', 'sitemap.xml'
+      ];
+      deployResult = await deploy.deploy('Publicación automática — ' + new Date().toISOString(), deployPaths);
     } catch (e) {
       deployResult = { ok: false, error: e.message };
     }

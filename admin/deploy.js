@@ -22,8 +22,15 @@ function runGit(args) {
   });
 }
 
-async function deploy(commitMessage) {
-  var add = await runGit(['add', '-A']);
+// "paths": opcional. Sin especificar, hace "git add -A" (todo lo que
+// haya cambiado) — es lo que usa el botón manual "Publicar cambios",
+// donde el usuario ya sabe qué tiene pendiente. admin/auto-publish.js
+// SIEMPRE pasa una lista explícita de paths (solo lo que el bot mismo
+// pudo haber tocado) para no arrastrar cambios sueltos sin relación
+// que puedan estar en el repo en ese momento (código a medio hacer,
+// imágenes que el usuario todavía no quiere subir, etc.).
+async function deploy(commitMessage, paths) {
+  var add = await runGit(['add'].concat(paths && paths.length ? paths : ['-A']));
   var commit = await runGit(['commit', '-m', commitMessage]);
   var nothingToCommit = commit.output.toLowerCase().indexOf('nothing to commit') !== -1;
   if (nothingToCommit) {

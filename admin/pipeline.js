@@ -20,7 +20,7 @@ const DRAFTS_FILE = path.join(DATA_DIR, 'drafts.json');
 const DISCARDED_FILE = path.join(DATA_DIR, 'discarded-sources.json');
 const ARTICULOS_FILE = path.join(DATA_DIR, 'articulos.json');
 
-const MAX_NEW_DRAFTS = 1; // TEMP: bajado para la prueba real del bot de auto-publicación, restaurar a 6
+const MAX_NEW_DRAFTS = 6;
 const MAX_ITEM_AGE_DAYS = 4;
 
 function readJSON(file, fallback) {
