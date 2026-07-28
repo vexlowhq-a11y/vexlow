@@ -644,6 +644,16 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
           <span class="game-card-title">Neon Orbit</span>
           <span class="game-card-desc">Tap to flip your orbit and dodge the blocks closing in.</span>
         </a>
+        <a class="game-card" href="gravity.html">
+          <span class="game-card-icon">🔻</span>
+          <span class="game-card-title">Gravity Flip</span>
+          <span class="game-card-desc">Tap to flip gravity between floor and ceiling, dodge everything.</span>
+        </a>
+        <a class="game-card" href="pulse.html">
+          <span class="game-card-icon">🎨</span>
+          <span class="game-card-title">Color Pulse</span>
+          <span class="game-card-desc">Tap to cycle your color and match each gate as it arrives.</span>
+        </a>
       </div>
 
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
@@ -994,6 +1004,186 @@ PLAY_ORBIT_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Flip — VexlowHQ Games</title>
+<meta name="description" content="Tap to flip gravity between floor and ceiling. Dodge spikes, gaps, saws and lasers. Free to play, no download.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Gravity Flip</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🔻 Gravity Flip</h1>
+      <p class="play-intro">Tap to flip gravity between floor and ceiling. Dodge the spikes, gaps, saws and lasers. Tap once to start.</p>
+
+      <div class="dash-wrap">
+        <canvas id="gravityCanvas" width="800" height="360" aria-label="Gravity Flip game"></canvas>
+        <div class="dash-hud">
+          <span id="gravityScore">Score: 0</span>
+          <span id="gravityBest">Best: 0</span>
+          <button type="button" id="gravityMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="dash-overlay" id="gravityOverlay">
+          <p id="gravityOverlayText">Tap or press Space to start</p>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="gravityNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Gravity Flip leaderboard.</p>
+          <input type="text" id="gravityNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="gravityNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="gravityNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="gravityAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="gravityAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="gravityLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="gravityYouRank" hidden></p>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/gravity.js?v={cache_bust}"></script>
+</body>
+</html>
+"""
+
+PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Pulse — VexlowHQ Games</title>
+<meta name="description" content="Tap to cycle your color and match each gate as it arrives. Simple, fast, and gets brutal once the speed ramps up. Free to play, no download.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Color Pulse</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🎨 Color Pulse</h1>
+      <p class="play-intro">Tap to cycle your color: red → blue → green → yellow. Match the gate's color to pass through. Tap once to start.</p>
+
+      <div class="dash-wrap">
+        <canvas id="pulseCanvas" width="800" height="360" aria-label="Color Pulse game"></canvas>
+        <div class="dash-hud">
+          <span id="pulseScore">Score: 0</span>
+          <span id="pulseBest">Best: 0</span>
+          <button type="button" id="pulseMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="dash-overlay" id="pulseOverlay">
+          <p id="pulseOverlayText">Tap or press Space to start</p>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="pulseNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Color Pulse leaderboard.</p>
+          <input type="text" id="pulseNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="pulseNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="pulseNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="pulseAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="pulseAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="pulseLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="pulseYouRank" hidden></p>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/pulse.js?v={cache_bust}"></script>
+</body>
+</html>
+"""
+
 
 def format_date(iso):
     y, m, d = iso.split("-")
@@ -1272,6 +1462,8 @@ def generate():
         ("dash.html", PLAY_DASH_TEMPLATE, "monthly"),
         ("snake.html", PLAY_SNAKE_TEMPLATE, "monthly"),
         ("orbit.html", PLAY_ORBIT_TEMPLATE, "monthly"),
+        ("gravity.html", PLAY_GRAVITY_TEMPLATE, "monthly"),
+        ("pulse.html", PLAY_PULSE_TEMPLATE, "monthly"),
     ):
         page_html = template.format(
             sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,

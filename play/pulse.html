@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Games — VexlowHQ</title>
-<meta name="description" content="Quick, addictive games to take a break — a new trivia question every day, plus more games on the way.">
+<title>Color Pulse — VexlowHQ Games</title>
+<meta name="description" content="Tap to cycle your color and match each gate as it arrives. Simple, fast, and gets brutal once the speed ramps up. Free to play, no download.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
@@ -210,45 +210,52 @@
   <main>
 
     <nav class="breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><span class="current">Games</span>
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Color Pulse</span>
     </nav>
 
     <article class="article-page">
-      <h1>🎮 Our Games</h1>
-      <p class="play-intro">Quick, addictive games to take a break — a new trivia question every day, plus more on the way.</p>
+      <h1>🎨 Color Pulse</h1>
+      <p class="play-intro">Tap to cycle your color: red → blue → green → yellow. Match the gate's color to pass through. Tap once to start.</p>
 
-      <div class="games-grid">
-        <a class="game-card" href="trivia.html">
-          <span class="game-card-icon">🧠</span>
-          <span class="game-card-title">Daily Trivia</span>
-          <span class="game-card-desc">One quick question a day about AI, gaming, science, entertainment and more.</span>
-        </a>
-        <a class="game-card" href="dash.html">
-          <span class="game-card-icon">🔺</span>
-          <span class="game-card-title">Vex Dash</span>
-          <span class="game-card-desc">Tap to jump, dodge the spikes, beat your best score.</span>
-        </a>
-        <a class="game-card" href="snake.html">
-          <span class="game-card-icon">🐍</span>
-          <span class="game-card-title">Neon Snake Survival</span>
-          <span class="game-card-desc">Swipe to steer, eat the orbs, don't run into yourself.</span>
-        </a>
-        <a class="game-card" href="orbit.html">
-          <span class="game-card-icon">🌀</span>
-          <span class="game-card-title">Neon Orbit</span>
-          <span class="game-card-desc">Tap to flip your orbit and dodge the blocks closing in.</span>
-        </a>
-        <a class="game-card" href="gravity.html">
-          <span class="game-card-icon">🔻</span>
-          <span class="game-card-title">Gravity Flip</span>
-          <span class="game-card-desc">Tap to flip gravity between floor and ceiling, dodge everything.</span>
-        </a>
-        <a class="game-card" href="pulse.html">
-          <span class="game-card-icon">🎨</span>
-          <span class="game-card-title">Color Pulse</span>
-          <span class="game-card-desc">Tap to cycle your color and match each gate as it arrives.</span>
-        </a>
+      <div class="dash-wrap">
+        <canvas id="pulseCanvas" width="800" height="360" aria-label="Color Pulse game"></canvas>
+        <div class="dash-hud">
+          <span id="pulseScore">Score: 0</span>
+          <span id="pulseBest">Best: 0</span>
+          <button type="button" id="pulseMute" class="dash-mute" aria-label="Mute sound">🔊</button>
+        </div>
+        <div class="dash-overlay" id="pulseOverlay">
+          <p id="pulseOverlayText">Tap or press Space to start</p>
+        </div>
       </div>
+
+      <div class="dash-name-modal hidden" id="pulseNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Color Pulse leaderboard.</p>
+          <input type="text" id="pulseNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="pulseNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="pulseNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="pulseAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
+          <button type="button" id="pulseAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Top Scores</h3>
+        <ol class="dash-leaderboard-list" id="pulseLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="pulseYouRank" hidden></p>
+      </div>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
@@ -304,5 +311,6 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
+<script src="../js/pulse.js?v=1785200152"></script>
 </body>
 </html>
