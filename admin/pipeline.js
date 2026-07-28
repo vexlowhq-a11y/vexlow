@@ -20,7 +20,7 @@ const DRAFTS_FILE = path.join(DATA_DIR, 'drafts.json');
 const DISCARDED_FILE = path.join(DATA_DIR, 'discarded-sources.json');
 const ARTICULOS_FILE = path.join(DATA_DIR, 'articulos.json');
 
-const MAX_NEW_DRAFTS = 6;
+const MAX_NEW_DRAFTS = 1; // TEMP: bajado para la prueba real del bot de auto-publicación, restaurar a 6
 const MAX_ITEM_AGE_DAYS = 4;
 
 function readJSON(file, fallback) {
@@ -61,6 +61,13 @@ function listTopicsFor(category) {
   return topics;
 }
 
+// Categorías de contenido reales (excluye "trending", que no es una
+// categoría propia — es un agregado de las demás).
+function listCategories() {
+  return pagegen.CATEGORIES.filter(function (c) { return c.slug !== 'trending'; })
+    .map(function (c) { return { slug: c.slug, label: c.label }; });
+}
+
 function uniqueSlug(base, taken) {
   var slug = base || 'articulo';
   var counter = 1;
@@ -79,16 +86,11 @@ function todayISO() {
   return d.getFullYear() + '-' + m + '-' + day;
 }
 
-// Corre el pipeline completo. Devuelve { added, skipped, errors, noApiKey }.
-// Si no hay API key configurada, no intenta nada y avisa una sola vez
-// (en vez de fallar ítem por ítem).
-async function fetchNewDrafts() {
-  var cfg = draft.loadConfig();
-  var apiKey = cfg.draftProvider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
-  if (!apiKey) {
-    return { added: 0, skipped: 0, errors: [], noApiKey: true };
-  }
-
+// Trae feeds, descarta lo ya visto (publicado, en borradores, o
+// descartado a mano) y devuelve hasta MAX_NEW_DRAFTS candidatos
+// nuevos, repartidos entre categorías. Compartido entre el flujo
+// manual (fetchNewDrafts, abajo) y admin/auto-publish.js.
+async function buildCandidates() {
   var drafts = readJSON(DRAFTS_FILE, []);
   var discarded = readJSON(DISCARDED_FILE, []);
   var published = readJSON(ARTICULOS_FILE, []);
@@ -100,10 +102,6 @@ async function fetchNewDrafts() {
   var knownTitles = new Set();
   drafts.forEach(function (d) { knownTitles.add(normalizeTitle(d.sourceTitle || d.title)); });
   published.forEach(function (a) { knownTitles.add(normalizeTitle(a.title)); });
-
-  var takenSlugs = new Set();
-  drafts.forEach(function (d) { takenSlugs.add(d.slug); });
-  published.forEach(function (a) { takenSlugs.add(a.slug); });
 
   var fetched = await feeds.fetchAllFeedItems();
   var candidates = fetched.items.filter(function (item) {
@@ -151,8 +149,32 @@ async function fetchNewDrafts() {
   }
   candidates = balanced.slice(0, MAX_NEW_DRAFTS);
 
+  var takenSlugs = new Set();
+  drafts.forEach(function (d) { takenSlugs.add(d.slug); });
+  published.forEach(function (a) { takenSlugs.add(a.slug); });
+
+  return { candidates: candidates, errors: fetched.errors.slice(), skipped: fetched.items.length - candidates.length, takenSlugs: takenSlugs };
+}
+
+// Corre el pipeline completo (flujo manual: deja todo en borradores
+// para revisión). Devuelve { added, skipped, errors, noApiKey }.
+// Si no hay API key configurada, no intenta nada y avisa una sola vez
+// (en vez de fallar ítem por ítem).
+async function fetchNewDrafts() {
+  var cfg = draft.loadConfig();
+  var apiKey = cfg.draftProvider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
+  if (!apiKey) {
+    return { added: 0, skipped: 0, errors: [], noApiKey: true };
+  }
+
+  var drafts = readJSON(DRAFTS_FILE, []);
+  var built = await buildCandidates();
+  var candidates = built.candidates;
+  var takenSlugs = built.takenSlugs;
+  var categoryOptions = listCategories();
+
   var added = 0;
-  var errors = fetched.errors.slice();
+  var errors = built.errors;
   var topicsCache = {};
 
   for (var i = 0; i < candidates.length; i++) {
@@ -162,16 +184,18 @@ async function fetchNewDrafts() {
     if (!topicsCache[item.category]) topicsCache[item.category] = listTopicsFor(item.category);
 
     try {
-      var result = await draft.draftArticle(item, topicsCache[item.category], cfg);
+      var result = await draft.draftArticle(item, topicsCache[item.category], cfg, categoryOptions);
+      var finalCat = pagegen.CATEGORY_BY_SLUG[result.category] || cat;
       var slug = uniqueSlug(pagegen.slugify(result.title), takenSlugs);
       drafts.push({
         title: result.title,
-        category: item.category,
-        categoryLabel: cat.label,
-        icon: cat.icon,
+        category: finalCat.slug,
+        categoryLabel: finalCat.label,
+        icon: finalCat.icon,
         date: todayISO(),
         readTime: result.readTime || '',
         topic: result.topic || '',
+        newTopicLabel: result.newTopicLabel || '',
         slug: slug,
         dek: result.dek,
         image: '',
@@ -190,7 +214,7 @@ async function fetchNewDrafts() {
 
   writeJSON(DRAFTS_FILE, drafts);
 
-  return { added: added, skipped: fetched.items.length - candidates.length, errors: errors, noApiKey: false };
+  return { added: added, skipped: built.skipped, errors: errors, noApiKey: false };
 }
 
 function discardDraft(slug) {
@@ -219,5 +243,10 @@ function removeDraft(slug) {
 module.exports = {
   fetchNewDrafts: fetchNewDrafts,
   discardDraft: discardDraft,
-  removeDraft: removeDraft
+  removeDraft: removeDraft,
+  buildCandidates: buildCandidates,
+  listTopicsFor: listTopicsFor,
+  listCategories: listCategories,
+  uniqueSlug: uniqueSlug,
+  todayISO: todayISO
 };

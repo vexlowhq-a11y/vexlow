@@ -80,6 +80,16 @@ body { padding: 0; }
 }
 .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
+.automation-toggle-row {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.automation-toggle-row .checkbox-label input[type="checkbox"] { width: 18px; height: 18px; }
+.automation-toggle-row .admin-hint { margin-top: 6px; }
+
 /* ---- Bulk actions (borrado en lote de artículos) ---- */
 .admin-bulk-bar {
   display: flex; align-items: center; gap: 14px;

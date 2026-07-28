@@ -132,13 +132,15 @@ var SYSTEM_PROMPT = [
   '- Consecutive lines starting with "- " form a bullet list (use only if it genuinely fits the content). Bullet items are plain text, never bold.',
   '- Insert a line that is EXACTLY "[publicidad]" once, roughly in the middle of the article, as an ad-slot marker.',
   '',
-  'Also pick the single best-fitting "topic" slug from the provided list for this category (or "" if none fit well), and estimate "readTime" as "N min" based on the body length.',
+  'You will also be given the category the source feed is filed under, plus the full list of valid site categories. Some source feeds are broad (e.g. a general tech feed) and mis-file stories that actually belong elsewhere (e.g. a gaming or business story filed under "technology") — read the actual headline/summary and pick the single best-fitting "category" slug from the full list. If the feed\'s original category is genuinely the best fit, just confirm it.',
+  '',
+  'Also pick the single best-fitting "topic" slug from the provided list for the category you chose (or "" if none fit well), and estimate "readTime" as "N min" based on the body length. If no existing topic fits but the story clearly belongs to a specific recurring subject (a game, a company, a product line, etc.) that readers would search for again, propose a short new topic label in "newTopicLabel" (2-4 words, title case, e.g. "Nintendo Switch 2") — leave it "" if an existing topic already fits or nothing specific enough comes up.',
   '',
   'Respond with ONLY a single JSON object, no markdown code fences, no commentary, with exactly these keys:',
-  '{"title": "...", "dek": "...", "body": "...", "topic": "...", "readTime": "..."}',
+  '{"title": "...", "dek": "...", "body": "...", "category": "...", "topic": "...", "newTopicLabel": "...", "readTime": "..."}',
 ].join('\n');
 
-function draftArticle(item, topicOptions, cfg) {
+function draftArticle(item, topicOptions, cfg, categoryOptions) {
   cfg = cfg || loadConfig();
   var provider = cfg.draftProvider || 'anthropic';
   var apiKey = provider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
@@ -146,12 +148,17 @@ function draftArticle(item, topicOptions, cfg) {
     return Promise.reject(new Error('NO_API_KEY'));
   }
   var topicsList = (topicOptions || []).map(function (t) { return t.slug + ' — ' + t.label; }).join('\n');
+  var categoriesList = (categoryOptions || []).map(function (c) { return c.slug + ' — ' + c.label; }).join('\n');
   var userPrompt = [
     'Source headline: ' + item.title,
     'Source summary: ' + (item.summary || '(no summary provided)'),
     'Source link: ' + item.link,
+    'Source feed\'s original category: ' + item.category,
     '',
-    'Available topic slugs for this category:',
+    'Valid site category slugs:',
+    categoriesList || item.category,
+    '',
+    'Available topic slugs for the feed\'s original category (' + item.category + ') — note the right list may differ if you change the category:',
     topicsList || '(none — use "")',
   ].join('\n');
 
@@ -162,12 +169,19 @@ function draftArticle(item, topicOptions, cfg) {
   return call.then(function (text) {
     var result = extractJson(text);
     if (!result.title || !result.body) throw new Error('Borrador incompleto (falta title o body)');
-    var validTopic = (topicOptions || []).some(function (t) { return t.slug === result.topic; });
+    var validCategory = (categoryOptions || []).some(function (c) { return c.slug === result.category; });
+    var category = validCategory ? result.category : item.category;
+    // El "topic" solo es válido si además coincide con la categoría final
+    // elegida (la lista de topicOptions que nos pasaron es la del feed
+    // original, puede no aplicar si la IA cambió de categoría).
+    var validTopic = category === item.category && (topicOptions || []).some(function (t) { return t.slug === result.topic; });
     return {
       title: stripMarkdownEmphasis(String(result.title).trim()),
       dek: stripMarkdownEmphasis(String(result.dek || '').trim()),
       body: stripMarkdownEmphasis(String(result.body)),
+      category: category,
       topic: validTopic ? result.topic : '',
+      newTopicLabel: validTopic ? '' : String(result.newTopicLabel || '').trim().slice(0, 40),
       readTime: String(result.readTime || '').trim()
     };
   });

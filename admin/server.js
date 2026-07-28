@@ -20,11 +20,14 @@ const path = require('path');
 const { spawn } = require('child_process');
 const pagegen = require('./pagegen');
 const pipeline = require('./pipeline');
+const deploy = require('./deploy');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
 const IMG_DIR = path.join(ROOT, 'img');
 const ADMIN_DIR = __dirname;
+const CONFIG_FILE = path.join(ADMIN_DIR, 'config.json');
+const AUTOMATION_LOG_FILE = path.join(DATA_DIR, 'automation-log.json');
 const PORT = 4321;
 
 const CATEGORIES = pagegen.CATEGORIES;
@@ -591,31 +594,9 @@ var server = http.createServer(function (req, res) {
     });
   }
   if (urlPath === '/api/deploy' && req.method === 'POST') {
-    (async function () {
-      function runGit(args) {
-        return new Promise(function (resolve, reject) {
-          var proc = spawn('git', args, { cwd: ROOT });
-          var out = '';
-          proc.stdout.on('data', function (d) { out += d.toString('utf8'); });
-          proc.stderr.on('data', function (d) { out += d.toString('utf8'); });
-          proc.on('error', reject);
-          proc.on('close', function (code) { resolve({ code: code, output: out }); });
-        });
-      }
-      try {
-        var add = await runGit(['add', '-A']);
-        var commit = await runGit(['commit', '-m', 'Actualización desde el panel de administración — ' + new Date().toISOString()]);
-        var nothingToCommit = commit.output.toLowerCase().indexOf('nothing to commit') !== -1;
-        if (nothingToCommit) {
-          return sendJSON(res, 200, { ok: true, nothingToCommit: true, output: 'No había cambios nuevos para publicar.' });
-        }
-        var push = await runGit(['push', 'origin', 'main']);
-        var full = '--- git add ---\n' + add.output + '\n--- git commit ---\n' + commit.output + '\n--- git push ---\n' + push.output;
-        return sendJSON(res, push.code === 0 ? 200 : 500, { ok: push.code === 0, output: full });
-      } catch (e) {
-        return sendJSON(res, 500, { ok: false, error: e.message });
-      }
-    })();
+    deploy.deploy('Actualización desde el panel de administración — ' + new Date().toISOString())
+      .then(function (result) { sendJSON(res, result.ok ? 200 : 500, result); })
+      .catch(function (e) { sendJSON(res, 500, { ok: false, error: e.message }); });
     return;
   }
   if (urlPath === '/api/regenerate' && req.method === 'POST') {
@@ -628,6 +609,41 @@ var server = http.createServer(function (req, res) {
     });
     py.on('close', function (code) {
       sendJSON(res, code === 0 ? 200 : 500, { ok: code === 0, output: out });
+    });
+    return;
+  }
+
+  // ---- Publicación automática (bot) ----
+  if (urlPath === '/api/automation-config' && req.method === 'GET') {
+    var cfgGet = {};
+    try { cfgGet = readJSON(CONFIG_FILE); } catch (e) { cfgGet = {}; }
+    return sendJSON(res, 200, cfgGet.autoPublish || { enabled: false, intervalHours: 6 });
+  }
+  if (urlPath === '/api/automation-config' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data) return sendJSON(res, 400, { error: 'JSON inválido' });
+      var cfgPost = {};
+      try { cfgPost = readJSON(CONFIG_FILE); } catch (e) { cfgPost = {}; }
+      cfgPost.autoPublish = Object.assign({ enabled: false, intervalHours: 6 }, cfgPost.autoPublish, { enabled: !!data.enabled });
+      writeJSON(CONFIG_FILE, cfgPost);
+      return sendJSON(res, 200, cfgPost.autoPublish);
+    });
+  }
+  if (urlPath === '/api/automation-log' && req.method === 'GET') {
+    var logGet = [];
+    try { logGet = readJSON(AUTOMATION_LOG_FILE); } catch (e) { logGet = []; }
+    return sendJSON(res, 200, logGet);
+  }
+  if (urlPath === '/api/automation-run' && req.method === 'POST') {
+    var runProc = spawn('node', [path.join(ADMIN_DIR, 'auto-publish.js'), '--force'], { cwd: ROOT });
+    var runOut = '';
+    runProc.stdout.on('data', function (d) { runOut += d.toString('utf8'); });
+    runProc.stderr.on('data', function (d) { runOut += d.toString('utf8'); });
+    runProc.on('error', function (e) {
+      sendJSON(res, 500, { ok: false, error: 'No se pudo ejecutar el bot: ' + e.message });
+    });
+    runProc.on('close', function (code) {
+      sendJSON(res, code === 0 ? 200 : 500, { ok: code === 0, output: runOut });
     });
     return;
   }

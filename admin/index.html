@@ -28,6 +28,7 @@
     <button type="button" class="admin-tab active" data-tab="hero">Carrusel principal</button>
     <button type="button" class="admin-tab" data-tab="articles">Últimas publicadas</button>
     <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
+    <button type="button" class="admin-tab" data-tab="automation">Automatización <span id="automationTabBadge"></span></button>
   </nav>
 
   <!-- ============ HERO ============ -->
@@ -202,6 +203,27 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
     </div>
 
     <div class="admin-list" id="draftsList"></div>
+  </section>
+
+  <!-- ============ AUTOMATIZACIÓN ============ -->
+  <section class="admin-panel" id="panel-automation">
+    <p class="admin-lede">El bot busca noticias nuevas, escribe el artículo, elige la categoría y el tema (creándolo si hace falta), lo publica y lo sube a vexlowhq.com solo — sin que revises nada a mano. Corre en tu PC cada 6 horas mientras esté prendida (tarea programada de Windows). Las imágenes las seguís poniendo vos: un artículo entra al carrusel principal recién cuando ya tiene una imagen puesta.</p>
+
+    <div class="automation-toggle-row">
+      <label class="checkbox-label" style="padding-bottom:0;">
+        <input type="checkbox" id="automationEnabledToggle">
+        <strong id="automationStatusLabel">Publicación automática: apagada</strong>
+      </label>
+      <p class="admin-hint">Si la apagás, las noticias vuelven a quedar en "Borradores sugeridos" para revisarlas vos como antes — no se pierde nada.</p>
+    </div>
+
+    <div class="form-actions" style="margin: 16px 0 20px;">
+      <button type="button" class="btn-primary" id="automationRunBtn">Correr ahora</button>
+      <span class="admin-hint" id="automationRunStatus"></span>
+    </div>
+
+    <h3>Historial de corridas</h3>
+    <div class="admin-list" id="automationLogList"></div>
   </section>
 
   <div class="admin-toast" id="adminToast"></div>
