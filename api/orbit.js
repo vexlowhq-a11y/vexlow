@@ -1,17 +1,17 @@
 /*
-  API de la tabla de posiciones global de Echo Clone — usado por
-  js/echo.js en play/echo.html. Mismo patrón que api/dash.js y
+  API de la tabla de posiciones global de Neon Orbit — usado por
+  js/orbit.js en play/orbit.html. Mismo patrón que api/dash.js y
   api/snake.js (Redis sorted set), con sus propias claves.
 
-  GET  /api/echo?visitorId=v123        -> { top: [{name, score}, ...], you: {rank, score} | null }
-  POST /api/echo { name, score, visitorId } -> guarda el puntaje si es un
+  GET  /api/orbit?visitorId=v123        -> { top: [{name, score}, ...], you: {rank, score} | null }
+  POST /api/orbit { name, score, visitorId } -> guarda el puntaje si es un
        nuevo mejor para ese visitorId, devuelve la misma forma que el GET.
 */
 
 const { createClient } = require('redis');
 
-const BOARD_KEY = 'echo:board';
-const NAMES_KEY = 'echo:names';
+const BOARD_KEY = 'orbit:board';
+const NAMES_KEY = 'orbit:names';
 const TOP_N = 10;
 const MAX_SCORE = 2000000;
 
