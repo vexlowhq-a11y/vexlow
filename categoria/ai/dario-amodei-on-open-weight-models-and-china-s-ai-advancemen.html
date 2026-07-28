@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Snake Survival — VexlowHQ Games</title>
-<meta name="description" content="Classic snake with a neon glow. Swipe or use arrow keys, eat the orbs, don't hit yourself. Free to play, no download.">
-<link rel="stylesheet" href="../css/style.css">
-<link rel="icon" type="image/x-icon" href="../favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<title>Dario Amodei on Open-Weight Models and China's AI Advancements — VexlowHQ</title>
+<meta name="description" content="Anthropic's CEO shares his nuanced stance on open-weight AI models amidst global competition, particularly highlighting concerns over China's rapidly evolving artificial intelligence landscape.">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="icon" type="image/x-icon" href="../../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
@@ -19,7 +19,7 @@
   gtag('config', 'G-20Z63KYZ3K');
 </script>
 </head>
-<body data-static-slug="play">
+<body data-category="ai">
 
 <div class="mobile-topbar">
   <a class="logo-chip" href="../../index.html" aria-label="Go to VexlowHQ Home"><img src="../../img/vexlow-logo.png" alt="VexlowHQ"></a>
@@ -210,61 +210,55 @@
   <main>
 
     <nav class="breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Neon Snake Survival</span>
+      <a href="../../index.html">Home</a><span class="sep">/</span><a href="index.html">AI</a><span class="sep">/</span><a href="anthropic.html">Anthropic</a><span class="sep">/</span><span class="current">Dario Amodei on Open-Weight Models an...</span>
     </nav>
 
     <article class="article-page">
-      <h1>🐍 Neon Snake Survival</h1>
-      <p class="play-intro">Swipe or use the arrow keys. Eat the orbs, don't run into yourself. Tap once to start.</p>
-
-      <div class="dash-wrap">
-        <canvas id="snakeCanvas" width="800" height="360" aria-label="Neon Snake Survival game"></canvas>
-        <div class="dash-hud">
-          <span id="snakeScore">Score: 0</span>
-          <span id="snakeBest">Best: 0</span>
-          <button type="button" id="snakeMute" class="dash-mute" aria-label="Mute sound">🔊</button>
-        </div>
-        <div class="dash-overlay" id="snakeOverlay">
-          <p id="snakeOverlayText">Tap or press Space to start</p>
-        </div>
+      <span class="chip">🤖 AI</span>
+      <h1>Dario Amodei on Open-Weight Models and China's AI Advancements</h1>
+      <p class="dek">Anthropic's CEO shares his nuanced stance on open-weight AI models amidst global competition, particularly highlighting concerns over China's rapidly evolving artificial intelligence landscape.</p>
+      <div class="article-meta">
+        <span>VexlowHQ Staff</span><span class="dot">·</span><span>July 27, 2026</span><span class="dot">·</span><span>7 min</span>
       </div>
 
-      <div class="snake-dpad">
-        <button type="button" class="snake-dpad-btn snake-dpad-up" data-dx="0" data-dy="-1" aria-label="Up"><img src="../img/snake/arrow-up.png" alt=""></button>
-        <button type="button" class="snake-dpad-btn snake-dpad-left" data-dx="-1" data-dy="0" aria-label="Left"><img src="../img/snake/arrow-left.png" alt=""></button>
-        <button type="button" class="snake-dpad-btn snake-dpad-right" data-dx="1" data-dy="0" aria-label="Right"><img src="../img/snake/arrow-right.png" alt=""></button>
-        <button type="button" class="snake-dpad-btn snake-dpad-down" data-dx="0" data-dy="1" aria-label="Down"><img src="../img/snake/arrow-down.png" alt=""></button>
-      </div>
+      <div class="article-banner media ai">🤖</div>
 
-      <div class="dash-name-modal hidden" id="snakeNameModal">
-        <div class="dash-name-card">
-          <h3>🏆 Enter your name</h3>
-          <p>This is what shows up on the Neon Snake leaderboard.</p>
-          <input type="text" id="snakeNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
-          <div class="dash-name-actions">
-            <button type="button" id="snakeNameSkip" class="dash-name-skip">Skip</button>
-            <button type="button" id="snakeNameSave" class="dash-name-save">Save &amp; Play</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-name-modal hidden" id="snakeAdBreak">
-        <div class="dash-name-card">
-          <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
-          <button type="button" id="snakeAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
-        </div>
-      </div>
-
-      <div class="dash-leaderboard">
-        <h3>🏆 Top Scores</h3>
-        <ol class="dash-leaderboard-list" id="snakeLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
-        <p class="dash-lb-you" id="snakeYouRank" hidden></p>
-      </div>
-
-      <div class="play-more"><a href="index.html">← Back to all games</a></div>
-
+      <div class="article-body">
+      <p>In a recent address, Dario Amodei, the founder and CEO of Anthropic, articulated his position regarding open-weight AI models and his apprehensions about the advancements being made in artificial intelligence by China. Amodei's comments come at a time when discussions about the implications of AI technologies are becoming increasingly urgent across multiple sectors, including security, ethics, and economic competitiveness.</p>
+      <h2>Understanding Open-Weight Models</h2>
+      <p>Open-weight models, which allow developers to access the underlying parameters and architecture of AI systems, have been a subject of debate since they can democratize technology and foster innovation. Proponents argue that these models enable researchers and smaller companies to iterate on existing technologies, potentially leading to breakthroughs that might otherwise be stalled in more closed environments.</p>
+      <p>Conversely, critics raise concerns about the misuse of powerful AI tools, particularly in harmful applications. Dario Amodei, while not outright opposing the concept of open-weight models, recognizes the delicate balance between openness and safety. His perspective reflects a growing awareness among AI leaders about the responsibilities that come with developing increasingly sophisticated models.</p>
+      <h2>The Concerns about China's AI Capabilities</h2>
+      <p>Amodei's worries are amplified by the rapid strides China is making in AI research and development. The country has prioritized artificial intelligence as a critical component of its technological strategy. State support for AI initiatives, combined with access to vast amounts of data and a growing pool of talent, has positioned China as a formidable competitor in the AI arena.</p>
+      <p>The implications of this competition extend beyond mere tech rivalry; they encompass national security, economic stability, and global leadership in technological innovation. Amodei's insights highlight a pivotal tension: while the open-sharing ethos in tech sectors aims to foster rapid innovation, it could inadvertently empower adversaries who may not share Western values regarding ethics and safety.</p>
+      <h2>Implications for AI Development</h2>
+      <p>As companies like Anthropic navigate these complexities, they must consider how to maintain a competitive edge without compromising ethical standards. This balancing act may influence future decisions regarding the transparency of AI models and the measures taken to mitigate potential risks. Amodei's comments suggest a cautious approach moving forward, as AI leaders seek to foster collaboration within responsible frameworks while being acutely aware of the geopolitical dimensions involved.</p>
+      <p>Moreover, the discussions surrounding open-weight models also raise vital questions about regulation and governance in the AI domain. As AI capabilities grow, so too does the necessity for a robust regulatory framework that can manage risks without stifling innovation. Industry leaders, governments, and stakeholders must engage in dialogues to shape regulations that ensure the benefits of AI are distributed equitably while also safeguarding against misuse.</p>
+      <h2>The Future of AI Governance</h2>
+      <p>Looking ahead, the future of AI governance will likely hinge on international collaborations and agreements aimed at standardizing practices and safety protocols in AI deployment. Countries might need to work together to create norms that allow for the open exchange of ideas while instituting checks against the potential risks posed by rogue actors.</p>
+      <p>In summary, Dario Amodei's nuanced perspective on open-weight models and the urgency surrounding China's AI advancements points to a critical junction for the global AI community. As stakeholders grapple with the dual priorities of fostering innovation and ensuring security, the path forward will require thoughtful considerations and strategic collaborations.</p>
       <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
+      </div>
+
+      <div class="article-reactions" data-article-slug="dario-amodei-on-open-weight-models-and-china-s-ai-advancemen">
+        <span>React</span>
+        <button type="button" class="reaction-btn" data-reaction="like" aria-label="Like this article">👍 <span class="reaction-count" data-count="like">0</span></button>
+        <button type="button" class="reaction-btn" data-reaction="fire" aria-label="Fire reaction">🔥 <span class="reaction-count" data-count="fire">0</span></button>
+        <button type="button" class="reaction-btn" data-reaction="dislike" aria-label="Dislike this article">👎 <span class="reaction-count" data-count="dislike">0</span></button>
+      </div>
+
+      <div class="article-share">
+        <span>Share</span>
+        <a href="#" data-share="x" aria-label="Share on X">X</a>
+        <a href="#" data-share="whatsapp" aria-label="Share on WhatsApp">W</a>
+        <a href="#" data-share="facebook" aria-label="Share on Facebook">F</a>
+        <a href="#" data-share="copy" aria-label="Copy link">🔗</a>
+      </div>
+
+      <div class="article-continue">
+        <p>Want more news about <strong>Anthropic</strong>?</p>
+        <a class="see-all" href="anthropic.html">See full coverage →</a>
+      </div>
     </article>
 
     <footer class="site-footer">
@@ -316,8 +310,7 @@
   </main>
 </div>
 
-<script src="../data/articulos.js"></script>
-<script src="../js/script.js"></script>
-<script src="../js/snake.js?v=1785205413"></script>
+<script src="../../data/articulos.js"></script>
+<script src="../../js/script.js"></script>
 </body>
 </html>
