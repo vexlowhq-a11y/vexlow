@@ -194,9 +194,9 @@
   var GRAVITY = 0.0028;
   var FLIP_KICK = 0.34;
   var MAX_VY = 1.0;
-  var BASE_SPEED = 0.32, MAX_SPEED = 0.62;
-  var SPEED_STEP_MS = 20000, SPEED_STEP = 0.02;
-  var MIN_WARNING_MS = 700; // tiempo mínimo visible antes de que un obstáculo te alcance
+  var BASE_SPEED = 0.32, MAX_SPEED = 0.72;
+  var SPEED_STEP_MS = 16000, SPEED_STEP = 0.025;
+  var MIN_WARNING_MS = 620; // tiempo mínimo visible antes de que un obstáculo te alcance
 
   var state, player, obstacles, particles, speed, score, elapsedMs, lastTime;
   var distanceSinceSpawn, nextSpawnGap;
@@ -280,9 +280,10 @@
   function spawnObstacle() {
     var elapsedS = elapsedMs / 1000;
     var pool = ['spike-floor', 'spike-ceil'];
-    if (elapsedS > 8) pool.push('gap-floor', 'gap-ceil');
-    if (elapsedS > 18) pool.push('saw');
-    if (elapsedS > 30) pool.push('laser');
+    if (elapsedS > 5) pool.push('gap-floor', 'gap-ceil');
+    if (elapsedS > 12) pool.push('saw');
+    if (elapsedS > 20) pool.push('laser');
+    if (elapsedS > 26) pool.push('pinch');
     var type = pool[Math.floor(Math.random() * pool.length)];
     var x = nextSegmentX();
 
@@ -299,9 +300,22 @@
       obstacles.push({ type: 'saw', surface: surf, x: x, r: 20, rot: 0 });
     } else if (type === 'laser') {
       obstacles.push({ type: 'laser', x: x, w: 14, active: true, blinkMs: 1100 });
+    } else if (type === 'pinch') {
+      // Pincho en el piso Y en el techo a la vez: hay que estar en el
+      // aire (a mitad de flip) justo al cruzarlo, ni parado ni pegado
+      // a ninguna de las dos superficies.
+      obstacles.push({ type: 'pinch', x: x, w: 30 });
     }
   }
   function nextSegmentX() { return player.worldX + W + 40; }
+
+  /* Probabilidad de encadenar un segundo obstáculo muy cerca del
+     anterior (zona de "poco margen para saltar"): crece con el tiempo
+     hasta un tope, y nunca reduce el hueco por debajo de lo que ya
+     garantiza minTravelWidth(). */
+  function comboChance(elapsedS) {
+    return Math.min(0.38, Math.max(0, (elapsedS - 14) / 55));
+  }
 
   function isSurfaceSolid(surface, worldX) {
     for (var i = 0; i < obstacles.length; i++) {
@@ -375,7 +389,12 @@
       spawnObstacle();
       distanceSinceSpawn = 0;
       var minGap = minTravelWidth();
-      nextSpawnGap = Math.max(minGap, 300 - elapsedMs / 1000 * 2 + Math.random() * 160);
+      if (Math.random() < comboChance(elapsedMs / 1000)) {
+        // Encadenar de cerca: obliga a dos flips seguidos sin respiro.
+        nextSpawnGap = minGap + Math.random() * 40;
+      } else {
+        nextSpawnGap = Math.max(minGap, 280 - elapsedMs / 1000 * 3 + Math.random() * 140);
+      }
     }
 
     var px = PLAYER_SCREEN_X;
@@ -400,6 +419,13 @@
         if (o.active) {
           var overlapsLaser = px + PLAYER_SIZE - 4 > sx && px + 4 < sx + o.w;
           if (overlapsLaser) { endGame(); return; }
+        }
+      } else if (o.type === 'pinch') {
+        var overlapsPinch = px + PLAYER_SIZE - 6 > sx && px + 6 < sx + o.w;
+        if (overlapsPinch) {
+          var nearFloor = player.y + PLAYER_SIZE > FLOOR_Y - 20;
+          var nearCeil = player.y < CEIL_Y + 20;
+          if (nearFloor || nearCeil) { endGame(); return; }
         }
       }
     }
@@ -470,6 +496,24 @@
         ctx.shadowBlur = 14;
         ctx.fillStyle = 'rgba(255,61,87,.8)';
         ctx.fillRect(sx, CEIL_Y, o.w, FLOOR_Y - CEIL_Y);
+        ctx.restore();
+      } else if (o.type === 'pinch') {
+        ctx.save();
+        ctx.shadowColor = '#FFC93D';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#FFC93D';
+        ctx.beginPath();
+        ctx.moveTo(sx, FLOOR_Y);
+        ctx.lineTo(sx + o.w / 2, FLOOR_Y - 34);
+        ctx.lineTo(sx + o.w, FLOOR_Y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(sx, CEIL_Y);
+        ctx.lineTo(sx + o.w / 2, CEIL_Y + 34);
+        ctx.lineTo(sx + o.w, CEIL_Y);
+        ctx.closePath();
+        ctx.fill();
         ctx.restore();
       }
     });
