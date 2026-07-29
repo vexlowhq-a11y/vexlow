@@ -173,7 +173,7 @@ async function main() {
 
   var built = await pipeline.buildCandidates();
   var categoryOptions = pipeline.listCategories();
-  var topicsCache = {};
+  var topicsMap = pipeline.allTopicsByCategory();
   var errors = built.errors.slice();
   var published = [];
   var topicsCreated = [];
@@ -183,10 +183,9 @@ async function main() {
 
   for (var i = 0; i < built.candidates.length; i++) {
     var item = built.candidates[i];
-    if (!topicsCache[item.category]) topicsCache[item.category] = pipeline.listTopicsFor(item.category);
 
     try {
-      var result = await draft.draftArticle(item, topicsCache[item.category], draftCfg, categoryOptions);
+      var result = await draft.draftArticle(item, topicsMap, draftCfg, categoryOptions);
       var finalCat = pagegen.CATEGORY_BY_SLUG[result.category] || pagegen.CATEGORY_BY_SLUG[item.category];
 
       var topicSlug = result.topic || '';
@@ -195,7 +194,7 @@ async function main() {
           var newTopic = pagegen.addTopic(finalCat.slug, result.newTopicLabel);
           topicSlug = newTopic.slug;
           topicsCreated.push(finalCat.label + ' / ' + newTopic.label);
-          topicsCache[finalCat.slug] = null; // por si hay otro candidato de la misma categoría en esta corrida
+          topicsMap[finalCat.slug] = (topicsMap[finalCat.slug] || []).concat([{ slug: newTopic.slug, label: newTopic.label }]);
         } catch (e) {
           // Ya existía o el nombre no dio un slug válido — el artículo
           // sigue publicándose, simplemente sin tema asignado.

@@ -134,21 +134,34 @@ var SYSTEM_PROMPT = [
   '',
   'You will also be given the category the source feed is filed under, plus the full list of valid site categories. Some source feeds are broad (e.g. a general tech feed) and mis-file stories that actually belong elsewhere (e.g. a gaming or business story filed under "technology") — read the actual headline/summary and pick the single best-fitting "category" slug from the full list. If the feed\'s original category is genuinely the best fit, just confirm it.',
   '',
-  'Also pick the single best-fitting "topic" slug from the provided list for the category you chose (or "" if none fit well), and estimate "readTime" as "N min" based on the body length. If no existing topic fits but the story clearly belongs to a specific recurring subject (a game, a company, a product line, etc.) that readers would search for again, propose a short new topic label in "newTopicLabel" (2-4 words, title case, e.g. "Nintendo Switch 2") — leave it "" if an existing topic already fits or nothing specific enough comes up.',
+  'You will also be given every existing topic for every category (topics are the specific subject tags articles are filed under within a category — a game, a company, a person, a franchise, a product line, etc., NOT a generic bucket). ALWAYS assign a topic to this article — leaving it untagged should be rare, only for a genuine multi-subject roundup with no single clear focus (e.g. "5 things happening in tech this week"). Almost every news story IS about a specific, nameable subject (the company involved, the person, the game/franchise, the product), so:',
+  '  1. First check if an existing topic (from the list for the category you chose) already covers that subject — if so, put its slug in "topic".',
+  '  2. If not, you MUST invent one: put a short, specific label in "newTopicLabel" (2-4 words, title case, e.g. "Nintendo Switch 2", "Meta", "SpaceX Starship") naming the actual subject of the story — the company/person/product/franchise it centers on. Do not leave both "topic" and "newTopicLabel" empty just because no existing topic matches; that is exactly when you create a new one.',
+  '  3. Only leave both "topic" and "newTopicLabel" as "" for genuinely topic-less roundup pieces where no single subject applies.',
+  '',
+  'Also estimate "readTime" as "N min" based on the body length.',
   '',
   'Respond with ONLY a single JSON object, no markdown code fences, no commentary, with exactly these keys:',
   '{"title": "...", "dek": "...", "body": "...", "category": "...", "topic": "...", "newTopicLabel": "...", "readTime": "..."}',
 ].join('\n');
 
-function draftArticle(item, topicOptions, cfg, categoryOptions) {
+// "topicsByCategory": { catSlug: [{slug, label}, ...], ... } — TODAS las
+// categorías, no solo la de origen, para que el tema siga siendo
+// validable aunque la IA reclasifique el artículo a otra categoría.
+function draftArticle(item, topicsByCategory, cfg, categoryOptions) {
   cfg = cfg || loadConfig();
   var provider = cfg.draftProvider || 'anthropic';
   var apiKey = provider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
   if (!apiKey) {
     return Promise.reject(new Error('NO_API_KEY'));
   }
-  var topicsList = (topicOptions || []).map(function (t) { return t.slug + ' — ' + t.label; }).join('\n');
+  topicsByCategory = topicsByCategory || {};
   var categoriesList = (categoryOptions || []).map(function (c) { return c.slug + ' — ' + c.label; }).join('\n');
+  var topicsBlock = Object.keys(topicsByCategory).map(function (cat) {
+    var list = topicsByCategory[cat] || [];
+    var line = list.map(function (t) { return t.slug + ' — ' + t.label; }).join(', ');
+    return cat + ': ' + (line || '(sin temas todavía)');
+  }).join('\n');
   var userPrompt = [
     'Source headline: ' + item.title,
     'Source summary: ' + (item.summary || '(no summary provided)'),
@@ -158,8 +171,8 @@ function draftArticle(item, topicOptions, cfg, categoryOptions) {
     'Valid site category slugs:',
     categoriesList || item.category,
     '',
-    'Available topic slugs for the feed\'s original category (' + item.category + ') — note the right list may differ if you change the category:',
-    topicsList || '(none — use "")',
+    'Existing topics per category (pick from the list matching the category you chose):',
+    topicsBlock || '(none — use "")',
   ].join('\n');
 
   var call = provider === 'openai'
@@ -171,10 +184,7 @@ function draftArticle(item, topicOptions, cfg, categoryOptions) {
     if (!result.title || !result.body) throw new Error('Borrador incompleto (falta title o body)');
     var validCategory = (categoryOptions || []).some(function (c) { return c.slug === result.category; });
     var category = validCategory ? result.category : item.category;
-    // El "topic" solo es válido si además coincide con la categoría final
-    // elegida (la lista de topicOptions que nos pasaron es la del feed
-    // original, puede no aplicar si la IA cambió de categoría).
-    var validTopic = category === item.category && (topicOptions || []).some(function (t) { return t.slug === result.topic; });
+    var validTopic = (topicsByCategory[category] || []).some(function (t) { return t.slug === result.topic; });
     return {
       title: stripMarkdownEmphasis(String(result.title).trim()),
       dek: stripMarkdownEmphasis(String(result.dek || '').trim()),
@@ -183,6 +193,47 @@ function draftArticle(item, topicOptions, cfg, categoryOptions) {
       topic: validTopic ? result.topic : '',
       newTopicLabel: validTopic ? '' : String(result.newTopicLabel || '').trim().slice(0, 40),
       readTime: String(result.readTime || '').trim()
+    };
+  });
+}
+
+var TOPIC_ONLY_SYSTEM_PROMPT = [
+  'You help tag existing news articles on VexlowHQ with a "topic" — the specific subject the article is about (a company, person, game, franchise, product line, etc.), used to group articles for readers browsing by subject within a category.',
+  'You will get a title, short summary, and the category it is already filed under (already correct, do not change it), plus the existing topics for that category. ALWAYS assign a topic — leaving it blank should be rare, only for a genuine multi-subject roundup with no single clear focus.',
+  '1. If an existing topic already covers the subject, put its slug in "topic".',
+  '2. Otherwise you MUST invent one: a short, specific label in "newTopicLabel" (2-4 words, title case) naming the actual subject.',
+  '3. Only leave both "topic" and "newTopicLabel" as "" for genuinely topic-less roundup pieces.',
+  'Respond with ONLY a single JSON object, no markdown code fences, no commentary: {"topic": "...", "newTopicLabel": "..."}',
+].join('\n');
+
+// Solo clasifica el tema de un artículo YA EXISTENTE (no reescribe nada
+// más) — usado por admin/backfill-topics.js para ponerle tema a
+// artículos publicados antes de que existiera esta lógica.
+function classifyTopic(article, topicOptions, cfg) {
+  cfg = cfg || loadConfig();
+  var provider = cfg.draftProvider || 'anthropic';
+  var apiKey = provider === 'openai' ? cfg.openaiApiKey : cfg.anthropicApiKey;
+  if (!apiKey) return Promise.reject(new Error('NO_API_KEY'));
+
+  var topicsList = (topicOptions || []).map(function (t) { return t.slug + ' — ' + t.label; }).join(', ');
+  var userPrompt = [
+    'Title: ' + article.title,
+    'Summary: ' + (article.dek || '(no summary)'),
+    'Category (fixed, do not change): ' + (article.categoryLabel || article.category),
+    '',
+    'Existing topics for this category: ' + (topicsList || '(none yet)'),
+  ].join('\n');
+
+  var call = provider === 'openai'
+    ? callOpenAI(apiKey, cfg.draftModel || 'gpt-4o-mini', TOPIC_ONLY_SYSTEM_PROMPT, userPrompt)
+    : callAnthropic(apiKey, cfg.draftModel || 'claude-sonnet-5', TOPIC_ONLY_SYSTEM_PROMPT, userPrompt);
+
+  return call.then(function (text) {
+    var result = extractJson(text);
+    var validTopic = (topicOptions || []).some(function (t) { return t.slug === result.topic; });
+    return {
+      topic: validTopic ? result.topic : '',
+      newTopicLabel: validTopic ? '' : String(result.newTopicLabel || '').trim().slice(0, 40)
     };
   });
 }
@@ -197,5 +248,6 @@ function stripMarkdownEmphasis(text) {
 
 module.exports = {
   loadConfig: loadConfig,
-  draftArticle: draftArticle
+  draftArticle: draftArticle,
+  classifyTopic: classifyTopic
 };

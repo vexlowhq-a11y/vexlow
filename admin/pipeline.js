@@ -68,6 +68,15 @@ function listCategories() {
     .map(function (c) { return { slug: c.slug, label: c.label }; });
 }
 
+// Temas existentes de TODAS las categorías, para pasarle a draftArticle
+// (necesita saber los temas válidos de cualquier categoría a la que
+// pueda reclasificar el artículo, no solo la de origen).
+function allTopicsByCategory() {
+  var map = {};
+  listCategories().forEach(function (c) { map[c.slug] = listTopicsFor(c.slug); });
+  return map;
+}
+
 function uniqueSlug(base, taken) {
   var slug = base || 'articulo';
   var counter = 1;
@@ -172,19 +181,18 @@ async function fetchNewDrafts() {
   var candidates = built.candidates;
   var takenSlugs = built.takenSlugs;
   var categoryOptions = listCategories();
+  var topicsMap = allTopicsByCategory();
 
   var added = 0;
   var errors = built.errors;
-  var topicsCache = {};
 
   for (var i = 0; i < candidates.length; i++) {
     var item = candidates[i];
     var cat = pagegen.CATEGORY_BY_SLUG[item.category];
     if (!cat) continue;
-    if (!topicsCache[item.category]) topicsCache[item.category] = listTopicsFor(item.category);
 
     try {
-      var result = await draft.draftArticle(item, topicsCache[item.category], cfg, categoryOptions);
+      var result = await draft.draftArticle(item, topicsMap, cfg, categoryOptions);
       var finalCat = pagegen.CATEGORY_BY_SLUG[result.category] || cat;
       var slug = uniqueSlug(pagegen.slugify(result.title), takenSlugs);
       drafts.push({
@@ -247,6 +255,7 @@ module.exports = {
   buildCandidates: buildCandidates,
   listTopicsFor: listTopicsFor,
   listCategories: listCategories,
+  allTopicsByCategory: allTopicsByCategory,
   uniqueSlug: uniqueSlug,
   todayISO: todayISO
 };
