@@ -1,0 +1,116 @@
+/*
+  Imagen destacada generada por IA — usado por admin/auto-publish.js
+  =====================================================================
+  Le pide a la API de imágenes de OpenAI (gpt-image-1.5, calidad "low"
+  por defecto — ver admin/config.json "imageGeneration") una portada
+  para el artículo, a partir del título y el tema. Se guarda en
+  img/temas/<slug>.jpg. Si falla por cualquier motivo (sin crédito,
+  error de red, etc.) devuelve null — el artículo se publica igual,
+  sin imagen (usa el ícono de la categoría, como cualquier artículo
+  sin imagen puesta a mano).
+
+  Solo aplica a artículos NUEVOS publicados por el bot de acá en
+  más — no reprocesa artículos viejos (para eso, si se quiere en
+  algún momento, sería un script de backfill aparte, igual que
+  admin/backfill-topics.js).
+*/
+
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const { spawn } = require('child_process');
+
+const ROOT = path.join(__dirname, '..');
+const IMG_TEMAS_DIR = path.join(ROOT, 'img', 'temas');
+
+function callOpenAIImage(apiKey, model, quality, size, prompt) {
+  return new Promise(function (resolve, reject) {
+    var payload = JSON.stringify({ model: model, prompt: prompt, size: size, quality: quality, n: 1 });
+    var req = https.request({
+      hostname: 'api.openai.com',
+      path: '/v1/images/generations',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer ' + apiKey,
+        'content-length': Buffer.byteLength(payload)
+      },
+      timeout: 120000
+    }, function (res) {
+      var chunks = [];
+      res.on('data', function (c) { chunks.push(c); });
+      res.on('end', function () {
+        var body = Buffer.concat(chunks).toString('utf8');
+        if (res.statusCode !== 200) {
+          return reject(new Error('OpenAI images API respondió ' + res.statusCode + ': ' + body.slice(0, 300)));
+        }
+        try {
+          var parsed = JSON.parse(body);
+          var b64 = parsed.data && parsed.data[0] && parsed.data[0].b64_json;
+          if (!b64) return reject(new Error('Respuesta sin imagen'));
+          resolve(b64);
+        } catch (e) {
+          reject(new Error('No se pudo leer la respuesta de OpenAI: ' + e.message));
+        }
+      });
+    });
+    req.on('timeout', function () { req.destroy(new Error('timeout generando la imagen')); });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+// Convierte el PNG que devuelve la API a JPEG comprimido (reusa Python
+// + PIL, que ya está probado en este repo para las portadas de los
+// juegos — evita sumar una dependencia nueva de Node solo para esto).
+function pngToJpeg(pngPath, jpegPath) {
+  return new Promise(function (resolve, reject) {
+    var code = [
+      'from PIL import Image',
+      "im = Image.open(r'" + pngPath + "').convert('RGB')",
+      "im.save(r'" + jpegPath + "', 'JPEG', quality=82, optimize=True)"
+    ].join('\n');
+    var py = spawn('python', ['-c', code]);
+    var err = '';
+    py.stderr.on('data', function (d) { err += d.toString('utf8'); });
+    py.on('error', reject);
+    py.on('close', function (exitCode) {
+      if (exitCode !== 0) return reject(new Error('PIL falló convirtiendo a JPEG: ' + err.slice(0, 300)));
+      resolve();
+    });
+  });
+}
+
+// article: { title, categoryLabel, topic-related label si hay, slug }
+// Devuelve la ruta relativa (ej. "img/temas/mi-articulo.jpg") o null.
+async function generateCoverImage(article, cfg, topicLabel) {
+  var imgCfg = (cfg && cfg.imageGeneration) || {};
+  if (!imgCfg.enabled) return null;
+  var apiKey = cfg.openaiApiKey;
+  if (!apiKey) return null;
+
+  var subject = topicLabel ? (article.title + ' (' + topicLabel + ')') : article.title;
+  var prompt = 'Wide editorial news-article cover image about: ' + subject +
+    '. Category: ' + (article.categoryLabel || '') + '. ' +
+    'Clean modern illustration / abstract-conceptual style matching a professional tech/news website — think abstract shapes, symbolic icons, generic scenes, or stylized objects representing the concept. ' +
+    'CRITICAL: never depict the face or likeness of any real, named, identifiable person (public figures, executives, celebrities, politicians, athletes, etc.) — do not draw a realistic or recognizable portrait of anyone real. If the story centers on a specific named person or organization, represent it symbolically instead (e.g. a generic silhouette from behind/far away, an abstract icon, a relevant object, a stylized building/logo-shape without readable text) rather than their actual face. ' +
+    'No readable text, no words, no letters, no logos, no watermarks, no captions anywhere in the image.';
+
+  fs.mkdirSync(IMG_TEMAS_DIR, { recursive: true });
+  var pngPath = path.join(IMG_TEMAS_DIR, article.slug + '.png');
+  var jpegPath = path.join(IMG_TEMAS_DIR, article.slug + '.jpg');
+
+  try {
+    var b64 = await callOpenAIImage(apiKey, imgCfg.model || 'gpt-image-1.5', imgCfg.quality || 'low', imgCfg.size || '1536x1024', prompt);
+    fs.writeFileSync(pngPath, Buffer.from(b64, 'base64'));
+    await pngToJpeg(pngPath, jpegPath);
+    fs.unlinkSync(pngPath);
+    return 'img/temas/' + article.slug + '.jpg';
+  } catch (e) {
+    try { if (fs.existsSync(pngPath)) fs.unlinkSync(pngPath); } catch (e2) {}
+    throw e;
+  }
+}
+
+module.exports = { generateCoverImage: generateCoverImage };

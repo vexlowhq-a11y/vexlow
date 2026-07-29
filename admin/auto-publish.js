@@ -22,9 +22,13 @@
        algunas notas (admin/draft.js).
     4. Si la IA sugiere un tema que no existe todavía, lo crea
        (pagegen.addTopic) en vez de dejarlo sin tema.
-    5. Guarda cada artículo en data/articulos.json y genera su página
-       HTML — nunca genera imágenes, esas las sigue poniendo el
-       usuario a mano cuando puede.
+    5. Le pide una imagen destacada a la API de OpenAI (gpt-image-1.5,
+       calidad "low" — ver admin/config.json "imageGeneration") y la
+       guarda en img/temas/. Si falla (sin crédito, error de red, etc.)
+       el artículo se publica igual, sin imagen — no se corta la
+       corrida. Solo aplica a artículos nuevos, no reprocesa los viejos.
+    5b. Guarda cada artículo en data/articulos.json y genera su página
+       HTML.
     6. Revisa si algún artículo (de esta corrida o de una anterior)
        ya tiene imagen puesta a mano y todavía no está en el
        carrusel de la home (data/hero.json) — si es así, lo suma
@@ -43,6 +47,7 @@ const draft = require('./draft');
 const pipeline = require('./pipeline');
 const pagegen = require('./pagegen');
 const deploy = require('./deploy');
+const imageGen = require('./image-gen');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -177,6 +182,7 @@ async function main() {
   var errors = built.errors.slice();
   var published = [];
   var topicsCreated = [];
+  var imagesGenerated = 0;
 
   var articles = readJSON(ARTICULOS_FILE, []);
   var takenSlugs = built.takenSlugs;
@@ -220,6 +226,15 @@ async function main() {
         sourceUrl: item.link,
         sourceTitle: item.title
       };
+
+      try {
+        var topicLabel = topicSlug ? pagegen.topicLabelFor(finalCat.slug, topicSlug) : null;
+        var imagePath = await imageGen.generateCoverImage(article, draftCfg, topicLabel);
+        if (imagePath) { article.image = imagePath; imagesGenerated++; }
+      } catch (e) {
+        errors.push({ error: 'Imagen para "' + article.title.slice(0, 40) + '": ' + e.message });
+      }
+
       articles.push(article);
       pagegen.generateArticleFile(article);
       published.push(article.title + ' (' + finalCat.label + ')');
@@ -251,7 +266,7 @@ async function main() {
         'data/hero.json', 'data/hero.js',
         'data/topics.json',
         'data/automation-log.json',
-        'categoria', 'sitemap.xml'
+        'categoria', 'sitemap.xml', 'img/temas'
       ];
       deployResult = await deploy.deploy('Publicación automática — ' + new Date().toISOString(), deployPaths);
     } catch (e) {
@@ -266,6 +281,7 @@ async function main() {
     ok: errors.length === 0 && deployResult.ok !== false,
     published: published,
     topicsCreated: topicsCreated,
+    imagesGenerated: imagesGenerated,
     heroAdded: heroAdded,
     errors: errors,
     deploy: deployResult.nothingToCommit ? 'sin cambios para publicar' : (deployResult.ok ? 'publicado en vexlowhq.com' : ('error: ' + (deployResult.error || 'git falló')))
