@@ -1,5 +1,32 @@
 [
   {
+    "startedAt": "2026-07-30T20:25:58.110Z",
+    "finishedAt": "2026-07-30T20:28:31.981Z",
+    "forced": false,
+    "ok": false,
+    "published": [
+      "Revamped Friend AI Wearable Launches with New Voice Feature (AI)",
+      "CareCloud Alerts Clients After Medical Records Breach (Technology)",
+      "Asteroid 44 Nysa: The First Three-Headed Asteroid Discovered with Its Own Moon (Science & Space)",
+      "The Enduring Legacy of Spider-Man in Comics: A Look at the Best Stories (Entertainment)",
+      "Amazon Sees Surge in Q2 Ad Revenue Amid Record Profits Fueled by AI Investments (Business)",
+      "Second-Year NFL Quarterbacks: A Look at Their Improvement Areas (Sports)"
+    ],
+    "topicsCreated": [
+      "AI / Friend AI Wearable",
+      "Entertainment / Spider-Man Comics"
+    ],
+    "imagesGenerated": 5,
+    "trendingUpdated": false,
+    "heroRotated": false,
+    "errors": [
+      {
+        "error": "Imagen para \"The Enduring Legacy of Spider-Man in Com\": OpenAI images API respondió 400: {\n  \"error\": {\n    \"message\": \"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_befdcdb5dbae46fcb7072b7f5204a469.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": null,\n    \"code\": \"moderation_block"
+      }
+    ],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-07-30T15:04:01.095Z",
     "finishedAt": "2026-07-30T15:08:02.652Z",
     "forced": false,

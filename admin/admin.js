@@ -1374,11 +1374,13 @@
       if (entry.heroRotated && entry.heroRotated.length) parts.push('carrusel rotado (' + entry.heroRotated.length + ')');
       if (entry.deploy) parts.push(entry.deploy);
       if (entry.errors && entry.errors.length) parts.push(entry.errors.length + ' error(es)');
-      info.innerHTML = '<div class="ttl"></div><div class="meta"></div>';
+      info.innerHTML = '<div class="ttl"></div><div class="meta"></div><div class="meta" style="color:#E5484D;"></div>';
       info.querySelector('.ttl').textContent = whenLabel + (entry.forced ? ' · manual' : ' · automática');
-      info.querySelector('.meta').textContent = parts.join(' · ') +
-        ((entry.published || []).length ? ' — ' + entry.published.join('; ') : '') +
-        (entry.error ? ' — ' + entry.error : '');
+      info.querySelectorAll('.meta')[0].textContent = parts.join(' · ') +
+        ((entry.published || []).length ? ' — ' + entry.published.join('; ') : '');
+      var errorTexts = (entry.errors || []).map(function (e) { return e.error || e; });
+      if (entry.error) errorTexts.unshift(entry.error);
+      info.querySelectorAll('.meta')[1].textContent = errorTexts.length ? errorTexts.join(' | ') : '';
 
       row.appendChild(thumb);
       row.appendChild(info);
