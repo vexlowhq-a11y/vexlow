@@ -1,9 +1,10 @@
 /*
   HERO — diapositivas del carrusel principal de la Home
   =======================================================
-  GENERADO AUTOMÁTICAMENTE (bot de publicación — rotación
-  semanal de trending). No lo edites a mano. La fuente real es
-  data/hero.json.
+  GENERADO AUTOMÁTICAMENTE por el panel de administración
+  (admin/index.html). No lo edites a mano: los cambios se van a
+  perder la próxima vez que guardes algo desde el panel.
+  La fuente real es data/hero.json.
 */
 const VEXLOW_HERO = [
   {
@@ -12,7 +13,7 @@ const VEXLOW_HERO = [
     "title": "Martha Stewart Co-Founders New AI Startup Hint for Home Management",
     "dek": "Hint aims to integrate home management tasks through an AI assistant, providing homeowners with a comprehensive tool for managing property records, maintenance schedules, and more.",
     "image": "img/temas/martha-stewart-co-founders-new-ai-startup-hint-for-home-mana.jpg",
-    "textColor": "auto",
+    "textColor": "#ffffff",
     "href": "https://vexlowhq.com/categoria/ai/martha-stewart-co-founders-new-ai-startup-hint-for-home-mana.html"
   },
   {
@@ -21,7 +22,7 @@ const VEXLOW_HERO = [
     "title": "Elon Musk’s X and the World Federation of Advertisers Reach Legal Settlement",
     "dek": "The social media platform X, under Elon Musk's ownership, has resolved a lengthy legal dispute with the World Federation of Advertisers over advertising practices and revenue loss.",
     "image": "img/temas/elon-musk-s-x-and-the-world-federation-of-advertisers-reach-.jpg",
-    "textColor": "auto",
+    "textColor": "#ffffff",
     "href": "https://vexlowhq.com/categoria/business/elon-musk-s-x-and-the-world-federation-of-advertisers-reach-.html"
   },
   {
@@ -30,7 +31,7 @@ const VEXLOW_HERO = [
     "title": "Dean Devlin Reveals Ambitious Plans for 'The Ark' Season 3",
     "dek": "The creator of 'The Ark' teases an over-the-top third season filled with unexpected twists and expansive narratives.",
     "image": "img/temas/dean-devlin-reveals-ambitious-plans-for-the-ark-season-3.jpg",
-    "textColor": "auto",
+    "textColor": "#ffffff",
     "href": "https://vexlowhq.com/categoria/entertainment/dean-devlin-reveals-ambitious-plans-for-the-ark-season-3.html"
   },
   {
@@ -39,7 +40,7 @@ const VEXLOW_HERO = [
     "title": "Halo: Campaign Evolved Launches for PS5 and Xbox Series X",
     "dek": "The latest installment in the Halo franchise, Halo: Campaign Evolved, is now available for players on both PlayStation 5 and Xbox Series X, featuring multiple editions to cater to different gaming preferences.",
     "image": "img/temas/halo-campaign-evolved-launches-for-ps5-and-xbox-series-x.jpg",
-    "textColor": "auto",
+    "textColor": "#ffffff",
     "href": "https://vexlowhq.com/categoria/gaming/halo-campaign-evolved-launches-for-ps5-and-xbox-series-x.html"
   },
   {
@@ -48,7 +49,7 @@ const VEXLOW_HERO = [
     "title": "LeBron James Makes Surprise Move to Philadelphia: A New Chapter in His Career",
     "dek": "The star forward's decision to join the Philadelphia 76ers marks a pivotal moment driven by personal loyalty and a quest for greatness.",
     "image": "img/temas/lebron-james-makes-surprise-move-to-philadelphia-a-new-chapt.jpg",
-    "textColor": "auto",
+    "textColor": "#ffffff",
     "href": "https://vexlowhq.com/categoria/sports/lebron-james-makes-surprise-move-to-philadelphia-a-new-chapt.html"
   }
 ];
