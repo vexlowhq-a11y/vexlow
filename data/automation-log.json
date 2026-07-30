@@ -1,5 +1,27 @@
 [
   {
+    "startedAt": "2026-07-30T15:04:01.095Z",
+    "finishedAt": "2026-07-30T15:08:02.652Z",
+    "forced": false,
+    "ok": true,
+    "published": [
+      "Examining the Lessons from the OpenAI Hack on Hugging Face (AI)",
+      "The Growing Demand for Forward-Deployed Engineers in AI (AI)",
+      "Celebrating Galileo: The First Observations of Saturn’s Rings and Their Lasting Impact (Science & Space)",
+      "Neon Genesis Evangelion Arrives on Criterion Channel This September (Entertainment)",
+      "Netflix to Release Léa Seydoux's 'Gentle Monster' This Fall (Entertainment)",
+      "MLB Trade Deadline Approaches: Analyzing Team Strategies and Key Targets (Sports)"
+    ],
+    "topicsCreated": [
+      "AI / Forward-Deployed Engineers"
+    ],
+    "imagesGenerated": 6,
+    "trendingUpdated": false,
+    "heroRotated": false,
+    "errors": [],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-07-30T09:20:57.910Z",
     "finishedAt": "2026-07-30T09:24:31.966Z",
     "forced": true,
