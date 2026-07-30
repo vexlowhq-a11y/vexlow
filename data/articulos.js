@@ -1,9 +1,10 @@
 /*
   ARTÍCULOS — fuente de "Últimas publicadas" y de las páginas de categoría
   ==========================================================================
-  GENERADO AUTOMÁTICAMENTE (panel de administración / bot de
-  publicación automática). No lo edites a mano. La fuente real es
-  data/articulos.json.
+  GENERADO AUTOMÁTICAMENTE por el panel de administración
+  (admin/index.html). No lo edites a mano: los cambios se van a
+  perder la próxima vez que guardes algo desde el panel.
+  La fuente real es data/articulos.json.
 */
 const VEXLOW_ARTICLES = [
   {
@@ -2113,16 +2114,15 @@ const VEXLOW_ARTICLES = [
     "icon": "🎬",
     "date": "2026-07-28",
     "readTime": "7 min",
-    "topic": "spidermanbrandnewday",
+    "topic": "disneyplus",
+    "subtopic": "marvel",
     "slug": "spider-man-brand-new-day-expected-to-dominate-2026-box-offic",
     "dek": "As anticipation builds, Spider-Man: Brand New Day is set to achieve record-breaking earnings in its opening weekend, signaling strong enthusiasm for the future of superhero films.",
-    "trending": false,
     "image": "",
     "videoUrl": "",
+    "trending": false,
     "body": "The latest installment in the Spider-Man franchise, titled Spider-Man: Brand New Day, is currently projected to break box office records upon its release, possibly achieving the biggest opening weekend of 2026. This anticipation underscores the continued cultural impact and commercial viability of superhero films, particularly those within the Marvel universe.\n\n## A Proven Formula\nSince the dawn of the MCU, Spider-Man has been one of the key figures in the superhero genre, consistently drawing audiences both in theaters and on streaming platforms. The character, which has evolved through various iterations, remains a fan favorite, making it a reliable choice for studios looking to capitalize on audience nostalgia and excitement. \n\nWith its combination of action-packed storytelling, compelling characters, and stunning visual effects, Brand New Day is expected to resonate with fans of all ages, multiplying its appeal across demographic lines. Marvel has a history of launching blockbuster hits, and the integration of innovative technology and storytelling elements only enhances the franchise's attractiveness.\n\n## Marketing and Hype\nThe marketing strategy surrounding Brand New Day has been robust, featuring anticipated trailers that provide glimpses of what fans can expect. Social media buzz has also contributed significantly to the film's hype, with dedicated fans creating discussions around potential plot points, character arcs, and cameos, all of which could play a role in expanding the narrative universe.\n\nMoreover, recent trends in cinematic releases suggest an appetite for superhero films post-pandemic, as audiences return to theaters for immersive experiences. The excitement surrounding Brand New Day reflects this broader resurgence, indicating a strong recovery in film attendance and a turning point for the entertainment industry.\n\n[publicidad]\n\n## Implications for the Box Office\nShould Brand New Day meet these lofty expectations and secure a record-breaking opening, it will further cement the superhero genre's influence over modern cinema. It can also reshape market dynamics, prompting studios to prioritize similar high-concept projects, which generally promise substantial returns on investments.\n\nCompeting releases might strategically alter their launch dates to avoid clashing with Brand New Day, which could influence industry patterns for future film schedules. Additionally, a strong opening weekend would bolster the chances for sequels or spin-offs, continuing the conversation around the Spider-Man universe and its expanding lore.\n\n## Looking Ahead\nAs Spider-Man: Brand New Day prepares to hit theaters, the looming question is how it will perform against competitors and how it will fare in a landscape filled with superhero offerings. The film's success could motivate studios to either replicate its format or explore unique approaches that push the genre in new directions.\n\nAs the opening day approaches, interest will undoubtedly continue to grow, creating a unique opportunity for Spider-Man to not only break records but also to set a new standard in the superhero film canon. Fans and industry watchers alike will be keenly examining the film's reception, which could either redefine box office expectations or reaffirm them.",
-    "href": "categoria/entertainment/spider-man-brand-new-day-expected-to-dominate-2026-box-offic.html",
-    "sourceUrl": "https://www.ign.com/articles/spider-man-brand-new-day-is-projected-to-have-the-biggest-opening-of-2026",
-    "sourceTitle": "Spider-Man: Brand New Day Is Projected to Have the Biggest Opening of 2026"
+    "href": "categoria/entertainment/spider-man-brand-new-day-expected-to-dominate-2026-box-offic.html"
   },
   {
     "title": "Lee Chang-dong's 'Possible Love' Sets Release Dates Amid Film Festival Buzz",
