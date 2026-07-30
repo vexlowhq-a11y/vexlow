@@ -1370,7 +1370,8 @@
       parts.push((entry.published || []).length + ' artículo(s) publicado(s)');
       if (entry.topicsCreated && entry.topicsCreated.length) parts.push(entry.topicsCreated.length + ' tema(s) nuevo(s)');
       if (entry.imagesGenerated) parts.push(entry.imagesGenerated + ' imagen(es) generada(s)');
-      if (entry.heroAdded && entry.heroAdded.length) parts.push(entry.heroAdded.length + ' al carrusel');
+      if (entry.trendingUpdated) parts.push('trending recalculado (' + entry.trendingUpdated + ')');
+      if (entry.heroRotated && entry.heroRotated.length) parts.push('carrusel rotado (' + entry.heroRotated.length + ')');
       if (entry.deploy) parts.push(entry.deploy);
       if (entry.errors && entry.errors.length) parts.push(entry.errors.length + ' error(es)');
       info.innerHTML = '<div class="ttl"></div><div class="meta"></div>';

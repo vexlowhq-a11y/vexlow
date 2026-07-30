@@ -1,5 +1,37 @@
 [
   {
+    "startedAt": "2026-07-30T00:01:45.039Z",
+    "finishedAt": "2026-07-30T00:01:49.640Z",
+    "forced": true,
+    "ok": true,
+    "published": [],
+    "topicsCreated": [],
+    "imagesGenerated": 0,
+    "trendingUpdated": false,
+    "heroRotated": false,
+    "errors": [],
+    "deploy": "sin cambios para publicar"
+  },
+  {
+    "startedAt": "2026-07-30T00:00:42.978Z",
+    "finishedAt": "2026-07-30T00:01:05.239Z",
+    "forced": true,
+    "ok": true,
+    "published": [],
+    "topicsCreated": [],
+    "imagesGenerated": 0,
+    "trendingUpdated": 15,
+    "heroRotated": [
+      "Martha Stewart Co-Founders New AI Startup Hint for Home Management",
+      "Elon Musk’s X and the World Federation of Advertisers Reach Legal Settlement",
+      "Dean Devlin Reveals Ambitious Plans for 'The Ark' Season 3",
+      "Halo: Campaign Evolved Launches for PS5 and Xbox Series X",
+      "LeBron James Makes Surprise Move to Philadelphia: A New Chapter in His Career"
+    ],
+    "errors": [],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-07-29T23:26:18.713Z",
     "finishedAt": "2026-07-29T23:27:01.750Z",
     "forced": true,

@@ -23,6 +23,27 @@ const { spawn } = require('child_process');
 const ROOT = path.join(__dirname, '..');
 const IMG_TEMAS_DIR = path.join(ROOT, 'img', 'temas');
 
+function sleep(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+
+// Esta cuenta de OpenAI tiene un límite bajo de imágenes por minuto
+// (visto en la práctica: 5/min) — generar varias seguidas (backfill,
+// o una corrida con varios artículos nuevos) choca con eso enseguida.
+// Reintenta con espera cuando la API devuelve 429, en vez de
+// simplemente fallar.
+async function callOpenAIImageWithRetry(apiKey, model, quality, size, prompt) {
+  var MAX_ATTEMPTS = 5;
+  for (var attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      return await callOpenAIImage(apiKey, model, quality, size, prompt);
+    } catch (e) {
+      if (e.statusCode !== 429 || attempt === MAX_ATTEMPTS) throw e;
+      var match = /try again in ([\d.]+)s/i.exec(e.message);
+      var waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 2000 : 15000;
+      await sleep(waitMs);
+    }
+  }
+}
+
 function callOpenAIImage(apiKey, model, quality, size, prompt) {
   return new Promise(function (resolve, reject) {
     var payload = JSON.stringify({ model: model, prompt: prompt, size: size, quality: quality, n: 1 });
@@ -42,7 +63,9 @@ function callOpenAIImage(apiKey, model, quality, size, prompt) {
       res.on('end', function () {
         var body = Buffer.concat(chunks).toString('utf8');
         if (res.statusCode !== 200) {
-          return reject(new Error('OpenAI images API respondió ' + res.statusCode + ': ' + body.slice(0, 300)));
+          var err = new Error('OpenAI images API respondió ' + res.statusCode + ': ' + body.slice(0, 300));
+          err.statusCode = res.statusCode;
+          return reject(err);
         }
         try {
           var parsed = JSON.parse(body);
@@ -102,7 +125,7 @@ async function generateCoverImage(article, cfg, topicLabel) {
   var jpegPath = path.join(IMG_TEMAS_DIR, article.slug + '.jpg');
 
   try {
-    var b64 = await callOpenAIImage(apiKey, imgCfg.model || 'gpt-image-1.5', imgCfg.quality || 'low', imgCfg.size || '1536x1024', prompt);
+    var b64 = await callOpenAIImageWithRetry(apiKey, imgCfg.model || 'gpt-image-1.5', imgCfg.quality || 'low', imgCfg.size || '1536x1024', prompt);
     fs.writeFileSync(pngPath, Buffer.from(b64, 'base64'));
     await pngToJpeg(pngPath, jpegPath);
     fs.unlinkSync(pngPath);

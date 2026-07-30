@@ -29,10 +29,12 @@
        corrida. Solo aplica a artículos nuevos, no reprocesa los viejos.
     5b. Guarda cada artículo en data/articulos.json y genera su página
        HTML.
-    6. Revisa si algún artículo (de esta corrida o de una anterior)
-       ya tiene imagen puesta a mano y todavía no está en el
-       carrusel de la home (data/hero.json) — si es así, lo suma
-       (hasta 5, nunca baja de 3).
+    6. Una vez por día (admin/trending.js), recalcula qué artículos
+       están "trending" combinando reacciones reales (api/react.js)
+       con antigüedad — reemplaza cualquier marca manual anterior.
+       Una vez por semana, arma el carrusel principal (data/hero.json,
+       3 a 5 slides) a partir de los trending que ya tengan imagen,
+       reemplazándolo entero (no lo acumula de a poco).
     7. Regenera categorías/temas/sitemap (generate_pages.py) y hace
        git add + commit + push (admin/deploy.js) — así lo publicado
        queda de verdad en vexlowhq.com, no solo en el disco local.
@@ -48,16 +50,14 @@ const pipeline = require('./pipeline');
 const pagegen = require('./pagegen');
 const deploy = require('./deploy');
 const imageGen = require('./image-gen');
+const trending = require('./trending');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 const ARTICULOS_FILE = path.join(DATA_DIR, 'articulos.json');
-const HERO_FILE = path.join(DATA_DIR, 'hero.json');
 const AUTOMATION_LOG_FILE = path.join(DATA_DIR, 'automation-log.json');
 const MAX_LOG_ENTRIES = 50;
-const HERO_MAX = 5;
-const HERO_MIN = 3;
 
 const FORCE = process.argv.indexOf('--force') !== -1;
 
@@ -78,17 +78,6 @@ function generateArticulosJs(data) {
     '*/\n';
   return header + 'const VEXLOW_ARTICLES = ' + JSON.stringify(data, null, 2) + ';\n';
 }
-function generateHeroJs(data) {
-  var header = '/*\n' +
-    '  HERO — diapositivas del carrusel principal de la Home\n' +
-    '  =======================================================\n' +
-    '  GENERADO AUTOMÁTICAMENTE (panel de administración / bot de\n' +
-    '  publicación automática). No lo edites a mano. La fuente real es\n' +
-    '  data/hero.json.\n' +
-    '*/\n';
-  return header + 'const VEXLOW_HERO = ' + JSON.stringify(data, null, 2) + ';\n';
-}
-
 function runPython(scriptPath) {
   return new Promise(function (resolve, reject) {
     var py = spawn('python', [scriptPath], { cwd: ROOT });
@@ -110,53 +99,6 @@ function appendLog(entry) {
   writeJSON(AUTOMATION_LOG_FILE, log);
 }
 
-// Suma al carrusel los artículos que ya tengan imagen puesta a mano y
-// todavía no estén ahí. 1 por categoría por corrida (variedad), nunca
-// pasa de HERO_MAX, nunca baja de HERO_MIN.
-function curateHero(articles) {
-  var hero = readJSON(HERO_FILE, []);
-  var heroHrefs = new Set(hero.map(function (h) { return h.href; }));
-
-  var eligible = articles.filter(function (a) {
-    if (!a.image || !a.href) return false;
-    var fullHref = 'https://vexlowhq.com/' + a.href;
-    return !heroHrefs.has(fullHref);
-  }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
-
-  var added = [];
-  var usedCategoriesThisRun = new Set();
-  for (var i = 0; i < eligible.length && hero.length < HERO_MAX; i++) {
-    var a = eligible[i];
-    if (usedCategoriesThisRun.has(a.category)) continue;
-    var cat = pagegen.CATEGORY_BY_SLUG[a.category];
-    if (!cat) continue;
-    var slide = {
-      category: a.category,
-      chip: cat.icon + ' ' + cat.label,
-      title: a.title,
-      dek: a.dek || '',
-      image: a.image,
-      textColor: 'auto',
-      href: 'https://vexlowhq.com/' + a.href
-    };
-    hero.unshift(slide); // más nuevo primero
-    usedCategoriesThisRun.add(a.category);
-    added.push(a.title);
-  }
-
-  // Si se pasó de HERO_MAX, recorta del final (las más viejas) sin
-  // bajar nunca de HERO_MIN.
-  while (hero.length > HERO_MAX && hero.length > HERO_MIN) {
-    hero.pop();
-  }
-
-  if (added.length) {
-    writeJSON(HERO_FILE, hero);
-    fs.writeFileSync(path.join(DATA_DIR, 'hero.js'), generateHeroJs(hero), 'utf8');
-  }
-  return added;
-}
-
 async function main() {
   var startedAt = new Date().toISOString();
   var cfg = {};
@@ -171,7 +113,7 @@ async function main() {
   var draftCfg = draft.loadConfig();
   var apiKey = draftCfg.draftProvider === 'openai' ? draftCfg.openaiApiKey : draftCfg.anthropicApiKey;
   if (!apiKey) {
-    appendLog({ startedAt: startedAt, forced: FORCE, ok: false, error: 'Sin API key configurada (admin/config.json)', published: [], topicsCreated: [], heroAdded: [], errors: [] });
+    appendLog({ startedAt: startedAt, forced: FORCE, ok: false, error: 'Sin API key configurada (admin/config.json)', published: [], topicsCreated: [], trendingUpdated: false, heroRotated: false, errors: [] });
     console.error('Sin API key configurada — nada para hacer.');
     return;
   }
@@ -243,15 +185,27 @@ async function main() {
     }
   }
 
-  if (published.length) {
+  var trendingResult = { updated: false };
+  try {
+    trendingResult = await trending.maybeUpdateTrending(articles);
+  } catch (e) {
+    errors.push({ error: 'Trending: ' + e.message });
+  }
+
+  if (published.length || trendingResult.updated) {
     writeJSON(ARTICULOS_FILE, articles);
     fs.writeFileSync(path.join(DATA_DIR, 'articulos.js'), generateArticulosJs(articles), 'utf8');
   }
 
-  var heroAdded = curateHero(articles);
+  var heroResult = { rotated: false };
+  try {
+    heroResult = await trending.maybeRotateHero(articles);
+  } catch (e) {
+    errors.push({ error: 'Carrusel: ' + e.message });
+  }
 
   var deployResult = { ok: true, nothingToCommit: true, output: '' };
-  if (published.length || heroAdded.length || topicsCreated.length) {
+  if (published.length || trendingResult.updated || heroResult.rotated || topicsCreated.length) {
     try {
       await runPython(path.join(__dirname, 'generate_pages.py'));
     } catch (e) {
@@ -266,6 +220,7 @@ async function main() {
         'data/hero.json', 'data/hero.js',
         'data/topics.json',
         'data/automation-log.json',
+        'data/trending-state.json',
         'categoria', 'sitemap.xml', 'img/temas'
       ];
       deployResult = await deploy.deploy('Publicación automática — ' + new Date().toISOString(), deployPaths);
@@ -282,7 +237,8 @@ async function main() {
     published: published,
     topicsCreated: topicsCreated,
     imagesGenerated: imagesGenerated,
-    heroAdded: heroAdded,
+    trendingUpdated: trendingResult.updated ? trendingResult.count : false,
+    heroRotated: heroResult.rotated ? heroResult.titles : false,
     errors: errors,
     deploy: deployResult.nothingToCommit ? 'sin cambios para publicar' : (deployResult.ok ? 'publicado en vexlowhq.com' : ('error: ' + (deployResult.error || 'git falló')))
   };
@@ -291,7 +247,7 @@ async function main() {
 }
 
 main().catch(function (e) {
-  appendLog({ startedAt: new Date().toISOString(), forced: FORCE, ok: false, error: e.message, published: [], topicsCreated: [], heroAdded: [], errors: [{ error: e.message }] });
+  appendLog({ startedAt: new Date().toISOString(), forced: FORCE, ok: false, error: e.message, published: [], topicsCreated: [], trendingUpdated: false, heroRotated: false, errors: [{ error: e.message }] });
   console.error('Falló la corrida del bot:', e);
   process.exitCode = 1;
 });
