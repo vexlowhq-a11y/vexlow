@@ -107,7 +107,7 @@ function loadLevel(id) {
   const meta = LEVELS.find(function (l) { return l.id === id; });
   if (!meta) throw new Error('Nivel no encontrado: ' + id);
   const data = meta.build();
-  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones };
+  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null };
 }
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
@@ -117,7 +117,9 @@ const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'porta
 const VARIANT_KEYS = ['spike_v1', 'spike_v2', 'spike_v3', 'spike_v4', 'spike_v5', 'spike_v6', 'spike_v7', 'spike_v8', 'spike_v9',
   'saw_v1', 'saw_v2', 'saw_v3', 'saw_v4', 'saw_v5', 'saw_v6',
   'platform_v1', 'platform_v2', 'platform_v3', 'platform_v4', 'platform_v5',
-  'portal_v1', 'portal_v2', 'portal_v3', 'portal_v4', 'portal_v5', 'portal_v6', 'portal_v7', 'portal_v8', 'portal_v9', 'portal_v10', 'portal_v11', 'portal_v12'];
+  'portal_v1', 'portal_v2', 'portal_v3', 'portal_v4', 'portal_v5', 'portal_v6', 'portal_v7', 'portal_v8', 'portal_v9', 'portal_v10', 'portal_v11', 'portal_v12',
+  'floor_v1', 'floor_v2', 'floor_v3', 'floor_v4', 'floor_v5', 'floor_v6', 'floor_v7', 'floor_v8', 'floor_v9',
+  'floor_v10', 'floor_v11', 'floor_v12', 'floor_v13', 'floor_v14', 'floor_v15', 'floor_v16', 'floor_v17', 'floor_v18'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
 const SKIN_KEYS = Array.from({ length: 72 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
@@ -357,7 +359,8 @@ function verifyLevel(id, levelData, maxRealMs) {
     return {
       objects: JSON.parse(JSON.stringify(clone.objects)),
       length: clone.length,
-      speedZones: JSON.parse(JSON.stringify(clone.speedZones))
+      speedZones: JSON.parse(JSON.stringify(clone.speedZones)),
+      floorVariant: clone.floorVariant || null
     };
   };
   window.__adminExport.selectLevel(idx);
@@ -393,7 +396,8 @@ function generateBuildFunctionSource(fnName, levelData) {
     if (e.kind === 'speed') lines.push('    setSpeed(' + e.sz.x + ', ' + e.sz.speed + ');');
     else lines.push('    add(' + serializeObjLiteral(e.obj) + ');');
   });
-  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone };');
+  var floorVariantSrc = levelData.floorVariant ? ", floorVariant: '" + levelData.floorVariant + "'" : '';
+  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ' };');
   lines.push('  }');
   return lines.join('\n') + '\n';
 }
@@ -410,9 +414,10 @@ function saveLevel(id, levelData) {
   var endIdx = src.indexOf(endTag);
   if (startIdx === -1 || endIdx === -1) throw new Error('No se encontraron los marcadores del nivel ' + id + ' en gravity.js');
   var afterStartLine = src.indexOf('\n', startIdx) + 1;
+  var endLineStart = src.lastIndexOf('\n', endIdx) + 1; // conserva la indentación del marcador de cierre
 
   var newFnSrc = generateBuildFunctionSource(fnName, levelData);
-  var newSrc = src.slice(0, afterStartLine) + newFnSrc + src.slice(endIdx);
+  var newSrc = src.slice(0, afterStartLine) + newFnSrc + src.slice(endLineStart);
 
   // Chequeo de sintaxis real (node --check) antes de tocar el archivo
   // de verdad -- se prueba en un archivo temporal aparte.

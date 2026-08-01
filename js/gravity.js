@@ -272,7 +272,7 @@
   // Variantes cosméticas opcionales (subidas por el usuario) para
   // pincho/sierra/plataforma/portal -- no cambian la física, solo el
   // sprite dibujado. Un nivel puede pedir 'spike_v3' con `variant: 'v3'`.
-  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12 };
+  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12, floor: 18 };
   Object.keys(VARIANT_COUNTS).forEach(function (base) {
     var n = VARIANT_COUNTS[base];
     var spriteBase = base === 'portal_gravity' || base === 'portal_shape' ? 'portal' : base;
@@ -1336,13 +1336,14 @@
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
     ctx.restore();
 
+    var floorSprite = (level && level.floorVariant) ? 'floor_' + level.floorVariant : 'floor';
     var tileW = 110, floorOff = player.worldX % tileW;
     for (var fx = -floorOff; fx < W; fx += tileW) {
-      drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
+      drawSprite(floorSprite, fx, FLOOR_Y, tileW, H - FLOOR_Y);
       ctx.save();
       ctx.translate(fx + tileW / 2, CEIL_Y);
       ctx.rotate(Math.PI);
-      drawSprite('floor', -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
+      drawSprite(floorSprite, -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
       ctx.restore();
     }
   }

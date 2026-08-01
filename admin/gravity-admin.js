@@ -41,6 +41,7 @@
   var canvas = document.getElementById('gravityEditorCanvas');
   var ctx = canvas.getContext('2d');
   var propsEl = document.getElementById('gravityEditorProps');
+  var floorPickerEl = document.getElementById('gravityEditorFloorPicker');
   var speedListEl = document.getElementById('gravityEditorSpeedList');
   var verifyBtn = document.getElementById('gravityEditorVerifyBtn');
   var saveBtn = document.getElementById('gravityEditorSaveBtn');
@@ -86,6 +87,27 @@
   }
   renderPaletteVariants();
 
+  /* ---- Piso del nivel (propiedad de todo el nivel, no un objeto) ---- */
+  var FLOOR_VARIANT_COUNT = 18;
+  function renderFloorPicker() {
+    if (!floorPickerEl) return;
+    var html = '<div class="gravity-variant-swatches">';
+    html += '<button type="button" class="gravity-variant-swatch' + (!state.floorVariant ? ' selected' : '') + '" data-floor="">Por defecto</button>';
+    for (var vi = 1; vi <= FLOOR_VARIANT_COUNT; vi++) {
+      var vid = 'v' + vi;
+      html += '<button type="button" class="gravity-variant-swatch' + (state.floorVariant === vid ? ' selected' : '') +
+        '" data-floor="' + vid + '"><img src="/site/img/gravitycover/sliced/floor_' + vid + '.png" alt="' + vid + '"></button>';
+    }
+    html += '</div>';
+    floorPickerEl.innerHTML = html;
+    floorPickerEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.floorVariant = btn.getAttribute('data-floor') || null;
+        renderFloorPicker();
+      });
+    });
+  }
+
   /* ---- Nivel seleccionado ---- */
   function loadLevelList() {
     fetch('/api/gravity-levels').then(function (r) { return r.json(); }).then(function (levels) {
@@ -102,9 +124,11 @@
       state.objects = data.objects;
       state.speedZones = data.speedZones;
       state.length = data.length;
+      state.floorVariant = data.floorVariant || null;
       state.selectedIndex = -1;
       levelSelect.value = id;
       renderSpeedList();
+      renderFloorPicker();
       renderProps();
       render();
       setStatus('Cargado: ' + data.name + ' (' + data.objects.length + ' obstáculos)');
@@ -152,6 +176,32 @@
     state.length = Math.round(maxX + 300);
   }
 
+  /* ---- Sprites reales para la vista previa (en vez de círculos) ---- */
+  var spriteImgCache = {};
+  function getSpriteImg(name) {
+    if (!spriteImgCache[name]) {
+      var img = new Image();
+      img.src = '/site/img/gravitycover/sliced/' + name + '.png';
+      img.onload = render;
+      spriteImgCache[name] = img;
+    }
+    return spriteImgCache[name];
+  }
+  function spriteNameFor(o) {
+    switch (o.type) {
+      case 'spike': return o.variant ? 'spike_' + o.variant : 'spike';
+      case 'saw': return o.variant ? 'saw_' + o.variant : 'saw';
+      case 'platform': return o.variant ? 'platform_' + o.variant : 'platform';
+      case 'gravityPortal': return o.variant ? 'portal_' + o.variant : 'portal_gravity';
+      case 'shapePortal': return o.variant ? 'portal_' + o.variant : 'portal_shape';
+      case 'orb': return 'orb_' + (o.color || 'yellow');
+      case 'pad': return 'pad_' + (o.color || 'cyan');
+      case 'key': return 'key';
+      case 'door': return 'door';
+      default: return null; // coin/diamond/interruptor/finish: se dibujan a mano (no tienen sprite)
+    }
+  }
+
   /* ---- Canvas ---- */
   function render() {
     var worldW = Math.max(state.length + 500, 2500);
@@ -169,6 +219,19 @@
     }
 
     var floorCy = FLOOR_Y * scaleY, ceilCy = CEIL_Y * scaleY;
+    var floorSpriteName = state.floorVariant ? 'floor_' + state.floorVariant : 'floor';
+    var floorImg = getSpriteImg(floorSpriteName);
+    if (floorImg.complete && floorImg.naturalWidth > 0) {
+      var tileW = Math.max(18, 44 * state.zoom);
+      for (var tx = 0; tx < canvas.width; tx += tileW) {
+        ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
+        ctx.save();
+        ctx.translate(tx + tileW / 2, ceilCy);
+        ctx.rotate(Math.PI);
+        ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
+        ctx.restore();
+      }
+    }
     ctx.strokeStyle = 'rgba(185,131,255,.55)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(0, floorCy); ctx.lineTo(canvas.width, floorCy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, ceilCy); ctx.lineTo(canvas.width, ceilCy); ctx.stroke();
@@ -200,13 +263,31 @@
       var cx = o.x * state.zoom;
       var cy = objectDrawY(o) * scaleY;
       var selected = i === state.selectedIndex;
-      ctx.beginPath();
-      ctx.arc(cx, cy, selected ? 10 : 7, 0, Math.PI * 2);
-      ctx.fillStyle = def.color;
-      ctx.fill();
-      if (selected) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
-      ctx.fillStyle = '#05060f'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(def.icon, cx, cy);
+      var spriteName = spriteNameFor(o);
+      var img = spriteName ? getSpriteImg(spriteName) : null;
+      var drawnAsSprite = false;
+      if (img && img.complete && img.naturalWidth > 0) {
+        var sz = o.type === 'platform' ? 26 : (o.type === 'saw' ? 28 : 24);
+        var rot = (o.surface === 'ceil' && (o.type === 'spike' || o.type === 'saw')) ? Math.PI : 0;
+        ctx.save();
+        ctx.translate(cx, cy);
+        if (rot) ctx.rotate(rot);
+        ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz);
+        ctx.restore();
+        drawnAsSprite = true;
+      }
+      if (!drawnAsSprite) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, selected ? 10 : 7, 0, Math.PI * 2);
+        ctx.fillStyle = def.color;
+        ctx.fill();
+        ctx.fillStyle = '#05060f'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(def.icon, cx, cy);
+      }
+      if (selected) {
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, drawnAsSprite ? 16 : 10, 0, Math.PI * 2); ctx.stroke();
+      }
     });
   }
 
@@ -381,7 +462,7 @@
 
   /* ---- Verificar / Guardar ---- */
   function currentPayload() {
-    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones };
+    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant };
   }
   verifyBtn.addEventListener('click', function () {
     verifyBtn.disabled = true;
