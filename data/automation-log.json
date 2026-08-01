@@ -1,5 +1,31 @@
 [
   {
+    "startedAt": "2026-07-31T20:25:00.611Z",
+    "finishedAt": "2026-07-31T20:28:14.758Z",
+    "forced": false,
+    "ok": true,
+    "published": [
+      "Google Quickly Retracts Earth AI Feature After Backlash Over Misinformation Risks (AI)",
+      "Index Ventures Secures $2 Billion in Fresh Funding, Boosting Its Investment Capital to $3.5 Billion (Technology)",
+      "Discovering the Great Rift: A Hidden Feature of the Milky Way (Science & Space)",
+      "Cancellation of Booster Gold TV Series Signs Continued Uncertainty for DC Universe Projects (Entertainment)",
+      "Antitrust Showdown: Paramount's Urgent Demand for November Trial Date (Entertainment)",
+      "Tragic End to Promising Boxing Career: Remembering Hannah Rapp (Sports)"
+    ],
+    "topicsCreated": [
+      "Technology / Venture Capital Growth",
+      "Science & Space / Milky Way Great Rift",
+      "Entertainment / Booster Gold Series",
+      "Entertainment / Paramount Skydance Antitrust Trial",
+      "Sports / Hannah Rapp"
+    ],
+    "imagesGenerated": 6,
+    "trendingUpdated": 15,
+    "heroRotated": false,
+    "errors": [],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-07-30T20:25:58.110Z",
     "finishedAt": "2026-07-30T20:28:31.981Z",
     "forced": false,

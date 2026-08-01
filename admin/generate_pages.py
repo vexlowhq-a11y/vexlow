@@ -643,7 +643,7 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
         </a>
         <a class="game-card" href="gravity.html">
           <img class="game-card-cover" src="../img/games/gravity-cover.jpg" alt="Gravity Flip" width="64" height="64" loading="lazy">
-          <span class="game-card-desc">Tap to flip gravity between floor and ceiling, dodge everything.</span>
+          <span class="game-card-desc">A rhythm platformer level — cube, ship, ball, key and secret coins.</span>
         </a>
         <a class="game-card" href="pulse.html">
           <img class="game-card-cover" src="../img/games/pulse-cover.jpg" alt="Color Pulse" width="64" height="64" loading="lazy">
@@ -1005,7 +1005,7 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gravity Flip — VexlowHQ Games</title>
-<meta name="description" content="Tap to flip gravity between floor and ceiling. Dodge spikes, gaps, saws and lasers. Free to play, no download.">
+<meta name="description" content="A rhythm platformer level: switch between cube, ship and ball, dodge spikes and saws, grab the key and secret coins, reach the finish. Free to play, no download.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
@@ -1032,13 +1032,15 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
 
     <article class="article-page">
       <h1>🔻 Gravity Flip</h1>
-      <p class="play-intro">Tap to flip gravity between floor and ceiling. Dodge the spikes, gaps, saws and lasers. Tap once to start.</p>
+      <p class="play-intro">"Neon Pulse" — tap/hold to control the cube, ship and ball. Dodge spikes and saws, grab the key and 3 secret coins, reach the finish. Tap once to start.</p>
 
       <div class="dash-wrap">
         <canvas id="gravityCanvas" width="800" height="360" aria-label="Gravity Flip game"></canvas>
         <div class="dash-hud">
-          <span id="gravityScore">Score: 0</span>
-          <span id="gravityBest">Best: 0</span>
+          <span id="gravityScore">Progress: 0%</span>
+          <span id="gravityBest">Best: 0%</span>
+          <span id="gravityCoins">🪙 0/3</span>
+          <span id="gravityKey"></span>
           <button type="button" id="gravityMute" class="dash-mute" aria-label="Mute sound">🔊</button>
         </div>
         <div class="dash-overlay" id="gravityOverlay">

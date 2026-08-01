@@ -1,12 +1,13 @@
 /*
-  Gravity Flip (play/gravity.html) — corredor automático tipo Geometry
-  Dash / Gravity Guy. Un solo toque invierte la gravedad al instante
-  (el personaje empieza a acelerar hacia el techo en vez del piso, o
-  viceversa), esquivando pinchos, huecos, sierras y láseres en el piso
-  o el techo. Todo dibujado a mano en canvas (glow con shadowBlur),
-  sin sprites. Sonido sintetizado con Web Audio API. Mismo patrón de
-  tabla de posiciones (api/gravity.js) y pausa publicitaria cada 3
-  partidas que los otros juegos.
+  Gravity Flip (play/gravity.html) — ahora un plataformas rítmico de
+  nivel fijo estilo Geometry Dash ("Neon Pulse", nivel 1 de varios).
+  Tres formas de personaje (cubo/nave/bola), portales de forma y de
+  gravedad, orbes (tap para activar), jump pads (automáticos), pinchos,
+  sierras, plataformas, llave+puerta, 3 monedas secretas y meta final.
+  Usa las sprites de img/gravitycover/sliced/ (recortadas de la hoja
+  del usuario). Sonido sintetizado con Web Audio API, mismo patrón de
+  tabla de posiciones (api/gravity.js, score = % del nivel completado)
+  y pausa publicitaria cada 3 intentos que los otros juegos.
 */
 (function () {
   var canvas = document.getElementById('gravityCanvas');
@@ -14,13 +15,15 @@
 
   var ctx = canvas.getContext('2d');
   var W = canvas.width, H = canvas.height;
-  var FLOOR_Y = H - 50;
-  var CEIL_Y = 50;
-  var PLAYER_SIZE = 28;
+  var FLOOR_Y = H - 40;
+  var CEIL_Y = 40;
+  var PLAYER_SIZE = 32;
   var PLAYER_SCREEN_X = 160;
 
   var scoreEl = document.getElementById('gravityScore');
   var bestEl = document.getElementById('gravityBest');
+  var coinsEl = document.getElementById('gravityCoins');
+  var keyEl = document.getElementById('gravityKey');
   var muteBtn = document.getElementById('gravityMute');
   var overlay = document.getElementById('gravityOverlay');
   var overlayText = document.getElementById('gravityOverlayText');
@@ -34,14 +37,16 @@
   var lbYou = document.getElementById('gravityYouRank');
 
   var BEST_KEY = 'vexlow_gravity_best';
+  var COINS_KEY = 'vexlow_gravity_coins';
   var PLAYS_KEY = 'vexlow_gravity_plays';
   var AD_BREAK_INTERVAL = 3;
   var MUTE_KEY = 'vexlow_gravity_muted';
   var NAME_KEY = 'vexlow_dash_name';
   var VID_KEY = 'vexlow_vid';
   var best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
+  var bestCoins = parseInt(localStorage.getItem(COINS_KEY) || '0', 10) || 0;
   var muted = localStorage.getItem(MUTE_KEY) === '1';
-  bestEl.textContent = 'Best: ' + best;
+  bestEl.textContent = 'Best: ' + best + '%';
   muteBtn.textContent = muted ? '🔇' : '🔊';
 
   function escapeHtml(s) {
@@ -96,13 +101,13 @@
         return '<li class="dash-lb-row' + (isYou ? ' dash-lb-you-row' : '') + '">' +
           '<span class="dash-lb-rank">' + (i + 1) + '</span>' +
           '<span class="dash-lb-name">' + escapeHtml(row.name) + '</span>' +
-          '<span class="dash-lb-score">' + row.score + '</span></li>';
+          '<span class="dash-lb-score">' + row.score + '%</span></li>';
       }).join('');
     }
     if (lbYou) {
       if (data.you && data.you.rank > 10) {
         lbYou.hidden = false;
-        lbYou.textContent = 'Your rank: #' + data.you.rank + ' (' + data.you.score + ' pts)';
+        lbYou.textContent = 'Your rank: #' + data.you.rank + ' (' + data.you.score + '%)';
       } else {
         lbYou.hidden = true;
       }
@@ -164,7 +169,11 @@
     osc.start();
     osc.stop(ac.currentTime + duration);
   }
-  function playFlip() { beep(420, 760, 0.09, 'square', 0.1); }
+  function playJump() { beep(420, 760, 0.08, 'square', 0.09); }
+  function playPortal() { beep(300, 900, 0.18, 'sine', 0.1); }
+  function playPickup() { beep(700, 1200, 0.12, 'triangle', 0.11); }
+  function playPad() { beep(500, 1000, 0.1, 'sawtooth', 0.09); }
+  function playWin() { beep(500, 1400, 0.4, 'sine', 0.13); }
   function playCrash() {
     if (muted) return;
     var ac = getAudioCtx();
@@ -190,65 +199,275 @@
     muteBtn.textContent = muted ? '🔇' : '🔊';
   });
 
-  /* ---- Física y dificultad ---- */
-  var GRAVITY = 0.0028;
-  var FLIP_KICK = 0.34;
-  var MAX_VY = 1.0;
-  var BASE_SPEED = 0.32, MAX_SPEED = 0.72;
-  var SPEED_STEP_MS = 16000, SPEED_STEP = 0.025;
-  var MIN_WARNING_MS = 620; // tiempo mínimo visible antes de que un obstáculo te alcance
+  /* ---- Sprites ---- */
+  var SPRITE_NAMES = ['floor', 'platform', 'spike', 'spike_triple', 'saw',
+    'portal_gravity', 'portal_shape', 'orb_green', 'orb_pink', 'orb_yellow',
+    'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock',
+    'cube_idle', 'cube_jump', 'cube_death'];
+  var sprites = {};
+  SPRITE_NAMES.forEach(function (name) {
+    var img = new Image();
+    img.src = '../img/gravitycover/sliced/' + name + '.png';
+    sprites[name] = img;
+  });
+  function drawSprite(name, x, y, w, h) {
+    var img = sprites[name];
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, x, y, w, h);
+    }
+  }
 
-  var state, player, obstacles, particles, speed, score, elapsedMs, lastTime;
-  var distanceSinceSpawn, nextSpawnGap;
+  /* ---- Física (por forma) ----
+     Cubo: gravedad + salto al tocar mientras está apoyado.
+     Nave: mantener presionado = empuje hacia arriba, soltar = cae.
+     Bola: tap invierte la dirección de gravedad al instante (con
+     impulso), se pega a la superficie donde cae — es la misma
+     mecánica que tenía el Gravity Flip original. */
+  var CUBE_GRAVITY = 0.0032, CUBE_JUMP_V = 0.85, CUBE_MAX_VY = 1.3;
+  var SHIP_THRUST = 0.0021, SHIP_FALL = 0.0021, SHIP_MAX_VY = 0.46;
+  var BALL_GRAVITY = 0.0028, BALL_FLIP_KICK = 0.34, BALL_MAX_VY = 1.0;
+  var ORB_YELLOW_V = 0.85, ORB_PINK_V = 0.46;
+
+  /* ---- Construcción del nivel ----
+     Cursor-based: cada helper agrega un objeto en la posición actual
+     del cursor y lo hace avanzar una distancia "cómoda" ya verificada
+     contra la física de arriba (mucho más que la mínima necesaria),
+     así el espaciado es seguro por construcción en vez de a mano.
+     Más niveles se agregan sumando más entradas a LEVELS. */
+  var GAP_CUBE = 230;      // espacio cómodo entre obstáculos en modo cubo/1x
+  var GAP_CUBE_FAST = 300; // ídem a 1.5x/2x (recorre más mundo por segundo)
+  var GAP_SHIP = 260;
+
+  function buildNeonPulse() {
+    var objs = [];
+    var cursor = 500;
+    var speedZone = []; // { from, speed }
+    function setSpeed(x, speed) { speedZone.push({ x: x, speed: speed }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+
+    setSpeed(0, 0.28);
+
+    // -- Sección 1 (cubo, 1x): salto básico --------------------------
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE + 30;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += 40;
+
+    // -- Sección 2 (cubo, 1x): orbes + gravedad -----------------------
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
+    cursor += 130;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'ceil', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += 130;
+    add({ type: 'orb', color: 'pink', y: CEIL_Y + 150 });
+    cursor += 40;
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += 260;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+
+    // -- Sección 3 (nave, 1.5x): túnel con sierras --------------------
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.4);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 90;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 60 });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    add({ type: 'saw', surface: 'ceil', xOff: 170 });
+    cursor += GAP_SHIP + 170;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+
+    // -- Sección 4 (cubo, 1.5x): triple pincho + orbes ----------------
+    setSpeed(cursor, 0.4);
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 52 });
+    cursor += 140;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'orb', color: 'green', y: FLOOR_Y - 130 });
+    cursor += 40;
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += 260;
+    add({ type: 'key', y: FLOOR_Y - 170 });
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += 40;
+    add({ type: 'shapePortal', form: 'ball' });
+    cursor += 40;
+
+    // -- Sección 5 (bola, 2x): flips encadenados ----------------------
+    setSpeed(cursor, 0.52);
+    cursor += 260;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 260;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
+    cursor += 260;
+    add({ type: 'pad', color: 'cyan', surface: 'floor' });
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += 260;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+
+    // -- Sección 6 (cubo, 2x -> 1x): combinado + puerta + final -------
+    setSpeed(cursor, 0.52);
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 150;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += 40;
+    add({ type: 'pad', color: 'yellow', surface: 'ceil' });
+    cursor += 300;
+    add({ type: 'coin', id: 2, y: CEIL_Y + 170, risky: true });
+    cursor += 40;
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += 40;
+
+    var doorX = cursor + 40;
+    add({ type: 'door', x2: doorX });
+    setSpeed(cursor, 0.34);
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += GAP_CUBE;
+    add({ type: 'pad', color: 'pink', surface: 'floor' });
+    cursor += 260;
+    setSpeed(cursor, 0.28);
+    add({ type: 'finish' });
+    cursor += 300;
+
+    // resolver xOff / posiciones relativas
+    objs.forEach(function (o) {
+      if (o.xOff) { o.x += o.xOff; delete o.xOff; }
+    });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  var LEVELS = [{ name: 'Neon Pulse', build: buildNeonPulse }];
+  var currentLevelIndex = 0;
+  var level; // { objects, length, speedZones }
+
+  function speedAt(worldX) {
+    var s = level.speedZones[0].speed;
+    for (var i = 0; i < level.speedZones.length; i++) {
+      if (level.speedZones[i].x <= worldX) s = level.speedZones[i].speed;
+    }
+    return s;
+  }
+
+  var state, player, particles, speed, elapsedMs, lastTime;
+  var coinsCollected, hasKey, deaths;
 
   function resetGame() {
-    player = { y: FLOOR_Y - PLAYER_SIZE, vy: 0, gravityDir: 1, worldX: 0 };
-    obstacles = [];
+    level = LEVELS[currentLevelIndex].build();
+    player = {
+      x: PLAYER_SCREEN_X, y: FLOOR_Y - PLAYER_SIZE, vy: 0,
+      gravityDir: 1, worldX: 0, form: 'cube', grounded: true,
+      face: 'cube_idle', faceTimer: 0, holding: false
+    };
     particles = [];
-    speed = BASE_SPEED;
-    score = 0;
+    speed = speedAt(0);
     elapsedMs = 0;
     lastTime = null;
-    distanceSinceSpawn = 0;
-    nextSpawnGap = 320;
+    coinsCollected = [];
+    hasKey = false;
     state = 'ready';
-    scoreEl.textContent = 'Score: 0';
+    scoreEl.textContent = 'Progress: 0%';
+    coinsEl.textContent = '🪙 0/3';
+    keyEl.textContent = '';
     overlayText.textContent = 'Tap or press Space to start';
     overlay.classList.remove('hidden');
   }
 
   function toScreenX(worldX) { return worldX - player.worldX + PLAYER_SCREEN_X; }
 
-  function flip() {
-    if (state === 'ready') { startGame(); return; }
-    if (state === 'gameover') { resetGame(); return; }
-    if (state !== 'playing') return;
-    player.gravityDir *= -1;
-    player.vy = FLIP_KICK * player.gravityDir;
-    playFlip();
-    spawnParticles(PLAYER_SCREEN_X + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFFFFF', 10);
-  }
-
   function startGame() {
     state = 'playing';
     overlay.classList.add('hidden');
   }
 
+  function press() {
+    if (state === 'ready') { startGame(); return; }
+    if (state === 'gameover' || state === 'win') { resetGame(); return; }
+    if (state !== 'playing') return;
+    player.holding = true;
+
+    if (player.form === 'cube') {
+      if (player.grounded) {
+        player.vy = -CUBE_JUMP_V * player.gravityDir;
+        player.grounded = false;
+        playJump();
+        player.face = 'cube_jump'; player.faceTimer = 220;
+        spawnParticles(player.x + PLAYER_SIZE / 2, player.y + (player.gravityDir === 1 ? PLAYER_SIZE : 0), '#3D8BFF', 8);
+      }
+    } else if (player.form === 'ball') {
+      player.gravityDir *= -1;
+      player.vy = BALL_FLIP_KICK * player.gravityDir;
+      playJump();
+      spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FF3DAE', 8);
+    }
+    // Nave: el empuje se maneja continuo en update() mientras holding=true.
+  }
+  function release() { player.holding = false; }
+
   function endGame() {
     if (state !== 'playing') return;
     state = 'gameover';
     playCrash();
-    var finalScore = Math.round(score);
-    if (finalScore > best) {
-      best = finalScore;
-      localStorage.setItem(BEST_KEY, String(best));
-      bestEl.textContent = 'Best: ' + best;
-      overlayText.textContent = 'New best! ' + finalScore + ' — tap to retry';
-      submitScore(finalScore);
-    } else {
-      overlayText.textContent = 'Score: ' + finalScore + ' — tap to retry';
+    player.face = 'cube_death';
+    finishRun(Math.round((player.worldX / level.length) * 100));
+    spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FF3D57', 22);
+  }
+
+  function winGame() {
+    if (state !== 'playing') return;
+    state = 'win';
+    playWin();
+    spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFC93D', 30);
+    finishRun(100);
+  }
+
+  function finishRun(pct) {
+    pct = Math.max(0, Math.min(100, pct));
+    var coinCount = coinsCollected.length;
+    if (coinCount > bestCoins) {
+      bestCoins = coinCount;
+      localStorage.setItem(COINS_KEY, String(bestCoins));
     }
-    spawnParticles(PLAYER_SCREEN_X + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FF3D57', 20);
+    coinsEl.textContent = '🪙 ' + coinCount + '/3';
+    if (pct > best) {
+      best = pct;
+      localStorage.setItem(BEST_KEY, String(best));
+      bestEl.textContent = 'Best: ' + best + '%';
+      submitScore(best);
+    }
+    var label = state === 'win' ? 'Level complete! 100%' : ('Reached ' + pct + '% — tap to retry');
+    overlayText.textContent = label + (hasKey ? ' 🔑' : '') + ' — 🪙 ' + coinCount + '/3';
 
     var plays = parseInt(localStorage.getItem(PLAYS_KEY) || '0', 10) || 0;
     plays++;
@@ -265,64 +484,6 @@
       adBreak.classList.add('hidden');
       overlay.classList.remove('hidden');
     });
-  }
-
-  /* ---- Obstáculos ----
-     Cada uno declara en qué superficie vive ('floor' | 'ceil' | 'mid')
-     y su tipo ('spike' | 'gap' | 'saw' | 'laser'). Los huecos (gap)
-     quitan lo sólido de esa franja: si la gravedad te empuja hacia
-     esa superficie mientras estás en ese rango, seguís cayendo/
-     subiendo de largo en vez de "pararte" ahí, y morís si te alejás
-     demasiado — nunca hay que esperar (el personaje no se detiene),
-     así que el hueco siempre es franqueable con el flip a tiempo. */
-  function minTravelWidth() { return speed * MIN_WARNING_MS; }
-
-  function spawnObstacle() {
-    var elapsedS = elapsedMs / 1000;
-    var pool = ['spike-floor', 'spike-ceil'];
-    if (elapsedS > 5) pool.push('gap-floor', 'gap-ceil');
-    if (elapsedS > 12) pool.push('saw');
-    if (elapsedS > 20) pool.push('laser');
-    if (elapsedS > 26) pool.push('pinch');
-    var type = pool[Math.floor(Math.random() * pool.length)];
-    var x = nextSegmentX();
-
-    if (type === 'spike-floor') {
-      obstacles.push({ type: 'spike', surface: 'floor', x: x, w: 26 });
-    } else if (type === 'spike-ceil') {
-      obstacles.push({ type: 'spike', surface: 'ceil', x: x, w: 26 });
-    } else if (type === 'gap-floor') {
-      obstacles.push({ type: 'gap', surface: 'floor', x: x, w: 150 + Math.random() * 60 });
-    } else if (type === 'gap-ceil') {
-      obstacles.push({ type: 'gap', surface: 'ceil', x: x, w: 150 + Math.random() * 60 });
-    } else if (type === 'saw') {
-      var surf = Math.random() < 0.5 ? 'floor' : 'ceil';
-      obstacles.push({ type: 'saw', surface: surf, x: x, r: 20, rot: 0 });
-    } else if (type === 'laser') {
-      obstacles.push({ type: 'laser', x: x, w: 14, active: true, blinkMs: 1100 });
-    } else if (type === 'pinch') {
-      // Pincho en el piso Y en el techo a la vez: hay que estar en el
-      // aire (a mitad de flip) justo al cruzarlo, ni parado ni pegado
-      // a ninguna de las dos superficies.
-      obstacles.push({ type: 'pinch', x: x, w: 30 });
-    }
-  }
-  function nextSegmentX() { return player.worldX + W + 40; }
-
-  /* Probabilidad de encadenar un segundo obstáculo muy cerca del
-     anterior (zona de "poco margen para saltar"): crece con el tiempo
-     hasta un tope, y nunca reduce el hueco por debajo de lo que ya
-     garantiza minTravelWidth(). */
-  function comboChance(elapsedS) {
-    return Math.min(0.38, Math.max(0, (elapsedS - 14) / 55));
-  }
-
-  function isSurfaceSolid(surface, worldX) {
-    for (var i = 0; i < obstacles.length; i++) {
-      var o = obstacles[i];
-      if (o.type === 'gap' && o.surface === surface && worldX > o.x && worldX < o.x + o.w) return false;
-    }
-    return true;
   }
 
   /* ---- Partículas ---- */
@@ -357,173 +518,306 @@
     });
   }
 
+  /* ---- Colisión con superficies (piso/techo), con huecos de
+     plataformas flotantes tratadas aparte ---- */
+  function surfaceYFor(o) {
+    if (o.surface === 'floor') return FLOOR_Y - (o.lift || 0);
+    return CEIL_Y + (o.lift || 0);
+  }
+
+  function overlapsX(o, w, playerCenterWorldX) {
+    // El margen de tolerancia se limita a un máximo fijo -- si escalara
+    // con el ancho del objeto, un grupo de varios pinchos pegados (o una
+    // puerta ancha) infla su "zona de peligro" mucho más allá de lo
+    // visual y puede volver imposible la ventana de salto válida.
+    var half = Math.min((w || 28) / 2, 8);
+    return playerCenterWorldX > o.x - half && playerCenterWorldX < o.x + (w || 28) + half;
+  }
+
   /* ---- Update ---- */
   function update(dt) {
-    if (state !== 'playing') return;
+    if (state !== 'playing') { updateParticles(dt); return; }
 
-    speed = Math.min(MAX_SPEED, BASE_SPEED + Math.floor(elapsedMs / SPEED_STEP_MS) * SPEED_STEP);
+    speed = speedAt(player.worldX);
+    if (player.faceTimer > 0) { player.faceTimer -= dt; if (player.faceTimer <= 0) player.face = 'cube_idle'; }
 
-    player.vy += GRAVITY * player.gravityDir * dt;
-    if (player.vy > MAX_VY) player.vy = MAX_VY;
-    if (player.vy < -MAX_VY) player.vy = -MAX_VY;
-    player.y += player.vy * dt;
-
-    var centerWorldX = player.worldX + PLAYER_SIZE / 2;
-    var floorSolid = isSurfaceSolid('floor', centerWorldX);
-    var ceilSolid = isSurfaceSolid('ceil', centerWorldX);
-
-    if (floorSolid && player.y >= FLOOR_Y - PLAYER_SIZE) {
-      player.y = FLOOR_Y - PLAYER_SIZE;
-      if (player.gravityDir === 1) player.vy = 0;
+    if (player.form === 'cube' || player.form === 'ball') {
+      var g = player.form === 'cube' ? CUBE_GRAVITY : BALL_GRAVITY;
+      var maxVy = player.form === 'cube' ? CUBE_MAX_VY : BALL_MAX_VY;
+      player.vy += g * player.gravityDir * dt;
+      if (player.vy > maxVy) player.vy = maxVy;
+      if (player.vy < -maxVy) player.vy = -maxVy;
+      player.y += player.vy * dt;
+    } else if (player.form === 'ship') {
+      player.vy += (player.holding ? -SHIP_THRUST : SHIP_FALL) * dt;
+      if (player.vy > SHIP_MAX_VY) player.vy = SHIP_MAX_VY;
+      if (player.vy < -SHIP_MAX_VY) player.vy = -SHIP_MAX_VY;
+      player.y += player.vy * dt;
     }
-    if (ceilSolid && player.y <= CEIL_Y) {
-      player.y = CEIL_Y;
-      if (player.gravityDir === -1) player.vy = 0;
+
+    // Piso/techo del nivel (sólidos salvo que una plataforma decida lo
+    // contrario más abajo) — solo aplica a cubo/bola, la nave vuela libre.
+    if (player.form !== 'ship') {
+      if (player.y >= FLOOR_Y - PLAYER_SIZE) {
+        player.y = FLOOR_Y - PLAYER_SIZE;
+        player.vy = 0;
+        player.grounded = player.gravityDir === 1;
+      }
+      if (player.y <= CEIL_Y) {
+        player.y = CEIL_Y;
+        player.vy = 0;
+        player.grounded = player.gravityDir === -1;
+      }
+    } else if (player.y > FLOOR_Y - PLAYER_SIZE || player.y < CEIL_Y) {
+      endGame(); return; // la nave muere si toca piso/techo
     }
-    if (player.y > FLOOR_Y + 90 || player.y < CEIL_Y - 90) { endGame(); return; }
 
     player.worldX += speed * dt;
+    player.x = PLAYER_SCREEN_X;
+    // Se calcula DESPUÉS de avanzar worldX este frame — si no, todas las
+    // colisiones de más abajo comparan contra la posición del frame
+    // anterior (un desfase de unos pixeles que alcanza para arruinar un
+    // salto justo en el límite).
+    var centerWorldX = player.worldX + PLAYER_SIZE / 2;
 
-    distanceSinceSpawn += speed * dt;
-    if (distanceSinceSpawn >= nextSpawnGap) {
-      spawnObstacle();
-      distanceSinceSpawn = 0;
-      var minGap = minTravelWidth();
-      if (Math.random() < comboChance(elapsedMs / 1000)) {
-        // Encadenar de cerca: obliga a dos flips seguidos sin respiro.
-        nextSpawnGap = minGap + Math.random() * 40;
-      } else {
-        nextSpawnGap = Math.max(minGap, 280 - elapsedMs / 1000 * 3 + Math.random() * 140);
-      }
+    // Plataformas flotantes: sólidas por arriba (aterrizar) y por abajo
+    // (cabezazo) solo para cubo/bola.
+    if (player.form !== 'ship') {
+      level.objects.forEach(function (o) {
+        if (o.type !== 'platform') return;
+        if (!overlapsX(o, o.w, centerWorldX)) return;
+        var topY = surfaceYFor(o) - (o.surface === 'floor' ? 0 : 0);
+        var platformTop = o.surface === 'floor' ? topY - 14 : topY;
+        var platformBottom = o.surface === 'floor' ? topY : topY + 14;
+        if (o.surface === 'floor' && player.gravityDir === 1) {
+          if (player.y + PLAYER_SIZE >= platformTop && player.y + PLAYER_SIZE <= platformTop + 26 && player.vy >= 0) {
+            player.y = platformTop - PLAYER_SIZE; player.vy = 0; player.grounded = true;
+          }
+        } else if (o.surface === 'ceil' && player.gravityDir === -1) {
+          if (player.y <= platformBottom && player.y >= platformBottom - 26 && player.vy <= 0) {
+            player.y = platformBottom; player.vy = 0; player.grounded = true;
+          }
+        }
+      });
     }
 
-    var px = PLAYER_SCREEN_X;
-    for (var i = obstacles.length - 1; i >= 0; i--) {
-      var o = obstacles[i];
-      var sx = toScreenX(o.x);
-      if (sx < -260) { obstacles.splice(i, 1); continue; }
+    // Puerta abierta con llave: se vuelve atravesable.
+    level.objects.forEach(function (o) {
+      if (o.type === 'door' && hasKey) o.open = true;
+    });
+
+    if (player.y > FLOOR_Y + 120 || player.y < CEIL_Y - 120) { endGame(); return; }
+
+    // Interacciones con entidades del nivel.
+    for (var i = 0; i < level.objects.length; i++) {
+      var o = level.objects[i];
+      if (o.dead) continue;
 
       if (o.type === 'spike') {
-        var spikeSurfaceY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
-        var playerNearThatSurface = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeSurfaceY - 20 : player.y < spikeSurfaceY + 20;
-        var overlapsX = px + PLAYER_SIZE - 6 > sx && px + 6 < sx + o.w;
-        if (overlapsX && playerNearThatSurface) { endGame(); return; }
+        var spikeY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
+        var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - 18 : player.y < spikeY + 18;
+        if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
       } else if (o.type === 'saw') {
-        o.rot += dt * 0.01;
-        var sawY = o.surface === 'floor' ? FLOOR_Y - o.r : CEIL_Y + o.r;
-        var dx = (px + PLAYER_SIZE / 2) - (sx + o.r);
-        var dy = (player.y + PLAYER_SIZE / 2) - sawY;
-        if (Math.sqrt(dx * dx + dy * dy) < o.r + PLAYER_SIZE * 0.32) { endGame(); return; }
-      } else if (o.type === 'laser') {
-        o.active = Math.floor((elapsedMs + o.x) / o.blinkMs) % 2 === 0;
-        if (o.active) {
-          var overlapsLaser = px + PLAYER_SIZE - 4 > sx && px + 4 < sx + o.w;
-          if (overlapsLaser) { endGame(); return; }
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
+        var dx = centerWorldX - o.x;
+        var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
+        if (Math.sqrt(dx * dx + dy * dy) < 22 + PLAYER_SIZE * 0.3) { endGame(); return; }
+      } else if (o.type === 'gravityPortal') {
+        if (!o.used && overlapsX(o, 30, centerWorldX)) {
+          o.used = true;
+          player.gravityDir = o.dir;
+          player.vy = 0;
+          playPortal();
+        } else if (o.used && !overlapsX(o, 30, centerWorldX)) {
+          o.used = false; // re-armar cuando el jugador ya pasó, por si reinicia y vuelve a cruzar (no aplica en un nivel lineal, pero evita dobles disparos raros)
         }
-      } else if (o.type === 'pinch') {
-        var overlapsPinch = px + PLAYER_SIZE - 6 > sx && px + 6 < sx + o.w;
-        if (overlapsPinch) {
-          var nearFloor = player.y + PLAYER_SIZE > FLOOR_Y - 20;
-          var nearCeil = player.y < CEIL_Y + 20;
-          if (nearFloor || nearCeil) { endGame(); return; }
+      } else if (o.type === 'shapePortal') {
+        if (!o.used && overlapsX(o, 30, centerWorldX)) {
+          o.used = true;
+          player.form = o.form;
+          if (o.form !== 'ship') player.grounded = false;
+          playPortal();
         }
+      } else if (o.type === 'orb') {
+        var orbNear = Math.abs(centerWorldX - o.x) < 26 && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 30;
+        o.playerNear = orbNear;
+      } else if (o.type === 'pad') {
+        if (!o.used && overlapsX(o, 40, centerWorldX)) {
+          var padSurfaceY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
+          var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - 24 : player.y < padSurfaceY + 24;
+          if (padNear) {
+            o.used = true;
+            var padV = o.color === 'yellow' ? ORB_YELLOW_V : o.color === 'pink' ? ORB_PINK_V : 0.62;
+            player.vy = -padV * player.gravityDir;
+            player.grounded = false;
+            playPad();
+            spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 10);
+          }
+        }
+      } else if (o.type === 'key') {
+        if (!hasKey && overlapsX(o, 26, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 28) {
+          hasKey = true;
+          o.dead = true;
+          keyEl.textContent = '🔑';
+          playPickup();
+        }
+      } else if (o.type === 'door') {
+        // El mundo se desplaza en una sola dirección (no se puede
+        // esperar ni retroceder), así que una puerta que realmente
+        // bloquee el paso solo es justa si la llave es imposible de
+        // perderse — y si lo es, bloquear no suma nada. Por eso la
+        // puerta es un premio visual/narrativo (se ve abierta con
+        // llave) y nunca mata, evitando una muerte injusta garantizada
+        // si alguien llega sin la llave.
+      } else if (o.type === 'coin') {
+        if (coinsCollected.indexOf(o.id) === -1 && overlapsX(o, 24, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26) {
+          coinsCollected.push(o.id);
+          o.dead = true;
+          coinsEl.textContent = '🪙 ' + coinsCollected.length + '/3';
+          playPickup();
+          spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFC93D', 12);
+        }
+      } else if (o.type === 'finish') {
+        if (overlapsX(o, 20, centerWorldX)) { winGame(); return; }
       }
     }
 
     updateParticles(dt);
-    score += speed * dt * 0.05;
-    scoreEl.textContent = 'Score: ' + Math.round(score);
+    var pct = Math.min(100, Math.round((player.worldX / level.length) * 100));
+    scoreEl.textContent = 'Progress: ' + pct + '%';
+  }
+
+  function activeOrbTap() {
+    for (var i = 0; i < level.objects.length; i++) {
+      var o = level.objects[i];
+      if (o.type === 'orb' && o.playerNear && !o.dead) {
+        if (o.color === 'yellow') player.vy = -ORB_YELLOW_V * player.gravityDir;
+        else if (o.color === 'pink') player.vy = -ORB_PINK_V * player.gravityDir;
+        else if (o.color === 'green') player.gravityDir *= -1;
+        player.grounded = false;
+        playPad();
+        spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CFFB2', 10);
+        return true;
+      }
+    }
+    return false;
   }
 
   /* ---- Draw ---- */
-  function draw() {
-    ctx.fillStyle = '#05060a';
+  function drawBackground() {
+    ctx.fillStyle = '#05060f';
     ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(120,90,255,.14)';
+    ctx.lineWidth = 1;
+    var off = (player.worldX * 0.3) % 40;
+    for (var gx = -off; gx < W; gx += 40) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+    }
+    for (var gy = 0; gy < H; gy += 40) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+    }
+    ctx.restore();
 
-    ctx.fillStyle = '#1b2029';
+    ctx.fillStyle = '#120a24';
     ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
     ctx.fillRect(0, 0, W, CEIL_Y);
-    ctx.fillStyle = '#3a4152';
+    ctx.save();
+    ctx.shadowColor = '#B983FF'; ctx.shadowBlur = 8;
+    ctx.fillStyle = '#B983FF';
     ctx.fillRect(0, FLOOR_Y, W, 2);
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
+    ctx.restore();
 
-    obstacles.forEach(function (o) {
+    var tileW = 110, floorOff = player.worldX % tileW;
+    for (var fx = -floorOff; fx < W; fx += tileW) {
+      drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
+      ctx.save();
+      ctx.translate(fx + tileW / 2, CEIL_Y);
+      ctx.rotate(Math.PI);
+      drawSprite('floor', -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
+      ctx.restore();
+    }
+  }
+
+  function draw() {
+    drawBackground();
+
+    level.objects.forEach(function (o) {
       var sx = toScreenX(o.x);
-      if (sx < -80 || sx > W + 80) return;
+      if (sx < -160 || sx > W + 160) return;
 
-      if (o.type === 'gap') {
-        var y = o.surface === 'floor' ? FLOOR_Y : 0;
-        var h = o.surface === 'floor' ? H - FLOOR_Y : CEIL_Y;
-        ctx.fillStyle = '#05060a';
-        ctx.fillRect(sx, y, o.w, h);
-      } else if (o.type === 'spike') {
-        var baseY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
-        var dir = o.surface === 'floor' ? -1 : 1;
-        ctx.save();
-        ctx.shadowColor = '#FF3D57';
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = '#FF3D57';
-        ctx.beginPath();
-        ctx.moveTo(sx, baseY);
-        ctx.lineTo(sx + o.w / 2, baseY + 22 * dir);
-        ctx.lineTo(sx + o.w, baseY);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+      if (o.type === 'spike') {
+        drawSprite('spike', sx - 6, (o.surface === 'floor' ? FLOOR_Y - 30 : CEIL_Y), 40, 30);
       } else if (o.type === 'saw') {
-        var sawCY = o.surface === 'floor' ? FLOOR_Y - o.r : CEIL_Y + o.r;
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
         ctx.save();
-        ctx.translate(sx + o.r, sawCY);
-        ctx.rotate(o.rot);
-        ctx.shadowColor = '#B983FF';
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = '#B983FF';
-        var teeth = 8;
-        ctx.beginPath();
-        for (var t = 0; t < teeth; t++) {
-          var a1 = (t / teeth) * Math.PI * 2;
-          var a2 = a1 + Math.PI / teeth;
-          ctx.lineTo(Math.cos(a1) * o.r, Math.sin(a1) * o.r);
-          ctx.lineTo(Math.cos(a2) * (o.r + 8), Math.sin(a2) * (o.r + 8));
-        }
-        ctx.closePath();
-        ctx.fill();
+        ctx.translate(sx, sawCY);
+        ctx.rotate(elapsedMs * 0.006);
+        drawSprite('saw', -22, -22, 44, 44);
         ctx.restore();
-      } else if (o.type === 'laser') {
-        if (!o.active) return;
+      } else if (o.type === 'platform') {
+        var py = surfaceYFor(o) - (o.surface === 'floor' ? 14 : 0);
+        drawSprite('platform', sx, py, o.w, 14);
+      } else if (o.type === 'gravityPortal') {
+        drawSprite('portal_gravity', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+      } else if (o.type === 'shapePortal') {
+        drawSprite('portal_shape', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+      } else if (o.type === 'orb') {
+        var sy = o.y;
         ctx.save();
-        ctx.shadowColor = '#FF3D57';
-        ctx.shadowBlur = 14;
-        ctx.fillStyle = 'rgba(255,61,87,.8)';
-        ctx.fillRect(sx, CEIL_Y, o.w, FLOOR_Y - CEIL_Y);
+        if (o.playerNear) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 14; }
+        drawSprite('orb_' + o.color, sx - 16, sy - 16, 32, 32);
         ctx.restore();
-      } else if (o.type === 'pinch') {
+      } else if (o.type === 'pad') {
+        var padY = o.surface === 'floor' ? FLOOR_Y - 16 : CEIL_Y;
         ctx.save();
-        ctx.shadowColor = '#FFC93D';
-        ctx.shadowBlur = 12;
+        if (o.surface === 'ceil') { ctx.translate(sx, padY + 16); ctx.rotate(Math.PI); drawSprite('pad_' + o.color, -20, -16, 40, 16); }
+        else { drawSprite('pad_' + o.color, sx - 20, padY, 40, 16); }
+        ctx.restore();
+      } else if (o.type === 'key' && !o.dead) {
+        drawSprite('key', sx - 15, o.y - 15, 30, 30);
+      } else if (o.type === 'door') {
+        ctx.save();
+        var doorW = o.x2 - o.x;
+        if (o.open) ctx.globalAlpha = Math.max(0.15, 1 - (elapsedMs % 1) );
+        if (!o.open) drawSprite('door', sx, CEIL_Y, doorW, FLOOR_Y - CEIL_Y);
+        ctx.restore();
+      } else if (o.type === 'coin' && !o.dead) {
+        ctx.save();
+        ctx.translate(sx, o.y);
+        ctx.scale(Math.abs(Math.cos(elapsedMs * 0.004)), 1);
         ctx.fillStyle = '#FFC93D';
-        ctx.beginPath();
-        ctx.moveTo(sx, FLOOR_Y);
-        ctx.lineTo(sx + o.w / 2, FLOOR_Y - 34);
-        ctx.lineTo(sx + o.w, FLOOR_Y);
-        ctx.closePath();
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(sx, CEIL_Y);
-        ctx.lineTo(sx + o.w / 2, CEIL_Y + 34);
-        ctx.lineTo(sx + o.w, CEIL_Y);
-        ctx.closePath();
-        ctx.fill();
+        ctx.shadowColor = '#FFC93D'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (o.type === 'finish') {
+        ctx.save();
+        ctx.shadowColor = '#7CFFB2'; ctx.shadowBlur = 18;
+        ctx.fillStyle = 'rgba(124,255,178,.35)';
+        ctx.fillRect(sx - 4, CEIL_Y, 8, FLOOR_Y - CEIL_Y);
         ctx.restore();
       }
     });
 
-    var pulse = player.gravityDir === 1 ? '#3D8BFF' : '#FF3DAE';
     ctx.save();
-    ctx.shadowColor = pulse;
-    ctx.shadowBlur = 16;
-    ctx.fillStyle = pulse;
-    ctx.fillRect(PLAYER_SCREEN_X, player.y, PLAYER_SIZE, PLAYER_SIZE);
+    if (player.form === 'ship') {
+      ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
+      ctx.rotate(Math.max(-0.4, Math.min(0.4, player.vy * 0.5)));
+      ctx.shadowColor = '#3DE0FF'; ctx.shadowBlur = 14;
+      drawSprite('cube_idle', -PLAYER_SIZE * 0.7, -PLAYER_SIZE * 0.42, PLAYER_SIZE * 1.4, PLAYER_SIZE * 0.84);
+    } else if (player.form === 'ball') {
+      ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
+      ctx.rotate(elapsedMs * 0.006);
+      ctx.shadowColor = '#FF3DAE'; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(0, 0, PLAYER_SIZE / 2, 0, Math.PI * 2);
+      ctx.clip();
+      drawSprite(player.face, -PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
+    } else {
+      ctx.translate(player.x, player.y);
+      ctx.shadowColor = '#3D8BFF'; ctx.shadowBlur = 14;
+      drawSprite(player.face, 0, 0, PLAYER_SIZE, PLAYER_SIZE);
+    }
     ctx.restore();
 
     drawParticles();
@@ -539,12 +833,28 @@
     requestAnimationFrame(loop);
   }
 
-  canvas.addEventListener('touchstart', function (e) { e.preventDefault(); flip(); }, { passive: false });
-  canvas.addEventListener('mousedown', function (e) { if (e.button === 0) flip(); });
-  overlay.addEventListener('touchstart', function (e) { e.preventDefault(); flip(); }, { passive: false });
-  overlay.addEventListener('mousedown', function (e) { if (e.button === 0) flip(); });
+  function handlePressStart(e) {
+    if (e) e.preventDefault();
+    if (state === 'playing' && player.form !== 'ship') {
+      if (!activeOrbTap()) press();
+    } else {
+      press();
+    }
+  }
+  function handlePressEnd(e) { if (e) e.preventDefault(); release(); }
+
+  canvas.addEventListener('touchstart', handlePressStart, { passive: false });
+  canvas.addEventListener('touchend', handlePressEnd, { passive: false });
+  canvas.addEventListener('mousedown', function (e) { if (e.button === 0) handlePressStart(e); });
+  canvas.addEventListener('mouseup', function (e) { if (e.button === 0) handlePressEnd(e); });
+  canvas.addEventListener('mouseleave', function () { release(); });
+  overlay.addEventListener('touchstart', handlePressStart, { passive: false });
+  overlay.addEventListener('mousedown', function (e) { if (e.button === 0) handlePressStart(e); });
   document.addEventListener('keydown', function (e) {
-    if (e.code === 'Space') { e.preventDefault(); flip(); }
+    if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handlePressStart(e); }
+  });
+  document.addEventListener('keyup', function (e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handlePressEnd(e); }
   });
 
   resetGame();
