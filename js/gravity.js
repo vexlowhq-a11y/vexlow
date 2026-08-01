@@ -268,33 +268,22 @@
      muerte propias, así que se usa la misma imagen para cubo/nave/
      bola en cualquier estado; el "feedback" de salto/muerte queda a
      cargo de partículas y sonido en vez de cambiar de cara. */
-  var SPRITE_NAMES = ['floor', 'platform', 'spike', 'spike_triple', 'saw',
-    'portal_gravity', 'portal_shape', 'orb_green', 'orb_pink', 'orb_yellow',
-    'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
-  // Variantes cosméticas opcionales (subidas por el usuario) para
-  // pincho/sierra/plataforma/portal -- no cambian la física, solo el
-  // sprite dibujado. Un nivel puede pedir 'spike_v3' con `variant: 'v3'`.
-  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12 };
-  Object.keys(VARIANT_COUNTS).forEach(function (base) {
-    var n = VARIANT_COUNTS[base];
-    var spriteBase = base === 'portal_gravity' || base === 'portal_shape' ? 'portal' : base;
-    for (var vi = 1; vi <= n; vi++) SPRITE_NAMES.push(spriteBase + '_v' + vi);
-  });
-  // El piso no se tilea con el sprite del bloque (no es una textura
-  // sin costura) -- se pinta una franja continua con el color
-  // representativo de cada bloque, calculado de antemano.
-  var FLOOR_VARIANT_COLORS = {
-    v1: '#7a7b7d', v2: '#707384', v3: '#923dab', v4: '#205c95', v5: '#5b9918', v6: '#a14016',
-    v7: '#795838', v8: '#888177', v9: '#816d4d', v10: '#33a0d5', v11: '#8c7d64', v12: '#9c3509',
-    v13: '#98621b', v14: '#8b6d47', v15: '#978369', v16: '#ac4904', v17: '#279ace', v18: '#aa4103'
-  };
-  SPRITE_NAMES = SPRITE_NAMES.filter(function (v, i, arr) { return arr.indexOf(v) === i; }); // sin duplicados (portal_v* se agrega dos veces)
+  // Los sprites (incluidas las variantes cosméticas opcionales
+  // spike_vN/saw_vN/platform_vN/portal_vN que un nivel puede pedir
+  // vía `variant: 'v3'`) se cargan de forma perezosa la primera vez
+  // que se piden -- así no hace falta saber de antemano cuántas
+  // variantes existen ni tocar este archivo cada vez que se sube una
+  // nueva desde el panel de admin.
   var sprites = {};
-  SPRITE_NAMES.forEach(function (name) {
-    var img = new Image();
-    img.src = '../img/gravitycover/sliced/' + name + '.png';
-    sprites[name] = img;
-  });
+  function getSprite(name) {
+    var img = sprites[name];
+    if (!img) {
+      img = new Image();
+      img.src = '../img/gravitycover/sliced/' + name + '.png';
+      sprites[name] = img;
+    }
+    return img;
+  }
   var skinImg = new Image();
   function setActiveSkin(skinId) {
     currentSkin = skinId;
@@ -303,13 +292,44 @@
   }
   setActiveSkin(currentSkin);
   function drawSprite(name, x, y, w, h) {
-    var img = sprites[name];
-    if (img && img.complete && img.naturalWidth > 0) {
+    var img = getSprite(name);
+    if (img.complete && img.naturalWidth > 0) {
       ctx.drawImage(img, x, y, w, h);
     }
   }
   function drawSkin(x, y, w, h) {
     if (skinImg.complete && skinImg.naturalWidth > 0) ctx.drawImage(skinImg, x, y, w, h);
+  }
+
+  // Color representativo de cada bloque de piso subido por el
+  // usuario, calculado en el momento (una sola vez por variante, con
+  // un canvas auxiliar) en vez de tener una tabla fija -- así
+  // funciona automáticamente con cualquier bloque nuevo que se suba,
+  // sin tener que tocar este archivo.
+  var floorColorCache = {};
+  function floorVariantColor(variant) {
+    if (floorColorCache[variant]) return floorColorCache[variant];
+    var img = getSprite('floor_' + variant);
+    if (!img.complete || img.naturalWidth === 0) return null;
+    try {
+      var c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      var cctx = c.getContext('2d');
+      cctx.drawImage(img, 0, 0);
+      var data = cctx.getImageData(0, 0, c.width, c.height).data;
+      var r = 0, g = 0, b = 0, wsum = 0;
+      for (var i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) continue; // pixel transparente
+        var bright = Math.max(data[i], data[i + 1], data[i + 2]);
+        var w = Math.max(0.05, Math.min(1, (bright - 40) / 180));
+        r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
+      }
+      var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
+      floorColorCache[variant] = color;
+      return color;
+    } catch (e) {
+      return null; // ej. lienzo no disponible en el sandbox de pruebas
+    }
   }
 
   /* ---- Física (por forma) ----
@@ -1205,12 +1225,14 @@
       if (o.dead) continue;
 
       if (o.type === 'spike') {
-        var spikeY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
-        var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - 18 : player.y < spikeY + 18;
+        var spikeLift = o.lift || 0;
+        var spikeY = o.surface === 'floor' ? FLOOR_Y - spikeLift : CEIL_Y + spikeLift;
+        var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - 18 && player.y + PLAYER_SIZE < spikeY + 18 : player.y < spikeY + 18 && player.y > spikeY - 18;
         if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
       } else if (o.type === 'saw') {
         if (o.linkId && level.switches[o.linkId]) continue; // desactivada por interruptor
-        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
+        var sawLift = o.lift || 0;
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 - sawLift : CEIL_Y + 22 + sawLift;
         var dx = centerWorldX - o.x;
         var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
         if (Math.sqrt(dx * dx + dy * dy) < 22 + PLAYER_SIZE * 0.3) { endGame(); return; }
@@ -1262,8 +1284,9 @@
         o.playerNear = orbNear;
       } else if (o.type === 'pad') {
         if (!o.used && overlapsX(o, 40, centerWorldX)) {
-          var padSurfaceY = o.surface === 'floor' ? FLOOR_Y : CEIL_Y;
-          var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - 24 : player.y < padSurfaceY + 24;
+          var padLift = o.lift || 0;
+          var padSurfaceY = o.surface === 'floor' ? FLOOR_Y - padLift : CEIL_Y + padLift;
+          var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - 24 && player.y + PLAYER_SIZE < padSurfaceY + 24 : player.y < padSurfaceY + 24 && player.y > padSurfaceY - 24;
           if (padNear) {
             o.used = true;
             var padV = o.color === 'yellow' ? ORB_YELLOW_V : o.color === 'pink' ? ORB_PINK_V : 0.62;
@@ -1348,12 +1371,13 @@
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
     ctx.restore();
 
-    if (level && level.floorVariant && FLOOR_VARIANT_COLORS[level.floorVariant]) {
+    var floorColor = level && level.floorVariant ? floorVariantColor(level.floorVariant) : null;
+    if (floorColor) {
       // Los "bloques" que subió el usuario son íconos individuales, no
       // una textura pensada para repetirse sin costura -- en vez de
       // tilearlos (que se ve con separaciones), se pinta una franja
       // continua del color representativo de ese bloque.
-      ctx.fillStyle = FLOOR_VARIANT_COLORS[level.floorVariant];
+      ctx.fillStyle = floorColor;
       ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
       ctx.fillRect(0, 0, W, CEIL_Y);
     } else {
@@ -1385,7 +1409,8 @@
         var spikeSprite = o.variant ? 'spike_' + o.variant : 'spike';
         var spikeBaseRot = o.surface === 'ceil' ? Math.PI : 0;
         var spikeExtraRot = (o.rotation || 0) * Math.PI / 180;
-        var spikeCY = o.surface === 'ceil' ? CEIL_Y + 15 : FLOOR_Y - 15;
+        var spikeLiftDraw = o.lift || 0;
+        var spikeCY = o.surface === 'ceil' ? CEIL_Y + 15 + spikeLiftDraw : FLOOR_Y - 15 - spikeLiftDraw;
         ctx.save();
         ctx.translate(sx + 14, spikeCY);
         ctx.rotate(spikeBaseRot + spikeExtraRot);
@@ -1394,7 +1419,8 @@
       } else if (o.type === 'saw') {
         var sawSprite = o.variant ? 'saw_' + o.variant : 'saw';
         var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
-        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
+        var sawLiftDraw = o.lift || 0;
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 - sawLiftDraw : CEIL_Y + 22 + sawLiftDraw;
         ctx.save();
         ctx.translate(sx, sawCY);
         if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
@@ -1445,7 +1471,8 @@
         drawSprite('orb_' + o.color, sx - 16, sy - 16, 32, 32);
         ctx.restore();
       } else if (o.type === 'pad') {
-        var padY = o.surface === 'floor' ? FLOOR_Y - 16 : CEIL_Y;
+        var padLiftDraw = o.lift || 0;
+        var padY = o.surface === 'floor' ? FLOOR_Y - 16 - padLiftDraw : CEIL_Y + padLiftDraw;
         ctx.save();
         if (o.surface === 'ceil') { ctx.translate(sx, padY + 16); ctx.rotate(Math.PI); drawSprite('pad_' + o.color, -20, -16, 40, 16); }
         else { drawSprite('pad_' + o.color, sx - 20, padY, 40, 16); }

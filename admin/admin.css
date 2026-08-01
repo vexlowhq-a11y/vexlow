@@ -319,6 +319,12 @@ body { padding: 0; }
 
 .gravity-asset-group { margin-bottom: 24px; }
 .gravity-asset-group h3 { font-size: 14px; margin-bottom: 10px; }
+.gravity-add-variant-btn {
+  display: inline-flex; align-items: center; gap: 4px; margin: 0 6px 10px 0; padding: 7px 12px;
+  border: 1px dashed var(--blue-fill); border-radius: 999px; background: var(--blue-tint); color: var(--blue);
+  font-family: 'Manrope'; font-weight: 700; font-size: 11.5px; cursor: pointer;
+}
+.gravity-add-variant-btn:hover { opacity: .85; }
 .gravity-asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
 .gravity-asset-card {
   border: 1px solid var(--border); border-radius: var(--radius-m); padding: 8px; text-align: center;

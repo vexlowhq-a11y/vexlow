@@ -11,20 +11,21 @@
   var CANVAS_H = 230;
   var scaleY = CANVAS_H / WORLD_H;
   var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
-  var FLOOR_VARIANT_COLORS = {
-    v1: '#7a7b7d', v2: '#707384', v3: '#923dab', v4: '#205c95', v5: '#5b9918', v6: '#a14016',
-    v7: '#795838', v8: '#888177', v9: '#816d4d', v10: '#33a0d5', v11: '#8c7d64', v12: '#9c3509',
-    v13: '#98621b', v14: '#8b6d47', v15: '#978369', v16: '#ac4904', v17: '#279ace', v18: '#aa4103'
-  };
+
+  // Las cantidades de variantes (cuántos spike_vN, saw_vN, etc. existen)
+  // NO están fijas acá -- se piden al servidor (que las cuenta mirando
+  // el disco) al cargar la pestaña, así una variante nueva subida desde
+  // "Sprites" aparece sola en los selectores sin tocar este archivo.
+  var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0 };
 
   var OBJECT_TYPES = {
-    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w', 'variant', 'rotation'], variantBase: 'spike', variantCount: 9 },
-    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'linkId', 'variant'], variantBase: 'saw', variantCount: 6 },
-    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform', variantCount: 5 },
-    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal', variantCount: 12 },
-    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'variant'], variantBase: 'portal', variantCount: 12 },
+    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'variant', 'rotation'], variantBase: 'spike' },
+    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'linkId', 'variant'], variantBase: 'saw' },
+    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
+    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal' },
+    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'variant'], variantBase: 'portal' },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y'] },
-    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'color'] },
+    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'color'] },
     key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y'] },
     door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'full', fields: ['x2'] },
     coin: { label: 'Moneda', color: '#FFC93D', icon: '◎', anchor: 'free', fields: ['id', 'y', 'risky'] },
@@ -33,6 +34,10 @@
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
   var TOOL_ORDER = ['spike', 'saw', 'platform', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
+  function variantCountFor(type) {
+    var def = OBJECT_TYPES[type];
+    return def && def.variantBase ? (variantCounts[def.variantBase] || 0) : 0;
+  }
 
   var state = { levelId: null, levelName: '', objects: [], speedZones: [], length: 4000, selectedIndex: -1, tool: 'spike', toolVariant: null, zoom: 0.4 };
   var drag = null; // { index, offsetWorldX, movedY }
@@ -73,10 +78,11 @@
 
   function renderPaletteVariants() {
     var def = OBJECT_TYPES[state.tool];
-    if (!def || !def.variantCount) { paletteVariantsEl.innerHTML = ''; return; }
+    var vc = variantCountFor(state.tool);
+    if (!def || !vc) { paletteVariantsEl.innerHTML = ''; return; }
     var html = '<span class="gravity-palette-variants-label">Molde de "' + def.label + '" a usar:</span><div class="gravity-variant-swatches">';
     html += '<button type="button" class="gravity-variant-swatch' + (!state.toolVariant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
-    for (var vi = 1; vi <= def.variantCount; vi++) {
+    for (var vi = 1; vi <= vc; vi++) {
       var vid = 'v' + vi;
       html += '<button type="button" class="gravity-variant-swatch' + (state.toolVariant === vid ? ' selected' : '') +
         '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
@@ -93,12 +99,11 @@
   renderPaletteVariants();
 
   /* ---- Piso del nivel (propiedad de todo el nivel, no un objeto) ---- */
-  var FLOOR_VARIANT_COUNT = 18;
   function renderFloorPicker() {
     if (!floorPickerEl) return;
     var html = '<div class="gravity-variant-swatches">';
     html += '<button type="button" class="gravity-variant-swatch' + (!state.floorVariant ? ' selected' : '') + '" data-floor="">Por defecto</button>';
-    for (var vi = 1; vi <= FLOOR_VARIANT_COUNT; vi++) {
+    for (var vi = 1; vi <= (variantCounts.floor || 0); vi++) {
       var vid = 'v' + vi;
       html += '<button type="button" class="gravity-variant-swatch' + (state.floorVariant === vid ? ' selected' : '') +
         '" data-floor="' + vid + '"><img src="/site/img/gravitycover/sliced/floor_' + vid + '.png" alt="' + vid + '"></button>';
@@ -162,7 +167,7 @@
       case 'finish': obj = { type: 'finish', x: x }; break;
       default: obj = { type: type, x: x };
     }
-    if (state.toolVariant && OBJECT_TYPES[type] && OBJECT_TYPES[type].variantCount) obj.variant = state.toolVariant;
+    if (state.toolVariant && variantCountFor(type)) obj.variant = state.toolVariant;
     return obj;
   }
   function countOf(type) { return state.objects.filter(function (o) { return o.type === type; }).length; }
@@ -170,11 +175,10 @@
   function objectDrawY(o) {
     var def = OBJECT_TYPES[o.type];
     if (!def) return MID_Y;
-    if (o.type === 'platform') {
+    if (def.anchor === 'surface') {
       var lift = o.lift || 0;
-      return o.surface === 'ceil' ? CEIL_Y + lift : FLOOR_Y - lift;
+      return o.surface === 'ceil' ? CEIL_Y + 20 + lift : FLOOR_Y - 20 - lift;
     }
-    if (def.anchor === 'surface') return o.surface === 'ceil' ? CEIL_Y + 20 : FLOOR_Y - 20;
     if (def.anchor === 'free') return (o.y != null ? o.y : MID_Y);
     return MID_Y;
   }
@@ -195,6 +199,31 @@
       spriteImgCache[name] = img;
     }
     return spriteImgCache[name];
+  }
+  var floorColorCache = {};
+  function floorVariantColor(variant) {
+    if (floorColorCache[variant]) return floorColorCache[variant];
+    var img = getSpriteImg('floor_' + variant);
+    if (!img.complete || img.naturalWidth === 0) return null;
+    try {
+      var c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      var cctx = c.getContext('2d');
+      cctx.drawImage(img, 0, 0);
+      var data = cctx.getImageData(0, 0, c.width, c.height).data;
+      var r = 0, g = 0, b = 0, wsum = 0;
+      for (var i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) continue;
+        var bright = Math.max(data[i], data[i + 1], data[i + 2]);
+        var w = Math.max(0.05, Math.min(1, (bright - 40) / 180));
+        r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
+      }
+      var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
+      floorColorCache[variant] = color;
+      return color;
+    } catch (e) {
+      return null;
+    }
   }
   function spriteNameFor(o) {
     switch (o.type) {
@@ -228,11 +257,12 @@
     }
 
     var floorCy = FLOOR_Y * scaleY, ceilCy = CEIL_Y * scaleY;
-    if (state.floorVariant && FLOOR_VARIANT_COLORS[state.floorVariant]) {
+    var floorColor = state.floorVariant ? floorVariantColor(state.floorVariant) : null;
+    if (floorColor) {
       // Los bloques no son una textura sin costura -- se pinta una
       // franja continua con el color representativo del bloque
       // elegido, igual que en el juego real.
-      ctx.fillStyle = FLOOR_VARIANT_COLORS[state.floorVariant];
+      ctx.fillStyle = floorColor;
       ctx.fillRect(0, floorCy, canvas.width, canvas.height - floorCy);
       ctx.fillRect(0, 0, canvas.width, ceilCy);
     } else {
@@ -333,12 +363,12 @@
     var idx = findObjectNear(w.x, w.y, hitThreshold);
     if (idx !== -1) {
       state.selectedIndex = idx;
-      drag = { index: idx, freeY: OBJECT_TYPES[state.objects[idx].type].anchor === 'free', liftDraggable: state.objects[idx].type === 'platform' };
+      drag = { index: idx, freeY: OBJECT_TYPES[state.objects[idx].type].anchor === 'free', liftDraggable: OBJECT_TYPES[state.objects[idx].type].anchor === 'surface' };
     } else {
       var obj = defaultObjectFor(state.tool, w.x, w.y);
       state.objects.push(obj);
       state.selectedIndex = state.objects.length - 1;
-      drag = { index: state.selectedIndex, freeY: OBJECT_TYPES[obj.type].anchor === 'free', liftDraggable: obj.type === 'platform' };
+      drag = { index: state.selectedIndex, freeY: OBJECT_TYPES[obj.type].anchor === 'free', liftDraggable: OBJECT_TYPES[obj.type].anchor === 'surface' };
       recomputeLength();
     }
     renderProps();
@@ -389,10 +419,11 @@
     var def = OBJECT_TYPES[o.type];
     if (!def) { propsEl.innerHTML = ''; return; }
     var html = '<div class="prop-row"><strong>' + def.icon + ' ' + def.label + '</strong> — x: ' + o.x + '</div>';
-    if (def.variantCount) {
+    var vc = variantCountFor(o.type);
+    if (vc) {
       html += '<div class="prop-row gravity-variant-row"><span>Aspecto</span><div class="gravity-variant-swatches">';
       html += '<button type="button" class="gravity-variant-swatch' + (!o.variant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
-      for (var vi = 1; vi <= def.variantCount; vi++) {
+      for (var vi = 1; vi <= vc; vi++) {
         var vid = 'v' + vi;
         html += '<button type="button" class="gravity-variant-swatch' + (o.variant === vid ? ' selected' : '') +
           '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
@@ -552,13 +583,16 @@
 
   /* ---- Sprites (galería de assets reemplazables) ---- */
   var assetGroupsEl = document.getElementById('gravityAssetGroups');
-  var assetsLoaded = false;
+  var VARIANT_BASE_LABELS = { spike: 'pincho', saw: 'sierra', platform: 'plataforma', portal: 'portal', floor: 'piso' };
   function loadAssets() {
-    if (assetsLoaded) return;
-    assetsLoaded = true;
     fetch('/api/gravity-assets').then(function (r) { return r.json(); }).then(function (groups) {
       assetGroupsEl.innerHTML = groups.map(function (g) {
-        return '<div class="gravity-asset-group"><h3>' + g.group + '</h3><div class="gravity-asset-grid">' +
+        var isVariantGroup = g.group.indexOf('Variantes') === 0;
+        var addButtons = isVariantGroup ? Object.keys(VARIANT_BASE_LABELS).map(function (base) {
+          return '<label class="gravity-add-variant-btn">+ Agregar ' + VARIANT_BASE_LABELS[base] + ' nuevo' +
+            '<input type="file" accept="image/*" data-add-variant="' + base + '" hidden></label>';
+        }).join('') : '';
+        return '<div class="gravity-asset-group"><h3>' + g.group + '</h3>' + addButtons + '<div class="gravity-asset-grid">' +
           g.items.map(function (item) {
             return '<div class="gravity-asset-card" data-key="' + item.key + '">' +
               (item.exists ? '<img src="' + item.url + '?t=' + Date.now() + '" alt="' + item.key + '">' : '<div class="missing">sin imagen</div>') +
@@ -566,8 +600,11 @@
               '<input type="file" accept="image/*" data-key="' + item.key + '"></div>';
           }).join('') + '</div></div>';
       }).join('');
-      assetGroupsEl.querySelectorAll('input[type="file"]').forEach(function (input) {
+      assetGroupsEl.querySelectorAll('input[data-key]').forEach(function (input) {
         input.addEventListener('change', function () { uploadAsset(input); });
+      });
+      assetGroupsEl.querySelectorAll('input[data-add-variant]').forEach(function (input) {
+        input.addEventListener('change', function () { uploadNewVariant(input); });
       });
     }).catch(function (e) { assetGroupsEl.textContent = 'Error al cargar los sprites: ' + e.message; });
   }
@@ -594,6 +631,35 @@
     };
     reader.readAsDataURL(file);
   }
+  function uploadNewVariant(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var base = input.getAttribute('data-add-variant');
+    var reader = new FileReader();
+    reader.onload = function () {
+      var dataUrl = reader.result;
+      var base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      fetch('/api/gravity-asset/add-variant', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: base, dataBase64: base64 })
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        if (!res.ok) { window.alert('Error al agregar la variante: ' + res.error); return; }
+        loadAssets(); // re-pinta la galería con la variante nueva ya incluida
+        loadVariantCounts(); // y refresca los selectores del editor de niveles
+      }).catch(function (e) { window.alert('Error al agregar la variante: ' + e.message); }).finally(function () {
+        input.value = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  }
 
+  function loadVariantCounts() {
+    fetch('/api/gravity-variant-counts').then(function (r) { return r.json(); }).then(function (counts) {
+      variantCounts = counts;
+      renderPaletteVariants();
+      renderProps();
+      renderFloorPicker();
+    }).catch(function () {});
+  }
+  loadVariantCounts();
   loadLevelList();
 })();

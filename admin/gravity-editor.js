@@ -111,32 +111,58 @@ function loadLevel(id) {
 }
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
-   se pueden reemplazar subiendo una imagen propia. ---- */
+   se pueden reemplazar subiendo una imagen propia. Las "variantes"
+   (spike_vN, saw_vN, platform_vN, portal_vN, floor_vN) no tienen una
+   cantidad fija: se cuentan mirando qué archivos existen de verdad en
+   el disco, así que agregar una variante nueva (en vez de solo
+   reemplazar una existente) es simplemente guardar el siguiente
+   número que falte. ---- */
 const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
   'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
-const VARIANT_KEYS = ['spike_v1', 'spike_v2', 'spike_v3', 'spike_v4', 'spike_v5', 'spike_v6', 'spike_v7', 'spike_v8', 'spike_v9',
-  'saw_v1', 'saw_v2', 'saw_v3', 'saw_v4', 'saw_v5', 'saw_v6',
-  'platform_v1', 'platform_v2', 'platform_v3', 'platform_v4', 'platform_v5',
-  'portal_v1', 'portal_v2', 'portal_v3', 'portal_v4', 'portal_v5', 'portal_v6', 'portal_v7', 'portal_v8', 'portal_v9', 'portal_v10', 'portal_v11', 'portal_v12',
-  'floor_v1', 'floor_v2', 'floor_v3', 'floor_v4', 'floor_v5', 'floor_v6', 'floor_v7', 'floor_v8', 'floor_v9',
-  'floor_v10', 'floor_v11', 'floor_v12', 'floor_v13', 'floor_v14', 'floor_v15', 'floor_v16', 'floor_v17', 'floor_v18'];
+const VARIANT_BASES = ['spike', 'saw', 'platform', 'portal', 'floor'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
 const SKIN_KEYS = Array.from({ length: 72 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
 
-const ASSET_GROUPS = [
-  { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
-  { group: 'Variantes (pincho/sierra/plataforma/portal)', keys: VARIANT_KEYS, ext: 'png' },
-  { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
-  { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
-  { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }
-];
-
 const SLICED_DIR = path.join(__dirname, '..', 'img', 'gravitycover', 'sliced');
 const MAX_ASSET_BYTES = 8 * 1024 * 1024;
 
+function countVariant(base) {
+  var n = 0;
+  while (fs.existsSync(path.join(SLICED_DIR, base + '_v' + (n + 1) + '.png'))) n++;
+  return n;
+}
+function getVariantCounts() {
+  var counts = {};
+  VARIANT_BASES.forEach(function (b) { counts[b] = countVariant(b); });
+  return counts;
+}
+function addVariant(base, dataBase64) {
+  if (VARIANT_BASES.indexOf(base) === -1) throw new Error('Tipo de variante desconocido: ' + base);
+  var buffer = Buffer.from(dataBase64, 'base64');
+  if (buffer.length === 0) throw new Error('El archivo llegó vacío');
+  if (buffer.length > MAX_ASSET_BYTES) throw new Error('La imagen pesa más de 8 MB');
+  var next = countVariant(base) + 1;
+  var key = base + '_v' + next;
+  fs.mkdirSync(SLICED_DIR, { recursive: true });
+  fs.writeFileSync(path.join(SLICED_DIR, key + '.png'), buffer);
+  return { key: key, index: next };
+}
+
 function listAssets() {
-  return ASSET_GROUPS.map(function (g) {
+  var variantKeys = [];
+  VARIANT_BASES.forEach(function (base) {
+    var n = countVariant(base);
+    for (var i = 1; i <= n; i++) variantKeys.push(base + '_v' + i);
+  });
+  var groups = [
+    { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
+    { group: 'Variantes (pincho/sierra/plataforma/portal/piso)', keys: variantKeys, ext: 'png' },
+    { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
+    { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
+    { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }
+  ];
+  return groups.map(function (g) {
     return {
       group: g.group,
       ext: g.ext,
@@ -149,9 +175,11 @@ function listAssets() {
 }
 
 function assetExt(key) {
-  var found = ASSET_GROUPS.find(function (g) { return g.keys.indexOf(key) !== -1; });
-  if (!found) throw new Error('Sprite desconocido: ' + key);
-  return found.ext;
+  var variantMatch = /^(spike|saw|platform|portal|floor)_v\d+$/.exec(key);
+  if (variantMatch) return 'png';
+  if (SPRITE_KEYS.indexOf(key) !== -1 || HOME_DECOR_KEYS.indexOf(key) !== -1 || SKIN_KEYS.indexOf(key) !== -1) return 'png';
+  if (LEVEL_THUMB_KEYS.indexOf(key) !== -1) return 'jpg';
+  throw new Error('Sprite desconocido: ' + key);
 }
 
 function saveAsset(key, dataBase64) {
@@ -442,5 +470,7 @@ module.exports = {
   saveLevel: saveLevel,
   createLevel: createLevel,
   listAssets: listAssets,
-  saveAsset: saveAsset
+  saveAsset: saveAsset,
+  getVariantCounts: getVariantCounts,
+  addVariant: addVariant
 };

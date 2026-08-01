@@ -688,6 +688,26 @@ var server = http.createServer(function (req, res) {
       }
     });
   }
+  if (urlPath === '/api/gravity-variant-counts' && req.method === 'GET') {
+    try {
+      return sendJSON(res, 200, gravityEditor.getVariantCounts());
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/gravity-asset/add-variant' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.base || !data.dataBase64) {
+        return sendJSON(res, 400, { error: 'Faltan datos de la variante nueva' });
+      }
+      try {
+        var created = gravityEditor.addVariant(data.base, data.dataBase64);
+        return sendJSON(res, 200, { ok: true, variant: created });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
 
   // ---- Publicación automática (bot) ----
   if (urlPath === '/api/automation-config' && req.method === 'GET') {
