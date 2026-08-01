@@ -13,7 +13,7 @@
   var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
 
   var OBJECT_TYPES = {
-    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w', 'variant'], variantBase: 'spike', variantCount: 9 },
+    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w', 'variant', 'rotation'], variantBase: 'spike', variantCount: 9 },
     saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'linkId', 'variant'], variantBase: 'saw', variantCount: 6 },
     platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform', variantCount: 5 },
     gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal', variantCount: 12 },
@@ -29,13 +29,14 @@
   };
   var TOOL_ORDER = ['spike', 'saw', 'platform', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
 
-  var state = { levelId: null, levelName: '', objects: [], speedZones: [], length: 4000, selectedIndex: -1, tool: 'spike', zoom: 0.4 };
+  var state = { levelId: null, levelName: '', objects: [], speedZones: [], length: 4000, selectedIndex: -1, tool: 'spike', toolVariant: null, zoom: 0.4 };
   var drag = null; // { index, offsetWorldX, movedY }
 
   var levelSelect = document.getElementById('gravityEditorLevelSelect');
   var zoomInput = document.getElementById('gravityEditorZoom');
   var statusEl = document.getElementById('gravityEditorStatus');
   var paletteEl = document.getElementById('gravityEditorPalette');
+  var paletteVariantsEl = document.getElementById('gravityEditorPaletteVariants');
   var canvasWrap = document.getElementById('gravityEditorCanvasWrap');
   var canvas = document.getElementById('gravityEditorCanvas');
   var ctx = canvas.getContext('2d');
@@ -59,8 +60,31 @@
     var btn = e.target.closest ? e.target.closest('.gravity-tool-btn') : null;
     if (!btn) return;
     state.tool = btn.getAttribute('data-tool');
+    state.toolVariant = null;
     paletteEl.querySelectorAll('.gravity-tool-btn').forEach(function (b) { b.classList.toggle('active', b === btn); });
+    renderPaletteVariants();
   });
+
+  function renderPaletteVariants() {
+    var def = OBJECT_TYPES[state.tool];
+    if (!def || !def.variantCount) { paletteVariantsEl.innerHTML = ''; return; }
+    var html = '<span class="gravity-palette-variants-label">Molde de "' + def.label + '" a usar:</span><div class="gravity-variant-swatches">';
+    html += '<button type="button" class="gravity-variant-swatch' + (!state.toolVariant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
+    for (var vi = 1; vi <= def.variantCount; vi++) {
+      var vid = 'v' + vi;
+      html += '<button type="button" class="gravity-variant-swatch' + (state.toolVariant === vid ? ' selected' : '') +
+        '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
+    }
+    html += '</div>';
+    paletteVariantsEl.innerHTML = html;
+    paletteVariantsEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.toolVariant = btn.getAttribute('data-variant') || null;
+        paletteVariantsEl.querySelectorAll('.gravity-variant-swatch').forEach(function (b) { b.classList.toggle('selected', b === btn); });
+      });
+    });
+  }
+  renderPaletteVariants();
 
   /* ---- Nivel seleccionado ---- */
   function loadLevelList() {
@@ -92,22 +116,25 @@
   /* ---- Objetos por defecto al colocar ---- */
   function defaultObjectFor(type, x, y) {
     var surface = y > MID_Y ? 'floor' : 'ceil';
+    var obj;
     switch (type) {
-      case 'spike': return { type: 'spike', surface: surface, w: 28, x: x };
-      case 'saw': return { type: 'saw', surface: surface, x: x };
-      case 'platform': return { type: 'platform', surface: surface, w: 90, lift: 46, x: x };
-      case 'gravityPortal': return { type: 'gravityPortal', dir: -1, x: x };
-      case 'shapePortal': return { type: 'shapePortal', form: 'ship', x: x };
-      case 'orb': return { type: 'orb', color: 'yellow', y: y, x: x };
-      case 'pad': return { type: 'pad', color: 'cyan', surface: surface, x: x };
-      case 'key': return { type: 'key', y: y, x: x };
-      case 'door': return { type: 'door', x2: x + 130, x: x };
-      case 'coin': return { type: 'coin', id: countOf('coin'), y: y, x: x };
-      case 'diamond': return { type: 'diamond', y: y, x: x };
-      case 'interruptor': return { type: 'interruptor', linkId: 'sw' + Math.round(x), x: x };
-      case 'finish': return { type: 'finish', x: x };
-      default: return { type: type, x: x };
+      case 'spike': obj = { type: 'spike', surface: surface, w: 28, x: x }; break;
+      case 'saw': obj = { type: 'saw', surface: surface, x: x }; break;
+      case 'platform': obj = { type: 'platform', surface: surface, w: 90, lift: 46, x: x }; break;
+      case 'gravityPortal': obj = { type: 'gravityPortal', dir: -1, x: x }; break;
+      case 'shapePortal': obj = { type: 'shapePortal', form: 'ship', x: x }; break;
+      case 'orb': obj = { type: 'orb', color: 'yellow', y: y, x: x }; break;
+      case 'pad': obj = { type: 'pad', color: 'cyan', surface: surface, x: x }; break;
+      case 'key': obj = { type: 'key', y: y, x: x }; break;
+      case 'door': obj = { type: 'door', x2: x + 130, x: x }; break;
+      case 'coin': obj = { type: 'coin', id: countOf('coin'), y: y, x: x }; break;
+      case 'diamond': obj = { type: 'diamond', y: y, x: x }; break;
+      case 'interruptor': obj = { type: 'interruptor', linkId: 'sw' + Math.round(x), x: x }; break;
+      case 'finish': obj = { type: 'finish', x: x }; break;
+      default: obj = { type: type, x: x };
     }
+    if (state.toolVariant && OBJECT_TYPES[type] && OBJECT_TYPES[type].variantCount) obj.variant = state.toolVariant;
+    return obj;
   }
   function countOf(type) { return state.objects.filter(function (o) { return o.type === type; }).length; }
 
@@ -250,7 +277,7 @@
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
-    x2: 'Hasta x', linkId: 'Vínculo (linkId)'
+    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }

@@ -1355,16 +1355,20 @@
       if (sx < -160 || sx > W + 160) return;
 
       if (o.type === 'spike') {
+        // Se voltea 180° automático al estar en el techo (para que
+        // apunte hacia el jugador en vez de "flotar" con la base para
+        // arriba), y encima se le puede sumar una rotación manual
+        // (o.rotation, en grados) para acomodar sprites propios que no
+        // vengan ya orientados "para arriba" por defecto.
         var spikeSprite = o.variant ? 'spike_' + o.variant : 'spike';
-        if (o.surface === 'ceil') {
-          ctx.save();
-          ctx.translate(sx + 14, CEIL_Y + 15);
-          ctx.rotate(Math.PI);
-          drawSprite(spikeSprite, -20, -15, 40, 30);
-          ctx.restore();
-        } else {
-          drawSprite(spikeSprite, sx - 6, FLOOR_Y - 30, 40, 30);
-        }
+        var spikeBaseRot = o.surface === 'ceil' ? Math.PI : 0;
+        var spikeExtraRot = (o.rotation || 0) * Math.PI / 180;
+        var spikeCY = o.surface === 'ceil' ? CEIL_Y + 15 : FLOOR_Y - 15;
+        ctx.save();
+        ctx.translate(sx + 14, spikeCY);
+        ctx.rotate(spikeBaseRot + spikeExtraRot);
+        drawSprite(spikeSprite, -20, -15, 40, 30);
+        ctx.restore();
       } else if (o.type === 'saw') {
         var sawSprite = o.variant ? 'saw_' + o.variant : 'saw';
         var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];

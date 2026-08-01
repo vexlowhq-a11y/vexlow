@@ -354,6 +354,12 @@ body { padding: 0; }
   font-family: 'Manrope'; font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .gravity-tool-btn.active { border-color: var(--blue-fill); background: var(--blue-tint); color: var(--blue); }
+.gravity-editor-palette-variants:empty { display: none; }
+.gravity-editor-palette-variants {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m);
+}
+.gravity-palette-variants-label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
 
 .gravity-editor-canvas-wrap {
   width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border);
