@@ -1032,7 +1032,7 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
 
     <article class="article-page">
       <h1>🔻 Gravity Flip</h1>
-      <p class="play-intro">"Neon Pulse" — tap/hold to control the cube, ship and ball. Dodge spikes and saws, grab the key and 3 secret coins, reach the finish. Tap once to start.</p>
+      <p class="play-intro">10 levels — tap/hold to control the cube, ship and ball. Dodge spikes and saws, grab the key and 3 secret coins, then reach the finish. Earn coins and diamonds to unlock new skins. Tap once to start.</p>
 
       <div class="dash-wrap">
         <canvas id="gravityCanvas" width="800" height="360" aria-label="Gravity Flip game"></canvas>
@@ -1041,10 +1041,30 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
           <span id="gravityBest">Best: 0%</span>
           <span id="gravityCoins">🪙 0/3</span>
           <span id="gravityKey"></span>
+          <span id="gravityWallet" class="gravity-wallet">🪙 0  💎 0</span>
+          <button type="button" id="gravityLevelBtn" class="dash-mute" aria-label="Choose level">🗺️</button>
+          <button type="button" id="gravitySkinBtn" class="dash-mute" aria-label="Choose skin">🧑‍🚀</button>
           <button type="button" id="gravityMute" class="dash-mute" aria-label="Mute sound">🔊</button>
         </div>
         <div class="dash-overlay" id="gravityOverlay">
           <p id="gravityOverlayText">Tap or press Space to start</p>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="gravityLevelSelect">
+        <div class="dash-name-card gravity-select-card">
+          <h3>🗺️ Choose a level</h3>
+          <div class="gravity-select-grid" id="gravityLevelGrid"></div>
+          <button type="button" id="gravityLevelSelectClose" class="dash-name-skip" style="width:100%;margin-top:14px;">Close</button>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="gravitySkinSelect">
+        <div class="dash-name-card gravity-select-card">
+          <h3>🧑‍🚀 Choose a skin</h3>
+          <p class="gravity-wallet-line" id="gravitySkinWalletLine">🪙 0  💎 0</p>
+          <div class="gravity-select-grid gravity-skin-grid" id="gravitySkinGrid"></div>
+          <button type="button" id="gravitySkinSelectClose" class="dash-name-skip" style="width:100%;margin-top:14px;">Close</button>
         </div>
       </div>
 

@@ -24,9 +24,12 @@
   var bestEl = document.getElementById('gravityBest');
   var coinsEl = document.getElementById('gravityCoins');
   var keyEl = document.getElementById('gravityKey');
+  var walletEl = document.getElementById('gravityWallet');
   var muteBtn = document.getElementById('gravityMute');
   var overlay = document.getElementById('gravityOverlay');
   var overlayText = document.getElementById('gravityOverlayText');
+  var levelBtn = document.getElementById('gravityLevelBtn');
+  var skinBtn = document.getElementById('gravitySkinBtn');
   var nameModal = document.getElementById('gravityNameModal');
   var nameInput = document.getElementById('gravityNameInput');
   var nameSaveBtn = document.getElementById('gravityNameSave');
@@ -35,19 +38,45 @@
   var adBreakContinueBtn = document.getElementById('gravityAdBreakContinue');
   var lbList = document.getElementById('gravityLeaderboardList');
   var lbYou = document.getElementById('gravityYouRank');
+  var levelSelect = document.getElementById('gravityLevelSelect');
+  var levelGrid = document.getElementById('gravityLevelGrid');
+  var levelSelectClose = document.getElementById('gravityLevelSelectClose');
+  var skinSelect = document.getElementById('gravitySkinSelect');
+  var skinGrid = document.getElementById('gravitySkinGrid');
+  var skinSelectClose = document.getElementById('gravitySkinSelectClose');
+  var skinWalletLine = document.getElementById('gravitySkinWalletLine');
 
-  var BEST_KEY = 'vexlow_gravity_best';
-  var COINS_KEY = 'vexlow_gravity_coins';
   var PLAYS_KEY = 'vexlow_gravity_plays';
   var AD_BREAK_INTERVAL = 3;
   var MUTE_KEY = 'vexlow_gravity_muted';
   var NAME_KEY = 'vexlow_dash_name';
   var VID_KEY = 'vexlow_vid';
-  var best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
-  var bestCoins = parseInt(localStorage.getItem(COINS_KEY) || '0', 10) || 0;
+  var COINS_WALLET_KEY = 'vexlow_gravity_coins'; // billetera acumulada (ya existía como "mejor cantidad de una corrida" -- se reusa como billetera)
+  var DIAMONDS_WALLET_KEY = 'vexlow_gravity_diamonds';
+  var PROGRESS_KEY = 'vexlow_gravity_progress'; // JSON: ids de nivel desbloqueados
+  var SKIN_KEY = 'vexlow_gravity_skin';
+  var UNLOCKED_SKINS_KEY = 'vexlow_gravity_unlocked_skins'; // JSON: ids de skin desbloqueados
+  function bestKeyFor(levelId) { return 'vexlow_gravity_best_' + levelId; }
+  function diamondClaimedKeyFor(levelId) { return 'vexlow_gravity_diamond_' + levelId; }
+
+  function readJSON(key, fallback) {
+    try { var v = JSON.parse(localStorage.getItem(key)); return v || fallback; } catch (e) { return fallback; }
+  }
+  function writeJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+
+  var coinsWallet = parseInt(localStorage.getItem(COINS_WALLET_KEY) || '0', 10) || 0;
+  var diamondsWallet = parseInt(localStorage.getItem(DIAMONDS_WALLET_KEY) || '0', 10) || 0;
+  var unlockedLevels = readJSON(PROGRESS_KEY, ['level_01']);
+  var unlockedSkins = readJSON(UNLOCKED_SKINS_KEY, ['skin_01']);
+  var currentSkin = localStorage.getItem(SKIN_KEY) || 'skin_01';
   var muted = localStorage.getItem(MUTE_KEY) === '1';
-  bestEl.textContent = 'Best: ' + best + '%';
+  var best = 0; // se actualiza por nivel en selectLevel()
   muteBtn.textContent = muted ? '🔇' : '🔊';
+
+  function updateWalletHud() {
+    if (walletEl) walletEl.textContent = '🪙 ' + coinsWallet + '  💎 ' + diamondsWallet;
+  }
+  updateWalletHud();
 
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, function (c) {
@@ -114,7 +143,7 @@
     }
   }
   function loadLeaderboard() {
-    fetch('/api/gravity?visitorId=' + encodeURIComponent(visitorId))
+    fetch('/api/gravity?visitorId=' + encodeURIComponent(visitorId) + '&level=' + encodeURIComponent(currentLevelId()))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         renderLeaderboard(data);
@@ -125,7 +154,7 @@
   function doSubmit(name, finalScore) {
     fetch('/api/gravity', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, score: finalScore, visitorId: visitorId })
+      body: JSON.stringify({ name: name, score: finalScore, visitorId: visitorId, level: currentLevelId() })
     }).then(function (r) { return r.ok ? r.json() : null; }).then(renderLeaderboard).catch(function () {});
   }
   function submitScore(finalScore) {
@@ -199,22 +228,36 @@
     muteBtn.textContent = muted ? '🔇' : '🔊';
   });
 
-  /* ---- Sprites ---- */
+  /* ---- Sprites ----
+     El personaje se dibuja siempre con la skin activa (incluida la
+     "skin_01" por defecto) — los skins no tienen variantes de salto/
+     muerte propias, así que se usa la misma imagen para cubo/nave/
+     bola en cualquier estado; el "feedback" de salto/muerte queda a
+     cargo de partículas y sonido en vez de cambiar de cara. */
   var SPRITE_NAMES = ['floor', 'platform', 'spike', 'spike_triple', 'saw',
     'portal_gravity', 'portal_shape', 'orb_green', 'orb_pink', 'orb_yellow',
-    'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock',
-    'cube_idle', 'cube_jump', 'cube_death'];
+    'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
   var sprites = {};
   SPRITE_NAMES.forEach(function (name) {
     var img = new Image();
     img.src = '../img/gravitycover/sliced/' + name + '.png';
     sprites[name] = img;
   });
+  var skinImg = new Image();
+  function setActiveSkin(skinId) {
+    currentSkin = skinId;
+    skinImg.src = '../img/gravitycover/sliced/' + skinId + '.png';
+    try { localStorage.setItem(SKIN_KEY, skinId); } catch (e) {}
+  }
+  setActiveSkin(currentSkin);
   function drawSprite(name, x, y, w, h) {
     var img = sprites[name];
     if (img && img.complete && img.naturalWidth > 0) {
       ctx.drawImage(img, x, y, w, h);
     }
+  }
+  function drawSkin(x, y, w, h) {
+    if (skinImg.complete && skinImg.naturalWidth > 0) ctx.drawImage(skinImg, x, y, w, h);
   }
 
   /* ---- Física (por forma) ----
@@ -286,6 +329,8 @@
     add({ type: 'saw', surface: 'ceil' });
     cursor += 90;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 60 });
+    cursor += GAP_SHIP;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
     add({ type: 'saw', surface: 'ceil', xOff: 170 });
@@ -368,8 +413,432 @@
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
 
-  var LEVELS = [{ name: 'Neon Pulse', build: buildNeonPulse }];
+  // Helper genérico para el cierre de cualquier nivel: llave -> puerta
+  // (nunca letal, ver comentario en el manejo de 'door') -> tramo final
+  // -> meta. Reduce repetición entre los 10 niveles.
+  function addKeyDoorFinish(add, getCursor, setCursor, keyY, finalSpeed) {
+    add({ type: 'key', y: keyY });
+    setCursor(getCursor() + GAP_CUBE);
+    var doorX = getCursor() + 40;
+    add({ type: 'door', x2: doorX });
+    setCursor(doorX + 260);
+    add({ type: 'finish' });
+    setCursor(getCursor() + 300);
+  }
+
+  function buildGreenCircuit() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += 140;
+    add({ type: 'orb', color: 'pink', y: FLOOR_Y - 140 });
+    cursor += GAP_CUBE;
+    add({ type: 'diamond', y: FLOOR_Y - 160 });
+    cursor += 40;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'orb', color: 'green', y: FLOOR_Y - 130 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE + 40;
+    add({ type: 'platform', surface: 'floor', w: 220, lift: 46 }); // puente largo
+    cursor += 260;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
+    cursor += 40;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildGravityGarden() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += GAP_CUBE;
+    add({ type: 'platform', surface: 'ceil', w: 90, lift: 46 });
+    add({ type: 'coin', id: 0, y: CEIL_Y + 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 }); // vuelve a piso normal
+    cursor += 40;
+    add({ type: 'diamond', y: CEIL_Y + 160 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'yellow', y: CEIL_Y + 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += 140;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
+    cursor += 40;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildSkyRider() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 100;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += GAP_SHIP;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    add({ type: 'saw', surface: 'ceil', xOff: 180 });
+    cursor += GAP_SHIP + 180;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
+    cursor += GAP_CUBE;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildRollingLight() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'shapePortal', form: 'ball' });
+    cursor += 40;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 260;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 260;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += 260;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += 260;
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += 260;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 260;
+    add({ type: 'coin', id: 1, y: CEIL_Y + 120 });
+    cursor += 260;
+    setSpeed(cursor, 0.35);
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += 300;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 300;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
+    cursor += 40;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildFireFactory() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_CUBE;
+    // Plataforma móvil: oscila en Y, alcance moderado, período largo
+    // para que esté "abajo" (fácil de alcanzar) buena parte del ciclo.
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46, moving: true, amp: 30, periodMs: 2600 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.35);
+    cursor += GAP_SHIP;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_SHIP;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'pad', color: 'yellow', surface: 'floor' });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
+    cursor += GAP_CUBE;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildAquaBounce() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'ball' });
+    cursor += 40;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_CUBE;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'pad', color: 'cyan', surface: 'floor' });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'pink', y: FLOOR_Y - 130 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
+    cursor += GAP_CUBE;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildPixelCastle() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_SHIP;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 80 });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += 140;
+    add({ type: 'orb', color: 'yellow', y: CEIL_Y + 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'diamond', y: CEIL_Y + 160 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 });
+    cursor += 40;
+    add({ type: 'shapePortal', form: 'ball' });
+    cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
+    cursor += GAP_CUBE;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildCyberSwitch() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += GAP_CUBE;
+    // Interruptor: opcional -- si se toca, desactiva la sierra que
+    // sigue (linkId compartido). Si no se toca, la sierra sigue activa
+    // y hay que esquivarla saltando como cualquier otro obstáculo, así
+    // que nunca es obligatorio ni puede dejar el nivel imposible.
+    add({ type: 'interruptor', linkId: 'sw1' });
+    cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor', linkId: 'sw1' });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
+    add({ type: 'diamond', y: FLOOR_Y - 160 });
+    cursor += GAP_CUBE;
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += GAP_SHIP;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
+    cursor += GAP_CUBE;
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  function buildNeonFinale() {
+    var objs = [], cursor = 500, speedZone = [];
+    function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
+    setSpeed(0, 0.28);
+
+    // Cubo
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
+    cursor += 150;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    // Nave
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.35);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_SHIP;
+    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.35);
+    // Gravedad
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += GAP_CUBE_FAST;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += 150;
+    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 });
+    cursor += 40;
+    add({ type: 'coin', id: 1, y: CEIL_Y + 120 });
+    cursor += GAP_CUBE_FAST;
+    // Bola
+    add({ type: 'shapePortal', form: 'ball' });
+    setSpeed(cursor + 20, 0.45);
+    cursor += 280;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 280;
+    add({ type: 'pad', color: 'yellow', surface: 'floor' });
+    cursor += 280;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.35);
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
+    cursor += GAP_CUBE_FAST;
+    setSpeed(cursor, 0.28);
+
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    return { objects: objs, length: cursor, speedZones: speedZone };
+  }
+
+  var LEVELS = [
+    { id: 'level_01', name: 'First Pulse', build: buildNeonPulse, thumb: 'level_01' },
+    { id: 'level_02', name: 'Green Circuit', build: buildGreenCircuit, thumb: 'level_02' },
+    { id: 'level_03', name: 'Gravity Garden', build: buildGravityGarden, thumb: 'level_03' },
+    { id: 'level_04', name: 'Sky Rider', build: buildSkyRider, thumb: 'level_04' },
+    { id: 'level_05', name: 'Rolling Light', build: buildRollingLight, thumb: 'level_05' },
+    { id: 'level_06', name: 'Fire Factory', build: buildFireFactory, thumb: 'level_06' },
+    { id: 'level_07', name: 'Aqua Bounce', build: buildAquaBounce, thumb: 'level_07' },
+    { id: 'level_08', name: 'Pixel Castle', build: buildPixelCastle, thumb: 'level_08' },
+    { id: 'level_09', name: 'Cyber Switch', build: buildCyberSwitch, thumb: 'level_09' },
+    { id: 'level_10', name: 'Neon Finale', build: buildNeonFinale, thumb: 'level_10' }
+  ];
   var currentLevelIndex = 0;
+  function currentLevelId() { return LEVELS[currentLevelIndex].id; }
   var level; // { objects, length, speedZones }
 
   function speedAt(worldX) {
@@ -381,14 +850,30 @@
   }
 
   var state, player, particles, speed, elapsedMs, lastTime;
-  var coinsCollected, hasKey, deaths;
+  var coinsCollected, hasKey, hasDiamond, deaths;
+
+  function selectLevel(index) {
+    currentLevelIndex = index;
+    var levelId = currentLevelId();
+    best = parseInt(localStorage.getItem(bestKeyFor(levelId)) || '0', 10) || 0;
+    resetGame();
+    loadLeaderboard();
+  }
 
   function resetGame() {
+    var levelId = currentLevelId();
     level = LEVELS[currentLevelIndex].build();
+    var diamondClaimed = localStorage.getItem(diamondClaimedKeyFor(levelId)) === '1';
+    if (diamondClaimed) {
+      level.objects = level.objects.filter(function (o) { return o.type !== 'diamond'; });
+    }
+    level.switches = {};
+    best = parseInt(localStorage.getItem(bestKeyFor(levelId)) || '0', 10) || 0;
+    if (bestEl) bestEl.textContent = 'Best: ' + best + '%';
     player = {
       x: PLAYER_SCREEN_X, y: FLOOR_Y - PLAYER_SIZE, vy: 0,
-      gravityDir: 1, worldX: 0, form: 'cube', grounded: true,
-      face: 'cube_idle', faceTimer: 0, holding: false
+      gravityDir: 1, worldX: 0, form: LEVELS[currentLevelIndex].startForm || 'cube', grounded: true,
+      holding: false
     };
     particles = [];
     speed = speedAt(0);
@@ -396,11 +881,12 @@
     lastTime = null;
     coinsCollected = [];
     hasKey = false;
+    hasDiamond = false;
     state = 'ready';
     scoreEl.textContent = 'Progress: 0%';
     coinsEl.textContent = '🪙 0/3';
     keyEl.textContent = '';
-    overlayText.textContent = 'Tap or press Space to start';
+    overlayText.textContent = LEVELS[currentLevelIndex].name + ' — Tap or press Space to start';
     overlay.classList.remove('hidden');
   }
 
@@ -422,7 +908,6 @@
         player.vy = -CUBE_JUMP_V * player.gravityDir;
         player.grounded = false;
         playJump();
-        player.face = 'cube_jump'; player.faceTimer = 220;
         spawnParticles(player.x + PLAYER_SIZE / 2, player.y + (player.gravityDir === 1 ? PLAYER_SIZE : 0), '#3D8BFF', 8);
       }
     } else if (player.form === 'ball') {
@@ -439,7 +924,6 @@
     if (state !== 'playing') return;
     state = 'gameover';
     playCrash();
-    player.face = 'cube_death';
     finishRun(Math.round((player.worldX / level.length) * 100));
     spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FF3D57', 22);
   }
@@ -454,19 +938,41 @@
 
   function finishRun(pct) {
     pct = Math.max(0, Math.min(100, pct));
+    var levelId = currentLevelId();
+    var won = state === 'win';
     var coinCount = coinsCollected.length;
-    if (coinCount > bestCoins) {
-      bestCoins = coinCount;
-      localStorage.setItem(COINS_KEY, String(bestCoins));
+
+    if (won) {
+      // Las monedas de la corrida se acreditan siempre que se complete
+      // el nivel (se pueden volver a ganar repitiendo). El diamante,
+      // en cambio, solo se acredita la primera vez que se lo trae
+      // hasta la meta -- después queda marcado y no vuelve a aparecer.
+      coinsWallet += coinCount;
+      localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
+      if (hasDiamond && localStorage.getItem(diamondClaimedKeyFor(levelId)) !== '1') {
+        diamondsWallet += 1;
+        localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
+        localStorage.setItem(diamondClaimedKeyFor(levelId), '1');
+      }
+      updateWalletHud();
+
+      var idx = -1;
+      for (var li = 0; li < LEVELS.length; li++) { if (LEVELS[li].id === levelId) { idx = li; break; } }
+      var nextLevel = LEVELS[idx + 1];
+      if (nextLevel && unlockedLevels.indexOf(nextLevel.id) === -1) {
+        unlockedLevels.push(nextLevel.id);
+        writeJSON(PROGRESS_KEY, unlockedLevels);
+      }
     }
+
     coinsEl.textContent = '🪙 ' + coinCount + '/3';
     if (pct > best) {
       best = pct;
-      localStorage.setItem(BEST_KEY, String(best));
-      bestEl.textContent = 'Best: ' + best + '%';
+      localStorage.setItem(bestKeyFor(levelId), String(best));
+      if (bestEl) bestEl.textContent = 'Best: ' + best + '%';
       submitScore(best);
     }
-    var label = state === 'win' ? 'Level complete! 100%' : ('Reached ' + pct + '% — tap to retry');
+    var label = won ? 'Level complete! 100%' : ('Reached ' + pct + '% — tap to retry');
     overlayText.textContent = label + (hasKey ? ' 🔑' : '') + ' — 🪙 ' + coinCount + '/3';
 
     var plays = parseInt(localStorage.getItem(PLAYS_KEY) || '0', 10) || 0;
@@ -520,9 +1026,17 @@
 
   /* ---- Colisión con superficies (piso/techo), con huecos de
      plataformas flotantes tratadas aparte ---- */
+  function movingOffset(o) {
+    // Desplazamiento sinusoidal calculado siempre a partir de elapsedMs
+    // (nunca de Math.random) para que sea determinístico y previsible,
+    // tanto para un jugador real como para el bot de verificación.
+    if (!o.moving) return 0;
+    return Math.sin((elapsedMs + (o.phase || 0)) / o.periodMs * Math.PI * 2) * o.amp;
+  }
   function surfaceYFor(o) {
-    if (o.surface === 'floor') return FLOOR_Y - (o.lift || 0);
-    return CEIL_Y + (o.lift || 0);
+    var lift = (o.lift || 0) + movingOffset(o);
+    if (o.surface === 'floor') return FLOOR_Y - lift;
+    return CEIL_Y + lift;
   }
 
   function overlapsX(o, w, playerCenterWorldX) {
@@ -539,7 +1053,6 @@
     if (state !== 'playing') { updateParticles(dt); return; }
 
     speed = speedAt(player.worldX);
-    if (player.faceTimer > 0) { player.faceTimer -= dt; if (player.faceTimer <= 0) player.face = 'cube_idle'; }
 
     if (player.form === 'cube' || player.form === 'ball') {
       var g = player.form === 'cube' ? CUBE_GRAVITY : BALL_GRAVITY;
@@ -618,10 +1131,29 @@
         var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - 18 : player.y < spikeY + 18;
         if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
       } else if (o.type === 'saw') {
+        if (o.linkId && level.switches[o.linkId]) continue; // desactivada por interruptor
         var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
         var dx = centerWorldX - o.x;
         var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
         if (Math.sqrt(dx * dx + dy * dy) < 22 + PLAYER_SIZE * 0.3) { endGame(); return; }
+      } else if (o.type === 'interruptor') {
+        // Se activa automático al tocarlo, como un jump pad -- nunca es
+        // obligatorio: si no se toca, el obstáculo enlazado sigue activo
+        // y se esquiva saltando como cualquier otro, así que jamás puede
+        // dejar el nivel imposible (misma regla que la puerta).
+        if (!o.used && overlapsX(o, 30, centerWorldX)) {
+          o.used = true;
+          level.switches[o.linkId] = true;
+          playPad();
+          spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 12);
+        }
+      } else if (o.type === 'diamond') {
+        if (!hasDiamond && overlapsX(o, 24, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26) {
+          hasDiamond = true;
+          o.dead = true;
+          playPickup();
+          spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 14);
+        }
       } else if (o.type === 'gravityPortal') {
         if (!o.used && overlapsX(o, 30, centerWorldX)) {
           o.used = true;
@@ -635,7 +1167,16 @@
         if (!o.used && overlapsX(o, 30, centerWorldX)) {
           o.used = true;
           player.form = o.form;
-          if (o.form !== 'ship') player.grounded = false;
+          if (o.form !== 'ship') {
+            player.grounded = false;
+          } else {
+            // Si se entra a modo nave estando apoyado justo en el piso
+            // (o el techo), el chequeo de límites de la nave puede
+            // matar en el frame siguiente antes de que el jugador
+            // llegue a reaccionar -- se separa un margen mínimo de
+            // los bordes al entrar para darle un instante de aire.
+            player.y = Math.max(CEIL_Y + 10, Math.min(FLOOR_Y - PLAYER_SIZE - 10, player.y));
+          }
           playPortal();
         }
       } else if (o.type === 'orb') {
@@ -750,11 +1291,32 @@
       if (o.type === 'spike') {
         drawSprite('spike', sx - 6, (o.surface === 'floor' ? FLOOR_Y - 30 : CEIL_Y), 40, 30);
       } else if (o.type === 'saw') {
+        var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
         var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
         ctx.save();
         ctx.translate(sx, sawCY);
-        ctx.rotate(elapsedMs * 0.006);
+        if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
         drawSprite('saw', -22, -22, 44, 44);
+        ctx.restore();
+      } else if (o.type === 'interruptor') {
+        ctx.save();
+        ctx.translate(sx, (FLOOR_Y + CEIL_Y) / 2);
+        var swOn = level.switches && level.switches[o.linkId];
+        ctx.fillStyle = swOn ? '#7CFFB2' : '#7CF6FF';
+        ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#05060f';
+        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (o.type === 'diamond' && !o.dead) {
+        ctx.save();
+        ctx.translate(sx, o.y);
+        ctx.rotate(Math.sin(elapsedMs * 0.003) * 0.15);
+        ctx.fillStyle = '#7CF6FF';
+        ctx.shadowColor = '#7CF6FF'; ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(0, -14); ctx.lineTo(11, -2); ctx.lineTo(0, 16); ctx.lineTo(-11, -2);
+        ctx.closePath(); ctx.fill();
         ctx.restore();
       } else if (o.type === 'platform') {
         var py = surfaceYFor(o) - (o.surface === 'floor' ? 14 : 0);
@@ -805,18 +1367,18 @@
       ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
       ctx.rotate(Math.max(-0.4, Math.min(0.4, player.vy * 0.5)));
       ctx.shadowColor = '#3DE0FF'; ctx.shadowBlur = 14;
-      drawSprite('cube_idle', -PLAYER_SIZE * 0.7, -PLAYER_SIZE * 0.42, PLAYER_SIZE * 1.4, PLAYER_SIZE * 0.84);
+      drawSkin(-PLAYER_SIZE * 0.7, -PLAYER_SIZE * 0.42, PLAYER_SIZE * 1.4, PLAYER_SIZE * 0.84);
     } else if (player.form === 'ball') {
       ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
       ctx.rotate(elapsedMs * 0.006);
       ctx.shadowColor = '#FF3DAE'; ctx.shadowBlur = 14;
       ctx.beginPath(); ctx.arc(0, 0, PLAYER_SIZE / 2, 0, Math.PI * 2);
       ctx.clip();
-      drawSprite(player.face, -PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
+      drawSkin(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
     } else {
       ctx.translate(player.x, player.y);
       ctx.shadowColor = '#3D8BFF'; ctx.shadowBlur = 14;
-      drawSprite(player.face, 0, 0, PLAYER_SIZE, PLAYER_SIZE);
+      drawSkin(0, 0, PLAYER_SIZE, PLAYER_SIZE);
     }
     ctx.restore();
 
@@ -856,6 +1418,101 @@
   document.addEventListener('keyup', function (e) {
     if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handlePressEnd(e); }
   });
+
+  /* ---- Selección de nivel ---- */
+  var SKIN_COUNT = 40;
+  function skinPrice(index) {
+    // index 0-based; skin_01 (index 0) siempre viene desbloqueado.
+    // Las primeras ~29 skins cuestan monedas en escala creciente, las
+    // últimas 10 ("premium") cuestan diamantes (1 a 3).
+    if (index === 0) return null;
+    if (index < 30) return { currency: 'coins', amount: 50 + index * 25 };
+    return { currency: 'diamonds', amount: 1 + Math.floor((index - 30) / 4) };
+  }
+
+  function openOverlay(el) { if (el) el.classList.remove('hidden'); }
+  function closeOverlay(el) { if (el) el.classList.add('hidden'); }
+
+  function renderLevelGrid() {
+    if (!levelGrid) return;
+    levelGrid.innerHTML = LEVELS.map(function (lvl, i) {
+      var unlocked = unlockedLevels.indexOf(lvl.id) !== -1;
+      var current = i === currentLevelIndex;
+      var savedBest = parseInt(localStorage.getItem(bestKeyFor(lvl.id)) || '0', 10) || 0;
+      return '<div class="gravity-card' + (current ? ' selected' : '') + (unlocked ? '' : ' locked') +
+        '" data-index="' + i + '" data-unlocked="' + (unlocked ? '1' : '0') + '">' +
+        '<img src="../img/gravitycover/sliced/' + lvl.thumb + '.jpg" alt="' + escapeHtml(lvl.name) + '" loading="lazy">' +
+        (unlocked ? '' : '<div class="gravity-card-lock">🔒</div>') +
+        '<div class="gravity-card-label">' + (i + 1) + '. ' + escapeHtml(lvl.name) + (unlocked ? ' — ' + savedBest + '%' : '') + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderSkinGrid() {
+    if (!skinGrid) return;
+    if (skinWalletLine) skinWalletLine.textContent = '🪙 ' + coinsWallet + '  💎 ' + diamondsWallet;
+    var rows = [];
+    for (var i = 0; i < SKIN_COUNT; i++) {
+      var id = 'skin_' + (i + 1 < 10 ? '0' + (i + 1) : (i + 1));
+      var owned = unlockedSkins.indexOf(id) !== -1;
+      var current = id === currentSkin;
+      var price = skinPrice(i);
+      var priceLabel = !price ? '' : (price.currency === 'coins' ? '🪙 ' + price.amount : '💎 ' + price.amount);
+      rows.push('<div class="gravity-card' + (current ? ' selected' : '') + (owned ? '' : ' locked') +
+        '" data-skin="' + id + '">' +
+        '<img src="../img/gravitycover/sliced/' + id + '.png" alt="' + id + '" loading="lazy">' +
+        (owned ? '' : '<div class="gravity-card-lock">🔒<span class="gravity-card-price">' + priceLabel + '</span></div>') +
+        '</div>');
+    }
+    skinGrid.innerHTML = rows.join('');
+  }
+
+  if (levelBtn) levelBtn.addEventListener('click', function () { renderLevelGrid(); openOverlay(levelSelect); });
+  if (levelSelectClose) levelSelectClose.addEventListener('click', function () { closeOverlay(levelSelect); });
+  if (levelSelect) levelSelect.addEventListener('mousedown', function (e) { if (e.target === levelSelect) closeOverlay(levelSelect); });
+  if (levelGrid) {
+    levelGrid.addEventListener('click', function (e) {
+      var card = e.target.closest ? e.target.closest('.gravity-card') : null;
+      if (!card || card.getAttribute('data-unlocked') !== '1') return;
+      var idx = parseInt(card.getAttribute('data-index'), 10);
+      if (isNaN(idx)) return;
+      selectLevel(idx);
+      closeOverlay(levelSelect);
+    });
+  }
+
+  if (skinBtn) skinBtn.addEventListener('click', function () { renderSkinGrid(); openOverlay(skinSelect); });
+  if (skinSelectClose) skinSelectClose.addEventListener('click', function () { closeOverlay(skinSelect); });
+  if (skinSelect) skinSelect.addEventListener('mousedown', function (e) { if (e.target === skinSelect) closeOverlay(skinSelect); });
+  if (skinGrid) {
+    skinGrid.addEventListener('click', function (e) {
+      var card = e.target.closest ? e.target.closest('.gravity-card') : null;
+      if (!card) return;
+      var id = card.getAttribute('data-skin');
+      var owned = unlockedSkins.indexOf(id) !== -1;
+      if (owned) {
+        setActiveSkin(id);
+      } else {
+        var idx = parseInt(id.replace('skin_', ''), 10) - 1;
+        var price = skinPrice(idx);
+        if (!price) return;
+        var wallet = price.currency === 'coins' ? coinsWallet : diamondsWallet;
+        if (wallet < price.amount) return; // no alcanza, no se compra
+        if (price.currency === 'coins') {
+          coinsWallet -= price.amount;
+          localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
+        } else {
+          diamondsWallet -= price.amount;
+          localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
+        }
+        updateWalletHud();
+        unlockedSkins.push(id);
+        writeJSON(UNLOCKED_SKINS_KEY, unlockedSkins);
+        setActiveSkin(id);
+      }
+      renderSkinGrid();
+    });
+  }
 
   resetGame();
   requestAnimationFrame(loop);
