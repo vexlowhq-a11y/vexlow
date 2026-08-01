@@ -21,19 +21,6 @@ const { JSDOM } = require('jsdom');
 
 const GRAVITY_JS_PATH = path.join(__dirname, '..', 'js', 'gravity.js');
 
-const LEVEL_FN = {
-  level_01: 'buildNeonPulse',
-  level_02: 'buildGreenCircuit',
-  level_03: 'buildGravityGarden',
-  level_04: 'buildSkyRider',
-  level_05: 'buildRollingLight',
-  level_06: 'buildFireFactory',
-  level_07: 'buildAquaBounce',
-  level_08: 'buildPixelCastle',
-  level_09: 'buildCyberSwitch',
-  level_10: 'buildNeonFinale'
-};
-
 const PLAYER_SCREEN_X = 160;
 const PLAYER_SIZE = 32;
 const FLOOR_Y = 320, CEIL_Y = 40;
@@ -121,6 +108,138 @@ function loadLevel(id) {
   if (!meta) throw new Error('Nivel no encontrado: ' + id);
   const data = meta.build();
   return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones };
+}
+
+/* ---- Sprites / assets del juego -- registro de todos los slots que
+   se pueden reemplazar subiendo una imagen propia. ---- */
+const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
+  'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
+const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
+const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
+const SKIN_KEYS = Array.from({ length: 40 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
+
+const ASSET_GROUPS = [
+  { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
+  { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
+  { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
+  { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }
+];
+
+const SLICED_DIR = path.join(__dirname, '..', 'img', 'gravitycover', 'sliced');
+const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+
+function listAssets() {
+  return ASSET_GROUPS.map(function (g) {
+    return {
+      group: g.group,
+      ext: g.ext,
+      items: g.keys.map(function (key) {
+        var file = path.join(SLICED_DIR, key + '.' + g.ext);
+        return { key: key, ext: g.ext, exists: fs.existsSync(file), url: '/site/img/gravitycover/sliced/' + key + '.' + g.ext };
+      })
+    };
+  });
+}
+
+function assetExt(key) {
+  var found = ASSET_GROUPS.find(function (g) { return g.keys.indexOf(key) !== -1; });
+  if (!found) throw new Error('Sprite desconocido: ' + key);
+  return found.ext;
+}
+
+function saveAsset(key, dataBase64) {
+  var ext = assetExt(key);
+  var buffer = Buffer.from(dataBase64, 'base64');
+  if (buffer.length === 0) throw new Error('El archivo llegó vacío');
+  if (buffer.length > MAX_ASSET_BYTES) throw new Error('La imagen pesa más de 8 MB');
+  fs.mkdirSync(SLICED_DIR, { recursive: true });
+  fs.writeFileSync(path.join(SLICED_DIR, key + '.' + ext), buffer);
+  return '/site/img/gravitycover/sliced/' + key + '.' + ext;
+}
+
+/* ---- Crear un nivel nuevo (más allá de los 10 iniciales) ---- */
+function slugToFnName(name) {
+  var words = String(name || 'Nivel').replace(/[^a-zA-Z0-9 ]/g, ' ').trim().split(/\s+/);
+  var camel = words.map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join('');
+  return 'buildCustom' + (camel || 'Nivel');
+}
+
+function makePlaceholderThumb(levelId, levelName) {
+  var outPath = path.join(SLICED_DIR, levelId + '.jpg');
+  var script = 'from PIL import Image, ImageDraw\n' +
+    'im = Image.new("RGB", (768, 205), (8, 10, 22))\n' +
+    'd = ImageDraw.Draw(im)\n' +
+    'd.rectangle([4, 4, 763, 200], outline=(61, 224, 255), width=3)\n' +
+    'text = ' + JSON.stringify(levelName) + '\n' +
+    'bbox = d.textbbox((0, 0), text)\n' +
+    'w = bbox[2] - bbox[0]; h = bbox[3] - bbox[1]\n' +
+    'd.text(((768 - w) / 2, (205 - h) / 2), text, fill=(236, 238, 242))\n' +
+    'im.save(' + JSON.stringify(outPath) + ', quality=85)\n';
+  var tmpPy = path.join(os.tmpdir(), 'gravity-thumb-' + Date.now() + '.py');
+  fs.writeFileSync(tmpPy, script, 'utf8');
+  try {
+    execFileSync('python', [tmpPy]);
+  } catch (e) {
+    // Si no hay Python/Pillow disponible, seguimos sin miniatura --
+    // no es bloqueante, se puede subir una a mano después.
+  } finally {
+    try { fs.unlinkSync(tmpPy); } catch (e2) {}
+  }
+}
+
+function createLevel(name) {
+  var cleanName = String(name || '').trim();
+  if (!cleanName) throw new Error('Falta el nombre del nivel');
+
+  var src = readSrc();
+  var { window } = loadSandbox(src);
+  var LEVELS = window.__adminExport.LEVELS;
+
+  var maxN = 0;
+  LEVELS.forEach(function (l) {
+    var m = /^level_(\d+)$/.exec(l.id);
+    if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
+  });
+  var newId = 'level_' + String(maxN + 1).padStart(2, '0');
+
+  var fnName = slugToFnName(cleanName);
+  var existingNames = LEVELS.map(function (l) { return l.build.name; });
+  var uniqueFnName = fnName, suffix = 2;
+  while (existingNames.indexOf(uniqueFnName) !== -1) { uniqueFnName = fnName + suffix; suffix++; }
+
+  var emptyLevelData = { objects: [{ type: 'finish', x: 1200 }], length: 1500, speedZones: [{ x: 0, speed: 0.28 }] };
+  var fnSrc = generateBuildFunctionSource(uniqueFnName, emptyLevelData);
+  var markedFn = '  // @gravity-editor:start ' + newId + '\n' + fnSrc + '  // @gravity-editor:end ' + newId + '\n\n';
+
+  // Inserta la función nueva justo antes de "var LEVELS = [".
+  var levelsDeclIdx = src.indexOf('var LEVELS = [');
+  if (levelsDeclIdx === -1) throw new Error('No se encontró el array LEVELS en gravity.js');
+  var lineStart = src.lastIndexOf('\n', levelsDeclIdx) + 1;
+  var afterInsertFn = src.slice(0, lineStart) + markedFn + src.slice(lineStart);
+
+  // Inserta la entrada nueva en el array LEVELS, justo después de la
+  // última entrada existente (que puede o no tener coma final).
+  var arrEndIdx = afterInsertFn.indexOf('];', afterInsertFn.indexOf('var LEVELS = ['));
+  if (arrEndIdx === -1) throw new Error('No se pudo ubicar el cierre del array LEVELS');
+  var lastBraceIdx = afterInsertFn.lastIndexOf('}', arrEndIdx);
+  if (lastBraceIdx === -1) throw new Error('No se pudo ubicar la última entrada del array LEVELS');
+  var newEntry = ",\n    { id: '" + newId + "', name: " + JSON.stringify(cleanName) + ', build: ' + uniqueFnName + ", thumb: '" + newId + "' }";
+  var newSrc = afterInsertFn.slice(0, lastBraceIdx + 1) + newEntry + afterInsertFn.slice(lastBraceIdx + 1);
+
+  // Chequeo de sintaxis antes de escribir.
+  var tmpFile = path.join(os.tmpdir(), 'gravity-editor-check-' + Date.now() + '.js');
+  fs.writeFileSync(tmpFile, newSrc, 'utf8');
+  try {
+    execFileSync(process.execPath, ['--check', tmpFile]);
+  } catch (e) {
+    throw new Error('No se pudo crear el nivel: JavaScript inválido (' + (e.stderr ? e.stderr.toString('utf8') : e.message) + ')');
+  } finally {
+    try { fs.unlinkSync(tmpFile); } catch (e2) {}
+  }
+
+  fs.writeFileSync(GRAVITY_JS_PATH, newSrc, 'utf8');
+  makePlaceholderThumb(newId, cleanName);
+  return { id: newId, name: cleanName };
 }
 
 /* ---- Bot reactivo (misma lógica calibrada usada para verificar los
@@ -275,9 +394,11 @@ function generateBuildFunctionSource(fnName, levelData) {
 }
 
 function saveLevel(id, levelData) {
-  var fnName = LEVEL_FN[id];
-  if (!fnName) throw new Error('Nivel desconocido: ' + id);
   var src = readSrc();
+  var sandbox = loadSandbox(src);
+  var meta = sandbox.window.__adminExport.LEVELS.find(function (l) { return l.id === id; });
+  if (!meta) throw new Error('Nivel desconocido: ' + id);
+  var fnName = meta.build.name;
   var startTag = '// @gravity-editor:start ' + id;
   var endTag = '// @gravity-editor:end ' + id;
   var startIdx = src.indexOf(startTag);
@@ -304,4 +425,12 @@ function saveLevel(id, levelData) {
   return true;
 }
 
-module.exports = { listLevels: listLevels, loadLevel: loadLevel, verifyLevel: verifyLevel, saveLevel: saveLevel };
+module.exports = {
+  listLevels: listLevels,
+  loadLevel: loadLevel,
+  verifyLevel: verifyLevel,
+  saveLevel: saveLevel,
+  createLevel: createLevel,
+  listAssets: listAssets,
+  saveAsset: saveAsset
+};

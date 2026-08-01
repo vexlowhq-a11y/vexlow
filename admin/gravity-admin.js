@@ -370,5 +370,80 @@
     });
   });
 
+  /* ---- Sub-pestañas (Editar niveles / Agregar nivel / Sprites) ---- */
+  document.querySelectorAll('.gravity-subtab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.gravity-subtab').forEach(function (t) { t.classList.remove('active'); });
+      document.querySelectorAll('.gravity-subpanel').forEach(function (p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('gravitySub-' + tab.getAttribute('data-subtab')).classList.add('active');
+      if (tab.getAttribute('data-subtab') === 'sprites') loadAssets();
+    });
+  });
+
+  /* ---- Agregar nivel ---- */
+  var addLevelForm = document.getElementById('gravityAddLevelForm');
+  var addLevelStatus = document.getElementById('gravityAddLevelStatus');
+  addLevelForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nameInput = document.getElementById('gravityNewLevelName');
+    var name = nameInput.value.trim();
+    if (!name) return;
+    addLevelStatus.textContent = 'Creando...';
+    fetch('/api/gravity-level/create', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res.ok) { addLevelStatus.textContent = 'Error: ' + res.error; return; }
+      addLevelStatus.textContent = '¡Creado! "' + res.level.name + '" (' + res.level.id + ') — ya está en "Editar niveles".';
+      nameInput.value = '';
+      loadLevelList();
+    }).catch(function (e) { addLevelStatus.textContent = 'Error: ' + e.message; });
+  });
+
+  /* ---- Sprites (galería de assets reemplazables) ---- */
+  var assetGroupsEl = document.getElementById('gravityAssetGroups');
+  var assetsLoaded = false;
+  function loadAssets() {
+    if (assetsLoaded) return;
+    assetsLoaded = true;
+    fetch('/api/gravity-assets').then(function (r) { return r.json(); }).then(function (groups) {
+      assetGroupsEl.innerHTML = groups.map(function (g) {
+        return '<div class="gravity-asset-group"><h3>' + g.group + '</h3><div class="gravity-asset-grid">' +
+          g.items.map(function (item) {
+            return '<div class="gravity-asset-card" data-key="' + item.key + '">' +
+              (item.exists ? '<img src="' + item.url + '?t=' + Date.now() + '" alt="' + item.key + '">' : '<div class="missing">sin imagen</div>') +
+              '<span class="key">' + item.key + '</span>' +
+              '<input type="file" accept="image/*" data-key="' + item.key + '"></div>';
+          }).join('') + '</div></div>';
+      }).join('');
+      assetGroupsEl.querySelectorAll('input[type="file"]').forEach(function (input) {
+        input.addEventListener('change', function () { uploadAsset(input); });
+      });
+    }).catch(function (e) { assetGroupsEl.textContent = 'Error al cargar los sprites: ' + e.message; });
+  }
+  function uploadAsset(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var key = input.getAttribute('data-key');
+    var card = input.closest('.gravity-asset-card');
+    var reader = new FileReader();
+    reader.onload = function () {
+      var dataUrl = reader.result;
+      var base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      fetch('/api/gravity-asset', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, dataBase64: base64 })
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        if (!res.ok) { window.alert('Error al subir ' + key + ': ' + res.error); return; }
+        var img = card.querySelector('img') || document.createElement('img');
+        img.src = res.url + '?t=' + Date.now();
+        var missing = card.querySelector('.missing');
+        if (missing) missing.replaceWith(img);
+      }).catch(function (e) { window.alert('Error al subir ' + key + ': ' + e.message); }).finally(function () {
+        input.value = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
   loadLevelList();
 })();

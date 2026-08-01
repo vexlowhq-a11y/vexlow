@@ -657,6 +657,37 @@ var server = http.createServer(function (req, res) {
       }
     });
   }
+  if (urlPath === '/api/gravity-level/create' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.name) return sendJSON(res, 400, { error: 'Falta el nombre del nivel' });
+      try {
+        var created = gravityEditor.createLevel(data.name);
+        return sendJSON(res, 200, { ok: true, level: created });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/gravity-assets' && req.method === 'GET') {
+    try {
+      return sendJSON(res, 200, gravityEditor.listAssets());
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/gravity-asset' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.key || !data.dataBase64) {
+        return sendJSON(res, 400, { error: 'Faltan datos del sprite a subir' });
+      }
+      try {
+        var savedUrl = gravityEditor.saveAsset(data.key, data.dataBase64);
+        return sendJSON(res, 200, { ok: true, url: savedUrl });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
 
   // ---- Publicación automática (bot) ----
   if (urlPath === '/api/automation-config' && req.method === 'GET') {

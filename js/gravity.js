@@ -1345,7 +1345,15 @@
       if (sx < -160 || sx > W + 160) return;
 
       if (o.type === 'spike') {
-        drawSprite('spike', sx - 6, (o.surface === 'floor' ? FLOOR_Y - 30 : CEIL_Y), 40, 30);
+        if (o.surface === 'ceil') {
+          ctx.save();
+          ctx.translate(sx + 14, CEIL_Y + 15);
+          ctx.rotate(Math.PI);
+          drawSprite('spike', -20, -15, 40, 30);
+          ctx.restore();
+        } else {
+          drawSprite('spike', sx - 6, FLOOR_Y - 30, 40, 30);
+        }
       } else if (o.type === 'saw') {
         var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
         var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;

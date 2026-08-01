@@ -306,6 +306,31 @@ body { padding: 0; }
   .form-grid .span-2 { grid-column: 1; }
 }
 
+/* ---- Gravity Flip — sub-pestañas + galería de sprites ---- */
+.gravity-subtabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+.gravity-subtab {
+  border: none; background: transparent; color: var(--text-muted); font-family: 'Manrope'; font-weight: 700;
+  font-size: 13px; padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.gravity-subtab:hover { color: var(--text); }
+.gravity-subtab.active { color: var(--blue); border-bottom-color: var(--blue-fill); }
+.gravity-subpanel { display: none; }
+.gravity-subpanel.active { display: block; }
+
+.gravity-asset-group { margin-bottom: 24px; }
+.gravity-asset-group h3 { font-size: 14px; margin-bottom: 10px; }
+.gravity-asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.gravity-asset-card {
+  border: 1px solid var(--border); border-radius: var(--radius-m); padding: 8px; text-align: center;
+  background: var(--surface-2); position: relative;
+}
+.gravity-asset-card img {
+  width: 100%; height: 56px; object-fit: contain; background: #05060f; border-radius: var(--radius-s); margin-bottom: 6px;
+}
+.gravity-asset-card .missing { width:100%; height:56px; display:flex; align-items:center; justify-content:center; background:#05060f; border-radius:var(--radius-s); margin-bottom:6px; color: var(--text-muted); font-size:10px; }
+.gravity-asset-card .key { font-size: 10.5px; font-weight: 700; display: block; margin-bottom: 6px; word-break: break-word; }
+.gravity-asset-card input[type="file"] { font-size: 10px; width: 100%; }
+
 /* ---- Gravity Flip — editor de niveles ---- */
 .gravity-editor-toolbar {
   display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px;

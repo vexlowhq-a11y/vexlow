@@ -229,7 +229,15 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
 
   <!-- ============ GRAVITY FLIP — EDITOR DE NIVELES ============ -->
   <section class="admin-panel" id="panel-gravity">
-    <p class="admin-lede">Editor visual de los 10 niveles de Gravity Flip. Elegí un nivel, tocá la pista para agregar el obstáculo seleccionado en la paleta, arrastrá lo que ya está puesto para moverlo. "Verificar con bot" corre el mismo bot que se usó para probar que cada nivel sea pasable — hacelo antes de guardar.</p>
+    <nav class="gravity-subtabs" id="gravitySubtabs">
+      <button type="button" class="gravity-subtab active" data-subtab="edit">Editar niveles</button>
+      <button type="button" class="gravity-subtab" data-subtab="add">+ Agregar nivel</button>
+      <button type="button" class="gravity-subtab" data-subtab="sprites">🖼️ Sprites</button>
+    </nav>
+
+    <!-- ---- Editar niveles ---- -->
+    <div class="gravity-subpanel active" id="gravitySub-edit">
+    <p class="admin-lede">Elegí un nivel, tocá la pista para agregar el obstáculo seleccionado en la paleta, arrastrá lo que ya está puesto para moverlo. "Verificar con bot" corre el mismo bot que se usó para probar que cada nivel sea pasable — hacelo antes de guardar.</p>
 
     <div class="gravity-editor-toolbar">
       <label>Nivel
@@ -258,6 +266,29 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
       <h3>Zonas de velocidad</h3>
       <div id="gravityEditorSpeedList"></div>
       <button type="button" class="btn-secondary" id="gravityEditorAddSpeedBtn">+ Agregar zona de velocidad</button>
+    </div>
+    </div>
+
+    <!-- ---- Agregar nivel ---- -->
+    <div class="gravity-subpanel" id="gravitySub-add">
+      <p class="admin-lede">Crea un nivel nuevo (empieza vacío, solo con la meta puesta) y lo agrega a la lista — después lo armás en "Editar niveles". Se le genera una miniatura simple automáticamente; podés reemplazarla luego desde "Sprites".</p>
+      <form class="admin-form" id="gravityAddLevelForm">
+        <div class="form-grid">
+          <label class="span-2">Nombre del nivel nuevo
+            <input type="text" id="gravityNewLevelName" placeholder="Ej: Neon Storm" required>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Crear nivel</button>
+        </div>
+      </form>
+      <p class="admin-hint" id="gravityAddLevelStatus"></p>
+    </div>
+
+    <!-- ---- Sprites ---- -->
+    <div class="gravity-subpanel" id="gravitySub-sprites">
+      <p class="admin-lede">Reemplazá cualquier sprite del juego por el tuyo — pincho, sierra, piso, portales, orbes, la decoración del menú, las miniaturas de nivel o las skins. Se sube tal cual, sin recortar: si tiene fondo transparente (PNG) mejor.</p>
+      <div id="gravityAssetGroups"></div>
     </div>
   </section>
 
