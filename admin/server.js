@@ -21,6 +21,7 @@ const { spawn } = require('child_process');
 const pagegen = require('./pagegen');
 const pipeline = require('./pipeline');
 const deploy = require('./deploy');
+const gravityEditor = require('./gravity-editor');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -611,6 +612,50 @@ var server = http.createServer(function (req, res) {
       sendJSON(res, code === 0 ? 200 : 500, { ok: code === 0, output: out });
     });
     return;
+  }
+
+  // ---- Editor visual de niveles de Gravity Flip ----
+  if (urlPath === '/api/gravity-levels' && req.method === 'GET') {
+    try {
+      return sendJSON(res, 200, gravityEditor.listLevels());
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/gravity-level' && req.method === 'GET') {
+    var levelId = new URL(req.url, 'http://localhost').searchParams.get('id');
+    if (!levelId) return sendJSON(res, 400, { error: 'Falta el id del nivel' });
+    try {
+      return sendJSON(res, 200, gravityEditor.loadLevel(levelId));
+    } catch (e) {
+      return sendJSON(res, 400, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/gravity-level/verify' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.id || !Array.isArray(data.objects)) {
+        return sendJSON(res, 400, { error: 'Faltan datos del nivel a verificar' });
+      }
+      try {
+        var result = gravityEditor.verifyLevel(data.id, data, 90 * 1000);
+        return sendJSON(res, 200, { ok: true, result: result });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/gravity-level/save' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.id || !Array.isArray(data.objects)) {
+        return sendJSON(res, 400, { error: 'Faltan datos del nivel a guardar' });
+      }
+      try {
+        gravityEditor.saveLevel(data.id, data);
+        return sendJSON(res, 200, { ok: true });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
   }
 
   // ---- Publicación automática (bot) ----

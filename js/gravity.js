@@ -313,6 +313,7 @@
   var GAP_CUBE_FAST = 300; // ídem a 1.5x/2x (recorre más mundo por segundo)
   var GAP_SHIP = 260;
 
+  // @gravity-editor:start level_01
   function buildNeonPulse() {
     var objs = [];
     var cursor = 500;
@@ -444,6 +445,7 @@
     });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_01
 
   // Helper genérico para el cierre de cualquier nivel: llave -> puerta
   // (nunca letal, ver comentario en el manejo de 'door') -> tramo final
@@ -458,6 +460,7 @@
     setCursor(getCursor() + 300);
   }
 
+  // @gravity-editor:start level_02
   function buildGreenCircuit() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -497,7 +500,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_02
 
+  // @gravity-editor:start level_03
   function buildGravityGarden() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -540,7 +545,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_03
 
+  // @gravity-editor:start level_04
   function buildSkyRider() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -582,7 +589,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_04
 
+  // @gravity-editor:start level_05
   function buildRollingLight() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -622,7 +631,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_05
 
+  // @gravity-editor:start level_06
   function buildFireFactory() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -671,7 +682,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_06
 
+  // @gravity-editor:start level_07
   function buildAquaBounce() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -710,7 +723,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_07
 
+  // @gravity-editor:start level_08
   function buildPixelCastle() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -754,7 +769,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_08
 
+  // @gravity-editor:start level_09
   function buildCyberSwitch() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -796,7 +813,9 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_09
 
+  // @gravity-editor:start level_10
   function buildNeonFinale() {
     var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
@@ -856,6 +875,7 @@
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
+  // @gravity-editor:end level_10
 
   var LEVELS = [
     { id: 'level_01', name: 'First Pulse', build: buildNeonPulse, thumb: 'level_01' },

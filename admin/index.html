@@ -29,6 +29,7 @@
     <button type="button" class="admin-tab" data-tab="articles">Últimas publicadas</button>
     <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
     <button type="button" class="admin-tab" data-tab="automation">Automatización <span id="automationTabBadge"></span></button>
+    <button type="button" class="admin-tab" data-tab="gravity">🔻 Gravity Flip</button>
   </nav>
 
   <!-- ============ HERO ============ -->
@@ -226,9 +227,44 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
     <div class="admin-list" id="automationLogList"></div>
   </section>
 
+  <!-- ============ GRAVITY FLIP — EDITOR DE NIVELES ============ -->
+  <section class="admin-panel" id="panel-gravity">
+    <p class="admin-lede">Editor visual de los 10 niveles de Gravity Flip. Elegí un nivel, tocá la pista para agregar el obstáculo seleccionado en la paleta, arrastrá lo que ya está puesto para moverlo. "Verificar con bot" corre el mismo bot que se usó para probar que cada nivel sea pasable — hacelo antes de guardar.</p>
+
+    <div class="gravity-editor-toolbar">
+      <label>Nivel
+        <select id="gravityEditorLevelSelect"></select>
+      </label>
+      <label>Zoom
+        <input type="range" id="gravityEditorZoom" min="0.2" max="1" step="0.05" value="0.4">
+      </label>
+      <span class="admin-hint" id="gravityEditorStatus"></span>
+      <div class="gravity-editor-actions">
+        <button type="button" class="btn-secondary" id="gravityEditorVerifyBtn">▶ Verificar con bot</button>
+        <button type="button" class="btn-primary" id="gravityEditorSaveBtn">Guardar nivel</button>
+      </div>
+    </div>
+
+    <div class="gravity-editor-palette" id="gravityEditorPalette"></div>
+
+    <div class="gravity-editor-canvas-wrap" id="gravityEditorCanvasWrap">
+      <canvas id="gravityEditorCanvas" height="230"></canvas>
+    </div>
+    <p class="admin-hint">Clic en la pista: agrega el obstáculo elegido arriba. Clic sobre uno ya puesto: lo selecciona (arrastralo para moverlo). Supr / Backspace: borra el seleccionado.</p>
+
+    <div class="gravity-editor-props" id="gravityEditorProps"></div>
+
+    <div class="gravity-editor-speedzones">
+      <h3>Zonas de velocidad</h3>
+      <div id="gravityEditorSpeedList"></div>
+      <button type="button" class="btn-secondary" id="gravityEditorAddSpeedBtn">+ Agregar zona de velocidad</button>
+    </div>
+  </section>
+
   <div class="admin-toast" id="adminToast"></div>
 </div>
 
 <script src="admin.js"></script>
+<script src="gravity-admin.js"></script>
 </body>
 </html>
