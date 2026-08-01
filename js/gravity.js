@@ -56,6 +56,10 @@
   var homeLevelsBtn = document.getElementById('gravityHomeLevelsBtn');
   var homePlayBtn = document.getElementById('gravityHomePlayBtn');
   var homeSkinsBtn = document.getElementById('gravityHomeSkinsBtn');
+  var homeProgressFill = document.getElementById('gravityHomeProgressFill');
+  var homeLvlEl = document.getElementById('gravityHomeLvl');
+  var homeTrophyBtn = document.getElementById('gravityHomeTrophyBtn');
+  var homeMuteBtn = document.getElementById('gravityHomeMuteBtn');
   var levelStarsChip = document.getElementById('gravityLevelStarsChip');
   var skinTabCollection = document.getElementById('gravitySkinTabCollection');
   var skinTabShop = document.getElementById('gravitySkinTabShop');
@@ -253,6 +257,7 @@
     muted = !muted;
     localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
     muteBtn.textContent = muted ? '🔇' : '🔊';
+    if (homeMuteBtn) homeMuteBtn.textContent = muted ? '🔇' : '🔊';
   });
 
   /* ---- Sprites ----
@@ -1484,9 +1489,17 @@
   function renderHomeMenu() {
     if (homeAvatar) homeAvatar.src = '../img/gravitycover/sliced/' + currentSkin + '.png';
     if (homeName) { var n = null; try { n = localStorage.getItem(NAME_KEY); } catch (e) {} homeName.textContent = (n || 'PLAYER').toUpperCase(); }
-    if (homeStarsEl) homeStarsEl.textContent = totalStars() + '/' + (LEVELS.length * 3);
+    var maxStars = LEVELS.length * 3;
+    var stars = totalStars();
+    if (homeStarsEl) homeStarsEl.textContent = stars + '/' + maxStars;
     if (homeCoinsEl) homeCoinsEl.textContent = String(coinsWallet);
     if (homeDiamondsEl) homeDiamondsEl.textContent = String(diamondsWallet);
+    if (homeProgressFill) homeProgressFill.style.width = Math.round((stars / maxStars) * 100) + '%';
+    if (homeLvlEl) {
+      var levelsStarted = 0;
+      for (var i = 0; i < LEVELS.length; i++) { if (starsFor(LEVELS[i].id) > 0) levelsStarted++; }
+      homeLvlEl.textContent = 'LVL ' + levelsStarted;
+    }
   }
 
   function goHome() {
@@ -1582,6 +1595,23 @@
   });
 
   if (dashWrap) dashWrap.classList.add('gravity-home-active'); // visible por defecto al cargar
+
+  if (homeTrophyBtn) {
+    homeTrophyBtn.addEventListener('click', function () {
+      var lb = document.querySelector('.dash-leaderboard');
+      if (lb && lb.scrollIntoView) lb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+  if (homeMuteBtn) {
+    homeMuteBtn.addEventListener('click', function () {
+      muted = !muted;
+      localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+      var icon = muted ? '🔇' : '🔊';
+      muteBtn.textContent = icon;
+      homeMuteBtn.textContent = icon;
+    });
+    homeMuteBtn.textContent = muted ? '🔇' : '🔊';
+  }
 
   /* -- Seleccionar nivel -- */
   if (levelBtn) levelBtn.addEventListener('click', function () { renderLevelGrid(); openOverlay(levelSelect); });
