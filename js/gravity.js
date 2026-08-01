@@ -12,6 +12,7 @@
 (function () {
   var canvas = document.getElementById('gravityCanvas');
   if (!canvas) return;
+  var dashWrap = canvas.closest('.dash-wrap');
 
   var ctx = canvas.getContext('2d');
   var W = canvas.width, H = canvas.height;
@@ -45,6 +46,25 @@
   var skinGrid = document.getElementById('gravitySkinGrid');
   var skinSelectClose = document.getElementById('gravitySkinSelectClose');
   var skinWalletLine = document.getElementById('gravitySkinWalletLine');
+  var homeBtn = document.getElementById('gravityHomeBtn');
+  var homeMenu = document.getElementById('gravityHomeMenu');
+  var homeAvatar = document.getElementById('gravityHomeAvatar');
+  var homeName = document.getElementById('gravityHomeName');
+  var homeStarsEl = document.getElementById('gravityHomeStars');
+  var homeCoinsEl = document.getElementById('gravityHomeCoins');
+  var homeDiamondsEl = document.getElementById('gravityHomeDiamonds');
+  var homeLevelsBtn = document.getElementById('gravityHomeLevelsBtn');
+  var homePlayBtn = document.getElementById('gravityHomePlayBtn');
+  var homeSkinsBtn = document.getElementById('gravityHomeSkinsBtn');
+  var levelStarsChip = document.getElementById('gravityLevelStarsChip');
+  var skinTabCollection = document.getElementById('gravitySkinTabCollection');
+  var skinTabShop = document.getElementById('gravitySkinTabShop');
+  var skinRarities = document.getElementById('gravitySkinRarities');
+  var skinPreviewPanel = document.getElementById('gravitySkinPreviewPanel');
+  var skinPreviewImg = document.getElementById('gravitySkinPreviewImg');
+  var skinPreviewName = document.getElementById('gravitySkinPreviewName');
+  var skinPreviewRarity = document.getElementById('gravitySkinPreviewRarity');
+  var skinEquipBtn = document.getElementById('gravitySkinEquipBtn');
 
   var PLAYS_KEY = 'vexlow_gravity_plays';
   var AD_BREAK_INTERVAL = 3;
@@ -58,6 +78,13 @@
   var UNLOCKED_SKINS_KEY = 'vexlow_gravity_unlocked_skins'; // JSON: ids de skin desbloqueados
   function bestKeyFor(levelId) { return 'vexlow_gravity_best_' + levelId; }
   function diamondClaimedKeyFor(levelId) { return 'vexlow_gravity_diamond_' + levelId; }
+  function starsKeyFor(levelId) { return 'vexlow_gravity_stars_' + levelId; }
+  function starsFor(levelId) { return parseInt(localStorage.getItem(starsKeyFor(levelId)) || '0', 10) || 0; }
+  function totalStars() {
+    var total = 0;
+    for (var i = 0; i < LEVELS.length; i++) total += starsFor(LEVELS[i].id);
+    return total;
+  }
 
   function readJSON(key, fallback) {
     try { var v = JSON.parse(localStorage.getItem(key)); return v || fallback; } catch (e) { return fallback; }
@@ -887,7 +914,7 @@
     coinsEl.textContent = '🪙 0/3';
     keyEl.textContent = '';
     overlayText.textContent = LEVELS[currentLevelIndex].name + ' — Tap or press Space to start';
-    overlay.classList.remove('hidden');
+    if (!homeMenuActive) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
   }
 
   function toScreenX(worldX) { return worldX - player.worldX + PLAYER_SCREEN_X; }
@@ -949,12 +976,16 @@
       // hasta la meta -- después queda marcado y no vuelve a aparecer.
       coinsWallet += coinCount;
       localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
+      // Las estrellas del nivel reflejan la MEJOR corrida (0-3 monedas
+      // secretas encontradas esa vez que se completó), no se pueden bajar.
+      if (coinCount > starsFor(levelId)) localStorage.setItem(starsKeyFor(levelId), String(coinCount));
       if (hasDiamond && localStorage.getItem(diamondClaimedKeyFor(levelId)) !== '1') {
         diamondsWallet += 1;
         localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
         localStorage.setItem(diamondClaimedKeyFor(levelId), '1');
       }
       updateWalletHud();
+      if (typeof renderHomeMenu === 'function') renderHomeMenu();
 
       var idx = -1;
       for (var li = 0; li < LEVELS.length; li++) { if (LEVELS[li].id === levelId) { idx = li; break; } }
@@ -1419,8 +1450,19 @@
     if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); handlePressEnd(e); }
   });
 
-  /* ---- Selección de nivel ---- */
+  /* ---- Selección de nivel / skin / menú principal ---- */
   var SKIN_COUNT = 40;
+  var LEVEL_ACCENTS = ['#3DE0FF', '#7CFFB2', '#B983FF', '#3D8BFF', '#FFC93D', '#FF7A3D', '#3DE0FF', '#FF3DAE', '#7CFFB2', '#B983FF'];
+  var SKIN_NAMES = [
+    'Neon Classic', 'Lava Gold', 'Ice Block', 'Toxic Slime', 'Devil', 'Iron Knight', 'Steel Knight', 'Galaxy Core',
+    'Galaxy Nova', 'Violet', 'Witch', 'Skull', 'Pirate', 'Pumpkin', 'Creeper', 'Dark Bot',
+    'Pink Pop', 'Blob Pink', 'Grassy', 'Ghost', 'Mummy', 'Duck', 'Dark Bot X', 'Crown King',
+    'Rainbow', 'Corgi', 'Purple Demon', 'Angel', 'Dark Tech', 'Headphone Bot', 'Panda Mask', 'Ice Crystal',
+    'Rainbow Trail', 'Void Fang', 'Shadow Horn', 'Glitch', 'Matrix', 'Panda Prime', 'Pink Crystal', 'Frost King'
+  ];
+  var SKIN_RARITIES = ['basico', 'raro', 'epico', 'legendario', 'especial'];
+  var SKIN_RARITY_LABEL = { basico: 'BÁSICO', raro: 'RARO', epico: 'ÉPICO', legendario: 'LEGENDARIO', especial: 'ESPECIAL' };
+  function skinRarity(index) { return SKIN_RARITIES[Math.min(4, Math.floor(index / 8))]; }
   function skinPrice(index) {
     // index 0-based; skin_01 (index 0) siempre viene desbloqueado.
     // Las primeras ~29 skins cuestan monedas en escala creciente, las
@@ -1429,47 +1471,121 @@
     if (index < 30) return { currency: 'coins', amount: 50 + index * 25 };
     return { currency: 'diamonds', amount: 1 + Math.floor((index - 30) / 4) };
   }
+  function skinIdAt(index) { return 'skin_' + (index + 1 < 10 ? '0' + (index + 1) : (index + 1)); }
 
   function openOverlay(el) { if (el) el.classList.remove('hidden'); }
   function closeOverlay(el) { if (el) el.classList.add('hidden'); }
 
+  var homeMenuActive = true;
+  var activeSkinTab = 'collection';
+  var activeRarityFilter = 'all';
+  var previewedSkinIndex = parseInt(currentSkin.replace('skin_', ''), 10) - 1;
+
+  function renderHomeMenu() {
+    if (homeAvatar) homeAvatar.src = '../img/gravitycover/sliced/' + currentSkin + '.png';
+    if (homeName) { var n = null; try { n = localStorage.getItem(NAME_KEY); } catch (e) {} homeName.textContent = (n || 'PLAYER').toUpperCase(); }
+    if (homeStarsEl) homeStarsEl.textContent = totalStars() + '/' + (LEVELS.length * 3);
+    if (homeCoinsEl) homeCoinsEl.textContent = String(coinsWallet);
+    if (homeDiamondsEl) homeDiamondsEl.textContent = String(diamondsWallet);
+  }
+
+  function goHome() {
+    homeMenuActive = true;
+    renderHomeMenu();
+    closeOverlay(overlay);
+    openOverlay(homeMenu);
+    if (dashWrap) dashWrap.classList.add('gravity-home-active');
+  }
+
   function renderLevelGrid() {
     if (!levelGrid) return;
+    if (levelStarsChip) levelStarsChip.textContent = '⭐ ' + totalStars() + '/' + (LEVELS.length * 3);
     levelGrid.innerHTML = LEVELS.map(function (lvl, i) {
       var unlocked = unlockedLevels.indexOf(lvl.id) !== -1;
       var current = i === currentLevelIndex;
-      var savedBest = parseInt(localStorage.getItem(bestKeyFor(lvl.id)) || '0', 10) || 0;
+      var stars = starsFor(lvl.id);
+      var starsRow = '';
+      for (var s = 0; s < 3; s++) starsRow += '<span class="' + (s < stars ? 'on' : 'off') + '">★</span>';
+      var accent = LEVEL_ACCENTS[i % LEVEL_ACCENTS.length];
       return '<div class="gravity-card' + (current ? ' selected' : '') + (unlocked ? '' : ' locked') +
-        '" data-index="' + i + '" data-unlocked="' + (unlocked ? '1' : '0') + '">' +
+        '" data-index="' + i + '" data-unlocked="' + (unlocked ? '1' : '0') + '" style="border-color:' + (unlocked ? accent : '') + '">' +
+        '<div class="gravity-level-num">' + (i + 1) + '</div>' +
         '<img src="../img/gravitycover/sliced/' + lvl.thumb + '.jpg" alt="' + escapeHtml(lvl.name) + '" loading="lazy">' +
         (unlocked ? '' : '<div class="gravity-card-lock">🔒</div>') +
-        '<div class="gravity-card-label">' + (i + 1) + '. ' + escapeHtml(lvl.name) + (unlocked ? ' — ' + savedBest + '%' : '') + '</div>' +
+        '<div class="gravity-card-label">' + escapeHtml(lvl.name) + '</div>' +
+        '<div class="gravity-level-stars">' + starsRow + '</div>' +
+        '<div class="gravity-level-meta"><span>🪙 ' + stars + '/3</span><span class="has-key">🔑</span></div>' +
         '</div>';
     }).join('');
   }
 
+  function updateSkinPreview() {
+    if (!skinPreviewImg) return;
+    var id = skinIdAt(previewedSkinIndex);
+    var owned = unlockedSkins.indexOf(id) !== -1;
+    var isActive = id === currentSkin;
+    skinPreviewImg.src = '../img/gravitycover/sliced/' + id + '.png';
+    if (skinPreviewName) skinPreviewName.textContent = (SKIN_NAMES[previewedSkinIndex] || id).toUpperCase();
+    if (skinPreviewRarity) skinPreviewRarity.textContent = SKIN_RARITY_LABEL[skinRarity(previewedSkinIndex)];
+    if (skinEquipBtn) {
+      if (isActive) { skinEquipBtn.textContent = '✔ EQUIPADO'; skinEquipBtn.className = 'gravity-equip-btn equipped'; }
+      else if (owned) { skinEquipBtn.textContent = 'EQUIPAR'; skinEquipBtn.className = 'gravity-equip-btn'; }
+      else { skinEquipBtn.textContent = '🔒 BLOQUEADO'; skinEquipBtn.className = 'gravity-equip-btn locked'; }
+    }
+  }
+
   function renderSkinGrid() {
     if (!skinGrid) return;
-    if (skinWalletLine) skinWalletLine.textContent = '🪙 ' + coinsWallet + '  💎 ' + diamondsWallet;
+    if (skinWalletLine) skinWalletLine.textContent = '🪙 ' + coinsWallet + ' 💎 ' + diamondsWallet;
+    if (skinTabCollection) skinTabCollection.classList.toggle('active', activeSkinTab === 'collection');
+    if (skinTabShop) skinTabShop.classList.toggle('active', activeSkinTab === 'shop');
     var rows = [];
     for (var i = 0; i < SKIN_COUNT; i++) {
-      var id = 'skin_' + (i + 1 < 10 ? '0' + (i + 1) : (i + 1));
+      var rarity = skinRarity(i);
+      if (activeRarityFilter !== 'all' && rarity !== activeRarityFilter) continue;
+      var id = skinIdAt(i);
       var owned = unlockedSkins.indexOf(id) !== -1;
+      if (activeSkinTab === 'shop' && owned) continue; // la tienda solo muestra lo que falta comprar
       var current = id === currentSkin;
       var price = skinPrice(i);
       var priceLabel = !price ? '' : (price.currency === 'coins' ? '🪙 ' + price.amount : '💎 ' + price.amount);
       rows.push('<div class="gravity-card' + (current ? ' selected' : '') + (owned ? '' : ' locked') +
-        '" data-skin="' + id + '">' +
+        '" data-index="' + i + '">' +
         '<img src="../img/gravitycover/sliced/' + id + '.png" alt="' + id + '" loading="lazy">' +
         (owned ? '' : '<div class="gravity-card-lock">🔒<span class="gravity-card-price">' + priceLabel + '</span></div>') +
         '</div>');
     }
-    skinGrid.innerHTML = rows.join('');
+    skinGrid.innerHTML = rows.length ? rows.join('') :
+      '<p style="grid-column:1/-1;text-align:center;color:var(--gv-muted);font-size:12.5px;padding:20px 0;">Nada por acá — probá otra categoría.</p>';
   }
 
+  function openSkinScreen(tab) {
+    activeSkinTab = tab || 'collection';
+    activeRarityFilter = 'all';
+    previewedSkinIndex = parseInt(currentSkin.replace('skin_', ''), 10) - 1;
+    if (skinRarities) skinRarities.querySelectorAll('.gravity-rarity-tab').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-rarity') === 'all'); });
+    updateSkinPreview();
+    renderSkinGrid();
+    openOverlay(skinSelect);
+  }
+
+  /* -- Menú principal -- */
+  function leaveHomeVisual() { closeOverlay(homeMenu); if (dashWrap) dashWrap.classList.remove('gravity-home-active'); }
+
+  if (homeBtn) homeBtn.addEventListener('click', goHome);
+  if (homeLevelsBtn) homeLevelsBtn.addEventListener('click', function () { leaveHomeVisual(); renderLevelGrid(); openOverlay(levelSelect); });
+  if (homeSkinsBtn) homeSkinsBtn.addEventListener('click', function () { leaveHomeVisual(); openSkinScreen('collection'); });
+  if (homePlayBtn) homePlayBtn.addEventListener('click', function () {
+    homeMenuActive = false;
+    leaveHomeVisual();
+    if (state === 'ready') overlay.classList.remove('hidden');
+  });
+
+  if (dashWrap) dashWrap.classList.add('gravity-home-active'); // visible por defecto al cargar
+
+  /* -- Seleccionar nivel -- */
   if (levelBtn) levelBtn.addEventListener('click', function () { renderLevelGrid(); openOverlay(levelSelect); });
-  if (levelSelectClose) levelSelectClose.addEventListener('click', function () { closeOverlay(levelSelect); });
-  if (levelSelect) levelSelect.addEventListener('mousedown', function (e) { if (e.target === levelSelect) closeOverlay(levelSelect); });
+  if (levelSelectClose) levelSelectClose.addEventListener('click', function () { closeOverlay(levelSelect); if (homeMenuActive) goHome(); });
   if (levelGrid) {
     levelGrid.addEventListener('click', function (e) {
       var card = e.target.closest ? e.target.closest('.gravity-card') : null;
@@ -1477,44 +1593,79 @@
       var idx = parseInt(card.getAttribute('data-index'), 10);
       if (isNaN(idx)) return;
       selectLevel(idx);
+      homeMenuActive = false;
+      if (dashWrap) dashWrap.classList.remove('gravity-home-active');
       closeOverlay(levelSelect);
+      overlay.classList.remove('hidden');
     });
   }
 
-  if (skinBtn) skinBtn.addEventListener('click', function () { renderSkinGrid(); openOverlay(skinSelect); });
-  if (skinSelectClose) skinSelectClose.addEventListener('click', function () { closeOverlay(skinSelect); });
-  if (skinSelect) skinSelect.addEventListener('mousedown', function (e) { if (e.target === skinSelect) closeOverlay(skinSelect); });
+  /* -- Seleccionar skin / Tienda -- */
+  if (skinBtn) skinBtn.addEventListener('click', function () { openSkinScreen('collection'); });
+  if (skinSelectClose) skinSelectClose.addEventListener('click', function () { closeOverlay(skinSelect); if (homeMenuActive) goHome(); });
+  if (skinTabCollection) skinTabCollection.addEventListener('click', function () { activeSkinTab = 'collection'; renderSkinGrid(); });
+  if (skinTabShop) skinTabShop.addEventListener('click', function () { activeSkinTab = 'shop'; renderSkinGrid(); });
+  if (skinRarities) {
+    skinRarities.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.gravity-rarity-tab') : null;
+      if (!btn) return;
+      activeRarityFilter = btn.getAttribute('data-rarity');
+      skinRarities.querySelectorAll('.gravity-rarity-tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      renderSkinGrid();
+    });
+  }
+  function buySkin(idx) {
+    var id = skinIdAt(idx);
+    var price = skinPrice(idx);
+    if (!price) return false;
+    var wallet = price.currency === 'coins' ? coinsWallet : diamondsWallet;
+    if (wallet < price.amount) return false; // no alcanza, no se compra
+    if (price.currency === 'coins') {
+      coinsWallet -= price.amount;
+      localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
+    } else {
+      diamondsWallet -= price.amount;
+      localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
+    }
+    updateWalletHud();
+    unlockedSkins.push(id);
+    writeJSON(UNLOCKED_SKINS_KEY, unlockedSkins);
+    return true;
+  }
   if (skinGrid) {
     skinGrid.addEventListener('click', function (e) {
       var card = e.target.closest ? e.target.closest('.gravity-card') : null;
       if (!card) return;
-      var id = card.getAttribute('data-skin');
+      var idx = parseInt(card.getAttribute('data-index'), 10);
+      if (isNaN(idx)) return;
+      var id = skinIdAt(idx);
       var owned = unlockedSkins.indexOf(id) !== -1;
-      if (owned) {
+      if (activeSkinTab === 'shop') {
+        if (owned) return;
+        if (!buySkin(idx)) return;
         setActiveSkin(id);
-      } else {
-        var idx = parseInt(id.replace('skin_', ''), 10) - 1;
-        var price = skinPrice(idx);
-        if (!price) return;
-        var wallet = price.currency === 'coins' ? coinsWallet : diamondsWallet;
-        if (wallet < price.amount) return; // no alcanza, no se compra
-        if (price.currency === 'coins') {
-          coinsWallet -= price.amount;
-          localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
-        } else {
-          diamondsWallet -= price.amount;
-          localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
-        }
-        updateWalletHud();
-        unlockedSkins.push(id);
-        writeJSON(UNLOCKED_SKINS_KEY, unlockedSkins);
+      } else if (owned) {
         setActiveSkin(id);
       }
+      previewedSkinIndex = idx;
+      updateSkinPreview();
       renderSkinGrid();
+      renderHomeMenu();
+    });
+  }
+  if (skinEquipBtn) {
+    skinEquipBtn.addEventListener('click', function () {
+      var id = skinIdAt(previewedSkinIndex);
+      if (unlockedSkins.indexOf(id) === -1) return;
+      setActiveSkin(id);
+      updateSkinPreview();
+      renderSkinGrid();
+      renderHomeMenu();
     });
   }
 
   resetGame();
+  renderHomeMenu();
   requestAnimationFrame(loop);
   loadLeaderboard();
 })();

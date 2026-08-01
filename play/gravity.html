@@ -225,6 +225,7 @@
           <span id="gravityCoins">🪙 0/3</span>
           <span id="gravityKey"></span>
           <span id="gravityWallet" class="gravity-wallet">🪙 0  💎 0</span>
+          <button type="button" id="gravityHomeBtn" class="dash-mute" aria-label="Home menu">🏠</button>
           <button type="button" id="gravityLevelBtn" class="dash-mute" aria-label="Choose level">🗺️</button>
           <button type="button" id="gravitySkinBtn" class="dash-mute" aria-label="Choose skin">🧑‍🚀</button>
           <button type="button" id="gravityMute" class="dash-mute" aria-label="Mute sound">🔊</button>
@@ -232,22 +233,76 @@
         <div class="dash-overlay" id="gravityOverlay">
           <p id="gravityOverlayText">Tap or press Space to start</p>
         </div>
+
+        <div class="gravity-home" id="gravityHomeMenu">
+          <div class="gravity-home-topbar">
+            <div class="gravity-player-card">
+              <div class="gravity-player-avatar"><img id="gravityHomeAvatar" src="../img/gravitycover/sliced/skin_01.png" alt=""></div>
+              <div class="gravity-player-info">
+                <strong id="gravityHomeName">PLAYER</strong>
+                <div class="gravity-player-stars">⭐ <span id="gravityHomeStars">0/30</span></div>
+              </div>
+            </div>
+            <div class="gravity-home-currency">
+              <span class="gravity-chip">🪙 <span id="gravityHomeCoins">0</span></span>
+              <span class="gravity-chip">💎 <span id="gravityHomeDiamonds">0</span></span>
+            </div>
+          </div>
+          <h2 class="gravity-home-title">GRAVITY<br>FLIP</h2>
+          <div class="gravity-home-actions">
+            <button type="button" class="gravity-oct gravity-oct-side" id="gravityHomeLevelsBtn">
+              <span class="gravity-oct-icon">🗺️</span><span>NIVELES</span>
+            </button>
+            <button type="button" class="gravity-oct gravity-oct-play" id="gravityHomePlayBtn">
+              <span class="gravity-oct-icon">▶</span><span>JUGAR</span>
+            </button>
+            <button type="button" class="gravity-oct gravity-oct-side" id="gravityHomeSkinsBtn">
+              <span class="gravity-oct-icon">🧑‍🚀</span><span>SKINS</span>
+            </button>
+          </div>
+          <p class="gravity-home-tip">¡Completá niveles y conseguí recompensas!</p>
+        </div>
       </div>
 
       <div class="dash-name-modal hidden" id="gravityLevelSelect">
-        <div class="dash-name-card gravity-select-card">
-          <h3>🗺️ Choose a level</h3>
+        <div class="dash-name-card gravity-select-card gravity-level-card">
+          <div class="gravity-screen-topbar">
+            <button type="button" id="gravityLevelSelectClose" class="gravity-back-btn" aria-label="Back">◀</button>
+            <h3>SELECCIONAR NIVEL</h3>
+            <span class="gravity-chip" id="gravityLevelStarsChip">⭐ 0/30</span>
+          </div>
           <div class="gravity-select-grid" id="gravityLevelGrid"></div>
-          <button type="button" id="gravityLevelSelectClose" class="dash-name-skip" style="width:100%;margin-top:14px;">Close</button>
         </div>
       </div>
 
       <div class="dash-name-modal hidden" id="gravitySkinSelect">
-        <div class="dash-name-card gravity-select-card">
-          <h3>🧑‍🚀 Choose a skin</h3>
-          <p class="gravity-wallet-line" id="gravitySkinWalletLine">🪙 0  💎 0</p>
-          <div class="gravity-select-grid gravity-skin-grid" id="gravitySkinGrid"></div>
-          <button type="button" id="gravitySkinSelectClose" class="dash-name-skip" style="width:100%;margin-top:14px;">Close</button>
+        <div class="dash-name-card gravity-select-card gravity-skin-card">
+          <div class="gravity-screen-topbar">
+            <button type="button" id="gravitySkinSelectClose" class="gravity-back-btn" aria-label="Back">◀</button>
+            <h3 id="gravitySkinScreenTitle">SELECCIONAR SKIN</h3>
+            <span class="gravity-chip" id="gravitySkinWalletLine">🪙 0 💎 0</span>
+          </div>
+          <div class="gravity-skin-tabs">
+            <button type="button" class="gravity-tab active" id="gravitySkinTabCollection">COLECCIÓN</button>
+            <button type="button" class="gravity-tab" id="gravitySkinTabShop">TIENDA</button>
+          </div>
+          <div class="gravity-skin-rarities" id="gravitySkinRarities">
+            <button type="button" class="gravity-rarity-tab active" data-rarity="all">TODOS</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="basico">BÁSICOS</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="raro">RAROS</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="epico">ÉPICOS</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="legendario">LEGENDARIOS</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="especial">ESPECIALES</button>
+          </div>
+          <div class="gravity-skin-body">
+            <div class="gravity-skin-preview" id="gravitySkinPreviewPanel">
+              <div class="gravity-skin-preview-img"><img id="gravitySkinPreviewImg" src="../img/gravitycover/sliced/skin_01.png" alt=""></div>
+              <strong id="gravitySkinPreviewName">NEON CLASSIC</strong>
+              <span class="gravity-rarity-tag" id="gravitySkinPreviewRarity">BÁSICO</span>
+              <button type="button" class="gravity-equip-btn" id="gravitySkinEquipBtn">EQUIPADO</button>
+            </div>
+            <div class="gravity-select-grid gravity-skin-grid" id="gravitySkinGrid"></div>
+          </div>
         </div>
       </div>
 
@@ -333,6 +388,6 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
-<script src="../js/gravity.js?v=1785596111"></script>
+<script src="../js/gravity.js?v=1785601197"></script>
 </body>
 </html>
