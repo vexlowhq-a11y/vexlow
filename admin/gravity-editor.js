@@ -114,12 +114,17 @@ function loadLevel(id) {
    se pueden reemplazar subiendo una imagen propia. ---- */
 const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
   'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
+const VARIANT_KEYS = ['spike_v1', 'spike_v2', 'spike_v3', 'spike_v4', 'spike_v5', 'spike_v6', 'spike_v7', 'spike_v8', 'spike_v9',
+  'saw_v1', 'saw_v2', 'saw_v3', 'saw_v4', 'saw_v5', 'saw_v6',
+  'platform_v1', 'platform_v2', 'platform_v3', 'platform_v4', 'platform_v5',
+  'portal_v1', 'portal_v2', 'portal_v3', 'portal_v4', 'portal_v5', 'portal_v6', 'portal_v7', 'portal_v8', 'portal_v9', 'portal_v10', 'portal_v11', 'portal_v12'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
-const SKIN_KEYS = Array.from({ length: 40 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
+const SKIN_KEYS = Array.from({ length: 72 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
 
 const ASSET_GROUPS = [
   { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
+  { group: 'Variantes (pincho/sierra/plataforma/portal)', keys: VARIANT_KEYS, ext: 'png' },
   { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
   { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
   { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }

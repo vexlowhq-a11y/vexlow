@@ -269,6 +269,16 @@
   var SPRITE_NAMES = ['floor', 'platform', 'spike', 'spike_triple', 'saw',
     'portal_gravity', 'portal_shape', 'orb_green', 'orb_pink', 'orb_yellow',
     'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
+  // Variantes cosméticas opcionales (subidas por el usuario) para
+  // pincho/sierra/plataforma/portal -- no cambian la física, solo el
+  // sprite dibujado. Un nivel puede pedir 'spike_v3' con `variant: 'v3'`.
+  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12 };
+  Object.keys(VARIANT_COUNTS).forEach(function (base) {
+    var n = VARIANT_COUNTS[base];
+    var spriteBase = base === 'portal_gravity' || base === 'portal_shape' ? 'portal' : base;
+    for (var vi = 1; vi <= n; vi++) SPRITE_NAMES.push(spriteBase + '_v' + vi);
+  });
+  SPRITE_NAMES = SPRITE_NAMES.filter(function (v, i, arr) { return arr.indexOf(v) === i; }); // sin duplicados (portal_v* se agrega dos veces)
   var sprites = {};
   SPRITE_NAMES.forEach(function (name) {
     var img = new Image();
@@ -1345,22 +1355,24 @@
       if (sx < -160 || sx > W + 160) return;
 
       if (o.type === 'spike') {
+        var spikeSprite = o.variant ? 'spike_' + o.variant : 'spike';
         if (o.surface === 'ceil') {
           ctx.save();
           ctx.translate(sx + 14, CEIL_Y + 15);
           ctx.rotate(Math.PI);
-          drawSprite('spike', -20, -15, 40, 30);
+          drawSprite(spikeSprite, -20, -15, 40, 30);
           ctx.restore();
         } else {
-          drawSprite('spike', sx - 6, FLOOR_Y - 30, 40, 30);
+          drawSprite(spikeSprite, sx - 6, FLOOR_Y - 30, 40, 30);
         }
       } else if (o.type === 'saw') {
+        var sawSprite = o.variant ? 'saw_' + o.variant : 'saw';
         var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
         var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 : CEIL_Y + 22;
         ctx.save();
         ctx.translate(sx, sawCY);
         if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
-        drawSprite('saw', -22, -22, 44, 44);
+        drawSprite(sawSprite, -22, -22, 44, 44);
         ctx.restore();
       } else if (o.type === 'interruptor') {
         ctx.save();
@@ -1384,11 +1396,11 @@
         ctx.restore();
       } else if (o.type === 'platform') {
         var py = surfaceYFor(o) - (o.surface === 'floor' ? 14 : 0);
-        drawSprite('platform', sx, py, o.w, 14);
+        drawSprite(o.variant ? 'platform_' + o.variant : 'platform', sx, py, o.w, 14);
       } else if (o.type === 'gravityPortal') {
-        drawSprite('portal_gravity', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
       } else if (o.type === 'shapePortal') {
-        drawSprite('portal_shape', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
       } else if (o.type === 'orb') {
         var sy = o.y;
         ctx.save();
@@ -1484,14 +1496,19 @@
   });
 
   /* ---- Selección de nivel / skin / menú principal ---- */
-  var SKIN_COUNT = 40;
+  var SKIN_COUNT = 72;
   var LEVEL_ACCENTS = ['#3DE0FF', '#7CFFB2', '#B983FF', '#3D8BFF', '#FFC93D', '#FF7A3D', '#3DE0FF', '#FF3DAE', '#7CFFB2', '#B983FF'];
   var SKIN_NAMES = [
     'Neon Classic', 'Lava Gold', 'Ice Block', 'Toxic Slime', 'Devil', 'Iron Knight', 'Steel Knight', 'Galaxy Core',
     'Galaxy Nova', 'Violet', 'Witch', 'Skull', 'Pirate', 'Pumpkin', 'Creeper', 'Dark Bot',
     'Pink Pop', 'Blob Pink', 'Grassy', 'Ghost', 'Mummy', 'Duck', 'Dark Bot X', 'Crown King',
     'Rainbow', 'Corgi', 'Purple Demon', 'Angel', 'Dark Tech', 'Headphone Bot', 'Panda Mask', 'Ice Crystal',
-    'Rainbow Trail', 'Void Fang', 'Shadow Horn', 'Glitch', 'Matrix', 'Panda Prime', 'Pink Crystal', 'Frost King'
+    'Rainbow Trail', 'Void Fang', 'Shadow Horn', 'Glitch', 'Matrix', 'Panda Prime', 'Pink Crystal', 'Frost King',
+    // Pack 2 (subido por el usuario, todo.png)
+    'Cobalt', 'Silver Ghost', 'Ember Horn', 'Golden Horn', 'Amethyst', 'Storm Horn', 'Royal Horn', 'Teal Wave',
+    'Twilight Horn', 'Frost White', 'Sunfire Horn', 'Sky Horn', 'Jade', 'Inferno Devil', 'Azure Horn', 'Orchid',
+    'Lagoon', 'Plum Horn', 'Tangerine', 'Cobalt Deep', 'Emerald', 'Nightshade', 'Amber', 'Grape',
+    'Fuchsia Devil', 'Honey', 'Sapphire', 'Lavender', 'Mint', 'Magenta Storm', 'Citrine Devil', 'Indigo'
   ];
   var SKIN_RARITIES = ['basico', 'raro', 'epico', 'legendario', 'especial'];
   var SKIN_RARITY_LABEL = { basico: 'BÁSICO', raro: 'RARO', epico: 'ÉPICO', legendario: 'LEGENDARIO', especial: 'ESPECIAL' };

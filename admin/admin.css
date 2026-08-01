@@ -372,6 +372,16 @@ body { padding: 0; }
   font-family: 'Manrope'; padding: 6px 8px; border-radius: var(--radius-s); border: 1px solid var(--border);
   background: var(--surface-1); color: var(--text); width: 90px;
 }
+.gravity-variant-row { align-items: flex-start !important; }
+.gravity-variant-row > span { font-size: 12px; font-weight: 600; color: var(--text-muted); padding-top: 6px; }
+.gravity-variant-swatches { display: flex; flex-wrap: wrap; gap: 6px; max-width: 520px; }
+.gravity-variant-swatch {
+  border: 2px solid var(--border); border-radius: var(--radius-s); background: #05060f; cursor: pointer;
+  padding: 4px; font-size: 9px; color: var(--text-muted); width: 46px; height: 40px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.gravity-variant-swatch img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.gravity-variant-swatch.selected { border-color: var(--blue-fill); }
 
 .gravity-editor-speedzones h3 { font-size: 14px; margin-bottom: 8px; }
 .gravity-speed-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }

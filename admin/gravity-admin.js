@@ -13,11 +13,11 @@
   var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
 
   var OBJECT_TYPES = {
-    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w'] },
-    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'linkId'] },
-    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'moving', 'amp', 'periodMs'] },
-    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir'] },
-    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form'] },
+    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w', 'variant'], variantBase: 'spike', variantCount: 9 },
+    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'linkId', 'variant'], variantBase: 'saw', variantCount: 6 },
+    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform', variantCount: 5 },
+    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal', variantCount: 12 },
+    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'variant'], variantBase: 'portal', variantCount: 12 },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y'] },
     pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'color'] },
     key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y'] },
@@ -257,8 +257,20 @@
     var o = state.objects[state.selectedIndex];
     var def = OBJECT_TYPES[o.type];
     if (!def) { propsEl.innerHTML = ''; return; }
-    var html = '<div class="prop-row"><strong>' + def.icon + ' ' + def.label + '</strong> — x: ' + o.x + '</div><div class="prop-row">';
+    var html = '<div class="prop-row"><strong>' + def.icon + ' ' + def.label + '</strong> — x: ' + o.x + '</div>';
+    if (def.variantCount) {
+      html += '<div class="prop-row gravity-variant-row"><span>Aspecto</span><div class="gravity-variant-swatches">';
+      html += '<button type="button" class="gravity-variant-swatch' + (!o.variant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
+      for (var vi = 1; vi <= def.variantCount; vi++) {
+        var vid = 'v' + vi;
+        html += '<button type="button" class="gravity-variant-swatch' + (o.variant === vid ? ' selected' : '') +
+          '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
+      }
+      html += '</div></div>';
+    }
+    html += '<div class="prop-row">';
     def.fields.forEach(function (f) {
+      if (f === 'variant') return; // se maneja arriba como swatches
       if (f === 'surface') {
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="surface"><option value="floor"' + (o.surface === 'floor' ? ' selected' : '') + '>Piso</option><option value="ceil"' + (o.surface === 'ceil' ? ' selected' : '') + '>Techo</option></select></label>';
       } else if (f === 'dir') {
@@ -290,6 +302,13 @@
         else val = input.value;
         o[field] = val;
         recomputeLength();
+        render();
+      });
+    });
+    propsEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        o.variant = btn.getAttribute('data-variant') || undefined;
+        renderProps();
         render();
       });
     });
