@@ -11,11 +11,16 @@
   var CANVAS_H = 230;
   var scaleY = CANVAS_H / WORLD_H;
   var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
+  var FLOOR_VARIANT_COLORS = {
+    v1: '#7a7b7d', v2: '#707384', v3: '#923dab', v4: '#205c95', v5: '#5b9918', v6: '#a14016',
+    v7: '#795838', v8: '#888177', v9: '#816d4d', v10: '#33a0d5', v11: '#8c7d64', v12: '#9c3509',
+    v13: '#98621b', v14: '#8b6d47', v15: '#978369', v16: '#ac4904', v17: '#279ace', v18: '#aa4103'
+  };
 
   var OBJECT_TYPES = {
     spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'w', 'variant', 'rotation'], variantBase: 'spike', variantCount: 9 },
     saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'linkId', 'variant'], variantBase: 'saw', variantCount: 6 },
-    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform', variantCount: 5 },
+    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform', variantCount: 5 },
     gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal', variantCount: 12 },
     shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'variant'], variantBase: 'portal', variantCount: 12 },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y'] },
@@ -165,6 +170,10 @@
   function objectDrawY(o) {
     var def = OBJECT_TYPES[o.type];
     if (!def) return MID_Y;
+    if (o.type === 'platform') {
+      var lift = o.lift || 0;
+      return o.surface === 'ceil' ? CEIL_Y + lift : FLOOR_Y - lift;
+    }
     if (def.anchor === 'surface') return o.surface === 'ceil' ? CEIL_Y + 20 : FLOOR_Y - 20;
     if (def.anchor === 'free') return (o.y != null ? o.y : MID_Y);
     return MID_Y;
@@ -219,17 +228,25 @@
     }
 
     var floorCy = FLOOR_Y * scaleY, ceilCy = CEIL_Y * scaleY;
-    var floorSpriteName = state.floorVariant ? 'floor_' + state.floorVariant : 'floor';
-    var floorImg = getSpriteImg(floorSpriteName);
-    if (floorImg.complete && floorImg.naturalWidth > 0) {
-      var tileW = Math.max(18, 44 * state.zoom);
-      for (var tx = 0; tx < canvas.width; tx += tileW) {
-        ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
-        ctx.save();
-        ctx.translate(tx + tileW / 2, ceilCy);
-        ctx.rotate(Math.PI);
-        ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
-        ctx.restore();
+    if (state.floorVariant && FLOOR_VARIANT_COLORS[state.floorVariant]) {
+      // Los bloques no son una textura sin costura -- se pinta una
+      // franja continua con el color representativo del bloque
+      // elegido, igual que en el juego real.
+      ctx.fillStyle = FLOOR_VARIANT_COLORS[state.floorVariant];
+      ctx.fillRect(0, floorCy, canvas.width, canvas.height - floorCy);
+      ctx.fillRect(0, 0, canvas.width, ceilCy);
+    } else {
+      var floorImg = getSpriteImg('floor');
+      if (floorImg.complete && floorImg.naturalWidth > 0) {
+        var tileW = Math.max(18, 44 * state.zoom);
+        for (var tx = 0; tx < canvas.width; tx += tileW) {
+          ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
+          ctx.save();
+          ctx.translate(tx + tileW / 2, ceilCy);
+          ctx.rotate(Math.PI);
+          ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
+          ctx.restore();
+        }
       }
     }
     ctx.strokeStyle = 'rgba(185,131,255,.55)'; ctx.lineWidth = 2;
@@ -272,6 +289,7 @@
         ctx.save();
         ctx.translate(cx, cy);
         if (rot) ctx.rotate(rot);
+        if (o.type === 'platform' && o.lethal) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)';
         ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz);
         ctx.restore();
         drawnAsSprite = true;
@@ -315,12 +333,12 @@
     var idx = findObjectNear(w.x, w.y, hitThreshold);
     if (idx !== -1) {
       state.selectedIndex = idx;
-      drag = { index: idx, freeY: OBJECT_TYPES[state.objects[idx].type].anchor === 'free' };
+      drag = { index: idx, freeY: OBJECT_TYPES[state.objects[idx].type].anchor === 'free', liftDraggable: state.objects[idx].type === 'platform' };
     } else {
       var obj = defaultObjectFor(state.tool, w.x, w.y);
       state.objects.push(obj);
       state.selectedIndex = state.objects.length - 1;
-      drag = { index: state.selectedIndex, freeY: OBJECT_TYPES[obj.type].anchor === 'free' };
+      drag = { index: state.selectedIndex, freeY: OBJECT_TYPES[obj.type].anchor === 'free', liftDraggable: obj.type === 'platform' };
       recomputeLength();
     }
     renderProps();
@@ -335,6 +353,11 @@
     o.x = Math.max(0, Math.round(w.x));
     if (dx != null) o.x2 = o.x + dx;
     if (drag.freeY) o.y = Math.round(Math.max(CEIL_Y, Math.min(FLOOR_Y, w.y)));
+    if (drag.liftDraggable) {
+      var lift = o.surface === 'ceil' ? (w.y - CEIL_Y) : (FLOOR_Y - w.y);
+      o.lift = Math.round(Math.max(0, Math.min(200, lift)));
+      renderProps();
+    }
     recomputeLength();
     render();
   });
@@ -358,7 +381,7 @@
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
-    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)'
+    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }
@@ -391,7 +414,7 @@
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="color">' + opts.map(function (v) { return '<option value="' + v + '"' + (o.color === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></label>';
       } else if (f === 'id') {
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="id">' + [0, 1, 2].map(function (v) { return '<option value="' + v + '"' + (o.id === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></label>';
-      } else if (f === 'moving' || f === 'risky') {
+      } else if (f === 'moving' || f === 'risky' || f === 'lethal') {
         html += '<label><input type="checkbox" data-field="' + f + '"' + (o[f] ? ' checked' : '') + '> ' + FIELD_LABEL[f] + '</label>';
       } else {
         html += '<label>' + FIELD_LABEL[f] + ' <input type="' + (f === 'linkId' ? 'text' : 'number') + '" data-field="' + f + '" value="' + (o[f] != null ? o[f] : '') + '"></label>';

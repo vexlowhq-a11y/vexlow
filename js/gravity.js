@@ -18,8 +18,10 @@
   var W = canvas.width, H = canvas.height;
   var FLOOR_Y = H - 40;
   var CEIL_Y = 40;
+  var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
   var PLAYER_SIZE = 32;
   var PLAYER_SCREEN_X = 160;
+  var PORTAL_W = 48, PORTAL_H = 64;
 
   var scoreEl = document.getElementById('gravityScore');
   var bestEl = document.getElementById('gravityBest');
@@ -272,12 +274,20 @@
   // Variantes cosméticas opcionales (subidas por el usuario) para
   // pincho/sierra/plataforma/portal -- no cambian la física, solo el
   // sprite dibujado. Un nivel puede pedir 'spike_v3' con `variant: 'v3'`.
-  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12, floor: 18 };
+  var VARIANT_COUNTS = { spike: 9, saw: 6, platform: 5, portal_gravity: 12, portal_shape: 12 };
   Object.keys(VARIANT_COUNTS).forEach(function (base) {
     var n = VARIANT_COUNTS[base];
     var spriteBase = base === 'portal_gravity' || base === 'portal_shape' ? 'portal' : base;
     for (var vi = 1; vi <= n; vi++) SPRITE_NAMES.push(spriteBase + '_v' + vi);
   });
+  // El piso no se tilea con el sprite del bloque (no es una textura
+  // sin costura) -- se pinta una franja continua con el color
+  // representativo de cada bloque, calculado de antemano.
+  var FLOOR_VARIANT_COLORS = {
+    v1: '#7a7b7d', v2: '#707384', v3: '#923dab', v4: '#205c95', v5: '#5b9918', v6: '#a14016',
+    v7: '#795838', v8: '#888177', v9: '#816d4d', v10: '#33a0d5', v11: '#8c7d64', v12: '#9c3509',
+    v13: '#98621b', v14: '#8b6d47', v15: '#978369', v16: '#ac4904', v17: '#279ace', v18: '#aa4103'
+  };
   SPRITE_NAMES = SPRITE_NAMES.filter(function (v, i, arr) { return arr.indexOf(v) === i; }); // sin duplicados (portal_v* se agrega dos veces)
   var sprites = {};
   SPRITE_NAMES.forEach(function (name) {
@@ -1170,10 +1180,12 @@
         var platformBottom = o.surface === 'floor' ? topY : topY + 14;
         if (o.surface === 'floor' && player.gravityDir === 1) {
           if (player.y + PLAYER_SIZE >= platformTop && player.y + PLAYER_SIZE <= platformTop + 26 && player.vy >= 0) {
+            if (o.lethal) { endGame(); return; }
             player.y = platformTop - PLAYER_SIZE; player.vy = 0; player.grounded = true;
           }
         } else if (o.surface === 'ceil' && player.gravityDir === -1) {
           if (player.y <= platformBottom && player.y >= platformBottom - 26 && player.vy <= 0) {
+            if (o.lethal) { endGame(); return; }
             player.y = platformBottom; player.vy = 0; player.grounded = true;
           }
         }
@@ -1336,15 +1348,24 @@
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
     ctx.restore();
 
-    var floorSprite = (level && level.floorVariant) ? 'floor_' + level.floorVariant : 'floor';
-    var tileW = 110, floorOff = player.worldX % tileW;
-    for (var fx = -floorOff; fx < W; fx += tileW) {
-      drawSprite(floorSprite, fx, FLOOR_Y, tileW, H - FLOOR_Y);
-      ctx.save();
-      ctx.translate(fx + tileW / 2, CEIL_Y);
-      ctx.rotate(Math.PI);
-      drawSprite(floorSprite, -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
-      ctx.restore();
+    if (level && level.floorVariant && FLOOR_VARIANT_COLORS[level.floorVariant]) {
+      // Los "bloques" que subió el usuario son íconos individuales, no
+      // una textura pensada para repetirse sin costura -- en vez de
+      // tilearlos (que se ve con separaciones), se pinta una franja
+      // continua del color representativo de ese bloque.
+      ctx.fillStyle = FLOOR_VARIANT_COLORS[level.floorVariant];
+      ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
+      ctx.fillRect(0, 0, W, CEIL_Y);
+    } else {
+      var tileW = 110, floorOff = player.worldX % tileW;
+      for (var fx = -floorOff; fx < W; fx += tileW) {
+        drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
+        ctx.save();
+        ctx.translate(fx + tileW / 2, CEIL_Y);
+        ctx.rotate(Math.PI);
+        drawSprite('floor', -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
+        ctx.restore();
+      }
     }
   }
 
@@ -1401,11 +1422,22 @@
         ctx.restore();
       } else if (o.type === 'platform') {
         var py = surfaceYFor(o) - (o.surface === 'floor' ? 14 : 0);
+        ctx.save();
+        // Las plataformas "letales" se ven con un tinte rojo -- es un
+        // peligro real (mata al tocarla), así que tiene que ser visible
+        // en vez de una trampa invisible.
+        if (o.lethal) { ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)'; }
         drawSprite(o.variant ? 'platform_' + o.variant : 'platform', sx, py, o.w, 14);
+        ctx.restore();
       } else if (o.type === 'gravityPortal') {
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+        // Tamaño fijo y centrado en la pantalla -- antes se estiraba
+        // para llenar todo el alto entre piso y techo, deformando el
+        // sprite. El área donde el portal REALMENTE activa sigue
+        // siendo la franja completa (overlapsX de abajo), esto es
+        // solo el dibujo.
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - PORTAL_W / 2, MID_Y - PORTAL_H / 2, PORTAL_W, PORTAL_H);
       } else if (o.type === 'shapePortal') {
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - 16, CEIL_Y, 32, FLOOR_Y - CEIL_Y);
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W / 2, MID_Y - PORTAL_H / 2, PORTAL_W, PORTAL_H);
       } else if (o.type === 'orb') {
         var sy = o.y;
         ctx.save();
