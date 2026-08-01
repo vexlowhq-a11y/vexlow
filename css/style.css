@@ -27,6 +27,13 @@
   font-display: swap;
   src: url('../fonts/ibm-plex-mono-500.woff2') format('woff2');
 }
+@font-face {
+  font-family: 'Bungee';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/bungee.woff2') format('woff2');
+}
 
 /* ---------- Tokens ---------- */
 :root {
@@ -646,28 +653,23 @@ main { min-width: 0; padding: 26px 32px 90px; }
 }
 .gravity-home.hidden { display: none; }
 
-/* Decoración de fondo: reusa las mismas sprites del juego (portal,
-   sierra, pinchos) en vez de arte nuevo -- mismo lenguaje visual que
-   el gameplay real, en vez de ilustraciones inventadas. */
-.gravity-home-bg-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5; }
+/* Decoración de fondo: recortes reales del mockup (portal, engranaje)
+   más la skin activa -- no arte inventado, piezas reales del diseño
+   de referencia, recortadas y reposicionadas para no chocar con los
+   botones. */
+.gravity-home-bg-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .8; }
 .gravity-decor-cube {
-  position: absolute; top: 14%; left: 6%; width: 60px; height: 60px; object-fit: contain;
+  position: absolute; top: 10%; left: 5%; width: 52px; height: 52px; object-fit: contain;
   filter: drop-shadow(0 0 12px rgba(61,224,255,.6)); animation: gravity-bob 3.2s ease-in-out infinite;
 }
-.gravity-decor-trail { position: absolute; top: 8%; left: 2%; width: 160px; height: 150px; overflow: visible; }
-.gravity-decor-trail path {
-  fill: none; stroke: url(#gravity-trail-gradient); stroke-width: 4; stroke-linecap: round; opacity: .55;
-}
 .gravity-decor-portal {
-  position: absolute; top: 22%; right: 7%; width: 60px; height: 90px; object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(185,131,255,.6)); animation: gravity-spin 7s linear infinite;
+  position: absolute; top: 13%; right: 4%; width: 54px; height: auto; object-fit: contain;
+  animation: gravity-spin 8s linear infinite;
 }
-.gravity-decor-saw { position: absolute; width: 56px; height: 56px; object-fit: contain; animation: gravity-spin 4s linear infinite; }
-.gravity-decor-saw-1 { top: 6%; right: 2%; opacity: .8; }
-.gravity-decor-saw-2 { bottom: 20%; right: 12%; width: 34px; height: 34px; opacity: .5; }
-.gravity-decor-spike { position: absolute; width: 30px; height: 26px; object-fit: contain; opacity: .55; }
-.gravity-decor-spike-1 { bottom: 16%; left: 10%; }
-.gravity-decor-spike-2 { bottom: 10%; left: 16%; width: 22px; }
+.gravity-decor-gear {
+  position: absolute; top: -3%; right: -4%; width: 96px; height: auto; object-fit: contain; opacity: .7;
+  animation: gravity-spin 10s linear infinite reverse;
+}
 @keyframes gravity-bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
 @keyframes gravity-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -700,12 +702,18 @@ main { min-width: 0; padding: 26px 32px 90px; }
 }
 
 .gravity-home-title {
-  position: relative; z-index: 1; font-family: 'Manrope'; font-weight: 900;
-  font-size: clamp(30px, 7vw, 52px); line-height: .95; letter-spacing: .02em; margin: 0;
+  position: relative; z-index: 1; font-family: 'Bungee', 'Manrope', sans-serif; font-weight: 400;
+  font-size: clamp(28px, 6.5vw, 46px); line-height: 1.05; letter-spacing: .01em; margin: 0;
 }
-.gravity-home-title .line { display: block; -webkit-text-stroke: 2px #05060f; }
-.gravity-home-title .line-1 { color: var(--gv-cyan); text-shadow: 0 3px 0 #0a3a4a, 0 6px 14px rgba(61,224,255,.55); }
-.gravity-home-title .line-2 { color: var(--gv-pink); text-shadow: 0 3px 0 #4a0a34, 0 6px 14px rgba(255,61,174,.55); }
+.gravity-home-title .line { display: block; -webkit-text-stroke: 2px #05060f; paint-order: stroke fill; }
+.gravity-home-title .line-1 {
+  color: var(--gv-cyan);
+  text-shadow: 0 2px 0 #0a3a4a, 0 4px 0 #082e3c, 0 6px 0 #062430, 0 9px 18px rgba(61,224,255,.6);
+}
+.gravity-home-title .line-2 {
+  color: var(--gv-pink);
+  text-shadow: 0 2px 0 #4a0a34, 0 4px 0 #3c082c, 0 6px 0 #300624, 0 9px 18px rgba(255,61,174,.6);
+}
 
 .gravity-home-actions { display: flex; align-items: flex-end; justify-content: center; gap: 14px; position: relative; z-index: 1; }
 .gravity-oct {
@@ -728,9 +736,11 @@ main { min-width: 0; padding: 26px 32px 90px; }
   border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 7px solid currentColor;
 }
 .gravity-home-platform {
-  width: min(420px, 92%); height: 8px; margin: 10px auto 0; border-radius: 3px; position: relative; z-index: 1;
-  background: linear-gradient(90deg, transparent, var(--gv-purple), transparent);
-  box-shadow: 0 0 16px -2px rgba(185,131,255,.7);
+  width: min(460px, 94%); height: 22px; margin: 8px auto 0; border-radius: 3px; position: relative; z-index: 1;
+  background-repeat: repeat-x; background-size: auto 100%; background-position: center;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  opacity: .9;
 }
 .gravity-home-bottom-row { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .gravity-home-tip { font-size: 11px; color: var(--gv-muted); margin: 0; }
@@ -841,7 +851,7 @@ main { min-width: 0; padding: 26px 32px 90px; }
   .gravity-player-avatar { width: 32px; height: 32px; }
   .gravity-player-progress-bar { width: 60px; }
   .gravity-icon-btn { width: 28px; height: 28px; font-size: 12px; }
-  .gravity-decor-portal, .gravity-decor-saw-1 { display: none; }
+  .gravity-decor-portal, .gravity-decor-gear { display: none; }
   .gravity-decor-cube { width: 42px; height: 42px; top: 10%; }
 }
 

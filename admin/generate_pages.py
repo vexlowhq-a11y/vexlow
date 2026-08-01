@@ -1054,19 +1054,8 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
         <div class="gravity-home" id="gravityHomeMenu">
           <div class="gravity-home-bg-decor" aria-hidden="true">
             <img class="gravity-decor-cube" id="gravityHomeDecorCube" src="../img/gravitycover/sliced/skin_01.png" alt="">
-            <svg class="gravity-decor-trail" viewBox="0 0 220 200">
-              <defs>
-                <linearGradient id="gravity-trail-gradient" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#FF3DAE"/><stop offset="50%" stop-color="#FFC93D"/><stop offset="100%" stop-color="#3DE0FF"/>
-                </linearGradient>
-              </defs>
-              <path d="M6 190 C 40 160, 30 90, 110 60" />
-            </svg>
-            <img class="gravity-decor-portal" src="../img/gravitycover/sliced/portal_gravity.png" alt="">
-            <img class="gravity-decor-saw gravity-decor-saw-1" src="../img/gravitycover/sliced/saw.png" alt="">
-            <img class="gravity-decor-saw gravity-decor-saw-2" src="../img/gravitycover/sliced/saw.png" alt="">
-            <img class="gravity-decor-spike gravity-decor-spike-1" src="../img/gravitycover/sliced/spike.png" alt="">
-            <img class="gravity-decor-spike gravity-decor-spike-2" src="../img/gravitycover/sliced/spike.png" alt="">
+            <img class="gravity-decor-portal" src="../img/gravitycover/sliced/home_portal.png" alt="">
+            <img class="gravity-decor-gear" src="../img/gravitycover/sliced/home_gear.png" alt="">
           </div>
           <div class="gravity-home-topbar">
             <div class="gravity-player-card">
@@ -1101,7 +1090,7 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
               <i class="gravity-oct-tri"></i>
             </button>
           </div>
-          <div class="gravity-home-platform"></div>
+          <div class="gravity-home-platform" style="background-image:url('../img/gravitycover/sliced/home_platform.png')"></div>
           <div class="gravity-home-bottom-row">
             <span class="gravity-chip">🪙 <span id="gravityHomeCoins">0</span></span>
             <p class="gravity-home-tip">◇ ⭐ ¡Completá niveles y conseguí recompensas! ⭐ ◇</p>
