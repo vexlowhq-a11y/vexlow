@@ -2,8 +2,8 @@
   Gravity Flip (play/gravity.html) — ahora un plataformas rítmico de
   nivel fijo estilo Geometry Dash ("Neon Pulse", nivel 1 de varios).
   Tres formas de personaje (cubo/nave/bola), portales de forma y de
-  gravedad, orbes (tap para activar), jump pads (automáticos), pinchos,
-  sierras, plataformas, llave+puerta, 3 monedas secretas y meta final.
+  gravedad, jump pads (automáticos), pinchos, sierras, plataformas,
+  llave+puerta, 3 monedas secretas y meta final.
   Usa las sprites de img/gravitycover/sliced/ (recortadas de la hoja
   del usuario). Sonido sintetizado con Web Audio API, mismo patrón de
   tabla de posiciones (api/gravity.js, score = % del nivel completado)
@@ -324,6 +324,19 @@
   function drawSkin(x, y, w, h) {
     if (skinImg.complete && skinImg.naturalWidth > 0) ctx.drawImage(skinImg, x, y, w, h);
   }
+  // Traza (sin fillear) una estrella de 5 puntas centrada en (0,0) --
+  // usada para la moneda/estrella secreta, dibujada a mano en vez de
+  // con sprite (mismo criterio que diamante/puerta).
+  function traceStar(outerR, innerR) {
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var r = i % 2 === 0 ? outerR : innerR;
+      var ang = (Math.PI / 5) * i - Math.PI / 2;
+      var px = Math.cos(ang) * r, py = Math.sin(ang) * r;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
 
   /* ---- Física (por forma) ----
      Cubo: gravedad + salto al tocar mientras está apoyado.
@@ -331,22 +344,22 @@
      Bola: tap invierte la dirección de gravedad al instante (con
      impulso), se pega a la superficie donde cae — es la misma
      mecánica que tenía el Gravity Flip original. */
-  // El salto del cubo (tap simple, sin orbe) se calibra en "bloques"
-  // de BLOCK_SIZE px -- con esta velocidad+gravedad llega justo a ~2
+  // El salto del cubo (tap simple) se calibra en "bloques" de
+  // BLOCK_SIZE px -- con esta velocidad+gravedad llega justo a ~2
   // bloques de alto (antes llegaba a ~113px, más de 3 bloques y
   // medio, de ahí que se sintiera "flotante"). Gravedad y velocidad
   // se bajaron juntas manteniendo la MISMA duración/alcance
   // horizontal que el salto original (~530ms, ~149px a velocidad
   // base) -- así el arco queda más bajo y "chato" sin volverse más
   // corto, y el espaciado ya calibrado entre obstáculos sigue
-  // sirviendo tal cual. Los orbes (ORB_YELLOW_V/PINK_V) NO se tocan a
+  // sirviendo tal cual. Los pads (PAD_YELLOW_V/PINK_V) NO se tocan a
   // propósito: siguen siendo el boost especial, ahora claramente más
   // alto que el salto normal en vez de igual.
   var BLOCK_SIZE = 32; // = PLAYER_SIZE, unidad de referencia para pinchos/plataformas/paredes
   var CUBE_GRAVITY = 0.0018, CUBE_JUMP_V = 0.48, CUBE_MAX_VY = 1.3;
   var SHIP_THRUST = 0.0021, SHIP_FALL = 0.0021, SHIP_MAX_VY = 0.46;
   var BALL_GRAVITY = 0.0028, BALL_FLIP_KICK = 0.34, BALL_MAX_VY = 1.0;
-  var ORB_YELLOW_V = 0.85, ORB_PINK_V = 0.46;
+  var PAD_YELLOW_V = 0.85, PAD_PINK_V = 0.46;
 
   /* ---- Construcción del nivel ----
      Cursor-based: cada helper agrega un objeto en la posición actual
@@ -600,7 +613,6 @@
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 9063, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 87, x: 9075, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 34, x: 9077, variant: "v2" });
-    add({ type: "coin", id: 4, y: 273, x: 9087, scale: 0.55 });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 9094, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 9134, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 9174, variant: "v2" });
@@ -632,43 +644,24 @@
 
   // @gravity-editor:start level_02
   function buildGreenCircuit() {
-    var objs = [], cursor = 500, speedZone = [];
+    // Editado con el panel de admin (Gravity Flip -> Niveles).
+    var objs = [], speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
-    function add(o) { o.x = cursor; objs.push(o); return o; }
+    function add(o) { objs.push(o); return o; }
     setSpeed(0, 0.28);
-
-    cursor += 260;
-    add({ type: 'spike', surface: 'floor', w: 28 });
-    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
-    cursor += GAP_CUBE;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
-    cursor += GAP_CUBE;
-    add({ type: 'spike', surface: 'floor', w: 28 });
-    cursor += 140;
-    add({ type: 'orb', color: 'pink', y: FLOOR_Y - 140 });
-    cursor += GAP_CUBE;
-    add({ type: 'diamond', y: FLOOR_Y - 160 });
-    cursor += 40;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
-    add({ type: 'orb', color: 'green', y: FLOOR_Y - 130 });
-    cursor += GAP_CUBE;
-    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
-    cursor += GAP_CUBE;
-    add({ type: 'spike', surface: 'floor', w: 28 });
-    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
-    cursor += GAP_CUBE + 40;
-    add({ type: 'platform', surface: 'floor', w: 220, lift: 26 }); // puente largo
-    cursor += 260;
-    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
-    cursor += GAP_CUBE;
-    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
-    cursor += 40;
-
-    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
-
-    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
-    return { objects: objs, length: cursor, speedZones: speedZone };
+    add({ type: "spike", surface: "floor", w: 28, x: 752, variant: "v1", lift: -3, hitboxScale: 1.28 });
+    add({ type: "spike", surface: "floor", w: 28, x: 786, variant: "v1", hitboxScale: 1.44, lift: -3 });
+    add({ type: "spike", surface: "floor", w: 28, x: 1220 });
+    add({ type: "diamond", y: 160, x: 1590 });
+    add({ type: "coin", id: 0, y: 200, x: 1860 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2090 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2116 });
+    add({ type: "coin", id: 1, y: 200, x: 2620 });
+    add({ type: "coin", id: 2, y: 200, risky: true, x: 2850 });
+    add({ type: "key", y: 294, x: 2906, keyId: "1" });
+    add({ type: "door", x2: 3068, x: 3028, scale: 0.25, y: 283, keyId: "1" });
+    add({ type: "finish", x: 3420 });
+    return { objects: objs, length: 3720, speedZones: speedZone, floorVariant: 'v20', backgroundDim: 0.45 };
   }
   // @gravity-editor:end level_02
 
@@ -690,14 +683,12 @@
     add({ type: 'platform', surface: 'ceil', w: 90, lift: 26 });
     add({ type: 'coin', id: 0, y: CEIL_Y + 120 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 }); // vuelve a piso normal
     cursor += 40;
     add({ type: 'diamond', y: CEIL_Y + 160 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'yellow', y: CEIL_Y + 150 });
     cursor += GAP_CUBE;
     add({ type: 'gravityPortal', dir: 1 });
     cursor += GAP_CUBE;
@@ -705,7 +696,6 @@
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'floor', w: 28 });
     cursor += 140;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
     cursor += 40;
@@ -728,7 +718,6 @@
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
@@ -771,7 +760,6 @@
     cursor += 260;
     add({ type: 'shapePortal', form: 'ball' });
     cursor += 40;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 260;
     add({ type: 'saw', surface: 'floor' });
     cursor += 260;
@@ -811,7 +799,6 @@
     setSpeed(0, 0.28);
 
     cursor += 260;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
     cursor += GAP_CUBE;
@@ -838,7 +825,6 @@
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.28);
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
@@ -873,13 +859,11 @@
     cursor += GAP_CUBE;
     add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
     add({ type: 'pad', color: 'cyan', surface: 'floor' });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'pink', y: FLOOR_Y - 130 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
@@ -917,11 +901,9 @@
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     cursor += 140;
-    add({ type: 'orb', color: 'yellow', y: CEIL_Y + 150 });
     cursor += GAP_CUBE;
     add({ type: 'diamond', y: CEIL_Y + 160 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 });
     cursor += 40;
     add({ type: 'shapePortal', form: 'ball' });
     cursor += GAP_CUBE;
@@ -951,17 +933,11 @@
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
     cursor += GAP_CUBE;
-    // Interruptor: opcional -- si se toca, desactiva la sierra que
-    // sigue (linkId compartido). Si no se toca, la sierra sigue activa
-    // y hay que esquivarla saltando como cualquier otro obstáculo, así
-    // que nunca es obligatorio ni puede dejar el nivel imposible.
-    add({ type: 'interruptor', linkId: 'sw1' });
     cursor += GAP_CUBE;
-    add({ type: 'saw', surface: 'floor', linkId: 'sw1' });
+    add({ type: 'saw', surface: 'floor' });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'diamond', y: FLOOR_Y - 160 });
     cursor += GAP_CUBE;
@@ -997,7 +973,6 @@
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
     cursor += GAP_CUBE;
-    add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
@@ -1021,7 +996,6 @@
     cursor += GAP_CUBE_FAST;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     cursor += 150;
-    add({ type: 'orb', color: 'green', y: CEIL_Y + 130 });
     cursor += 40;
     add({ type: 'coin', id: 1, y: CEIL_Y + 120 });
     cursor += GAP_CUBE_FAST;
@@ -1107,7 +1081,6 @@
     if (diamondClaimed) {
       level.objects = level.objects.filter(function (o) { return o.type !== 'diamond'; });
     }
-    level.switches = {};
     best = parseInt(localStorage.getItem(bestKeyFor(levelId)) || '0', 10) || 0;
     if (bestEl) bestEl.textContent = 'Best: ' + best + '%';
     player = {
@@ -1139,7 +1112,7 @@
     hasDiamond = false;
     state = 'ready';
     scoreEl.textContent = 'Progress: 0%';
-    coinsEl.textContent = '🪙 0/3';
+    coinsEl.textContent = '⭐ 0/3';
     keyEl.textContent = '';
     overlayText.textContent = LEVELS[currentLevelIndex].name + (testStartX ? ' — prueba desde x:' + Math.round(testStartX) : '') + ' — Tap or press Space to start';
     if (!homeMenuActive) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
@@ -1219,7 +1192,7 @@
       // que no hace falta empujar nada a una lista.
     }
 
-    coinsEl.textContent = '🪙 ' + coinCount + '/3';
+    coinsEl.textContent = '⭐ ' + coinCount + '/3';
     if (pct > best) {
       best = pct;
       localStorage.setItem(bestKeyFor(levelId), String(best));
@@ -1227,7 +1200,7 @@
       submitScore(best);
     }
     var label = won ? 'Level complete! 100%' : ('Reached ' + pct + '% — tap to retry');
-    overlayText.textContent = label + (hasKey ? ' 🔑' : '') + ' — 🪙 ' + coinCount + '/3';
+    overlayText.textContent = label + (hasKey ? ' 🔑' : '') + ' — ⭐ ' + coinCount + '/3';
 
     var plays = parseInt(localStorage.getItem(PLAYS_KEY) || '0', 10) || 0;
     plays++;
@@ -1407,7 +1380,6 @@
         var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - spikeHalf && player.y + PLAYER_SIZE < spikeY + spikeHalf : player.y < spikeY + spikeHalf && player.y > spikeY - spikeHalf;
         if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
       } else if (o.type === 'saw') {
-        if (o.linkId && level.switches[o.linkId]) continue; // desactivada por interruptor
         var sawLift = o.lift || 0;
         var sawR = 22 * (o.scale || 1);
         var sawHitR = sawR * hbScale(o);
@@ -1446,17 +1418,6 @@
             if (player.y + PLAYER_SIZE > wallBodyLo && player.y < wallBodyHi) { endGame(); return; }
           }
         }
-      } else if (o.type === 'interruptor') {
-        // Se activa automático al tocarlo, como un jump pad -- nunca es
-        // obligatorio: si no se toca, el obstáculo enlazado sigue activo
-        // y se esquiva saltando como cualquier otro, así que jamás puede
-        // dejar el nivel imposible (misma regla que la puerta).
-        if (!o.used && overlapsX(o, 30, centerWorldX)) {
-          o.used = true;
-          level.switches[o.linkId] = true;
-          playPad();
-          spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 12);
-        }
       } else if (o.type === 'diamond') {
         var diamondScale = o.scale || 1;
         if (!hasDiamond && overlapsX(o, 24 * diamondScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * diamondScale) {
@@ -1491,10 +1452,6 @@
           }
           playPortal();
         }
-      } else if (o.type === 'orb') {
-        var orbScale = o.scale || 1;
-        var orbNear = Math.abs(centerWorldX - o.x) < 26 * orbScale && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 30 * orbScale;
-        o.playerNear = orbNear;
       } else if (o.type === 'pad') {
         if (!o.used && overlapsX(o, 40, centerWorldX)) {
           var padLift = o.lift || 0;
@@ -1509,7 +1466,7 @@
             // siempre); con "dir" puesto (-1 arriba, 1 abajo, mismo
             // criterio que el portal de gravedad) lanza siempre para
             // ese lado, sin importar en qué superficie esté parada.
-            var padV = o.color === 'yellow' ? ORB_YELLOW_V : o.color === 'pink' ? ORB_PINK_V : 0.62;
+            var padV = o.color === 'yellow' ? PAD_YELLOW_V : o.color === 'pink' ? PAD_PINK_V : 0.62;
             var padPower = o.power != null ? o.power : 1;
             var padDir = o.dir != null ? o.dir : -player.gravityDir;
             player.vy = padV * padPower * padDir;
@@ -1541,7 +1498,7 @@
         if (coinsCollected.indexOf(o.id) === -1 && overlapsX(o, 24 * coinScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * coinScale) {
           coinsCollected.push(o.id);
           o.dead = true;
-          coinsEl.textContent = '🪙 ' + coinsCollected.length + '/3';
+          coinsEl.textContent = '⭐ ' + coinsCollected.length + '/3';
           playPickup();
           spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFC93D', 12);
         }
@@ -1555,23 +1512,11 @@
     scoreEl.textContent = 'Progress: ' + pct + '%';
   }
 
-  function activeOrbTap() {
-    for (var i = 0; i < level.objects.length; i++) {
-      var o = level.objects[i];
-      if (o.type === 'orb' && o.playerNear && !o.dead) {
-        if (o.color === 'yellow') player.vy = -ORB_YELLOW_V * player.gravityDir;
-        else if (o.color === 'pink') player.vy = -ORB_PINK_V * player.gravityDir;
-        else if (o.color === 'green') player.gravityDir *= -1;
-        player.grounded = false;
-        playPad();
-        spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CFFB2', 10);
-        return true;
-      }
-    }
-    return false;
-  }
-
   /* ---- Draw ---- */
+  function hexToRgba(hex, a) {
+    var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
   function drawBackground() {
     // Fondo elegido en el editor -- se tilea horizontalmente y se
     // desplaza a una fracción de la velocidad del jugador (efecto
@@ -1596,7 +1541,14 @@
         ctx.fillRect(0, 0, W, H);
       }
     } else {
+      // Sin fondo propio elegido: en vez del mismo gris parejo para
+      // los 10 niveles, cada uno tiñe el fondo con su propio color de
+      // acento (mismo array que ya se usa para las tarjetas del menú
+      // de niveles), bien tenue para no competir con piso/techo.
       ctx.fillStyle = '#05060f';
+      ctx.fillRect(0, 0, W, H);
+      var fallbackAccent = LEVEL_ACCENTS[currentLevelIndex % LEVEL_ACCENTS.length];
+      ctx.fillStyle = hexToRgba(fallbackAccent, 0.12);
       ctx.fillRect(0, 0, W, H);
     }
     ctx.save();
@@ -1670,13 +1622,12 @@
         ctx.restore();
       } else if (o.type === 'saw') {
         var sawSprite = o.variant ? 'saw_' + o.variant : 'saw';
-        var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
         var sawLiftDraw = o.lift || 0;
         var sawR2 = 22 * (o.scale || 1);
         var sawCY = o.surface === 'floor' ? FLOOR_Y - sawR2 - sawLiftDraw : CEIL_Y + sawR2 + sawLiftDraw;
         ctx.save();
         ctx.translate(sx, sawCY);
-        if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
+        ctx.rotate(elapsedMs * 0.006);
         drawSprite(sawSprite, -sawR2, -sawR2, sawR2 * 2, sawR2 * 2);
         ctx.restore();
       } else if (o.type === 'wall') {
@@ -1686,17 +1637,6 @@
         var wallDrawTop = o.surface === 'floor' ? wallDrawBase - wallDrawH : wallDrawBase + wallDrawH;
         var wallDrawY = Math.min(wallDrawBase, wallDrawTop);
         drawSprite(o.variant ? 'wall_' + o.variant : 'platform', sx, wallDrawY, o.w, wallDrawH);
-      } else if (o.type === 'interruptor') {
-        var swScale = o.scale || 1;
-        ctx.save();
-        ctx.translate(sx, (FLOOR_Y + CEIL_Y) / 2);
-        var swOn = level.switches && level.switches[o.linkId];
-        ctx.fillStyle = swOn ? '#7CFFB2' : '#7CF6FF';
-        ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 12;
-        ctx.beginPath(); ctx.arc(0, 0, 14 * swScale, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#05060f';
-        ctx.beginPath(); ctx.arc(0, 0, 6 * swScale, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
       } else if (o.type === 'diamond' && !o.dead) {
         var diamondDrawScale = o.scale || 1;
         ctx.save();
@@ -1732,14 +1672,6 @@
         var spDrawScale = o.scale || 1;
         var spY = o.y != null ? o.y : MID_Y;
         drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W * spDrawScale / 2, spY - PORTAL_H * spDrawScale / 2, PORTAL_W * spDrawScale, PORTAL_H * spDrawScale);
-      } else if (o.type === 'orb') {
-        var sy = o.y;
-        var orbDrawScale = o.scale || 1;
-        var orbSz = 32 * orbDrawScale;
-        ctx.save();
-        if (o.playerNear) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 14; }
-        drawSprite('orb_' + o.color, sx - orbSz / 2, sy - orbSz / 2, orbSz, orbSz);
-        ctx.restore();
       } else if (o.type === 'pad') {
         var padLiftDraw = o.lift || 0;
         var padDrawScale = o.scale || 1;
@@ -1787,10 +1719,12 @@
         var coinDrawScale = o.scale || 1;
         ctx.save();
         ctx.translate(sx, o.y);
-        ctx.scale(Math.abs(Math.cos(elapsedMs * 0.004)) * coinDrawScale, coinDrawScale);
+        ctx.rotate(elapsedMs * 0.0015);
+        ctx.scale(coinDrawScale, coinDrawScale);
         ctx.fillStyle = '#FFC93D';
         ctx.shadowColor = '#FFC93D'; ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+        traceStar(13, 5.5);
+        ctx.fill();
         ctx.restore();
       } else if (o.type === 'finish') {
         ctx.save();
@@ -1840,11 +1774,7 @@
 
   function handlePressStart(e) {
     if (e) e.preventDefault();
-    if (state === 'playing' && player.form !== 'ship') {
-      if (!activeOrbTap()) press();
-    } else {
-      press();
-    }
+    press();
   }
   function handlePressEnd(e) { if (e) e.preventDefault(); release(); }
 
@@ -1882,11 +1812,17 @@
   function skinRarity(index) { return SKIN_RARITIES[Math.min(4, Math.floor(index / 8))]; }
   function skinPrice(index) {
     // index 0-based; skin_01 (index 0) siempre viene desbloqueado.
-    // Las primeras ~29 skins cuestan monedas en escala creciente, las
-    // últimas 10 ("premium") cuestan diamantes (1 a 3).
+    // Monedas = desbloquean skins normales (básico/raro/épico).
+    // Diamantes = desbloquean las skins legendarias/especiales -- el
+    // corte de moneda sigue exactamente el corte de rareza, no un
+    // índice fijo aparte, así nunca queda una "legendaria" pagable
+    // con monedas.
     if (index === 0) return null;
-    if (index < 30) return { currency: 'coins', amount: 50 + index * 25 };
-    return { currency: 'diamonds', amount: 1 + Math.floor((index - 30) / 4) };
+    var rarity = skinRarity(index);
+    if (rarity === 'legendario' || rarity === 'especial') {
+      return { currency: 'diamonds', amount: 1 + Math.floor((index - 24) / 4) };
+    }
+    return { currency: 'coins', amount: 50 + index * 25 };
   }
   function skinIdAt(index) { return 'skin_' + (index + 1 < 10 ? '0' + (index + 1) : (index + 1)); }
 
@@ -1946,7 +1882,7 @@
         (unlocked ? '' : '<div class="gravity-card-lock">🔒<span class="gravity-card-lock-need">⭐ ' + starsNeededAt(i) + '</span></div>') +
         '<div class="gravity-card-label">' + escapeHtml(lvl.name) + '</div>' +
         '<div class="gravity-level-stars">' + starsRow + '</div>' +
-        '<div class="gravity-level-meta"><span>🪙 ' + stars + '/3</span><span class="has-key">🔑</span></div>' +
+        '<div class="gravity-level-meta"><span>⭐ ' + stars + '/3</span><span class="has-key">🔑</span></div>' +
         '</div>';
     }).join('');
   }

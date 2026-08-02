@@ -118,7 +118,7 @@ function loadLevel(id) {
    reemplazar una existente) es simplemente guardar el siguiente
    número que falte. ---- */
 const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
-  'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
+  'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
 const VARIANT_BASES = ['spike', 'saw', 'platform', 'portal', 'floor', 'wall'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
@@ -327,8 +327,7 @@ function decide(st, botMem) {
     return { hold: p.y > targetY };
   }
   if (!upcoming) return { tap: false };
-  if (upcoming.type === 'orb') return { tap: !!upcoming.playerNear };
-  var passiveTypes = ['gravityPortal', 'shapePortal', 'pad', 'door', 'coin', 'key', 'finish', 'interruptor', 'diamond'];
+  var passiveTypes = ['gravityPortal', 'shapePortal', 'pad', 'door', 'coin', 'key', 'finish', 'diamond'];
   if (passiveTypes.indexOf(upcoming.type) !== -1) return { tap: false };
   var jumpWindow = p.form === 'ball' ? 230 : 60;
   if (upcomingDist < jumpWindow && upcomingDist > -10) {

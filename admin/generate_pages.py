@@ -1039,7 +1039,7 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
         <div class="dash-hud">
           <span id="gravityScore">Progress: 0%</span>
           <span id="gravityBest">Best: 0%</span>
-          <span id="gravityCoins">🪙 0/3</span>
+          <span id="gravityCoins">⭐ 0/3</span>
           <span id="gravityKey"></span>
           <span id="gravityWallet" class="gravity-wallet">🪙 0  💎 0</span>
           <button type="button" id="gravityHomeBtn" class="dash-mute" aria-label="Home menu">🏠</button>

@@ -24,21 +24,19 @@
 
   var OBJECT_TYPES = {
     spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'hitboxScale', 'variant', 'rotation'], variantBase: 'spike' },
-    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'hitboxScale', 'linkId', 'variant'], variantBase: 'saw' },
+    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'hitboxScale', 'variant'], variantBase: 'saw' },
     platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'scale', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
     wall: { label: 'Pared', color: '#FF7A3D', icon: '🧱', anchor: 'surface', fields: ['surface', 'w', 'height', 'scale', 'hitboxScale', 'lift', 'variant'], variantBase: 'wall' },
     gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'free', fields: ['dir', 'y', 'scale', 'variant'], variantBase: 'portal' },
     shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'free', fields: ['form', 'y', 'scale', 'variant'], variantBase: 'portal' },
-    orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y', 'scale'] },
     pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'color', 'power', 'dir'] },
     key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y', 'scale', 'keyId'] },
     door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'free', fields: ['x2', 'y', 'scale', 'keyId'] },
-    coin: { label: 'Moneda', color: '#FFC93D', icon: '◎', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
+    coin: { label: 'Estrella', color: '#FFC93D', icon: '⭐', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
     diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y', 'scale'] },
-    interruptor: { label: 'Interruptor', color: '#7CF6FF', icon: '⊙', anchor: 'full', fields: ['linkId', 'scale'] },
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
-  var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
+  var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'pad', 'key', 'door', 'coin', 'diamond', 'finish'];
   function variantCountFor(type) {
     var def = OBJECT_TYPES[type];
     return def && def.variantBase ? (variantCounts[def.variantBase] || 0) : 0;
@@ -163,7 +161,6 @@
   // así que no aparece acá con las demás.
   var FIXED_SPRITE_SLOTS = {
     key: [{ key: 'key', label: 'Llave' }],
-    orb: [{ key: 'orb_yellow', label: 'Amarillo' }, { key: 'orb_pink', label: 'Rosa' }, { key: 'orb_green', label: 'Verde' }],
     pad: [{ key: 'pad_cyan', label: 'Cian' }, { key: 'pad_yellow', label: 'Amarilla' }, { key: 'pad_pink', label: 'Rosa' }]
   };
   function renderPaletteVariants() {
@@ -355,13 +352,11 @@
       case 'wall': obj = { type: 'wall', surface: surface, w: 40, height: 80, lift: 0, x: x }; break;
       case 'gravityPortal': obj = { type: 'gravityPortal', dir: -1, y: y, x: x }; break;
       case 'shapePortal': obj = { type: 'shapePortal', form: 'ship', y: y, x: x }; break;
-      case 'orb': obj = { type: 'orb', color: 'yellow', y: y, x: x }; break;
       case 'pad': obj = { type: 'pad', color: 'cyan', surface: surface, x: x }; break;
       case 'key': obj = { type: 'key', y: y, x: x }; break;
       case 'door': obj = { type: 'door', x2: x + 130, y: y, x: x }; break;
       case 'coin': obj = { type: 'coin', id: countOf('coin'), y: y, x: x }; break;
       case 'diamond': obj = { type: 'diamond', y: y, x: x }; break;
-      case 'interruptor': obj = { type: 'interruptor', linkId: 'sw' + Math.round(x), x: x }; break;
       case 'finish': obj = { type: 'finish', x: x }; break;
       default: obj = { type: type, x: x };
     }
@@ -531,10 +526,9 @@
       case 'wall': return o.variant ? 'wall_' + o.variant : 'platform';
       case 'gravityPortal': return o.variant ? 'portal_' + o.variant : 'portal_gravity';
       case 'shapePortal': return o.variant ? 'portal_' + o.variant : 'portal_shape';
-      case 'orb': return 'orb_' + (o.color || 'yellow');
       case 'pad': return 'pad_' + (o.color || 'cyan');
       case 'key': return 'key';
-      default: return null; // coin/diamond/interruptor/finish/door: se dibujan a mano (no tienen sprite)
+      default: return null; // coin/diamond/finish/door: se dibujan a mano (no tienen sprite)
     }
   }
 
@@ -550,7 +544,6 @@
       case 'platform': return { w: o.w || 90, h: 14 * scale };
       case 'wall': return { w: o.w || 40, h: (o.height || 80) * scale };
       case 'gravityPortal': case 'shapePortal': return { w: PORTAL_W * scale, h: PORTAL_H * scale };
-      case 'orb': return { w: 32 * scale, h: 32 * scale };
       case 'pad': return { w: 40 * scale, h: 16 * scale };
       case 'key': return { w: 30 * scale, h: 30 * scale };
       case 'door': return { w: (o.x2 != null ? o.x2 - o.x : 130), h: (o.height != null ? o.height : (FLOOR_Y - CEIL_Y)) * scale };
@@ -987,8 +980,8 @@
   /* ---- Panel de propiedades ---- */
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
-    dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
-    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
+    dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID estrella', risky: 'Riesgosa',
+    x2: 'Hasta x', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
     height: 'Altura de la pared', hitboxScale: 'Colisión (qué tan justo choca)', power: 'Fuerza del salto',
     keyId: 'Llave que le corresponde'
   };
