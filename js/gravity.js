@@ -284,6 +284,20 @@
     }
     return img;
   }
+  // Fondo de nivel a elección -- distinto de getSprite() porque el
+  // nombre ya trae su propia extensión (puede ser .gif para que se
+  // vea animado, no solo .png) y porque solo hace falta un slot, no
+  // un pool de variantes.
+  var bgImages = {};
+  function getBackgroundImg(fileName) {
+    var img = bgImages[fileName];
+    if (!img) {
+      img = new Image();
+      img.src = '../img/gravitycover/sliced/' + fileName;
+      bgImages[fileName] = img;
+    }
+    return img;
+  }
   var skinImg = new Image();
   function setActiveSkin(skinId) {
     currentSkin = skinId;
@@ -299,40 +313,6 @@
   }
   function drawSkin(x, y, w, h) {
     if (skinImg.complete && skinImg.naturalWidth > 0) ctx.drawImage(skinImg, x, y, w, h);
-  }
-
-  // Color representativo de cada bloque de piso subido por el
-  // usuario, calculado en el momento (una sola vez por variante, con
-  // un canvas auxiliar) en vez de tener una tabla fija -- así
-  // funciona automáticamente con cualquier bloque nuevo que se suba,
-  // sin tener que tocar este archivo.
-  // Acepta el nombre completo del sprite ("floor_v2", "wall_v1"...) para
-  // servir tanto al piso como al techo/paredes, que tienen su propio
-  // pool de bloques subidos por separado.
-  var blockColorCache = {};
-  function blockColor(spriteName) {
-    if (blockColorCache[spriteName]) return blockColorCache[spriteName];
-    var img = getSprite(spriteName);
-    if (!img.complete || img.naturalWidth === 0) return null;
-    try {
-      var c = document.createElement('canvas');
-      c.width = img.naturalWidth; c.height = img.naturalHeight;
-      var cctx = c.getContext('2d');
-      cctx.drawImage(img, 0, 0);
-      var data = cctx.getImageData(0, 0, c.width, c.height).data;
-      var r = 0, g = 0, b = 0, wsum = 0;
-      for (var i = 0; i < data.length; i += 4) {
-        if (data[i + 3] < 128) continue; // pixel transparente
-        var bright = Math.max(data[i], data[i + 1], data[i + 2]);
-        var w = Math.max(0.05, Math.min(1, (bright - 40) / 180));
-        r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
-      }
-      var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
-      blockColorCache[spriteName] = color;
-      return color;
-    } catch (e) {
-      return null; // ej. lienzo no disponible en el sandbox de pruebas
-    }
   }
 
   /* ---- Física (por forma) ----
@@ -1150,6 +1130,12 @@
     return CEIL_Y + lift;
   }
 
+  // Ajuste fino de la colisión, aparte del tamaño visual (o.scale) --
+  // así un sprite subido por el usuario con relleno/padding transparente
+  // alrededor no obliga a que el área que mata sea igual de grande que
+  // el dibujo. 1 = como venía siendo (ningún nivel existente lo usa).
+  function hbScale(o) { return o.hitboxScale != null ? o.hitboxScale : 1; }
+
   function overlapsX(o, w, playerCenterWorldX) {
     // El margen de tolerancia se limita a un máximo fijo -- si escalara
     // con el ancho del objeto, un grupo de varios pinchos pegados (o una
@@ -1243,7 +1229,7 @@
       if (o.type === 'spike') {
         var spikeLift = o.lift || 0;
         var spikeScale = o.scale || 1;
-        var spikeHalf = 18 * spikeScale;
+        var spikeHalf = 18 * spikeScale * hbScale(o);
         var spikeY = o.surface === 'floor' ? FLOOR_Y - spikeLift : CEIL_Y + spikeLift;
         var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - spikeHalf && player.y + PLAYER_SIZE < spikeY + spikeHalf : player.y < spikeY + spikeHalf && player.y > spikeY - spikeHalf;
         if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
@@ -1251,10 +1237,11 @@
         if (o.linkId && level.switches[o.linkId]) continue; // desactivada por interruptor
         var sawLift = o.lift || 0;
         var sawR = 22 * (o.scale || 1);
+        var sawHitR = sawR * hbScale(o);
         var sawCY = o.surface === 'floor' ? FLOOR_Y - sawR - sawLift : CEIL_Y + sawR + sawLift;
         var dx = centerWorldX - o.x;
         var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
-        if (Math.sqrt(dx * dx + dy * dy) < sawR + PLAYER_SIZE * 0.3) { endGame(); return; }
+        if (Math.sqrt(dx * dx + dy * dy) < sawHitR + PLAYER_SIZE * 0.3) { endGame(); return; }
       } else if (o.type === 'wall') {
         // Pared sólida: se puede pisar por arriba (como una
         // plataforma) pero es imposible atravesarla -- si el cuerpo
@@ -1275,7 +1262,14 @@
             }
           }
           if (!wallLandedOnTop) {
-            var wallBodyLo = Math.min(wallTop, wallBase), wallBodyHi = Math.max(wallTop, wallBase);
+            // El tramo que realmente mata arranca en la superficie
+            // pisable (wallTop, sin tocar -- ahí es donde aterriza) y
+            // se extiende hacia la base según hitboxScale, no según el
+            // alto visual completo -- así se puede angostar el cuerpo
+            // sólido sin mover el borde donde se puede parar.
+            var wallHitH = wallH * hbScale(o);
+            var wallHitEdge = o.surface === 'floor' ? wallTop + wallHitH : wallTop - wallHitH;
+            var wallBodyLo = Math.min(wallTop, wallHitEdge), wallBodyHi = Math.max(wallTop, wallHitEdge);
             if (player.y + PLAYER_SIZE > wallBodyLo && player.y < wallBodyHi) { endGame(); return; }
           }
         }
@@ -1396,8 +1390,21 @@
 
   /* ---- Draw ---- */
   function drawBackground() {
-    ctx.fillStyle = '#05060f';
-    ctx.fillRect(0, 0, W, H);
+    // Fondo elegido en el editor -- se tilea horizontalmente y se
+    // desplaza a una fracción de la velocidad del jugador (efecto
+    // parallax, "que se mueva"). Si es un .gif, el navegador avanza
+    // sus cuadros solo con seguir dibujándolo cada frame como acá.
+    var bgImg = level && level.background ? getBackgroundImg(level.background) : null;
+    if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+      var bgTileW = Math.max(40, bgImg.naturalWidth * (H / bgImg.naturalHeight));
+      var bgOff = (player.worldX * 0.15) % bgTileW;
+      for (var bx = -bgOff; bx < W; bx += bgTileW) {
+        ctx.drawImage(bgImg, bx, 0, bgTileW, H);
+      }
+    } else {
+      ctx.fillStyle = '#05060f';
+      ctx.fillRect(0, 0, W, H);
+    }
     ctx.save();
     ctx.strokeStyle = 'rgba(120,90,255,.14)';
     ctx.lineWidth = 1;
@@ -1421,34 +1428,21 @@
     ctx.restore();
 
     // Piso y techo/paredes se eligen por separado, cada uno con su
-    // propio pool de bloques subidos (floor_vN / wall_vN) -- si no se
-    // eligió ninguno para un lado, ese lado sigue tileando el sprite
-    // 'floor' por defecto como siempre.
-    var floorColor = level && level.floorVariant ? blockColor('floor_' + level.floorVariant) : null;
-    if (floorColor) {
-      // Los "bloques" que subió el usuario son íconos individuales, no
-      // una textura pensada para repetirse sin costura -- en vez de
-      // tilearlos (que se ve con separaciones), se pinta una franja
-      // continua del color representativo de ese bloque.
-      ctx.fillStyle = floorColor;
-      ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
-    } else {
-      var tileW = 110, floorOff = player.worldX % tileW;
-      for (var fx = -floorOff; fx < W; fx += tileW) drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
-    }
-    var ceilColor = level && level.ceilVariant ? blockColor('wall_' + level.ceilVariant) : null;
-    if (ceilColor) {
-      ctx.fillStyle = ceilColor;
-      ctx.fillRect(0, 0, W, CEIL_Y);
-    } else {
-      var tileW2 = 110, ceilOff = player.worldX % tileW2;
-      for (var cx = -ceilOff; cx < W; cx += tileW2) {
-        ctx.save();
-        ctx.translate(cx + tileW2 / 2, CEIL_Y);
-        ctx.rotate(Math.PI);
-        drawSprite('floor', -tileW2 / 2, -CEIL_Y, tileW2, CEIL_Y);
-        ctx.restore();
-      }
+    // propio pool de bloques subidos (floor_vN / wall_vN) -- se
+    // tilean igual que las paredes-obstáculo (el bloque elegido se
+    // repite), en vez de aplanarse a un color promedio.
+    var floorSpriteName = level && level.floorVariant ? 'floor_' + level.floorVariant : 'floor';
+    var tileW = 110, floorOff = player.worldX % tileW;
+    for (var fx = -floorOff; fx < W; fx += tileW) drawSprite(floorSpriteName, fx, FLOOR_Y, tileW, H - FLOOR_Y);
+
+    var ceilSpriteName = level && level.ceilVariant ? 'wall_' + level.ceilVariant : 'floor';
+    var tileW2 = 110, ceilOff = player.worldX % tileW2;
+    for (var cx = -ceilOff; cx < W; cx += tileW2) {
+      ctx.save();
+      ctx.translate(cx + tileW2 / 2, CEIL_Y);
+      ctx.rotate(Math.PI);
+      drawSprite(ceilSpriteName, -tileW2 / 2, -CEIL_Y, tileW2, CEIL_Y);
+      ctx.restore();
     }
   }
 

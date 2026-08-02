@@ -22,10 +22,10 @@
   var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0, wall: 0 };
 
   var OBJECT_TYPES = {
-    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'variant', 'rotation'], variantBase: 'spike' },
-    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'linkId', 'variant'], variantBase: 'saw' },
+    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'hitboxScale', 'variant', 'rotation'], variantBase: 'spike' },
+    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'hitboxScale', 'linkId', 'variant'], variantBase: 'saw' },
     platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'scale', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
-    wall: { label: 'Pared', color: '#FF7A3D', icon: '🧱', anchor: 'surface', fields: ['surface', 'w', 'height', 'scale', 'lift', 'variant'], variantBase: 'wall' },
+    wall: { label: 'Pared', color: '#FF7A3D', icon: '🧱', anchor: 'surface', fields: ['surface', 'w', 'height', 'scale', 'hitboxScale', 'lift', 'variant'], variantBase: 'wall' },
     gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'scale', 'variant'], variantBase: 'portal' },
     shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'scale', 'variant'], variantBase: 'portal' },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y', 'scale'] },
@@ -46,6 +46,7 @@
   var state = { levelId: null, levelName: '', objects: [], speedZones: [], length: 4000, selectedIndex: -1, tool: 'spike', toolVariant: null, zoom: 0.4 };
   var drag = null; // { index, offsetWorldX, movedY }
   var resizeDrag = null; // { index, centerX, centerY, startDist, startScale } -- en píxeles de canvas
+  var hitboxDrag = null; // { index, anchorX, anchorY, startDist, startHb } -- en píxeles de canvas
 
   var levelSelect = document.getElementById('gravityEditorLevelSelect');
   var zoomInput = document.getElementById('gravityEditorZoom');
@@ -58,6 +59,7 @@
   var propsEl = document.getElementById('gravityEditorProps');
   var floorPickerEl = document.getElementById('gravityEditorFloorPicker');
   var ceilPickerEl = document.getElementById('gravityEditorCeilPicker');
+  var bgPickerEl = document.getElementById('gravityEditorBgPicker');
   var speedListEl = document.getElementById('gravityEditorSpeedList');
   var verifyBtn = document.getElementById('gravityEditorVerifyBtn');
   var saveBtn = document.getElementById('gravityEditorSaveBtn');
@@ -235,6 +237,54 @@
     wireAddVariantTile(ceilPickerEl, 'wall');
   }
 
+  /* ---- Fondo del nivel (imagen o GIF animado, aparte de piso/techo) ---- */
+  var backgroundFiles = [];
+  function renderBgPicker() {
+    if (!bgPickerEl) return;
+    var html = '<div class="gravity-variant-swatches">';
+    html += '<button type="button" class="gravity-variant-swatch' + (!state.background ? ' selected' : '') + '" data-bg="">Ninguno</button>';
+    backgroundFiles.forEach(function (file) {
+      html += '<button type="button" class="gravity-variant-swatch' + (state.background === file ? ' selected' : '') +
+        '" data-bg="' + file + '"><img src="/site/img/gravitycover/sliced/' + file + '" alt="' + file + '"></button>';
+    });
+    html += '<label class="gravity-variant-swatch gravity-variant-swatch-add" title="Subir un fondo nuevo (imagen o GIF)">+' +
+      '<input type="file" accept="image/*,.gif" hidden></label>';
+    html += '</div>';
+    bgPickerEl.innerHTML = html;
+    bgPickerEl.querySelectorAll('.gravity-variant-swatch[data-bg]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.background = btn.getAttribute('data-bg') || null;
+        renderBgPicker();
+        render();
+      });
+    });
+    var addInput = bgPickerEl.querySelector('.gravity-variant-swatch-add input');
+    addInput.addEventListener('change', function () {
+      var file = addInput.files[0];
+      if (!file) return;
+      var ext = (file.name.split('.').pop() || 'png').toLowerCase();
+      var reader = new FileReader();
+      reader.onload = function () {
+        var base64 = reader.result.slice(reader.result.indexOf(',') + 1);
+        fetch('/api/gravity-background', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataBase64: base64, ext: ext })
+        }).then(function (r) { return r.json(); }).then(function (res) {
+          if (!res.ok) { window.alert('Error al subir el fondo: ' + res.error); return; }
+          state.background = res.file;
+          loadBackgrounds();
+        }).catch(function (e) { window.alert('Error al subir el fondo: ' + e.message); }).finally(function () { addInput.value = ''; });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function loadBackgrounds() {
+    fetch('/api/gravity-backgrounds').then(function (r) { return r.json(); }).then(function (files) {
+      backgroundFiles = files;
+      renderBgPicker();
+      render();
+    }).catch(function () {});
+  }
+
   /* ---- Nivel seleccionado ---- */
   function loadLevelList() {
     fetch('/api/gravity-levels').then(function (r) { return r.json(); }).then(function (levels) {
@@ -253,11 +303,13 @@
       state.length = data.length;
       state.floorVariant = data.floorVariant || null;
       state.ceilVariant = data.ceilVariant || null;
+      state.background = data.background || null;
       state.selectedIndex = -1;
       levelSelect.value = id;
       renderSpeedList();
       renderFloorPicker();
       renderCeilPicker();
+      renderBgPicker();
       renderProps();
       render();
       setStatus('Cargado: ' + data.name + ' (' + data.objects.length + ' obstáculos)');
@@ -341,30 +393,16 @@
     }
     return spriteImgCache[name];
   }
-  var blockColorCache = {};
-  function blockColor(spriteName) {
-    if (blockColorCache[spriteName]) return blockColorCache[spriteName];
-    var img = getSpriteImg(spriteName);
-    if (!img.complete || img.naturalWidth === 0) return null;
-    try {
-      var c = document.createElement('canvas');
-      c.width = img.naturalWidth; c.height = img.naturalHeight;
-      var cctx = c.getContext('2d');
-      cctx.drawImage(img, 0, 0);
-      var data = cctx.getImageData(0, 0, c.width, c.height).data;
-      var r = 0, g = 0, b = 0, wsum = 0;
-      for (var i = 0; i < data.length; i += 4) {
-        if (data[i + 3] < 128) continue;
-        var bright = Math.max(data[i], data[i + 1], data[i + 2]);
-        var w = Math.max(0.05, Math.min(1, (bright - 40) / 180));
-        r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
-      }
-      var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
-      blockColorCache[spriteName] = color;
-      return color;
-    } catch (e) {
-      return null;
+  // Los fondos ya vienen con su propia extensión en el nombre (pueden
+  // ser .gif) -- no hay que agregarles ".png" como al resto de sprites.
+  function getBgImg(fileName) {
+    if (!spriteImgCache[fileName]) {
+      var img = new Image();
+      img.src = '/site/img/gravitycover/sliced/' + fileName;
+      img.onload = render;
+      spriteImgCache[fileName] = img;
     }
+    return spriteImgCache[fileName];
   }
   function spriteNameFor(o) {
     switch (o.type) {
@@ -408,6 +446,13 @@
     canvas.height = Math.round(WORLD_H * state.zoom);
     ctx.fillStyle = '#05060f';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (state.background) {
+      var bgImg = getBgImg(state.background);
+      if (bgImg.complete && bgImg.naturalWidth > 0) {
+        var bgTileW = Math.max(20, bgImg.naturalWidth * (canvas.height / bgImg.naturalHeight));
+        for (var bx = 0; bx < canvas.width; bx += bgTileW) ctx.drawImage(bgImg, bx, 0, bgTileW, canvas.height);
+      }
+    }
 
     // grilla de referencia cada 230px de mundo (distancia "cómoda" GAP_CUBE)
     ctx.strokeStyle = 'rgba(255,255,255,.05)';
@@ -418,30 +463,20 @@
     }
 
     var floorCy = FLOOR_Y * state.zoom, ceilCy = CEIL_Y * state.zoom;
-    var floorColor = state.floorVariant ? blockColor('floor_' + state.floorVariant) : null;
-    var ceilColor = state.ceilVariant ? blockColor('wall_' + state.ceilVariant) : null;
-    var floorImg = getSpriteImg('floor');
     var tileW = 110 * state.zoom; // igual que js/gravity.js
-    if (floorColor) {
-      // Los bloques no son una textura sin costura -- se pinta una
-      // franja continua con el color representativo del bloque
-      // elegido, igual que en el juego real.
-      ctx.fillStyle = floorColor;
-      ctx.fillRect(0, floorCy, canvas.width, canvas.height - floorCy);
-    } else if (floorImg.complete && floorImg.naturalWidth > 0) {
+    var floorImg = getSpriteImg(state.floorVariant ? 'floor_' + state.floorVariant : 'floor');
+    if (floorImg.complete && floorImg.naturalWidth > 0) {
       for (var tx = 0; tx < canvas.width; tx += tileW) {
         ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
       }
     }
-    if (ceilColor) {
-      ctx.fillStyle = ceilColor;
-      ctx.fillRect(0, 0, canvas.width, ceilCy);
-    } else if (floorImg.complete && floorImg.naturalWidth > 0) {
+    var ceilImg = getSpriteImg(state.ceilVariant ? 'wall_' + state.ceilVariant : 'floor');
+    if (ceilImg.complete && ceilImg.naturalWidth > 0) {
       for (var tx2 = 0; tx2 < canvas.width; tx2 += tileW) {
         ctx.save();
         ctx.translate(tx2 + tileW / 2, ceilCy);
         ctx.rotate(Math.PI);
-        ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
+        ctx.drawImage(ceilImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
         ctx.restore();
       }
     }
@@ -530,6 +565,20 @@
         ctx.strokeStyle = '#05060f'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.arc(h.x, h.y, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       }
+      if (selObj && hasHitbox(selObj)) {
+        var hb = hitboxShape(selObj);
+        ctx.save();
+        ctx.strokeStyle = '#FF3D57'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+        if (hb.kind === 'circle') {
+          ctx.beginPath(); ctx.arc(hb.cx, hb.cy, hb.r, 0, Math.PI * 2); ctx.stroke();
+        } else {
+          ctx.strokeRect(hb.left, hb.top, hb.right - hb.left, hb.bottom - hb.top);
+        }
+        ctx.restore();
+        ctx.fillStyle = '#FF3D57';
+        ctx.strokeStyle = '#05060f'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(hb.handleX, hb.handleY, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
     }
   }
 
@@ -556,6 +605,58 @@
     return { x: box.right, y: box.bottom };
   }
 
+  // Pincho/sierra/pared son los únicos tipos que matan al chocar --
+  // acá se puede ver Y arrastrar exactamente hasta dónde llega esa
+  // zona de choque, aparte de lo grande que se vea el sprite (mismas
+  // cuentas que hbScale()/spikeHalf/sawHitR/wallHitH en js/gravity.js).
+  function hasHitbox(o) {
+    var def = OBJECT_TYPES[o.type];
+    return !!(def && def.fields && def.fields.indexOf('hitboxScale') !== -1);
+  }
+  function hitboxShape(o) {
+    var scale = o.scale || 1, hb = o.hitboxScale != null ? o.hitboxScale : 1;
+    var lift = o.lift || 0;
+    var cx = o.x * state.zoom;
+    if (o.type === 'saw') {
+      var cy = objectDrawY(o) * state.zoom;
+      var r = 22 * scale * hb * state.zoom;
+      return { kind: 'circle', cx: cx, cy: cy, r: r, handleX: cx + r * 0.7071, handleY: cy + r * 0.7071 };
+    }
+    if (o.type === 'spike') {
+      var half = 18 * scale * hb;
+      var spikeYWorld = o.surface === 'ceil' ? CEIL_Y + lift : FLOOR_Y - lift;
+      var topW = spikeYWorld - half, bottomW = spikeYWorld + half;
+      var wpx = (o.w || 28) * state.zoom;
+      return { kind: 'rect', left: cx - wpx / 2, right: cx + wpx / 2, top: topW * state.zoom, bottom: bottomW * state.zoom, handleX: cx + wpx / 2, handleY: bottomW * state.zoom };
+    }
+    // wall -- el borde pisable (wallTop) queda fijo; la zona que mata
+    // se estira desde ahí hacia la base según hitboxScale.
+    var wallBase = o.surface === 'floor' ? FLOOR_Y - lift : CEIL_Y + lift;
+    var visH = (o.height || 80) * scale;
+    var wallTop = o.surface === 'floor' ? wallBase - visH : wallBase + visH;
+    var hitH = visH * hb;
+    var hitEdge = o.surface === 'floor' ? wallTop + hitH : wallTop - hitH;
+    var topW2 = Math.min(wallTop, hitEdge), bottomW2 = Math.max(wallTop, hitEdge);
+    var wpx2 = (o.w || 40) * state.zoom;
+    return { kind: 'rect', left: cx, right: cx + wpx2, top: topW2 * state.zoom, bottom: bottomW2 * state.zoom, handleX: cx + wpx2, handleY: bottomW2 * state.zoom };
+  }
+  // Punto fijo desde el que se mide el arrastre de la agarradera de
+  // colisión -- el centro de la banda para pincho/sierra, el borde
+  // pisable (que no se mueve) para pared.
+  function hitboxAnchor(o) {
+    var lift = o.lift || 0;
+    var cx = o.x * state.zoom;
+    if (o.type === 'saw') return { x: cx, y: objectDrawY(o) * state.zoom };
+    if (o.type === 'spike') {
+      var spikeYWorld = o.surface === 'ceil' ? CEIL_Y + lift : FLOOR_Y - lift;
+      return { x: cx, y: spikeYWorld * state.zoom };
+    }
+    var wallBase = o.surface === 'floor' ? FLOOR_Y - lift : CEIL_Y + lift;
+    var visH = (o.height || 80) * (o.scale || 1);
+    var wallTop = o.surface === 'floor' ? wallBase - visH : wallBase + visH;
+    return { x: cx, y: wallTop * state.zoom };
+  }
+
   function worldFromEvent(e) {
     var rect = canvas.getBoundingClientRect();
     var cx = e.clientX - rect.left;
@@ -580,12 +681,27 @@
   }
 
   canvas.addEventListener('mousedown', function (e) {
-    // Si ya hay un objeto seleccionado con "Tamaño" y el clic pegó en
-    // su agarradera, arrastrar cambia el tamaño en vez de mover.
+    // Si ya hay un objeto seleccionado con agarraderas y el clic pegó
+    // en una de ellas, arrastrar cambia tamaño/colisión en vez de
+    // mover el objeto. Se chequea la de colisión primero porque
+    // suele quedar más afuera que la de tamaño.
     if (state.selectedIndex !== -1) {
       var selObj = state.objects[state.selectedIndex];
+      var cp = eventCanvasPos(e);
+      if (selObj && hasHitbox(selObj)) {
+        var hbShape = hitboxShape(selObj);
+        if (Math.hypot(cp.x - hbShape.handleX, cp.y - hbShape.handleY) < 9) {
+          var anchor = hitboxAnchor(selObj);
+          hitboxDrag = {
+            index: state.selectedIndex,
+            anchorX: anchor.x, anchorY: anchor.y,
+            startDist: Math.max(6, Math.hypot(hbShape.handleX - anchor.x, hbShape.handleY - anchor.y)),
+            startHb: selObj.hitboxScale != null ? selObj.hitboxScale : 1
+          };
+          return;
+        }
+      }
       if (selObj && hasScale(selObj)) {
-        var cp = eventCanvasPos(e);
         var h = handleScreenPos(selObj);
         if (Math.hypot(cp.x - h.x, cp.y - h.y) < 10) {
           var box = objectScreenBox(selObj);
@@ -621,6 +737,17 @@
     render();
   });
   window.addEventListener('mousemove', function (e) {
+    if (hitboxDrag) {
+      var o3 = state.objects[hitboxDrag.index];
+      if (!o3) { hitboxDrag = null; return; }
+      var cp3 = eventCanvasPos(e);
+      var dist3 = Math.hypot(cp3.x - hitboxDrag.anchorX, cp3.y - hitboxDrag.anchorY);
+      var newHb = hitboxDrag.startHb * (dist3 / hitboxDrag.startDist);
+      o3.hitboxScale = Math.round(Math.max(0.2, Math.min(2, newHb)) * 100) / 100;
+      renderProps();
+      render();
+      return;
+    }
     if (resizeDrag) {
       var o2 = state.objects[resizeDrag.index];
       if (!o2) { resizeDrag = null; return; }
@@ -649,6 +776,7 @@
     render();
   });
   window.addEventListener('mouseup', function () {
+    if (hitboxDrag) { hitboxDrag = null; renderProps(); }
     if (resizeDrag) { resizeDrag = null; renderProps(); }
     if (drag) { drag = null; renderProps(); }
   });
@@ -670,7 +798,7 @@
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
     x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
-    height: 'Altura de la pared'
+    height: 'Altura de la pared', hitboxScale: 'Colisión (qué tan justo choca)'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }
@@ -708,6 +836,8 @@
         html += '<label><input type="checkbox" data-field="' + f + '"' + (o[f] ? ' checked' : '') + '> ' + FIELD_LABEL[f] + '</label>';
       } else if (f === 'scale') {
         html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.4" max="3" step="0.1" data-field="scale" value="' + (o.scale != null ? o.scale : 1) + '"></label>';
+      } else if (f === 'hitboxScale') {
+        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.2" max="2" step="0.1" data-field="hitboxScale" value="' + (o.hitboxScale != null ? o.hitboxScale : 1) + '"></label>';
       } else {
         html += '<label>' + FIELD_LABEL[f] + ' <input type="' + (f === 'linkId' ? 'text' : 'number') + '" data-field="' + f + '" value="' + (o[f] != null ? o[f] : '') + '"></label>';
       }
@@ -777,7 +907,7 @@
 
   /* ---- Verificar / Guardar ---- */
   function currentPayload() {
-    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant };
+    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant, background: state.background };
   }
 
   verifyBtn.addEventListener('click', function () {
@@ -898,5 +1028,6 @@
     }).catch(function () {});
   }
   loadVariantCounts();
+  loadBackgrounds();
   loadLevelList();
 })();

@@ -107,7 +107,7 @@ function loadLevel(id) {
   const meta = LEVELS.find(function (l) { return l.id === id; });
   if (!meta) throw new Error('Nivel no encontrado: ' + id);
   const data = meta.build();
-  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null, ceilVariant: data.ceilVariant || null };
+  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null, ceilVariant: data.ceilVariant || null, background: data.background || null };
 }
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
@@ -147,6 +147,35 @@ function addVariant(base, dataBase64) {
   fs.mkdirSync(SLICED_DIR, { recursive: true });
   fs.writeFileSync(path.join(SLICED_DIR, key + '.png'), buffer);
   return { key: key, index: next };
+}
+
+/* ---- Fondos de nivel -- a diferencia de las otras variantes, pueden
+   ser GIF animado (para que "se mueva"), así que se guardan con la
+   extensión real del archivo subido en vez de forzar .png siempre. ---- */
+const BG_EXTS = ['gif', 'png', 'jpg', 'jpeg', 'webp'];
+function listBackgrounds() {
+  var files = fs.existsSync(SLICED_DIR) ? fs.readdirSync(SLICED_DIR) : [];
+  var found = [];
+  files.forEach(function (f) {
+    var m = /^bg_v(\d+)\.([a-zA-Z0-9]+)$/.exec(f);
+    if (m) found.push({ index: parseInt(m[1], 10), file: f });
+  });
+  found.sort(function (a, b) { return a.index - b.index; });
+  return found.map(function (f) { return f.file; });
+}
+function addBackground(dataBase64, ext) {
+  var cleanExt = (ext || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (BG_EXTS.indexOf(cleanExt) === -1) throw new Error('Formato de imagen no soportado: ' + ext);
+  var buffer = Buffer.from(dataBase64, 'base64');
+  if (buffer.length === 0) throw new Error('El archivo llegó vacío');
+  if (buffer.length > MAX_ASSET_BYTES) throw new Error('La imagen pesa más de 8 MB');
+  var existing = listBackgrounds();
+  var maxN = 0;
+  existing.forEach(function (f) { var m = /^bg_v(\d+)\./.exec(f); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
+  var file = 'bg_v' + (maxN + 1) + '.' + cleanExt;
+  fs.mkdirSync(SLICED_DIR, { recursive: true });
+  fs.writeFileSync(path.join(SLICED_DIR, file), buffer);
+  return file;
 }
 
 function listAssets() {
@@ -388,7 +417,8 @@ function verifyLevel(id, levelData, maxRealMs) {
       length: clone.length,
       speedZones: JSON.parse(JSON.stringify(clone.speedZones)),
       floorVariant: clone.floorVariant || null,
-      ceilVariant: clone.ceilVariant || null
+      ceilVariant: clone.ceilVariant || null,
+      background: clone.background || null
     };
   };
   window.__adminExport.selectLevel(idx);
@@ -426,7 +456,8 @@ function generateBuildFunctionSource(fnName, levelData) {
   });
   var floorVariantSrc = levelData.floorVariant ? ", floorVariant: '" + levelData.floorVariant + "'" : '';
   var ceilVariantSrc = levelData.ceilVariant ? ", ceilVariant: '" + levelData.ceilVariant + "'" : '';
-  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ceilVariantSrc + ' };');
+  var backgroundSrc = levelData.background ? ", background: '" + levelData.background + "'" : '';
+  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ceilVariantSrc + backgroundSrc + ' };');
   lines.push('  }');
   return lines.join('\n') + '\n';
 }
@@ -473,5 +504,7 @@ module.exports = {
   listAssets: listAssets,
   saveAsset: saveAsset,
   getVariantCounts: getVariantCounts,
-  addVariant: addVariant
+  addVariant: addVariant,
+  listBackgrounds: listBackgrounds,
+  addBackground: addBackground
 };

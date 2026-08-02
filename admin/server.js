@@ -708,6 +708,26 @@ var server = http.createServer(function (req, res) {
       }
     });
   }
+  if (urlPath === '/api/gravity-backgrounds' && req.method === 'GET') {
+    try {
+      return sendJSON(res, 200, gravityEditor.listBackgrounds());
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/gravity-background' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.dataBase64) {
+        return sendJSON(res, 400, { error: 'Falta la imagen del fondo' });
+      }
+      try {
+        var file = gravityEditor.addBackground(data.dataBase64, data.ext);
+        return sendJSON(res, 200, { ok: true, file: file });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
 
   // ---- Publicación automática (bot) ----
   if (urlPath === '/api/automation-config' && req.method === 'GET') {
