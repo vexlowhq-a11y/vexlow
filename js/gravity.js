@@ -400,8 +400,8 @@
     add({ type: "saw", surface: "ceil", x: 879, variant: "v7", lift: 83 });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 894, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 932, variant: "v2" });
+    add({ type: "coin", id: 1, y: 167, x: 965, scale: 0.62, risky: false });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 969, variant: "v2" });
-    add({ type: "coin", id: 1, y: 161, x: 988, scale: 0.62, risky: false });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 1006, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 1042, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 1077, variant: "v2" });
