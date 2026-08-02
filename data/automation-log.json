@@ -1,5 +1,31 @@
 [
   {
+    "startedAt": "2026-08-02T10:40:29.204Z",
+    "finishedAt": "2026-08-02T10:42:59.883Z",
+    "forced": false,
+    "ok": false,
+    "published": [
+      "Legal Challenges Rise as Minnesota Proceeds with Nudify App Ban (AI)",
+      "Reimagining Founder Culture: A New Approach to Preventing Burnout (Technology)",
+      "Setback for UK Space Launch as Rocket Issue Delays Orbital Mission (Science & Space)",
+      "Spider-Man: Brand New Day Sets New Domestic Box Office Record (Entertainment)",
+      "Reflecting on the Legacy of 'Hacks': Thoughts from Stars Hannah Einbinder and Paul W. Downs (Entertainment)",
+      "Tarik Skubal Joins the Dodgers: Analyzing the Trade Deadline's Landmark Move (Sports)"
+    ],
+    "topicsCreated": [
+      "Technology / London Founder House"
+    ],
+    "imagesGenerated": 5,
+    "trendingUpdated": false,
+    "heroRotated": false,
+    "errors": [
+      {
+        "error": "Imagen para \"Spider-Man: Brand New Day Sets New Domes\": OpenAI images API respondió 400: {\n  \"error\": {\n    \"message\": \"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_76df001d5dac421ca2bf6567f202e330.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": null,\n    \"code\": \"moderation_block"
+      }
+    ],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-08-01T20:25:58.025Z",
     "finishedAt": "2026-08-01T20:28:40.761Z",
     "forced": false,
