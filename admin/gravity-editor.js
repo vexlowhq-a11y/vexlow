@@ -107,7 +107,7 @@ function loadLevel(id) {
   const meta = LEVELS.find(function (l) { return l.id === id; });
   if (!meta) throw new Error('Nivel no encontrado: ' + id);
   const data = meta.build();
-  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null, ceilVariant: data.ceilVariant || null, background: data.background || null };
+  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null, ceilVariant: data.ceilVariant || null, background: data.background || null, backgroundDim: data.backgroundDim != null ? data.backgroundDim : null };
 }
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
@@ -418,7 +418,8 @@ function verifyLevel(id, levelData, maxRealMs) {
       speedZones: JSON.parse(JSON.stringify(clone.speedZones)),
       floorVariant: clone.floorVariant || null,
       ceilVariant: clone.ceilVariant || null,
-      background: clone.background || null
+      background: clone.background || null,
+      backgroundDim: clone.backgroundDim != null ? clone.backgroundDim : null
     };
   };
   window.__adminExport.selectLevel(idx);
@@ -457,7 +458,8 @@ function generateBuildFunctionSource(fnName, levelData) {
   var floorVariantSrc = levelData.floorVariant ? ", floorVariant: '" + levelData.floorVariant + "'" : '';
   var ceilVariantSrc = levelData.ceilVariant ? ", ceilVariant: '" + levelData.ceilVariant + "'" : '';
   var backgroundSrc = levelData.background ? ", background: '" + levelData.background + "'" : '';
-  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ceilVariantSrc + backgroundSrc + ' };');
+  var backgroundDimSrc = levelData.backgroundDim != null ? ", backgroundDim: " + levelData.backgroundDim : '';
+  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ceilVariantSrc + backgroundSrc + backgroundDimSrc + ' };');
   lines.push('  }');
   return lines.join('\n') + '\n';
 }

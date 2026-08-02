@@ -253,15 +253,35 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
       </div>
     </div>
 
+    <div class="gravity-editor-toolbar gravity-editor-testrow">
+      <label>Probar desde x
+        <input type="number" id="gravityEditorTestX" value="0" min="0" step="10">
+      </label>
+      <button type="button" class="btn-secondary" id="gravityEditorUseSelectedX">Usar el seleccionado</button>
+      <button type="button" class="btn-primary" id="gravityEditorPlayFromBtn">▶ Jugar desde acá</button>
+      <span class="admin-hint">Abre el nivel guardado de verdad en una pestaña nueva, arrancando justo en ese punto (probá guardar primero para que sea lo último que armaste).</span>
+    </div>
+
     <div class="gravity-editor-palette" id="gravityEditorPalette"></div>
     <div class="gravity-editor-palette-variants" id="gravityEditorPaletteVariants"></div>
 
     <div class="gravity-editor-canvas-wrap" id="gravityEditorCanvasWrap">
       <canvas id="gravityEditorCanvas"></canvas>
     </div>
-    <p class="admin-hint">Clic en la pista: agrega el obstáculo elegido arriba. Clic sobre uno ya puesto: lo selecciona (arrastralo para moverlo). Con uno seleccionado aparece un punto verde en su esquina — arrastralo para cambiarle el tamaño. Supr / Backspace: borra el seleccionado. Lo que ves acá es el tamaño real del juego (a escala según el zoom elegido), no un boceto.</p>
+    <p class="admin-hint">Clic en la pista: agrega el obstáculo elegido arriba. Clic sobre uno ya puesto: lo selecciona (arrastralo para moverlo). Con uno seleccionado aparece un punto verde en su esquina — arrastralo para cambiarle el tamaño. Ctrl+C / Ctrl+V: copia y pega el seleccionado. Supr / Backspace: borra el seleccionado. Lo que ves acá es el tamaño real del juego (a escala según el zoom elegido), no un boceto.</p>
 
     <div class="gravity-editor-props" id="gravityEditorProps"></div>
+
+    <div class="gravity-editor-objectlist">
+      <h3>Objetos del nivel</h3>
+      <p class="admin-hint">Si algo quedó gigante, mal puesto o no lo podés tocar en la pista, borralo o seleccionalo desde acá.</p>
+      <div class="gravity-objectlist-filters" id="gravityObjectListFilters"></div>
+      <div class="gravity-objectlist-actions">
+        <label><input type="checkbox" id="gravityObjectListSelectAll"> Seleccionar todos (filtrados)</label>
+        <button type="button" class="btn-secondary danger" id="gravityObjectListDeleteBtn">Eliminar seleccionados</button>
+      </div>
+      <div class="gravity-objectlist-rows" id="gravityObjectListRows"></div>
+    </div>
 
     <div class="gravity-editor-floor-row">
       <div class="gravity-editor-floor">
@@ -270,14 +290,19 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
       </div>
       <div class="gravity-editor-floor">
         <h3>Techo / paredes del nivel</h3>
+        <p class="admin-hint">Si no elegís uno acá, el techo copia automáticamente el mismo bloque que el piso. Elegí uno de acá solo si lo querés distinto.</p>
         <div id="gravityEditorCeilPicker"></div>
       </div>
     </div>
 
     <div class="gravity-editor-floor">
       <h3>Fondo del nivel</h3>
-      <p class="admin-hint">Podés subir una imagen fija o un GIF animado (se mueve solo, a media velocidad del juego).</p>
+      <p class="admin-hint">Podés subir una imagen fija o un GIF animado (se mueve solo, a media velocidad del juego). Si es una imagen muy cargada, oscurecela un poco para que el piso y el techo se sigan viendo claros.</p>
       <div id="gravityEditorBgPicker"></div>
+      <label class="gravity-bg-dim-label">Oscurecer fondo
+        <input type="range" id="gravityEditorBgDim" min="0" max="1" step="0.05" value="0.45">
+        <span id="gravityEditorBgDimValue">45%</span>
+      </label>
     </div>
 
     <div class="gravity-editor-speedzones">

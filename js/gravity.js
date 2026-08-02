@@ -938,6 +938,12 @@
 
   var state, player, particles, speed, elapsedMs, lastTime;
   var coinsCollected, hasKey, hasDiamond, deaths;
+  // Sistema de llaves con etiqueta (1/2/3): además de hasKey (compat,
+  // "tengo alguna llave", usado para el ícono y las puertas viejas sin
+  // keyId asignado), se guarda por separado cuál llave específica se
+  // juntó -- así una puerta con keyId puesto solo abre con SU llave.
+  var collectedKeyIds;
+  var KEY_COLORS = { '1': '#FF7A3D', '2': '#3DDBFF', '3': '#C63DFF', 'default': '#FF7A3D' };
 
   function selectLevel(index) {
     currentLevelIndex = index;
@@ -946,6 +952,18 @@
     resetGame();
     loadLeaderboard();
   }
+
+  // Con ?startX=N en la URL (lo arma el editor visual del admin con
+  // "Jugar desde acá") arranca el nivel directo en esa posición en
+  // vez de en x:0 -- para poder probar un tramo sin tener que rejugar
+  // el nivel entero cada vez. La forma y la dirección de gravedad se
+  // adivinan mirando el último portal de cada tipo antes de ese punto,
+  // no siempre son cubo/piso.
+  var testStartX = null;
+  try {
+    var testStartXRaw = new URLSearchParams(window.location.search).get('startX');
+    if (testStartXRaw != null && !isNaN(parseFloat(testStartXRaw))) testStartX = Math.max(0, parseFloat(testStartXRaw));
+  } catch (e) {}
 
   function resetGame() {
     var levelId = currentLevelId();
@@ -962,18 +980,33 @@
       gravityDir: 1, worldX: 0, form: LEVELS[currentLevelIndex].startForm || 'cube', grounded: true,
       holding: false
     };
+    hasKey = false;
+    collectedKeyIds = {};
+    if (testStartX) {
+      var tForm = player.form, tGravityDir = 1, tKeyIds = {};
+      level.objects.slice().sort(function (a, b) { return a.x - b.x; }).forEach(function (o) {
+        if (o.x > testStartX) return;
+        if (o.type === 'shapePortal') tForm = o.form;
+        else if (o.type === 'gravityPortal') tGravityDir = o.dir;
+        else if (o.type === 'key') { tKeyIds[o.keyId != null ? String(o.keyId) : 'default'] = true; hasKey = true; }
+      });
+      player.worldX = testStartX;
+      player.form = tForm;
+      player.gravityDir = tGravityDir;
+      player.y = tGravityDir === 1 ? FLOOR_Y - PLAYER_SIZE : CEIL_Y;
+      collectedKeyIds = tKeyIds;
+    }
     particles = [];
-    speed = speedAt(0);
+    speed = speedAt(player.worldX);
     elapsedMs = 0;
     lastTime = null;
     coinsCollected = [];
-    hasKey = false;
     hasDiamond = false;
     state = 'ready';
     scoreEl.textContent = 'Progress: 0%';
     coinsEl.textContent = '🪙 0/3';
     keyEl.textContent = '';
-    overlayText.textContent = LEVELS[currentLevelIndex].name + ' — Tap or press Space to start';
+    overlayText.textContent = LEVELS[currentLevelIndex].name + (testStartX ? ' — prueba desde x:' + Math.round(testStartX) : '') + ' — Tap or press Space to start';
     if (!homeMenuActive) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
   }
 
@@ -1183,6 +1216,21 @@
     }
 
     player.worldX += speed * dt;
+    // Puerta con llave asignada (keyId): bloquea de verdad el avance
+    // hasta tener SU llave -- a diferencia de una puerta sin keyId
+    // (la de siempre), que nunca bloqueó, así que los niveles ya
+    // hechos no cambian. Como acá no se puede retroceder, esto solo
+    // es justo si la llave siempre queda antes que su puerta en el
+    // nivel -- por eso hay que verificar con el bot como cualquier
+    // otro cambio (si la llave no es alcanzable, el bot se queda
+    // trabado ahí y avisa que el nivel quedó imposible).
+    level.objects.forEach(function (o) {
+      if (o.type !== 'door') return;
+      o.open = o.keyId != null ? !!collectedKeyIds[String(o.keyId)] : hasKey;
+      if (o.keyId != null && !o.open && player.worldX + PLAYER_SIZE > o.x) {
+        player.worldX = o.x - PLAYER_SIZE;
+      }
+    });
     player.x = PLAYER_SCREEN_X;
     // Se calcula DESPUÉS de avanzar worldX este frame — si no, todas las
     // colisiones de más abajo comparan contra la posición del frame
@@ -1213,11 +1261,6 @@
         }
       });
     }
-
-    // Puerta abierta con llave: se vuelve atravesable.
-    level.objects.forEach(function (o) {
-      if (o.type === 'door' && hasKey) o.open = true;
-    });
 
     if (player.y > FLOOR_Y + 120 || player.y < CEIL_Y - 120) { endGame(); return; }
 
@@ -1330,8 +1373,16 @@
           var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - padHalf && player.y + PLAYER_SIZE < padSurfaceY + padHalf : player.y < padSurfaceY + padHalf && player.y > padSurfaceY - padHalf;
           if (padNear) {
             o.used = true;
+            // Fuerza base según el color, ajustable por rampa con
+            // "power" (multiplicador). Sin "dir" a mano, lanza para
+            // el lado contrario a la superficie donde está (como
+            // siempre); con "dir" puesto (-1 arriba, 1 abajo, mismo
+            // criterio que el portal de gravedad) lanza siempre para
+            // ese lado, sin importar en qué superficie esté parada.
             var padV = o.color === 'yellow' ? ORB_YELLOW_V : o.color === 'pink' ? ORB_PINK_V : 0.62;
-            player.vy = -padV * player.gravityDir;
+            var padPower = o.power != null ? o.power : 1;
+            var padDir = o.dir != null ? o.dir : -player.gravityDir;
+            player.vy = padV * padPower * padDir;
             player.grounded = false;
             playPad();
             spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 10);
@@ -1339,7 +1390,9 @@
         }
       } else if (o.type === 'key') {
         var keyScale = o.scale || 1;
-        if (!hasKey && overlapsX(o, 26 * keyScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 28 * keyScale) {
+        var kid = o.keyId != null ? String(o.keyId) : 'default';
+        if (!collectedKeyIds[kid] && overlapsX(o, 26 * keyScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 28 * keyScale) {
+          collectedKeyIds[kid] = true;
           hasKey = true;
           o.dead = true;
           keyEl.textContent = '🔑';
@@ -1401,6 +1454,17 @@
       for (var bx = -bgOff; bx < W; bx += bgTileW) {
         ctx.drawImage(bgImg, bx, 0, bgTileW, H);
       }
+      // Sin esto, un fondo muy cargado (una imagen grande y llamativa)
+      // compite visualmente con el piso/techo y los hace ilegibles como
+      // "suelo sólido" aunque la colisión nunca cambie -- se oscurece
+      // para que quede de fondo, no en primer plano. Ajustable por
+      // nivel (0 = sin oscurecer, 1 = casi negro); por defecto ya
+      // atenúa un poco aunque no se elija nada.
+      var dim = level && level.backgroundDim != null ? level.backgroundDim : 0.45;
+      if (dim > 0) {
+        ctx.fillStyle = 'rgba(5,6,15,' + Math.min(1, dim) + ')';
+        ctx.fillRect(0, 0, W, H);
+      }
     } else {
       ctx.fillStyle = '#05060f';
       ctx.fillRect(0, 0, W, H);
@@ -1430,12 +1494,16 @@
     // Piso y techo/paredes se eligen por separado, cada uno con su
     // propio pool de bloques subidos (floor_vN / wall_vN) -- se
     // tilean igual que las paredes-obstáculo (el bloque elegido se
-    // repite), en vez de aplanarse a un color promedio.
+    // repite), en vez de aplanarse a un color promedio. Si no se
+    // elige un techo a mano, por defecto usa el MISMO bloque que el
+    // piso (en vez de caer siempre al sprite genérico) -- así piso y
+    // techo quedan iguales sin tener que subir la imagen dos veces;
+    // igual se puede elegir uno distinto a mano en "Techo / paredes".
     var floorSpriteName = level && level.floorVariant ? 'floor_' + level.floorVariant : 'floor';
     var tileW = 110, floorOff = player.worldX % tileW;
     for (var fx = -floorOff; fx < W; fx += tileW) drawSprite(floorSpriteName, fx, FLOOR_Y, tileW, H - FLOOR_Y);
 
-    var ceilSpriteName = level && level.ceilVariant ? 'wall_' + level.ceilVariant : 'floor';
+    var ceilSpriteName = level && level.ceilVariant ? 'wall_' + level.ceilVariant : floorSpriteName;
     var tileW2 = 110, ceilOff = player.worldX % tileW2;
     for (var cx = -ceilOff; cx < W; cx += tileW2) {
       ctx.save();
@@ -1522,16 +1590,18 @@
         drawSprite(o.variant ? 'platform_' + o.variant : 'platform', sx, py, o.w, platformDrawH);
         ctx.restore();
       } else if (o.type === 'gravityPortal') {
-        // Tamaño fijo y centrado en la pantalla -- antes se estiraba
-        // para llenar todo el alto entre piso y techo, deformando el
-        // sprite. El área donde el portal REALMENTE activa sigue
-        // siendo la franja completa (overlapsX de abajo), esto es
+        // Tamaño ajustable con "scale" y posición vertical ajustable
+        // con "y" (si no se puso, queda centrado como antes). El área
+        // donde el portal REALMENTE activa sigue siendo la franja
+        // completa (overlapsX de abajo, no depende de "y"), esto es
         // solo el dibujo.
         var gpDrawScale = o.scale || 1;
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - PORTAL_W * gpDrawScale / 2, MID_Y - PORTAL_H * gpDrawScale / 2, PORTAL_W * gpDrawScale, PORTAL_H * gpDrawScale);
+        var gpY = o.y != null ? o.y : MID_Y;
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - PORTAL_W * gpDrawScale / 2, gpY - PORTAL_H * gpDrawScale / 2, PORTAL_W * gpDrawScale, PORTAL_H * gpDrawScale);
       } else if (o.type === 'shapePortal') {
         var spDrawScale = o.scale || 1;
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W * spDrawScale / 2, MID_Y - PORTAL_H * spDrawScale / 2, PORTAL_W * spDrawScale, PORTAL_H * spDrawScale);
+        var spY = o.y != null ? o.y : MID_Y;
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W * spDrawScale / 2, spY - PORTAL_H * spDrawScale / 2, PORTAL_W * spDrawScale, PORTAL_H * spDrawScale);
       } else if (o.type === 'orb') {
         var sy = o.y;
         var orbDrawScale = o.scale || 1;
@@ -1552,13 +1622,37 @@
       } else if (o.type === 'key' && !o.dead) {
         var keyDrawScale = o.scale || 1;
         var keySz = 30 * keyDrawScale;
+        var keyRingColor = KEY_COLORS[o.keyId != null ? String(o.keyId) : 'default'] || KEY_COLORS.default;
+        ctx.save();
+        ctx.shadowColor = keyRingColor; ctx.shadowBlur = 12;
+        ctx.strokeStyle = keyRingColor; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(sx, o.y, keySz / 2 + 5, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
         drawSprite('key', sx - keySz / 2, o.y - keySz / 2, keySz, keySz);
       } else if (o.type === 'door') {
-        ctx.save();
-        var doorW = o.x2 - o.x;
-        if (o.open) ctx.globalAlpha = Math.max(0.15, 1 - (elapsedMs % 1) );
-        if (!o.open) drawSprite('door', sx, CEIL_Y, doorW, FLOOR_Y - CEIL_Y);
-        ctx.restore();
+        // Sin keyId (puertas de siempre): nunca bloquea de verdad, es
+        // solo decoración/narrativa. Con keyId: SÍ bloquea de verdad
+        // hasta conseguir la llave con ese mismo id (ver el clamp de
+        // player.worldX en update()). En 2D un sprite de "puerta" no
+        // queda bien, así que se dibuja como una franja/láser
+        // vertical: sólida mientras está cerrada, desaparece en
+        // cuanto se consigue la llave que le toca. El color cambia
+        // según el keyId para que se pueda distinguir a simple vista
+        // qué llave abre cada puerta.
+        if (!o.open) {
+          var doorH = (o.height != null ? o.height : FLOOR_Y - CEIL_Y) * (o.scale || 1);
+          var doorCY = o.y != null ? o.y : MID_Y;
+          var doorTopY = doorCY - doorH / 2, doorBotY = doorCY + doorH / 2;
+          var doorLineW = 6 * (o.scale || 1);
+          var doorColor = KEY_COLORS[o.keyId != null ? String(o.keyId) : 'default'] || KEY_COLORS.default;
+          ctx.save();
+          ctx.shadowColor = doorColor; ctx.shadowBlur = 14;
+          ctx.strokeStyle = doorColor; ctx.lineWidth = doorLineW; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(sx, doorTopY); ctx.lineTo(sx, doorBotY); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1, doorLineW * 0.3);
+          ctx.beginPath(); ctx.moveTo(sx, doorTopY); ctx.lineTo(sx, doorBotY); ctx.stroke();
+          ctx.restore();
+        }
       } else if (o.type === 'coin' && !o.dead) {
         var coinDrawScale = o.scale || 1;
         ctx.save();
@@ -1591,9 +1685,13 @@
       ctx.clip();
       drawSkin(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
     } else {
-      ctx.translate(player.x, player.y);
+      // En el techo (gravityDir -1) se da vuelta 180° -- así se ve
+      // "parado" sobre el techo en vez de quedar cabeza abajo con el
+      // mismo dibujo de cuando está parado en el piso.
+      ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
+      if (player.gravityDir === -1) ctx.rotate(Math.PI);
       ctx.shadowColor = '#3D8BFF'; ctx.shadowBlur = 14;
-      drawSkin(0, 0, PLAYER_SIZE, PLAYER_SIZE);
+      drawSkin(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
     }
     ctx.restore();
 
@@ -1878,8 +1976,27 @@
     });
   }
 
+  // "Jugar desde acá" (editor de niveles del admin) manda también qué
+  // nivel probar -- sin esto seguiría abriendo siempre el nivel 1.
+  if (testStartX != null) {
+    var testLevelId = null;
+    try { testLevelId = new URLSearchParams(window.location.search).get('level'); } catch (e) {}
+    if (testLevelId) {
+      for (var ti = 0; ti < LEVELS.length; ti++) {
+        if (LEVELS[ti].id === testLevelId) { currentLevelIndex = ti; break; }
+      }
+    }
+    homeMenuActive = false;
+  }
+
   resetGame();
-  renderHomeMenu();
+  if (testStartX != null) {
+    if (dashWrap) dashWrap.classList.remove('gravity-home-active');
+    closeOverlay(homeMenu);
+    overlay.classList.remove('hidden');
+  } else {
+    renderHomeMenu();
+  }
   requestAnimationFrame(loop);
   loadLeaderboard();
 })();

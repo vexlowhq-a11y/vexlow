@@ -20,18 +20,19 @@
   // el disco) al cargar la pestaña, así una variante nueva subida desde
   // "Sprites" aparece sola en los selectores sin tocar este archivo.
   var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0, wall: 0 };
+  var KEY_COLORS = { '1': '#FF7A3D', '2': '#3DDBFF', '3': '#C63DFF', 'default': '#FF7A3D' };
 
   var OBJECT_TYPES = {
     spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'hitboxScale', 'variant', 'rotation'], variantBase: 'spike' },
     saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'hitboxScale', 'linkId', 'variant'], variantBase: 'saw' },
     platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'scale', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
     wall: { label: 'Pared', color: '#FF7A3D', icon: '🧱', anchor: 'surface', fields: ['surface', 'w', 'height', 'scale', 'hitboxScale', 'lift', 'variant'], variantBase: 'wall' },
-    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'scale', 'variant'], variantBase: 'portal' },
-    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'scale', 'variant'], variantBase: 'portal' },
+    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'free', fields: ['dir', 'y', 'scale', 'variant'], variantBase: 'portal' },
+    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'free', fields: ['form', 'y', 'scale', 'variant'], variantBase: 'portal' },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y', 'scale'] },
-    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'color'] },
-    key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y', 'scale'] },
-    door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'full', fields: ['x2'] },
+    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'color', 'power', 'dir'] },
+    key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y', 'scale', 'keyId'] },
+    door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'free', fields: ['x2', 'y', 'scale', 'keyId'] },
     coin: { label: 'Moneda', color: '#FFC93D', icon: '◎', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
     diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y', 'scale'] },
     interruptor: { label: 'Interruptor', color: '#7CF6FF', icon: '⊙', anchor: 'full', fields: ['linkId', 'scale'] },
@@ -60,10 +61,21 @@
   var floorPickerEl = document.getElementById('gravityEditorFloorPicker');
   var ceilPickerEl = document.getElementById('gravityEditorCeilPicker');
   var bgPickerEl = document.getElementById('gravityEditorBgPicker');
+  var bgDimInput = document.getElementById('gravityEditorBgDim');
+  var bgDimValueEl = document.getElementById('gravityEditorBgDimValue');
   var speedListEl = document.getElementById('gravityEditorSpeedList');
   var verifyBtn = document.getElementById('gravityEditorVerifyBtn');
   var saveBtn = document.getElementById('gravityEditorSaveBtn');
   var addSpeedBtn = document.getElementById('gravityEditorAddSpeedBtn');
+  var testXInput = document.getElementById('gravityEditorTestX');
+  var useSelectedXBtn = document.getElementById('gravityEditorUseSelectedX');
+  var playFromBtn = document.getElementById('gravityEditorPlayFromBtn');
+  var objectListFiltersEl = document.getElementById('gravityObjectListFilters');
+  var objectListRowsEl = document.getElementById('gravityObjectListRows');
+  var objectListSelectAllEl = document.getElementById('gravityObjectListSelectAll');
+  var objectListDeleteBtn = document.getElementById('gravityObjectListDeleteBtn');
+  var objectListFilter = null;
+  var objectListSelected = new Set();
 
   function setStatus(msg, isError) {
     statusEl.textContent = msg || '';
@@ -134,6 +146,7 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, dataBase64: base64 })
         }).then(function (r) { return r.json(); }).then(function (res) {
           if (!res.ok) { window.alert('Error al reemplazar ' + key + ': ' + res.error); return; }
+          spriteImgVersion[key] = (spriteImgVersion[key] || 0) + 1;
           delete spriteImgCache[key];
           renderPaletteVariants();
           render();
@@ -146,9 +159,10 @@
   // "moldes" -- key/door tienen una sola imagen, orb/pad tienen una
   // por color). Se muestran para poder reemplazarlas sin ir a buscar
   // otra pestaña.
+  // La puerta no tiene sprite -- se dibuja como láser (ver render()),
+  // así que no aparece acá con las demás.
   var FIXED_SPRITE_SLOTS = {
     key: [{ key: 'key', label: 'Llave' }],
-    door: [{ key: 'door', label: 'Puerta' }],
     orb: [{ key: 'orb_yellow', label: 'Amarillo' }, { key: 'orb_pink', label: 'Rosa' }, { key: 'orb_green', label: 'Verde' }],
     pad: [{ key: 'pad_cyan', label: 'Cian' }, { key: 'pad_yellow', label: 'Amarilla' }, { key: 'pad_pink', label: 'Rosa' }]
   };
@@ -218,7 +232,7 @@
   function renderCeilPicker() {
     if (!ceilPickerEl) return;
     var html = '<div class="gravity-variant-swatches">';
-    html += '<button type="button" class="gravity-variant-swatch' + (!state.ceilVariant ? ' selected' : '') + '" data-ceil="">Por defecto</button>';
+    html += '<button type="button" class="gravity-variant-swatch' + (!state.ceilVariant ? ' selected' : '') + '" data-ceil="">Igual al piso</button>';
     for (var vi = 1; vi <= (variantCounts.wall || 0); vi++) {
       var vid = 'v' + vi;
       html += '<button type="button" class="gravity-variant-swatch' + (state.ceilVariant === vid ? ' selected' : '') +
@@ -304,19 +318,31 @@
       state.floorVariant = data.floorVariant || null;
       state.ceilVariant = data.ceilVariant || null;
       state.background = data.background || null;
+      state.backgroundDim = data.backgroundDim != null ? data.backgroundDim : 0.45;
       state.selectedIndex = -1;
+      objectListSelected.clear();
+      objectListFilter = null;
       levelSelect.value = id;
+      if (bgDimInput) { bgDimInput.value = state.backgroundDim; bgDimValueEl.textContent = Math.round(state.backgroundDim * 100) + '%'; }
       renderSpeedList();
       renderFloorPicker();
       renderCeilPicker();
       renderBgPicker();
       renderProps();
+      renderObjectList();
       render();
       setStatus('Cargado: ' + data.name + ' (' + data.objects.length + ' obstáculos)');
     }).catch(function (e) { setStatus('Error cargando el nivel: ' + e.message, true); });
   }
   levelSelect.addEventListener('change', function () { loadLevel(levelSelect.value); });
   zoomInput.addEventListener('input', function () { state.zoom = parseFloat(zoomInput.value); render(); });
+  if (bgDimInput) {
+    bgDimInput.addEventListener('input', function () {
+      state.backgroundDim = parseFloat(bgDimInput.value);
+      bgDimValueEl.textContent = Math.round(state.backgroundDim * 100) + '%';
+      render();
+    });
+  }
 
   /* ---- Objetos por defecto al colocar ---- */
   function defaultObjectFor(type, x, y) {
@@ -327,12 +353,12 @@
       case 'saw': obj = { type: 'saw', surface: surface, x: x }; break;
       case 'platform': obj = { type: 'platform', surface: surface, w: 90, lift: 46, x: x }; break;
       case 'wall': obj = { type: 'wall', surface: surface, w: 40, height: 80, lift: 0, x: x }; break;
-      case 'gravityPortal': obj = { type: 'gravityPortal', dir: -1, x: x }; break;
-      case 'shapePortal': obj = { type: 'shapePortal', form: 'ship', x: x }; break;
+      case 'gravityPortal': obj = { type: 'gravityPortal', dir: -1, y: y, x: x }; break;
+      case 'shapePortal': obj = { type: 'shapePortal', form: 'ship', y: y, x: x }; break;
       case 'orb': obj = { type: 'orb', color: 'yellow', y: y, x: x }; break;
       case 'pad': obj = { type: 'pad', color: 'cyan', surface: surface, x: x }; break;
       case 'key': obj = { type: 'key', y: y, x: x }; break;
-      case 'door': obj = { type: 'door', x2: x + 130, x: x }; break;
+      case 'door': obj = { type: 'door', x2: x + 130, y: y, x: x }; break;
       case 'coin': obj = { type: 'coin', id: countOf('coin'), y: y, x: x }; break;
       case 'diamond': obj = { type: 'diamond', y: y, x: x }; break;
       case 'interruptor': obj = { type: 'interruptor', linkId: 'sw' + Math.round(x), x: x }; break;
@@ -380,14 +406,107 @@
     var maxX = 0;
     state.objects.forEach(function (o) { maxX = Math.max(maxX, o.x, o.x2 || 0); });
     state.length = Math.round(maxX + 300);
+    renderObjectList();
+  }
+
+  /* ---- Lista de objetos puestos -- para encontrar y borrar algo que
+     quedó gigante, mal puesto o imposible de tocar en la pista (clic
+     directo), en vez de tener que cazarlo a mano en el canvas. ---- */
+  function renderObjectList() {
+    if (!objectListFiltersEl) return;
+    var counts = {};
+    state.objects.forEach(function (o) { counts[o.type] = (counts[o.type] || 0) + 1; });
+    var filterHtml = '<button type="button" class="gravity-objtype-filter' + (!objectListFilter ? ' active' : '') + '" data-filter="">Todos (' + state.objects.length + ')</button>';
+    Object.keys(counts).sort().forEach(function (t) {
+      var def = OBJECT_TYPES[t];
+      filterHtml += '<button type="button" class="gravity-objtype-filter' + (objectListFilter === t ? ' active' : '') + '" data-filter="' + t + '">' +
+        (def ? def.icon : '?') + ' ' + (def ? def.label : t) + ' (' + counts[t] + ')</button>';
+    });
+    objectListFiltersEl.innerHTML = filterHtml;
+    objectListFiltersEl.querySelectorAll('.gravity-objtype-filter').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        objectListFilter = btn.getAttribute('data-filter') || null;
+        renderObjectList();
+      });
+    });
+
+    var rowsHtml = '';
+    state.objects.forEach(function (o, i) {
+      if (objectListFilter && o.type !== objectListFilter) return;
+      var def = OBJECT_TYPES[o.type] || { icon: '?', label: o.type };
+      var isSel = objectListSelected.has(o);
+      rowsHtml += '<div class="gravity-objectlist-row' + (i === state.selectedIndex ? ' selected' : '') + '">' +
+        '<input type="checkbox" class="oli-check" data-idx="' + i + '"' + (isSel ? ' checked' : '') + '>' +
+        '<span class="oli-label" data-idx="' + i + '">' + def.icon + ' ' + def.label + '</span>' +
+        '<span class="oli-x">x:' + Math.round(o.x) + '</span>' +
+        '<button type="button" class="oli-del" data-idx="' + i + '" title="Eliminar">✕</button>' +
+        '</div>';
+    });
+    objectListRowsEl.innerHTML = rowsHtml;
+
+    objectListRowsEl.querySelectorAll('.oli-label').forEach(function (el) {
+      el.addEventListener('click', function () {
+        state.selectedIndex = parseInt(el.getAttribute('data-idx'), 10);
+        renderProps();
+        render();
+        renderObjectList();
+      });
+    });
+    objectListRowsEl.querySelectorAll('.oli-check').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        var o = state.objects[parseInt(cb.getAttribute('data-idx'), 10)];
+        if (cb.checked) objectListSelected.add(o); else objectListSelected.delete(o);
+      });
+    });
+    objectListRowsEl.querySelectorAll('.oli-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        objectListSelected.delete(state.objects[idx]);
+        state.objects.splice(idx, 1);
+        if (state.selectedIndex === idx) state.selectedIndex = -1;
+        else if (state.selectedIndex > idx) state.selectedIndex--;
+        recomputeLength();
+        renderProps();
+        render();
+      });
+    });
+    if (objectListSelectAllEl) objectListSelectAllEl.checked = false;
+  }
+  if (objectListSelectAllEl) {
+    objectListSelectAllEl.addEventListener('change', function () {
+      state.objects.forEach(function (o) {
+        if (!objectListFilter || o.type === objectListFilter) {
+          if (objectListSelectAllEl.checked) objectListSelected.add(o); else objectListSelected.delete(o);
+        }
+      });
+      renderObjectList();
+    });
+  }
+  if (objectListDeleteBtn) {
+    objectListDeleteBtn.addEventListener('click', function () {
+      if (objectListSelected.size === 0) { window.alert('No hay nada seleccionado.'); return; }
+      if (!window.confirm('¿Eliminar ' + objectListSelected.size + ' objeto(s)? No se puede deshacer.')) return;
+      state.objects = state.objects.filter(function (o) { return !objectListSelected.has(o); });
+      objectListSelected.clear();
+      state.selectedIndex = -1;
+      recomputeLength();
+      renderProps();
+      render();
+    });
   }
 
   /* ---- Sprites reales para la vista previa (en vez de círculos) ---- */
   var spriteImgCache = {};
+  // spriteImgVersion se pisa cada vez que se reemplaza un sprite fijo
+  // (wireReplaceSpriteTile) -- sin esto, el navegador puede seguir
+  // sirviendo la imagen vieja desde su caché HTTP aunque el archivo en
+  // el server ya haya cambiado, porque la URL queda igual.
+  var spriteImgVersion = {};
   function getSpriteImg(name) {
     if (!spriteImgCache[name]) {
       var img = new Image();
-      img.src = '/site/img/gravitycover/sliced/' + name + '.png';
+      var v = spriteImgVersion[name];
+      img.src = '/site/img/gravitycover/sliced/' + name + '.png' + (v ? ('?v=' + v) : '');
       img.onload = render;
       spriteImgCache[name] = img;
     }
@@ -415,8 +534,7 @@
       case 'orb': return 'orb_' + (o.color || 'yellow');
       case 'pad': return 'pad_' + (o.color || 'cyan');
       case 'key': return 'key';
-      case 'door': return 'door';
-      default: return null; // coin/diamond/interruptor/finish: se dibujan a mano (no tienen sprite)
+      default: return null; // coin/diamond/interruptor/finish/door: se dibujan a mano (no tienen sprite)
     }
   }
 
@@ -435,6 +553,7 @@
       case 'orb': return { w: 32 * scale, h: 32 * scale };
       case 'pad': return { w: 40 * scale, h: 16 * scale };
       case 'key': return { w: 30 * scale, h: 30 * scale };
+      case 'door': return { w: (o.x2 != null ? o.x2 - o.x : 130), h: (o.height != null ? o.height : (FLOOR_Y - CEIL_Y)) * scale };
       default: return { w: 24 * scale, h: 24 * scale };
     }
   }
@@ -451,6 +570,11 @@
       if (bgImg.complete && bgImg.naturalWidth > 0) {
         var bgTileW = Math.max(20, bgImg.naturalWidth * (canvas.height / bgImg.naturalHeight));
         for (var bx = 0; bx < canvas.width; bx += bgTileW) ctx.drawImage(bgImg, bx, 0, bgTileW, canvas.height);
+        var dim = state.backgroundDim != null ? state.backgroundDim : 0.45;
+        if (dim > 0) {
+          ctx.fillStyle = 'rgba(5,6,15,' + Math.min(1, dim) + ')';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
       }
     }
 
@@ -464,13 +588,16 @@
 
     var floorCy = FLOOR_Y * state.zoom, ceilCy = CEIL_Y * state.zoom;
     var tileW = 110 * state.zoom; // igual que js/gravity.js
-    var floorImg = getSpriteImg(state.floorVariant ? 'floor_' + state.floorVariant : 'floor');
+    var floorSpriteKey = state.floorVariant ? 'floor_' + state.floorVariant : 'floor';
+    var floorImg = getSpriteImg(floorSpriteKey);
     if (floorImg.complete && floorImg.naturalWidth > 0) {
       for (var tx = 0; tx < canvas.width; tx += tileW) {
         ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
       }
     }
-    var ceilImg = getSpriteImg(state.ceilVariant ? 'wall_' + state.ceilVariant : 'floor');
+    // Sin techo propio elegido, usa el mismo bloque que el piso por
+    // defecto (en vez del sprite genérico) -- ver nota en js/gravity.js.
+    var ceilImg = getSpriteImg(state.ceilVariant ? 'wall_' + state.ceilVariant : floorSpriteKey);
     if (ceilImg.complete && ceilImg.naturalWidth > 0) {
       for (var tx2 = 0; tx2 < canvas.width; tx2 += tileW) {
         ctx.save();
@@ -498,11 +625,23 @@
     ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.setLineDash([2, 3]);
     ctx.beginPath(); ctx.moveTo(endCx, 0); ctx.lineTo(endCx, canvas.height); ctx.stroke(); ctx.setLineDash([]);
 
-    // puertas (banda, igual que el juego real: desde o.x hasta o.x2, todo el alto)
+    // marca de "probar desde acá"
+    if (testXInput) {
+      var testCx = Math.max(0, parseInt(testXInput.value, 10) || 0) * state.zoom;
+      ctx.strokeStyle = '#7CFFB2'; ctx.lineWidth = 2; ctx.setLineDash([6, 3]);
+      ctx.beginPath(); ctx.moveTo(testCx, 0); ctx.lineTo(testCx, canvas.height); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#7CFFB2';
+      ctx.beginPath(); ctx.moveTo(testCx, 0); ctx.lineTo(testCx + 10, 6); ctx.lineTo(testCx, 12); ctx.closePath(); ctx.fill();
+    }
+
+    // puertas (banda, igual que el juego real: de o.x a o.x2, alto y
+    // posición vertical ajustables -- ya no siempre todo el alto)
     state.objects.forEach(function (o) {
       if (o.type !== 'door') return;
+      var doorHBand = ((o.height != null ? o.height : (FLOOR_Y - CEIL_Y)) * (o.scale || 1)) * state.zoom;
+      var doorTopBand = objectDrawY(o) * state.zoom - doorHBand / 2;
       ctx.fillStyle = 'rgba(255,122,61,.18)';
-      ctx.fillRect(o.x * state.zoom, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
+      ctx.fillRect(o.x * state.zoom, doorTopBand, (o.x2 - o.x) * state.zoom, doorHBand);
     });
 
     // objetos -- mismas posiciones/tamaños/anclajes que js/gravity.js draw(),
@@ -525,8 +664,6 @@
           // igual que drawSprite(sprite, sx, py, o.w, h) en el juego real.
           if (o.lethal) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)';
           ctx.drawImage(img, cx, cy - drawH / 2, drawW, drawH);
-        } else if (o.type === 'door') {
-          ctx.drawImage(img, cx, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
         } else {
           ctx.translate(cx, cy);
           if (rot) ctx.rotate(rot);
@@ -535,8 +672,29 @@
         }
         ctx.restore();
         drawnAsSprite = true;
+      } else if (o.type === 'door') {
+        // Sin sprite -- se dibuja como el láser/franja del juego real,
+        // no como una puerta 2D.
+        var doorLineW = Math.max(3, 6 * (o.scale || 1) * state.zoom);
+        var doorColor = KEY_COLORS[o.keyId != null ? String(o.keyId) : 'default'] || KEY_COLORS.default;
+        ctx.save();
+        ctx.shadowColor = doorColor; ctx.shadowBlur = 10;
+        ctx.strokeStyle = doorColor; ctx.lineWidth = doorLineW; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(cx, cy - drawH / 2); ctx.lineTo(cx, cy + drawH / 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1, doorLineW * 0.3);
+        ctx.beginPath(); ctx.moveTo(cx, cy - drawH / 2); ctx.lineTo(cx, cy + drawH / 2); ctx.stroke();
+        ctx.restore();
+        drawnAsSprite = true;
       }
-      if (!drawnAsSprite && o.type !== 'door') {
+      if (o.type === 'key') {
+        var keyRingColor = KEY_COLORS[o.keyId != null ? String(o.keyId) : 'default'] || KEY_COLORS.default;
+        ctx.save();
+        ctx.shadowColor = keyRingColor; ctx.shadowBlur = 8;
+        ctx.strokeStyle = keyRingColor; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, Math.max(drawW, drawH) / 2 + 5, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+      if (!drawnAsSprite) {
         var r = Math.max(6, Math.max(drawW, drawH) / 2) * (selected ? 1.15 : 1);
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -550,7 +708,7 @@
         ctx.beginPath(); ctx.arc(cx, cy, Math.max(drawW, drawH) / 2 + 4, 0, Math.PI * 2); ctx.stroke();
       } else if (selected && o.type === 'door') {
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-        ctx.strokeRect(o.x * state.zoom, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
+        ctx.strokeRect(cx, cy - drawH / 2, drawW, drawH);
       }
     });
 
@@ -595,7 +753,7 @@
     var cy = objectDrawY(o) * state.zoom;
     var sizeW = spriteWorldSize(o);
     var drawW = sizeW.w * state.zoom, drawH = sizeW.h * state.zoom;
-    if (o.type === 'platform' || o.type === 'wall') {
+    if (o.type === 'platform' || o.type === 'wall' || o.type === 'door') {
       return { left: cx, top: cy - drawH / 2, right: cx + drawW, bottom: cy + drawH / 2 };
     }
     return { left: cx - drawW / 2, top: cy - drawH / 2, right: cx + drawW / 2, bottom: cy + drawH / 2 };
@@ -667,6 +825,17 @@
   function findObjectNear(worldX, worldY, thresholdWorld) {
     var best = -1, bestDist = Infinity;
     state.objects.forEach(function (o, i) {
+      // La puerta se dibuja como una franja ancha de o.x a o.x2, no un
+      // punto -- si solo se mide contra o.x, una puerta ensanchada se
+      // vuelve imposible de tocar más allá de su borde izquierdo. Acá
+      // cualquier clic dentro de la franja (con margen) cuenta.
+      if (o.type === 'door' && o.x2 != null) {
+        if (worldX >= o.x - thresholdWorld && worldX <= o.x2 + thresholdWorld) {
+          var doorDist = thresholdWorld * 0.9; // cede el paso a algo más puntual en el mismo lugar
+          if (doorDist < bestDist) { bestDist = doorDist; best = i; }
+        }
+        return;
+      }
       var oy = objectDrawY(o);
       var dx = o.x - worldX, dy = oy - worldY;
       var dist = Math.sqrt(dx * dx + dy * dy);
@@ -743,7 +912,7 @@
       var cp3 = eventCanvasPos(e);
       var dist3 = Math.hypot(cp3.x - hitboxDrag.anchorX, cp3.y - hitboxDrag.anchorY);
       var newHb = hitboxDrag.startHb * (dist3 / hitboxDrag.startDist);
-      o3.hitboxScale = Math.round(Math.max(0.2, Math.min(2, newHb)) * 100) / 100;
+      o3.hitboxScale = Math.round(Math.max(0.05, newHb) * 100) / 100;
       renderProps();
       render();
       return;
@@ -754,7 +923,7 @@
       var cp = eventCanvasPos(e);
       var dist = Math.hypot(cp.x - resizeDrag.centerX, cp.y - resizeDrag.centerY);
       var newScale = resizeDrag.startScale * (dist / resizeDrag.startDist);
-      o2.scale = Math.round(Math.max(0.4, Math.min(3, newScale)) * 100) / 100;
+      o2.scale = Math.round(Math.max(0.05, newScale) * 100) / 100;
       renderProps();
       render();
       return;
@@ -769,7 +938,7 @@
     if (drag.freeY) o.y = Math.round(Math.max(CEIL_Y, Math.min(FLOOR_Y, w.y)));
     if (drag.liftDraggable) {
       var lift = o.surface === 'ceil' ? (w.y - CEIL_Y) : (FLOOR_Y - w.y);
-      o.lift = Math.round(Math.max(0, Math.min(200, lift)));
+      o.lift = Math.round(Math.max(-500, lift));
       renderProps();
     }
     recomputeLength();
@@ -780,16 +949,38 @@
     if (resizeDrag) { resizeDrag = null; renderProps(); }
     if (drag) { drag = null; renderProps(); }
   });
+  var objectClipboard = null;
   window.addEventListener('keydown', function (e) {
-    if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedIndex !== -1 &&
-      document.activeElement && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT' &&
-      panel.classList.contains('active')) {
+    var typing = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT');
+    if (typing || !panel.classList.contains('active')) return;
+    if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedIndex !== -1) {
       e.preventDefault();
+      objectListSelected.delete(state.objects[state.selectedIndex]);
       state.objects.splice(state.selectedIndex, 1);
       state.selectedIndex = -1;
       recomputeLength();
       renderProps();
       render();
+      return;
+    }
+    var ctrl = e.ctrlKey || e.metaKey;
+    if (ctrl && e.key.toLowerCase() === 'c' && state.selectedIndex !== -1) {
+      e.preventDefault();
+      objectClipboard = JSON.parse(JSON.stringify(state.objects[state.selectedIndex]));
+      setStatus('Copiado (' + (OBJECT_TYPES[objectClipboard.type] || { label: objectClipboard.type }).label + ') -- Ctrl+V para pegar');
+      return;
+    }
+    if (ctrl && e.key.toLowerCase() === 'v' && objectClipboard) {
+      e.preventDefault();
+      var copy = JSON.parse(JSON.stringify(objectClipboard));
+      copy.x = Math.round((copy.x || 0) + 40);
+      if (copy.x2 != null) copy.x2 = copy.x + (objectClipboard.x2 - objectClipboard.x);
+      state.objects.push(copy);
+      state.selectedIndex = state.objects.length - 1;
+      recomputeLength();
+      renderProps();
+      render();
+      setStatus('Pegado en x:' + copy.x);
     }
   });
 
@@ -798,7 +989,8 @@
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
     x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
-    height: 'Altura de la pared', hitboxScale: 'Colisión (qué tan justo choca)'
+    height: 'Altura de la pared', hitboxScale: 'Colisión (qué tan justo choca)', power: 'Fuerza del salto',
+    keyId: 'Llave que le corresponde'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }
@@ -823,7 +1015,8 @@
       if (f === 'surface') {
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="surface"><option value="floor"' + (o.surface === 'floor' ? ' selected' : '') + '>Piso</option><option value="ceil"' + (o.surface === 'ceil' ? ' selected' : '') + '>Techo</option></select></label>';
       } else if (f === 'dir') {
-        html += '<label>' + FIELD_LABEL[f] + ' <select data-field="dir"><option value="-1"' + (o.dir === -1 ? ' selected' : '') + '>Hacia arriba</option><option value="1"' + (o.dir === 1 ? ' selected' : '') + '>Hacia abajo</option></select></label>';
+        var dirAutoOpt = o.type === 'pad' ? '<option value=""' + (o.dir == null ? ' selected' : '') + '>Automática (según la superficie)</option>' : '';
+        html += '<label>' + FIELD_LABEL[f] + ' <select data-field="dir">' + dirAutoOpt + '<option value="-1"' + (o.dir === -1 ? ' selected' : '') + '>Hacia arriba</option><option value="1"' + (o.dir === 1 ? ' selected' : '') + '>Hacia abajo</option></select></label>';
       } else if (f === 'form') {
         ['cube', 'ship', 'ball'].forEach(function () {});
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="form">' + ['cube', 'ship', 'ball'].map(function (v) { return '<option value="' + v + '"' + (o.form === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></label>';
@@ -835,9 +1028,15 @@
       } else if (f === 'moving' || f === 'risky' || f === 'lethal') {
         html += '<label><input type="checkbox" data-field="' + f + '"' + (o[f] ? ' checked' : '') + '> ' + FIELD_LABEL[f] + '</label>';
       } else if (f === 'scale') {
-        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.4" max="3" step="0.1" data-field="scale" value="' + (o.scale != null ? o.scale : 1) + '"></label>';
+        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.05" step="0.1" data-field="scale" value="' + (o.scale != null ? o.scale : 1) + '"></label>';
       } else if (f === 'hitboxScale') {
-        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.2" max="2" step="0.1" data-field="hitboxScale" value="' + (o.hitboxScale != null ? o.hitboxScale : 1) + '"></label>';
+        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.05" step="0.1" data-field="hitboxScale" value="' + (o.hitboxScale != null ? o.hitboxScale : 1) + '"></label>';
+      } else if (f === 'power') {
+        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.05" step="0.1" data-field="power" value="' + (o.power != null ? o.power : 1) + '"></label>';
+      } else if (f === 'keyId') {
+        var keyIdCur = o.keyId != null ? String(o.keyId) : '';
+        html += '<label>' + FIELD_LABEL[f] + ' <select data-field="keyId"><option value=""' + (keyIdCur === '' ? ' selected' : '') + '>Ninguna en particular' + (o.type === 'door' ? ' (no bloquea)' : '') + '</option>' +
+          ['1', '2', '3'].map(function (v) { return '<option value="' + v + '"' + (keyIdCur === v ? ' selected' : '') + '>Llave ' + v + '</option>'; }).join('') + '</select></label>';
       } else {
         html += '<label>' + FIELD_LABEL[f] + ' <input type="' + (f === 'linkId' ? 'text' : 'number') + '" data-field="' + f + '" value="' + (o[f] != null ? o[f] : '') + '"></label>';
       }
@@ -851,7 +1050,9 @@
         var val;
         if (input.type === 'checkbox') val = input.checked;
         else if (input.type === 'number') val = input.value === '' ? undefined : Number(input.value);
-        else if (field === 'dir' || field === 'id') val = Number(input.value);
+        else if (field === 'dir') val = input.value === '' ? undefined : Number(input.value);
+        else if (field === 'keyId') val = input.value === '' ? undefined : input.value;
+        else if (field === 'id') val = Number(input.value);
         else val = input.value;
         o[field] = val;
         recomputeLength();
@@ -907,8 +1108,28 @@
 
   /* ---- Verificar / Guardar ---- */
   function currentPayload() {
-    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant, background: state.background };
+    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant, background: state.background, backgroundDim: state.backgroundDim };
   }
+
+  /* ---- Probar desde una posición -- abre el nivel GUARDADO de
+     verdad (no el borrador sin guardar) en una pestaña nueva,
+     arrancando justo ahí en vez de en x:0, para poder ir probando el
+     nivel en partes sin rejugarlo entero cada vez. ---- */
+  if (useSelectedXBtn) {
+    useSelectedXBtn.addEventListener('click', function () {
+      if (state.selectedIndex === -1) { window.alert('Primero seleccioná un obstáculo puesto.'); return; }
+      testXInput.value = Math.round(state.objects[state.selectedIndex].x);
+      render();
+    });
+  }
+  if (playFromBtn) {
+    playFromBtn.addEventListener('click', function () {
+      if (!state.levelId) return;
+      var x = Math.max(0, parseInt(testXInput.value, 10) || 0);
+      window.open('/site/play/gravity.html?level=' + encodeURIComponent(state.levelId) + '&startX=' + x, '_blank');
+    });
+  }
+  if (testXInput) testXInput.addEventListener('input', render);
 
   verifyBtn.addEventListener('click', function () {
     verifyBtn.disabled = true;
