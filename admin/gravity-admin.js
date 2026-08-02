@@ -25,6 +25,7 @@
     spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'variant', 'rotation'], variantBase: 'spike' },
     saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'linkId', 'variant'], variantBase: 'saw' },
     platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'scale', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
+    wall: { label: 'Pared', color: '#FF7A3D', icon: '🧱', anchor: 'surface', fields: ['surface', 'w', 'height', 'scale', 'lift', 'variant'], variantBase: 'wall' },
     gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'scale', 'variant'], variantBase: 'portal' },
     shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'scale', 'variant'], variantBase: 'portal' },
     orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y', 'scale'] },
@@ -36,7 +37,7 @@
     interruptor: { label: 'Interruptor', color: '#7CF6FF', icon: '⊙', anchor: 'full', fields: ['linkId', 'scale'] },
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
-  var TOOL_ORDER = ['spike', 'saw', 'platform', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
+  var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
   function variantCountFor(type) {
     var def = OBJECT_TYPES[type];
     return def && def.variantBase ? (variantCounts[def.variantBase] || 0) : 0;
@@ -67,7 +68,12 @@
   }
 
   /* ---- Paleta ---- */
-  paletteEl.innerHTML = TOOL_ORDER.map(function (t) {
+  // "Mano": no es un tipo de objeto, es un modo -- con ella activa,
+  // tocar la pista NUNCA agrega algo nuevo, solo permite seleccionar
+  // y arrastrar lo que ya está puesto (evita crear un objeto de más
+  // por error al fallar un clic cerca de uno existente).
+  var MOVE_TOOL_HTML = '<button type="button" class="gravity-tool-btn gravity-tool-move' + (state.tool === 'move' ? ' active' : '') + '" data-tool="move">✋ Mover</button>';
+  paletteEl.innerHTML = MOVE_TOOL_HTML + TOOL_ORDER.map(function (t) {
     return '<button type="button" class="gravity-tool-btn' + (t === state.tool ? ' active' : '') + '" data-tool="' + t + '">' +
       OBJECT_TYPES[t].icon + ' ' + OBJECT_TYPES[t].label + '</button>';
   }).join('');
@@ -183,6 +189,7 @@
       case 'spike': obj = { type: 'spike', surface: surface, w: 28, x: x }; break;
       case 'saw': obj = { type: 'saw', surface: surface, x: x }; break;
       case 'platform': obj = { type: 'platform', surface: surface, w: 90, lift: 46, x: x }; break;
+      case 'wall': obj = { type: 'wall', surface: surface, w: 40, height: 80, lift: 0, x: x }; break;
       case 'gravityPortal': obj = { type: 'gravityPortal', dir: -1, x: x }; break;
       case 'shapePortal': obj = { type: 'shapePortal', form: 'ship', x: x }; break;
       case 'orb': obj = { type: 'orb', color: 'yellow', y: y, x: x }; break;
@@ -223,6 +230,10 @@
     if (o.type === 'pad') {
       var padH = 16 * scale;
       return o.surface === 'ceil' ? CEIL_Y + lift + padH / 2 : FLOOR_Y - lift - padH / 2;
+    }
+    if (o.type === 'wall') {
+      var wallH = (o.height || 80) * scale;
+      return o.surface === 'ceil' ? CEIL_Y + lift + wallH / 2 : FLOOR_Y - lift - wallH / 2;
     }
     if (def.anchor === 'free') return (o.y != null ? o.y : MID_Y);
     return MID_Y;
@@ -275,6 +286,7 @@
       case 'spike': return o.variant ? 'spike_' + o.variant : 'spike';
       case 'saw': return o.variant ? 'saw_' + o.variant : 'saw';
       case 'platform': return o.variant ? 'platform_' + o.variant : 'platform';
+      case 'wall': return o.variant ? 'wall_' + o.variant : 'platform';
       case 'gravityPortal': return o.variant ? 'portal_' + o.variant : 'portal_gravity';
       case 'shapePortal': return o.variant ? 'portal_' + o.variant : 'portal_shape';
       case 'orb': return 'orb_' + (o.color || 'yellow');
@@ -295,6 +307,7 @@
       case 'spike': return { w: 40 * scale, h: 30 * scale };
       case 'saw': var sawR = 22 * scale; return { w: sawR * 2, h: sawR * 2 };
       case 'platform': return { w: o.w || 90, h: 14 * scale };
+      case 'wall': return { w: o.w || 40, h: (o.height || 80) * scale };
       case 'gravityPortal': case 'shapePortal': return { w: PORTAL_W * scale, h: PORTAL_H * scale };
       case 'orb': return { w: 32 * scale, h: 32 * scale };
       case 'pad': return { w: 40 * scale, h: 16 * scale };
@@ -387,7 +400,7 @@
         var rot = (o.surface === 'ceil' && (o.type === 'spike' || o.type === 'saw')) ? Math.PI : 0;
         if (o.type === 'spike') rot += (o.rotation || 0) * Math.PI / 180;
         ctx.save();
-        if (o.type === 'platform') {
+        if (o.type === 'platform' || o.type === 'wall') {
           // Ancla en la esquina superior izquierda (o.x), no centrado --
           // igual que drawSprite(sprite, sx, py, o.w, h) en el juego real.
           if (o.lethal) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)';
@@ -442,17 +455,21 @@
 
   canvas.addEventListener('mousedown', function (e) {
     var w = worldFromEvent(e);
-    var hitThreshold = 14 / state.zoom;
+    var isMoveMode = state.tool === 'move';
+    var hitThreshold = (isMoveMode ? 26 : 14) / state.zoom;
     var idx = findObjectNear(w.x, w.y, hitThreshold);
     if (idx !== -1) {
       state.selectedIndex = idx;
       drag = { index: idx, freeY: OBJECT_TYPES[state.objects[idx].type].anchor === 'free', liftDraggable: OBJECT_TYPES[state.objects[idx].type].anchor === 'surface' };
-    } else {
+    } else if (!isMoveMode) {
       var obj = defaultObjectFor(state.tool, w.x, w.y);
       state.objects.push(obj);
       state.selectedIndex = state.objects.length - 1;
       drag = { index: state.selectedIndex, freeY: OBJECT_TYPES[obj.type].anchor === 'free', liftDraggable: OBJECT_TYPES[obj.type].anchor === 'surface' };
       recomputeLength();
+    } else {
+      // Modo "Mover" y no se tocó nada existente: no se crea nada.
+      state.selectedIndex = -1;
     }
     renderProps();
     render();
@@ -494,7 +511,8 @@
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
-    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño'
+    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
+    height: 'Altura de la pared'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }

@@ -1243,6 +1243,30 @@
         var dx = centerWorldX - o.x;
         var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
         if (Math.sqrt(dx * dx + dy * dy) < sawR + PLAYER_SIZE * 0.3) { endGame(); return; }
+      } else if (o.type === 'wall') {
+        // Pared sólida: se puede pisar por arriba (como una
+        // plataforma) pero es imposible atravesarla -- si el cuerpo
+        // del jugador entra en su tramo sin haber aterrizado encima,
+        // pierde (como un pincho, pero con un cuerpo sólido en vez de
+        // una punta).
+        if (overlapsX(o, o.w, centerWorldX)) {
+          var wallLift = o.lift || 0;
+          var wallH = (o.height || 80) * (o.scale || 1);
+          var wallBase = o.surface === 'floor' ? FLOOR_Y - wallLift : CEIL_Y + wallLift;
+          var wallTop = o.surface === 'floor' ? wallBase - wallH : wallBase + wallH;
+          var wallLandedOnTop = false;
+          if (player.form !== 'ship') {
+            if (o.surface === 'floor' && player.gravityDir === 1 && player.y + PLAYER_SIZE >= wallTop && player.y + PLAYER_SIZE <= wallTop + 26 && player.vy >= 0) {
+              player.y = wallTop - PLAYER_SIZE; player.vy = 0; player.grounded = true; wallLandedOnTop = true;
+            } else if (o.surface === 'ceil' && player.gravityDir === -1 && player.y <= wallTop && player.y >= wallTop - 26 && player.vy <= 0) {
+              player.y = wallTop; player.vy = 0; player.grounded = true; wallLandedOnTop = true;
+            }
+          }
+          if (!wallLandedOnTop) {
+            var wallBodyLo = Math.min(wallTop, wallBase), wallBodyHi = Math.max(wallTop, wallBase);
+            if (player.y + PLAYER_SIZE > wallBodyLo && player.y < wallBodyHi) { endGame(); return; }
+          }
+        }
       } else if (o.type === 'interruptor') {
         // Se activa automático al tocarlo, como un jump pad -- nunca es
         // obligatorio: si no se toca, el obstáculo enlazado sigue activo
@@ -1451,6 +1475,13 @@
         if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
         drawSprite(sawSprite, -sawR2, -sawR2, sawR2 * 2, sawR2 * 2);
         ctx.restore();
+      } else if (o.type === 'wall') {
+        var wallDrawLift = o.lift || 0;
+        var wallDrawH = (o.height || 80) * (o.scale || 1);
+        var wallDrawBase = o.surface === 'floor' ? FLOOR_Y - wallDrawLift : CEIL_Y + wallDrawLift;
+        var wallDrawTop = o.surface === 'floor' ? wallDrawBase - wallDrawH : wallDrawBase + wallDrawH;
+        var wallDrawY = Math.min(wallDrawBase, wallDrawTop);
+        drawSprite(o.variant ? 'wall_' + o.variant : 'platform', sx, wallDrawY, o.w, wallDrawH);
       } else if (o.type === 'interruptor') {
         var swScale = o.scale || 1;
         ctx.save();

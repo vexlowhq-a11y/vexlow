@@ -360,6 +360,8 @@ body { padding: 0; }
   font-family: 'Manrope'; font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .gravity-tool-btn.active { border-color: var(--blue-fill); background: var(--blue-tint); color: var(--blue); }
+.gravity-tool-move { border-style: dashed; }
+.gravity-tool-move.active { border-color: #7CFFB2; background: rgba(124,255,178,.12); color: #7CFFB2; }
 .gravity-editor-palette-variants:empty { display: none; }
 .gravity-editor-palette-variants {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px;
