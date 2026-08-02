@@ -1,5 +1,34 @@
 [
   {
+    "startedAt": "2026-08-02T15:30:06.676Z",
+    "finishedAt": "2026-08-02T15:33:11.913Z",
+    "forced": false,
+    "ok": false,
+    "published": [
+      "Exploring Parenting with ChatGPT: Insights from OpenAI's CEO (AI)",
+      "Innovative Apps Flourish Amid AI Predictions of Obsolescence (Technology)",
+      "Stratolaunch Reaches New Heights with Talon-A Hypersonic Vehicle Milestone (Science & Space)",
+      "Marvel's Current Direction with the Hulk: A Closer Look (Entertainment)",
+      "‘Spider-Man: Brand New Day’ Achieves Record-Breaking Box Office Performance (Entertainment)",
+      "Dodgers Shake Up MLB with Skubal Trade (Sports)"
+    ],
+    "topicsCreated": [
+      "Technology / Innovative Apps"
+    ],
+    "imagesGenerated": 4,
+    "trendingUpdated": false,
+    "heroRotated": false,
+    "errors": [
+      {
+        "error": "Imagen para \"Marvel's Current Direction with the Hulk\": OpenAI images API respondió 400: {\n  \"error\": {\n    \"message\": \"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_e1daba7a773d45929b0192993ab838b8.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": null,\n    \"code\": \"moderation_block"
+      },
+      {
+        "error": "Imagen para \"‘Spider-Man: Brand New Day’ Achieves Rec\": OpenAI images API respondió 400: {\n  \"error\": {\n    \"message\": \"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_2ea91bc352fc4ee79eeae67e16686a10.\",\n    \"type\": \"image_generation_user_error\",\n    \"param\": null,\n    \"code\": \"moderation_block"
+      }
+    ],
+    "deploy": "publicado en vexlowhq.com"
+  },
+  {
     "startedAt": "2026-08-02T10:40:29.204Z",
     "finishedAt": "2026-08-02T10:42:59.883Z",
     "forced": false,
