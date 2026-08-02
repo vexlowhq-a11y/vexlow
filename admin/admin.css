@@ -373,17 +373,6 @@ body { padding: 0; }
 }
 #gravityEditorCanvas { display: block; cursor: crosshair; }
 
-.gravity-editor-preview {
-  width: 100%; max-width: 620px; margin: 0 auto 14px; border: 1px solid var(--border); border-radius: var(--radius-m);
-  background: #05060f; overflow: hidden;
-}
-.gravity-editor-preview-head {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px;
-  background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text-muted);
-}
-.gravity-editor-preview-head button { padding: 4px 8px; font-size: 11px; }
-#gravityEditorPreviewFrame { display: block; width: 100%; aspect-ratio: 800 / 360; border: 0; background: #000; }
-
 .gravity-editor-props {
   margin: 14px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-m);
   background: var(--surface-2); font-size: 13px; min-height: 20px;

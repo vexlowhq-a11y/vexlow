@@ -8,15 +8,18 @@
   if (!panel) return;
 
   var FLOOR_Y = 320, CEIL_Y = 40, WORLD_H = 360;
-  var CANVAS_H = 230;
-  var scaleY = CANVAS_H / WORLD_H;
+  var PORTAL_W = 48, PORTAL_H = 64; // igual que en js/gravity.js
   var MID_Y = (FLOOR_Y + CEIL_Y) / 2;
+  // El canvas del editor usa UN SOLO factor de escala (el zoom) para
+  // ancho y alto -- así lo que se ve acá son las proporciones reales
+  // del juego (nada de íconos-boceto a tamaño fijo), solo una copia
+  // más chica o más grande según el zoom elegido.
 
   // Las cantidades de variantes (cuántos spike_vN, saw_vN, etc. existen)
   // NO están fijas acá -- se piden al servidor (que las cuenta mirando
   // el disco) al cargar la pestaña, así una variante nueva subida desde
   // "Sprites" aparece sola en los selectores sin tocar este archivo.
-  var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0 };
+  var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0, wall: 0 };
 
   var OBJECT_TYPES = {
     spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'variant', 'rotation'], variantBase: 'spike' },
@@ -53,8 +56,6 @@
   var propsEl = document.getElementById('gravityEditorProps');
   var floorPickerEl = document.getElementById('gravityEditorFloorPicker');
   var ceilPickerEl = document.getElementById('gravityEditorCeilPicker');
-  var previewFrame = document.getElementById('gravityEditorPreviewFrame');
-  var previewReloadBtn = document.getElementById('gravityEditorPreviewReload');
   var speedListEl = document.getElementById('gravityEditorSpeedList');
   var verifyBtn = document.getElementById('gravityEditorVerifyBtn');
   var saveBtn = document.getElementById('gravityEditorSaveBtn');
@@ -118,20 +119,19 @@
         state.floorVariant = btn.getAttribute('data-floor') || null;
         renderFloorPicker();
         render();
-        schedulePreviewUpdate();
       });
     });
   }
 
-  /* ---- Techo del nivel (mismo pool de bloques que el piso, aparte) ---- */
+  /* ---- Techo / paredes del nivel (pool de bloques propio, aparte del piso) ---- */
   function renderCeilPicker() {
     if (!ceilPickerEl) return;
     var html = '<div class="gravity-variant-swatches">';
     html += '<button type="button" class="gravity-variant-swatch' + (!state.ceilVariant ? ' selected' : '') + '" data-ceil="">Por defecto</button>';
-    for (var vi = 1; vi <= (variantCounts.floor || 0); vi++) {
+    for (var vi = 1; vi <= (variantCounts.wall || 0); vi++) {
       var vid = 'v' + vi;
       html += '<button type="button" class="gravity-variant-swatch' + (state.ceilVariant === vid ? ' selected' : '') +
-        '" data-ceil="' + vid + '"><img src="/site/img/gravitycover/sliced/floor_' + vid + '.png" alt="' + vid + '"></button>';
+        '" data-ceil="' + vid + '"><img src="/site/img/gravitycover/sliced/wall_' + vid + '.png" alt="' + vid + '"></button>';
     }
     html += '</div>';
     ceilPickerEl.innerHTML = html;
@@ -140,7 +140,6 @@
         state.ceilVariant = btn.getAttribute('data-ceil') || null;
         renderCeilPicker();
         render();
-        schedulePreviewUpdate();
       });
     });
   }
@@ -171,7 +170,6 @@
       renderProps();
       render();
       setStatus('Cargado: ' + data.name + ' (' + data.objects.length + ' obstáculos)');
-      schedulePreviewUpdate(true);
     }).catch(function (e) { setStatus('Error cargando el nivel: ' + e.message, true); });
   }
   levelSelect.addEventListener('change', function () { loadLevel(levelSelect.value); });
@@ -202,13 +200,29 @@
   }
   function countOf(type) { return state.objects.filter(function (o) { return o.type === type; }).length; }
 
+  // Centro real en coordenadas de mundo -- las mismas cuentas que usa
+  // js/gravity.js para dibujar/colisionar cada tipo, así lo que se ve
+  // en el editor cae exactamente donde va a cargar en el juego real.
   function objectDrawY(o) {
     var def = OBJECT_TYPES[o.type];
     if (!def) return MID_Y;
-    if (def.anchor === 'surface') {
-      var lift = o.lift || 0;
-      var off = 20 * (o.scale || 1);
-      return o.surface === 'ceil' ? CEIL_Y + off + lift : FLOOR_Y - off - lift;
+    var lift = o.lift || 0;
+    var scale = o.scale || 1;
+    if (o.type === 'spike') {
+      var half = 15 * scale;
+      return o.surface === 'ceil' ? CEIL_Y + half + lift : FLOOR_Y - half - lift;
+    }
+    if (o.type === 'saw') {
+      var sawR = 22 * scale;
+      return o.surface === 'ceil' ? CEIL_Y + sawR + lift : FLOOR_Y - sawR - lift;
+    }
+    if (o.type === 'platform') {
+      var pH = 14 * scale;
+      return o.surface === 'ceil' ? CEIL_Y + lift + pH / 2 : FLOOR_Y - lift - pH / 2;
+    }
+    if (o.type === 'pad') {
+      var padH = 16 * scale;
+      return o.surface === 'ceil' ? CEIL_Y + lift + padH / 2 : FLOOR_Y - lift - padH / 2;
     }
     if (def.anchor === 'free') return (o.y != null ? o.y : MID_Y);
     return MID_Y;
@@ -218,7 +232,6 @@
     var maxX = 0;
     state.objects.forEach(function (o) { maxX = Math.max(maxX, o.x, o.x2 || 0); });
     state.length = Math.round(maxX + 300);
-    schedulePreviewUpdate();
   }
 
   /* ---- Sprites reales para la vista previa (en vez de círculos) ---- */
@@ -232,10 +245,10 @@
     }
     return spriteImgCache[name];
   }
-  var floorColorCache = {};
-  function floorVariantColor(variant) {
-    if (floorColorCache[variant]) return floorColorCache[variant];
-    var img = getSpriteImg('floor_' + variant);
+  var blockColorCache = {};
+  function blockColor(spriteName) {
+    if (blockColorCache[spriteName]) return blockColorCache[spriteName];
+    var img = getSpriteImg(spriteName);
     if (!img.complete || img.naturalWidth === 0) return null;
     try {
       var c = document.createElement('canvas');
@@ -251,7 +264,7 @@
         r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
       }
       var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
-      floorColorCache[variant] = color;
+      blockColorCache[spriteName] = color;
       return color;
     } catch (e) {
       return null;
@@ -272,11 +285,29 @@
     }
   }
 
+  // Tamaño real (mundo) de cada sprite dibujado, MISMAS cuentas que
+  // js/gravity.js draw() -- se multiplican por el zoom (un solo factor
+  // para ancho y alto) para que el editor muestre proporciones 100%
+  // reales, no íconos de tamaño fijo.
+  function spriteWorldSize(o) {
+    var scale = o.scale || 1;
+    switch (o.type) {
+      case 'spike': return { w: 40 * scale, h: 30 * scale };
+      case 'saw': var sawR = 22 * scale; return { w: sawR * 2, h: sawR * 2 };
+      case 'platform': return { w: o.w || 90, h: 14 * scale };
+      case 'gravityPortal': case 'shapePortal': return { w: PORTAL_W * scale, h: PORTAL_H * scale };
+      case 'orb': return { w: 32 * scale, h: 32 * scale };
+      case 'pad': return { w: 40 * scale, h: 16 * scale };
+      case 'key': return { w: 30 * scale, h: 30 * scale };
+      default: return { w: 24 * scale, h: 24 * scale };
+    }
+  }
+
   /* ---- Canvas ---- */
   function render() {
     var worldW = Math.max(state.length + 500, 2500);
     canvas.width = Math.round(worldW * state.zoom);
-    canvas.height = CANVAS_H;
+    canvas.height = Math.round(WORLD_H * state.zoom);
     ctx.fillStyle = '#05060f';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -288,10 +319,11 @@
       ctx.beginPath(); ctx.moveTo(cgx, 0); ctx.lineTo(cgx, canvas.height); ctx.stroke();
     }
 
-    var floorCy = FLOOR_Y * scaleY, ceilCy = CEIL_Y * scaleY;
-    var floorColor = state.floorVariant ? floorVariantColor(state.floorVariant) : null;
-    var ceilColor = state.ceilVariant ? floorVariantColor(state.ceilVariant) : null;
+    var floorCy = FLOOR_Y * state.zoom, ceilCy = CEIL_Y * state.zoom;
+    var floorColor = state.floorVariant ? blockColor('floor_' + state.floorVariant) : null;
+    var ceilColor = state.ceilVariant ? blockColor('wall_' + state.ceilVariant) : null;
     var floorImg = getSpriteImg('floor');
+    var tileW = 110 * state.zoom; // igual que js/gravity.js
     if (floorColor) {
       // Los bloques no son una textura sin costura -- se pinta una
       // franja continua con el color representativo del bloque
@@ -299,7 +331,6 @@
       ctx.fillStyle = floorColor;
       ctx.fillRect(0, floorCy, canvas.width, canvas.height - floorCy);
     } else if (floorImg.complete && floorImg.naturalWidth > 0) {
-      var tileW = Math.max(18, 44 * state.zoom);
       for (var tx = 0; tx < canvas.width; tx += tileW) {
         ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
       }
@@ -308,12 +339,11 @@
       ctx.fillStyle = ceilColor;
       ctx.fillRect(0, 0, canvas.width, ceilCy);
     } else if (floorImg.complete && floorImg.naturalWidth > 0) {
-      var tileW2 = Math.max(18, 44 * state.zoom);
-      for (var tx2 = 0; tx2 < canvas.width; tx2 += tileW2) {
+      for (var tx2 = 0; tx2 < canvas.width; tx2 += tileW) {
         ctx.save();
-        ctx.translate(tx2 + tileW2 / 2, ceilCy);
+        ctx.translate(tx2 + tileW / 2, ceilCy);
         ctx.rotate(Math.PI);
-        ctx.drawImage(floorImg, -tileW2 / 2, -ceilCy, tileW2 + 1, ceilCy);
+        ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
         ctx.restore();
       }
     }
@@ -335,44 +365,59 @@
     ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.setLineDash([2, 3]);
     ctx.beginPath(); ctx.moveTo(endCx, 0); ctx.lineTo(endCx, canvas.height); ctx.stroke(); ctx.setLineDash([]);
 
-    // puertas (banda)
+    // puertas (banda, igual que el juego real: desde o.x hasta o.x2, todo el alto)
     state.objects.forEach(function (o) {
       if (o.type !== 'door') return;
       ctx.fillStyle = 'rgba(255,122,61,.18)';
       ctx.fillRect(o.x * state.zoom, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
     });
 
-    // objetos
+    // objetos -- mismas posiciones/tamaños/anclajes que js/gravity.js draw(),
+    // escalados por el mismo factor de zoom que ya se usó para todo lo demás
     state.objects.forEach(function (o, i) {
       var def = OBJECT_TYPES[o.type] || { color: '#fff', icon: '?' };
       var cx = o.x * state.zoom;
-      var cy = objectDrawY(o) * scaleY;
+      var cy = objectDrawY(o) * state.zoom;
       var selected = i === state.selectedIndex;
       var spriteName = spriteNameFor(o);
       var img = spriteName ? getSpriteImg(spriteName) : null;
+      var sizeW = spriteWorldSize(o), drawW = sizeW.w * state.zoom, drawH = sizeW.h * state.zoom;
       var drawnAsSprite = false;
       if (img && img.complete && img.naturalWidth > 0) {
-        var sz = (o.type === 'platform' ? 26 : (o.type === 'saw' ? 28 : 24)) * (o.scale || 1);
         var rot = (o.surface === 'ceil' && (o.type === 'spike' || o.type === 'saw')) ? Math.PI : 0;
+        if (o.type === 'spike') rot += (o.rotation || 0) * Math.PI / 180;
         ctx.save();
-        ctx.translate(cx, cy);
-        if (rot) ctx.rotate(rot);
-        if (o.type === 'platform' && o.lethal) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)';
-        ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz);
+        if (o.type === 'platform') {
+          // Ancla en la esquina superior izquierda (o.x), no centrado --
+          // igual que drawSprite(sprite, sx, py, o.w, h) en el juego real.
+          if (o.lethal) ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)';
+          ctx.drawImage(img, cx, cy - drawH / 2, drawW, drawH);
+        } else if (o.type === 'door') {
+          ctx.drawImage(img, cx, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
+        } else {
+          ctx.translate(cx, cy);
+          if (rot) ctx.rotate(rot);
+          if (o.surface === 'ceil' && o.type === 'pad') ctx.rotate(Math.PI);
+          ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+        }
         ctx.restore();
         drawnAsSprite = true;
       }
-      if (!drawnAsSprite) {
+      if (!drawnAsSprite && o.type !== 'door') {
+        var r = Math.max(6, Math.max(drawW, drawH) / 2) * (selected ? 1.15 : 1);
         ctx.beginPath();
-        ctx.arc(cx, cy, selected ? 10 : 7, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fillStyle = def.color;
         ctx.fill();
-        ctx.fillStyle = '#05060f'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#05060f'; ctx.font = Math.max(8, r) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(def.icon, cx, cy);
       }
-      if (selected) {
+      if (selected && o.type !== 'door') {
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(cx, cy, drawnAsSprite ? 16 : 10, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, Math.max(drawW, drawH) / 2 + 4, 0, Math.PI * 2); ctx.stroke();
+      } else if (selected && o.type === 'door') {
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.strokeRect(o.x * state.zoom, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
       }
     });
   }
@@ -381,7 +426,7 @@
     var rect = canvas.getBoundingClientRect();
     var cx = e.clientX - rect.left;
     var cy = e.clientY - rect.top;
-    return { x: Math.max(0, Math.round(cx / state.zoom)), y: Math.max(0, Math.min(WORLD_H, cy / scaleY)) };
+    return { x: Math.max(0, Math.round(cx / state.zoom)), y: Math.max(0, Math.min(WORLD_H, cy / state.zoom)) };
   }
 
   function findObjectNear(worldX, worldY, thresholdWorld) {
@@ -512,7 +557,6 @@
         o.variant = btn.getAttribute('data-variant') || undefined;
         renderProps();
         render();
-        schedulePreviewUpdate();
       });
     });
     var delBtn = document.getElementById('gravityEditorDeleteBtn');
@@ -539,7 +583,6 @@
         var field = input.getAttribute('data-field');
         state.speedZones[i][field] = Number(input.value);
         render();
-        schedulePreviewUpdate();
       });
     });
     speedListEl.querySelectorAll('[data-remove]').forEach(function (btn) {
@@ -547,7 +590,6 @@
         state.speedZones.splice(parseInt(btn.getAttribute('data-remove'), 10), 1);
         renderSpeedList();
         render();
-        schedulePreviewUpdate();
       });
     });
   }
@@ -555,7 +597,6 @@
     state.speedZones.push({ x: 0, speed: 0.28 });
     renderSpeedList();
     render();
-    schedulePreviewUpdate();
   });
 
   /* ---- Verificar / Guardar ---- */
@@ -563,29 +604,6 @@
     return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant };
   }
 
-  /* ---- Vista previa en vivo (el juego real, en un iframe) ----
-     Cada cambio en el nivel se manda como "borrador" al servidor (sin
-     tocar js/gravity.js) y el iframe, que carga el juego de verdad
-     con ?preview=<id>, se recarga para reflejarlo -- así el editor
-     nunca reimplementa el dibujo del juego por su cuenta. */
-  var previewTimer = null;
-  var previewReloadCounter = 0;
-  function refreshPreview() {
-    if (!state.levelId || !previewFrame) return;
-    previewReloadCounter++;
-    previewFrame.src = '/site/play/gravity.html?preview=' + encodeURIComponent(state.levelId) + '&r=' + previewReloadCounter;
-  }
-  function schedulePreviewUpdate(immediate) {
-    if (!state.levelId) return;
-    clearTimeout(previewTimer);
-    var run = function () {
-      fetch('/api/gravity-level/draft', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(currentPayload())
-      }).then(function () { refreshPreview(); }).catch(function () {});
-    };
-    if (immediate) run(); else previewTimer = setTimeout(run, 500);
-  }
-  if (previewReloadBtn) previewReloadBtn.addEventListener('click', function () { schedulePreviewUpdate(true); });
   verifyBtn.addEventListener('click', function () {
     verifyBtn.disabled = true;
     setStatus('Verificando con el bot (unos segundos)...');
@@ -651,13 +669,15 @@
 
   /* ---- Sprites (galería de assets reemplazables) ---- */
   var assetGroupsEl = document.getElementById('gravityAssetGroups');
-  var VARIANT_BASE_LABELS = { spike: 'pincho', saw: 'sierra', platform: 'plataforma', portal: 'portal', floor: 'piso' };
+  var OBSTACLE_VARIANT_LABELS = { spike: 'pincho', saw: 'sierra', platform: 'plataforma', portal: 'portal' };
+  var FLOOR_WALL_LABELS = { floor: 'piso', wall: 'pared/techo' };
   function loadAssets() {
     fetch('/api/gravity-assets').then(function (r) { return r.json(); }).then(function (groups) {
       assetGroupsEl.innerHTML = groups.map(function (g) {
-        var isVariantGroup = g.group.indexOf('Variantes') === 0;
-        var addButtons = isVariantGroup ? Object.keys(VARIANT_BASE_LABELS).map(function (base) {
-          return '<label class="gravity-add-variant-btn">+ Agregar ' + VARIANT_BASE_LABELS[base] + ' nuevo' +
+        var labelSet = g.group.indexOf('Variantes') === 0 ? OBSTACLE_VARIANT_LABELS
+          : (g.group === 'Piso / paredes' ? FLOOR_WALL_LABELS : null);
+        var addButtons = labelSet ? Object.keys(labelSet).map(function (base) {
+          return '<label class="gravity-add-variant-btn">+ Agregar ' + labelSet[base] + ' nuevo' +
             '<input type="file" accept="image/*" data-add-variant="' + base + '" hidden></label>';
         }).join('') : '';
         return '<div class="gravity-asset-group"><h3>' + g.group + '</h3>' + addButtons + '<div class="gravity-asset-grid">' +
@@ -726,6 +746,8 @@
       renderPaletteVariants();
       renderProps();
       renderFloorPicker();
+      renderCeilPicker();
+      render();
     }).catch(function () {});
   }
   loadVariantCounts();

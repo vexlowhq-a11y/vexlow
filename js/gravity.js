@@ -306,10 +306,13 @@
   // un canvas auxiliar) en vez de tener una tabla fija -- así
   // funciona automáticamente con cualquier bloque nuevo que se suba,
   // sin tener que tocar este archivo.
-  var floorColorCache = {};
-  function floorVariantColor(variant) {
-    if (floorColorCache[variant]) return floorColorCache[variant];
-    var img = getSprite('floor_' + variant);
+  // Acepta el nombre completo del sprite ("floor_v2", "wall_v1"...) para
+  // servir tanto al piso como al techo/paredes, que tienen su propio
+  // pool de bloques subidos por separado.
+  var blockColorCache = {};
+  function blockColor(spriteName) {
+    if (blockColorCache[spriteName]) return blockColorCache[spriteName];
+    var img = getSprite(spriteName);
     if (!img.complete || img.naturalWidth === 0) return null;
     try {
       var c = document.createElement('canvas');
@@ -325,7 +328,7 @@
         r += data[i] * w; g += data[i + 1] * w; b += data[i + 2] * w; wsum += w;
       }
       var color = wsum > 0 ? 'rgb(' + Math.round(r / wsum) + ',' + Math.round(g / wsum) + ',' + Math.round(b / wsum) + ')' : '#3D3040';
-      floorColorCache[variant] = color;
+      blockColorCache[spriteName] = color;
       return color;
     } catch (e) {
       return null; // ej. lienzo no disponible en el sandbox de pruebas
@@ -1381,11 +1384,11 @@
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
     ctx.restore();
 
-    // Piso y techo se eligen por separado (mismo pool de bloques,
-    // cada uno con su propia variante opcional) -- si no se eligió
-    // ninguno para un lado, ese lado sigue tileando el sprite 'floor'
-    // por defecto como siempre.
-    var floorColor = level && level.floorVariant ? floorVariantColor(level.floorVariant) : null;
+    // Piso y techo/paredes se eligen por separado, cada uno con su
+    // propio pool de bloques subidos (floor_vN / wall_vN) -- si no se
+    // eligió ninguno para un lado, ese lado sigue tileando el sprite
+    // 'floor' por defecto como siempre.
+    var floorColor = level && level.floorVariant ? blockColor('floor_' + level.floorVariant) : null;
     if (floorColor) {
       // Los "bloques" que subió el usuario son íconos individuales, no
       // una textura pensada para repetirse sin costura -- en vez de
@@ -1397,7 +1400,7 @@
       var tileW = 110, floorOff = player.worldX % tileW;
       for (var fx = -floorOff; fx < W; fx += tileW) drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
     }
-    var ceilColor = level && level.ceilVariant ? floorVariantColor(level.ceilVariant) : null;
+    var ceilColor = level && level.ceilVariant ? blockColor('wall_' + level.ceilVariant) : null;
     if (ceilColor) {
       ctx.fillStyle = ceilColor;
       ctx.fillRect(0, 0, W, CEIL_Y);
@@ -1838,44 +1841,8 @@
     });
   }
 
-  /* ---- Modo vista previa (solo para el editor de niveles del admin) ----
-     Con ?preview=level_XX en la URL, en vez de jugar el nivel guardado
-     de verdad, pide el borrador sin guardar (/api/gravity-level/draft)
-     y arranca directo ahí -- así el editor puede mostrar el juego REAL
-     renderizando los cambios en el momento, sin tener que reimplementar
-     el dibujo del juego dos veces. */
-  var previewLevelId = null;
-  try { previewLevelId = new URLSearchParams(window.location.search).get('preview'); } catch (e) {}
-
-  function startGameLoop() {
-    requestAnimationFrame(loop);
-    loadLeaderboard();
-  }
-
-  if (previewLevelId) {
-    fetch('/api/gravity-level/draft?id=' + encodeURIComponent(previewLevelId))
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (draft) {
-        if (draft) {
-          var idx = -1;
-          for (var i = 0; i < LEVELS.length; i++) { if (LEVELS[i].id === previewLevelId) { idx = i; break; } }
-          var patchedBuild = function () {
-            return { objects: draft.objects, length: draft.length, speedZones: draft.speedZones, floorVariant: draft.floorVariant, ceilVariant: draft.ceilVariant };
-          };
-          if (idx !== -1) { LEVELS[idx].build = patchedBuild; currentLevelIndex = idx; }
-          else { LEVELS.push({ id: previewLevelId, name: 'Vista previa', build: patchedBuild, thumb: previewLevelId }); currentLevelIndex = LEVELS.length - 1; }
-        }
-        homeMenuActive = false;
-        if (dashWrap) dashWrap.classList.remove('gravity-home-active');
-        closeOverlay(homeMenu);
-        resetGame();
-        overlay.classList.remove('hidden');
-        startGameLoop();
-      })
-      .catch(function () { resetGame(); renderHomeMenu(); startGameLoop(); });
-  } else {
-    resetGame();
-    renderHomeMenu();
-    startGameLoop();
-  }
+  resetGame();
+  renderHomeMenu();
+  requestAnimationFrame(loop);
+  loadLeaderboard();
 })();

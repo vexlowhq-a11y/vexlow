@@ -112,14 +112,15 @@ function loadLevel(id) {
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
    se pueden reemplazar subiendo una imagen propia. Las "variantes"
-   (spike_vN, saw_vN, platform_vN, portal_vN, floor_vN) no tienen una
+   (spike_vN, saw_vN, platform_vN, portal_vN, floor_vN, wall_vN) no tienen una
    cantidad fija: se cuentan mirando qué archivos existen de verdad en
    el disco, así que agregar una variante nueva (en vez de solo
    reemplazar una existente) es simplemente guardar el siguiente
    número que falte. ---- */
 const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
   'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
-const VARIANT_BASES = ['spike', 'saw', 'platform', 'portal', 'floor'];
+const VARIANT_BASES = ['spike', 'saw', 'platform', 'portal', 'floor', 'wall'];
+const FLOOR_WALL_BASES = ['floor', 'wall'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
 const SKIN_KEYS = Array.from({ length: 72 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
@@ -150,14 +151,20 @@ function addVariant(base, dataBase64) {
 }
 
 function listAssets() {
-  var variantKeys = [];
-  VARIANT_BASES.forEach(function (base) {
+  var obstacleVariantKeys = [];
+  ['spike', 'saw', 'platform', 'portal'].forEach(function (base) {
     var n = countVariant(base);
-    for (var i = 1; i <= n; i++) variantKeys.push(base + '_v' + i);
+    for (var i = 1; i <= n; i++) obstacleVariantKeys.push(base + '_v' + i);
+  });
+  var floorWallKeys = [];
+  FLOOR_WALL_BASES.forEach(function (base) {
+    var n = countVariant(base);
+    for (var i = 1; i <= n; i++) floorWallKeys.push(base + '_v' + i);
   });
   var groups = [
     { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
-    { group: 'Variantes (pincho/sierra/plataforma/portal/piso)', keys: variantKeys, ext: 'png' },
+    { group: 'Variantes (pincho/sierra/plataforma/portal)', keys: obstacleVariantKeys, ext: 'png' },
+    { group: 'Piso / paredes', keys: floorWallKeys, ext: 'png' },
     { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
     { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
     { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }
@@ -175,7 +182,7 @@ function listAssets() {
 }
 
 function assetExt(key) {
-  var variantMatch = /^(spike|saw|platform|portal|floor)_v\d+$/.exec(key);
+  var variantMatch = /^(spike|saw|platform|portal|floor|wall)_v\d+$/.exec(key);
   if (variantMatch) return 'png';
   if (SPRITE_KEYS.indexOf(key) !== -1 || HOME_DECOR_KEYS.indexOf(key) !== -1 || SKIN_KEYS.indexOf(key) !== -1) return 'png';
   if (LEVEL_THUMB_KEYS.indexOf(key) !== -1) return 'jpg';
@@ -465,34 +472,6 @@ function saveLevel(id, levelData) {
   return true;
 }
 
-/* ---- Borradores para la vista previa en vivo del editor ----
-   El editor visual va guardando acá (sin tocar js/gravity.js) el
-   estado que se está editando todavía; el juego real, cargado en un
-   iframe con ?preview=<id>, lo lee para dibujarse -- así la vista
-   previa es el motor de juego de verdad, no una segunda
-   reimplementación del dibujo dentro del admin. */
-const DRAFTS_DIR = path.join(__dirname, 'drafts');
-
-function saveDraft(id, levelData) {
-  if (!id) throw new Error('Falta el id del nivel');
-  fs.mkdirSync(DRAFTS_DIR, { recursive: true });
-  var draft = {
-    objects: levelData.objects || [],
-    length: levelData.length || 0,
-    speedZones: levelData.speedZones || [],
-    floorVariant: levelData.floorVariant || null,
-    ceilVariant: levelData.ceilVariant || null
-  };
-  fs.writeFileSync(path.join(DRAFTS_DIR, id + '.json'), JSON.stringify(draft), 'utf8');
-  return true;
-}
-
-function loadDraft(id) {
-  var file = path.join(DRAFTS_DIR, id + '.json');
-  if (!fs.existsSync(file)) return null;
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
-}
-
 module.exports = {
   listLevels: listLevels,
   loadLevel: loadLevel,
@@ -502,7 +481,5 @@ module.exports = {
   listAssets: listAssets,
   saveAsset: saveAsset,
   getVariantCounts: getVariantCounts,
-  addVariant: addVariant,
-  saveDraft: saveDraft,
-  loadDraft: loadDraft
+  addVariant: addVariant
 };
