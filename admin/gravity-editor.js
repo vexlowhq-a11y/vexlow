@@ -107,7 +107,7 @@ function loadLevel(id) {
   const meta = LEVELS.find(function (l) { return l.id === id; });
   if (!meta) throw new Error('Nivel no encontrado: ' + id);
   const data = meta.build();
-  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null };
+  return { id: meta.id, name: meta.name, thumb: meta.thumb, objects: data.objects, length: data.length, speedZones: data.speedZones, floorVariant: data.floorVariant || null, ceilVariant: data.ceilVariant || null };
 }
 
 /* ---- Sprites / assets del juego -- registro de todos los slots que
@@ -388,7 +388,8 @@ function verifyLevel(id, levelData, maxRealMs) {
       objects: JSON.parse(JSON.stringify(clone.objects)),
       length: clone.length,
       speedZones: JSON.parse(JSON.stringify(clone.speedZones)),
-      floorVariant: clone.floorVariant || null
+      floorVariant: clone.floorVariant || null,
+      ceilVariant: clone.ceilVariant || null
     };
   };
   window.__adminExport.selectLevel(idx);
@@ -425,7 +426,8 @@ function generateBuildFunctionSource(fnName, levelData) {
     else lines.push('    add(' + serializeObjLiteral(e.obj) + ');');
   });
   var floorVariantSrc = levelData.floorVariant ? ", floorVariant: '" + levelData.floorVariant + "'" : '';
-  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ' };');
+  var ceilVariantSrc = levelData.ceilVariant ? ", ceilVariant: '" + levelData.ceilVariant + "'" : '';
+  lines.push('    return { objects: objs, length: ' + levelData.length + ', speedZones: speedZone' + floorVariantSrc + ceilVariantSrc + ' };');
   lines.push('  }');
   return lines.join('\n') + '\n';
 }
@@ -463,6 +465,34 @@ function saveLevel(id, levelData) {
   return true;
 }
 
+/* ---- Borradores para la vista previa en vivo del editor ----
+   El editor visual va guardando acá (sin tocar js/gravity.js) el
+   estado que se está editando todavía; el juego real, cargado en un
+   iframe con ?preview=<id>, lo lee para dibujarse -- así la vista
+   previa es el motor de juego de verdad, no una segunda
+   reimplementación del dibujo dentro del admin. */
+const DRAFTS_DIR = path.join(__dirname, 'drafts');
+
+function saveDraft(id, levelData) {
+  if (!id) throw new Error('Falta el id del nivel');
+  fs.mkdirSync(DRAFTS_DIR, { recursive: true });
+  var draft = {
+    objects: levelData.objects || [],
+    length: levelData.length || 0,
+    speedZones: levelData.speedZones || [],
+    floorVariant: levelData.floorVariant || null,
+    ceilVariant: levelData.ceilVariant || null
+  };
+  fs.writeFileSync(path.join(DRAFTS_DIR, id + '.json'), JSON.stringify(draft), 'utf8');
+  return true;
+}
+
+function loadDraft(id) {
+  var file = path.join(DRAFTS_DIR, id + '.json');
+  if (!fs.existsSync(file)) return null;
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
 module.exports = {
   listLevels: listLevels,
   loadLevel: loadLevel,
@@ -472,5 +502,7 @@ module.exports = {
   listAssets: listAssets,
   saveAsset: saveAsset,
   getVariantCounts: getVariantCounts,
-  addVariant: addVariant
+  addVariant: addVariant,
+  saveDraft: saveDraft,
+  loadDraft: loadDraft
 };

@@ -15,3 +15,6 @@ node_modules/
 
 # Documentos internos de estrategia — no van al repo público
 docs/
+
+# Borradores sin guardar de la vista previa en vivo del editor de niveles
+admin/drafts/

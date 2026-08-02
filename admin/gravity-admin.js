@@ -19,18 +19,18 @@
   var variantCounts = { spike: 0, saw: 0, platform: 0, portal: 0, floor: 0 };
 
   var OBJECT_TYPES = {
-    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'variant', 'rotation'], variantBase: 'spike' },
-    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'linkId', 'variant'], variantBase: 'saw' },
-    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
-    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'variant'], variantBase: 'portal' },
-    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'variant'], variantBase: 'portal' },
-    orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y'] },
-    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'color'] },
-    key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y'] },
+    spike: { label: 'Pincho', color: '#FF3D57', icon: '▲', anchor: 'surface', fields: ['surface', 'lift', 'w', 'scale', 'variant', 'rotation'], variantBase: 'spike' },
+    saw: { label: 'Sierra', color: '#B983FF', icon: '⚙', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'linkId', 'variant'], variantBase: 'saw' },
+    platform: { label: 'Plataforma', color: '#3D8BFF', icon: '▬', anchor: 'surface', fields: ['surface', 'w', 'scale', 'lift', 'lethal', 'moving', 'amp', 'periodMs', 'variant'], variantBase: 'platform' },
+    gravityPortal: { label: 'Portal gravedad', color: '#B983FF', icon: '◐', anchor: 'full', fields: ['dir', 'scale', 'variant'], variantBase: 'portal' },
+    shapePortal: { label: 'Portal forma', color: '#7CF6FF', icon: '◇', anchor: 'full', fields: ['form', 'scale', 'variant'], variantBase: 'portal' },
+    orb: { label: 'Orbe', color: '#FFC93D', icon: '●', anchor: 'free', fields: ['color', 'y', 'scale'] },
+    pad: { label: 'Rampa', color: '#7CF6FF', icon: '^', anchor: 'surface', fields: ['surface', 'lift', 'scale', 'color'] },
+    key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y', 'scale'] },
     door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'full', fields: ['x2'] },
-    coin: { label: 'Moneda', color: '#FFC93D', icon: '◎', anchor: 'free', fields: ['id', 'y', 'risky'] },
-    diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y'] },
-    interruptor: { label: 'Interruptor', color: '#7CF6FF', icon: '⊙', anchor: 'full', fields: ['linkId'] },
+    coin: { label: 'Moneda', color: '#FFC93D', icon: '◎', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
+    diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y', 'scale'] },
+    interruptor: { label: 'Interruptor', color: '#7CF6FF', icon: '⊙', anchor: 'full', fields: ['linkId', 'scale'] },
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
   var TOOL_ORDER = ['spike', 'saw', 'platform', 'gravityPortal', 'shapePortal', 'orb', 'pad', 'key', 'door', 'coin', 'diamond', 'interruptor', 'finish'];
@@ -52,6 +52,9 @@
   var ctx = canvas.getContext('2d');
   var propsEl = document.getElementById('gravityEditorProps');
   var floorPickerEl = document.getElementById('gravityEditorFloorPicker');
+  var ceilPickerEl = document.getElementById('gravityEditorCeilPicker');
+  var previewFrame = document.getElementById('gravityEditorPreviewFrame');
+  var previewReloadBtn = document.getElementById('gravityEditorPreviewReload');
   var speedListEl = document.getElementById('gravityEditorSpeedList');
   var verifyBtn = document.getElementById('gravityEditorVerifyBtn');
   var saveBtn = document.getElementById('gravityEditorSaveBtn');
@@ -114,6 +117,30 @@
       btn.addEventListener('click', function () {
         state.floorVariant = btn.getAttribute('data-floor') || null;
         renderFloorPicker();
+        render();
+        schedulePreviewUpdate();
+      });
+    });
+  }
+
+  /* ---- Techo del nivel (mismo pool de bloques que el piso, aparte) ---- */
+  function renderCeilPicker() {
+    if (!ceilPickerEl) return;
+    var html = '<div class="gravity-variant-swatches">';
+    html += '<button type="button" class="gravity-variant-swatch' + (!state.ceilVariant ? ' selected' : '') + '" data-ceil="">Por defecto</button>';
+    for (var vi = 1; vi <= (variantCounts.floor || 0); vi++) {
+      var vid = 'v' + vi;
+      html += '<button type="button" class="gravity-variant-swatch' + (state.ceilVariant === vid ? ' selected' : '') +
+        '" data-ceil="' + vid + '"><img src="/site/img/gravitycover/sliced/floor_' + vid + '.png" alt="' + vid + '"></button>';
+    }
+    html += '</div>';
+    ceilPickerEl.innerHTML = html;
+    ceilPickerEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.ceilVariant = btn.getAttribute('data-ceil') || null;
+        renderCeilPicker();
+        render();
+        schedulePreviewUpdate();
       });
     });
   }
@@ -135,13 +162,16 @@
       state.speedZones = data.speedZones;
       state.length = data.length;
       state.floorVariant = data.floorVariant || null;
+      state.ceilVariant = data.ceilVariant || null;
       state.selectedIndex = -1;
       levelSelect.value = id;
       renderSpeedList();
       renderFloorPicker();
+      renderCeilPicker();
       renderProps();
       render();
       setStatus('Cargado: ' + data.name + ' (' + data.objects.length + ' obstáculos)');
+      schedulePreviewUpdate(true);
     }).catch(function (e) { setStatus('Error cargando el nivel: ' + e.message, true); });
   }
   levelSelect.addEventListener('change', function () { loadLevel(levelSelect.value); });
@@ -177,7 +207,8 @@
     if (!def) return MID_Y;
     if (def.anchor === 'surface') {
       var lift = o.lift || 0;
-      return o.surface === 'ceil' ? CEIL_Y + 20 + lift : FLOOR_Y - 20 - lift;
+      var off = 20 * (o.scale || 1);
+      return o.surface === 'ceil' ? CEIL_Y + off + lift : FLOOR_Y - off - lift;
     }
     if (def.anchor === 'free') return (o.y != null ? o.y : MID_Y);
     return MID_Y;
@@ -187,6 +218,7 @@
     var maxX = 0;
     state.objects.forEach(function (o) { maxX = Math.max(maxX, o.x, o.x2 || 0); });
     state.length = Math.round(maxX + 300);
+    schedulePreviewUpdate();
   }
 
   /* ---- Sprites reales para la vista previa (en vez de círculos) ---- */
@@ -258,25 +290,31 @@
 
     var floorCy = FLOOR_Y * scaleY, ceilCy = CEIL_Y * scaleY;
     var floorColor = state.floorVariant ? floorVariantColor(state.floorVariant) : null;
+    var ceilColor = state.ceilVariant ? floorVariantColor(state.ceilVariant) : null;
+    var floorImg = getSpriteImg('floor');
     if (floorColor) {
       // Los bloques no son una textura sin costura -- se pinta una
       // franja continua con el color representativo del bloque
       // elegido, igual que en el juego real.
       ctx.fillStyle = floorColor;
       ctx.fillRect(0, floorCy, canvas.width, canvas.height - floorCy);
+    } else if (floorImg.complete && floorImg.naturalWidth > 0) {
+      var tileW = Math.max(18, 44 * state.zoom);
+      for (var tx = 0; tx < canvas.width; tx += tileW) {
+        ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
+      }
+    }
+    if (ceilColor) {
+      ctx.fillStyle = ceilColor;
       ctx.fillRect(0, 0, canvas.width, ceilCy);
-    } else {
-      var floorImg = getSpriteImg('floor');
-      if (floorImg.complete && floorImg.naturalWidth > 0) {
-        var tileW = Math.max(18, 44 * state.zoom);
-        for (var tx = 0; tx < canvas.width; tx += tileW) {
-          ctx.drawImage(floorImg, tx, floorCy, tileW + 1, canvas.height - floorCy);
-          ctx.save();
-          ctx.translate(tx + tileW / 2, ceilCy);
-          ctx.rotate(Math.PI);
-          ctx.drawImage(floorImg, -tileW / 2, -ceilCy, tileW + 1, ceilCy);
-          ctx.restore();
-        }
+    } else if (floorImg.complete && floorImg.naturalWidth > 0) {
+      var tileW2 = Math.max(18, 44 * state.zoom);
+      for (var tx2 = 0; tx2 < canvas.width; tx2 += tileW2) {
+        ctx.save();
+        ctx.translate(tx2 + tileW2 / 2, ceilCy);
+        ctx.rotate(Math.PI);
+        ctx.drawImage(floorImg, -tileW2 / 2, -ceilCy, tileW2 + 1, ceilCy);
+        ctx.restore();
       }
     }
     ctx.strokeStyle = 'rgba(185,131,255,.55)'; ctx.lineWidth = 2;
@@ -314,7 +352,7 @@
       var img = spriteName ? getSpriteImg(spriteName) : null;
       var drawnAsSprite = false;
       if (img && img.complete && img.naturalWidth > 0) {
-        var sz = o.type === 'platform' ? 26 : (o.type === 'saw' ? 28 : 24);
+        var sz = (o.type === 'platform' ? 26 : (o.type === 'saw' ? 28 : 24)) * (o.scale || 1);
         var rot = (o.surface === 'ceil' && (o.type === 'spike' || o.type === 'saw')) ? Math.PI : 0;
         ctx.save();
         ctx.translate(cx, cy);
@@ -411,7 +449,7 @@
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
     dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID moneda', risky: 'Riesgosa',
-    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?'
+    x2: 'Hasta x', linkId: 'Vínculo (linkId)', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño'
   };
   function renderProps() {
     if (state.selectedIndex === -1) { propsEl.innerHTML = ''; return; }
@@ -447,6 +485,8 @@
         html += '<label>' + FIELD_LABEL[f] + ' <select data-field="id">' + [0, 1, 2].map(function (v) { return '<option value="' + v + '"' + (o.id === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></label>';
       } else if (f === 'moving' || f === 'risky' || f === 'lethal') {
         html += '<label><input type="checkbox" data-field="' + f + '"' + (o[f] ? ' checked' : '') + '> ' + FIELD_LABEL[f] + '</label>';
+      } else if (f === 'scale') {
+        html += '<label>' + FIELD_LABEL[f] + ' <input type="number" min="0.4" max="3" step="0.1" data-field="scale" value="' + (o.scale != null ? o.scale : 1) + '"></label>';
       } else {
         html += '<label>' + FIELD_LABEL[f] + ' <input type="' + (f === 'linkId' ? 'text' : 'number') + '" data-field="' + f + '" value="' + (o[f] != null ? o[f] : '') + '"></label>';
       }
@@ -472,6 +512,7 @@
         o.variant = btn.getAttribute('data-variant') || undefined;
         renderProps();
         render();
+        schedulePreviewUpdate();
       });
     });
     var delBtn = document.getElementById('gravityEditorDeleteBtn');
@@ -498,6 +539,7 @@
         var field = input.getAttribute('data-field');
         state.speedZones[i][field] = Number(input.value);
         render();
+        schedulePreviewUpdate();
       });
     });
     speedListEl.querySelectorAll('[data-remove]').forEach(function (btn) {
@@ -505,6 +547,7 @@
         state.speedZones.splice(parseInt(btn.getAttribute('data-remove'), 10), 1);
         renderSpeedList();
         render();
+        schedulePreviewUpdate();
       });
     });
   }
@@ -512,12 +555,37 @@
     state.speedZones.push({ x: 0, speed: 0.28 });
     renderSpeedList();
     render();
+    schedulePreviewUpdate();
   });
 
   /* ---- Verificar / Guardar ---- */
   function currentPayload() {
-    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant };
+    return { id: state.levelId, objects: state.objects, length: state.length, speedZones: state.speedZones, floorVariant: state.floorVariant, ceilVariant: state.ceilVariant };
   }
+
+  /* ---- Vista previa en vivo (el juego real, en un iframe) ----
+     Cada cambio en el nivel se manda como "borrador" al servidor (sin
+     tocar js/gravity.js) y el iframe, que carga el juego de verdad
+     con ?preview=<id>, se recarga para reflejarlo -- así el editor
+     nunca reimplementa el dibujo del juego por su cuenta. */
+  var previewTimer = null;
+  var previewReloadCounter = 0;
+  function refreshPreview() {
+    if (!state.levelId || !previewFrame) return;
+    previewReloadCounter++;
+    previewFrame.src = '/site/play/gravity.html?preview=' + encodeURIComponent(state.levelId) + '&r=' + previewReloadCounter;
+  }
+  function schedulePreviewUpdate(immediate) {
+    if (!state.levelId) return;
+    clearTimeout(previewTimer);
+    var run = function () {
+      fetch('/api/gravity-level/draft', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(currentPayload())
+      }).then(function () { refreshPreview(); }).catch(function () {});
+    };
+    if (immediate) run(); else previewTimer = setTimeout(run, 500);
+  }
+  if (previewReloadBtn) previewReloadBtn.addEventListener('click', function () { schedulePreviewUpdate(true); });
   verifyBtn.addEventListener('click', function () {
     verifyBtn.disabled = true;
     setStatus('Verificando con el bot (unos segundos)...');

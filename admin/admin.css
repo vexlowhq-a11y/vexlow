@@ -367,11 +367,25 @@ body { padding: 0; }
 }
 .gravity-palette-variants-label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
 
+.gravity-editor-dual { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 6px; }
 .gravity-editor-canvas-wrap {
-  width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border);
-  border-radius: var(--radius-m); background: #05060f; margin-bottom: 6px;
+  flex: 1 1 420px; min-width: 280px; max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border);
+  border-radius: var(--radius-m); background: #05060f; margin-bottom: 0;
 }
 #gravityEditorCanvas { display: block; cursor: crosshair; }
+
+.gravity-editor-preview {
+  flex: 0 0 300px; border: 1px solid var(--border); border-radius: var(--radius-m); background: #05060f; overflow: hidden;
+}
+.gravity-editor-preview-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text-muted);
+}
+.gravity-editor-preview-head button { padding: 4px 8px; font-size: 11px; }
+#gravityEditorPreviewFrame { display: block; width: 100%; height: 230px; border: 0; background: #000; }
+@media (max-width: 900px) {
+  .gravity-editor-preview { flex-basis: 100%; }
+}
 
 .gravity-editor-props {
   margin: 14px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-m);
@@ -394,6 +408,9 @@ body { padding: 0; }
 }
 .gravity-variant-swatch img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .gravity-variant-swatch.selected { border-color: var(--blue-fill); }
+
+.gravity-editor-floor-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.gravity-editor-floor-row .gravity-editor-floor { flex: 1 1 260px; }
 
 .gravity-editor-speedzones h3 { font-size: 14px; margin-bottom: 8px; }
 .gravity-speed-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }

@@ -708,6 +708,30 @@ var server = http.createServer(function (req, res) {
       }
     });
   }
+  if (urlPath === '/api/gravity-level/draft' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.id || !Array.isArray(data.objects)) {
+        return sendJSON(res, 400, { error: 'Faltan datos del borrador' });
+      }
+      try {
+        gravityEditor.saveDraft(data.id, data);
+        return sendJSON(res, 200, { ok: true });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/gravity-level/draft' && req.method === 'GET') {
+    var draftId = new URL(req.url, 'http://localhost').searchParams.get('id');
+    if (!draftId) return sendJSON(res, 400, { error: 'Falta el id del nivel' });
+    try {
+      var draft = gravityEditor.loadDraft(draftId);
+      if (!draft) return sendJSON(res, 404, { error: 'No hay borrador para ese nivel' });
+      return sendJSON(res, 200, draft);
+    } catch (e) {
+      return sendJSON(res, 400, { error: e.message });
+    }
+  }
 
   // ---- Publicación automática (bot) ----
   if (urlPath === '/api/automation-config' && req.method === 'GET') {

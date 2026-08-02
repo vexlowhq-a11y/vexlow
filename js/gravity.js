@@ -1195,9 +1195,10 @@
       level.objects.forEach(function (o) {
         if (o.type !== 'platform') return;
         if (!overlapsX(o, o.w, centerWorldX)) return;
+        var platformH = 14 * (o.scale || 1);
         var topY = surfaceYFor(o) - (o.surface === 'floor' ? 0 : 0);
-        var platformTop = o.surface === 'floor' ? topY - 14 : topY;
-        var platformBottom = o.surface === 'floor' ? topY : topY + 14;
+        var platformTop = o.surface === 'floor' ? topY - platformH : topY;
+        var platformBottom = o.surface === 'floor' ? topY : topY + platformH;
         if (o.surface === 'floor' && player.gravityDir === 1) {
           if (player.y + PLAYER_SIZE >= platformTop && player.y + PLAYER_SIZE <= platformTop + 26 && player.vy >= 0) {
             if (o.lethal) { endGame(); return; }
@@ -1226,16 +1227,19 @@
 
       if (o.type === 'spike') {
         var spikeLift = o.lift || 0;
+        var spikeScale = o.scale || 1;
+        var spikeHalf = 18 * spikeScale;
         var spikeY = o.surface === 'floor' ? FLOOR_Y - spikeLift : CEIL_Y + spikeLift;
-        var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - 18 && player.y + PLAYER_SIZE < spikeY + 18 : player.y < spikeY + 18 && player.y > spikeY - 18;
+        var near = o.surface === 'floor' ? player.y + PLAYER_SIZE > spikeY - spikeHalf && player.y + PLAYER_SIZE < spikeY + spikeHalf : player.y < spikeY + spikeHalf && player.y > spikeY - spikeHalf;
         if (near && overlapsX(o, o.w, centerWorldX)) { endGame(); return; }
       } else if (o.type === 'saw') {
         if (o.linkId && level.switches[o.linkId]) continue; // desactivada por interruptor
         var sawLift = o.lift || 0;
-        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 - sawLift : CEIL_Y + 22 + sawLift;
+        var sawR = 22 * (o.scale || 1);
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - sawR - sawLift : CEIL_Y + sawR + sawLift;
         var dx = centerWorldX - o.x;
         var dy = (player.y + PLAYER_SIZE / 2) - sawCY;
-        if (Math.sqrt(dx * dx + dy * dy) < 22 + PLAYER_SIZE * 0.3) { endGame(); return; }
+        if (Math.sqrt(dx * dx + dy * dy) < sawR + PLAYER_SIZE * 0.3) { endGame(); return; }
       } else if (o.type === 'interruptor') {
         // Se activa automático al tocarlo, como un jump pad -- nunca es
         // obligatorio: si no se toca, el obstáculo enlazado sigue activo
@@ -1248,23 +1252,25 @@
           spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 12);
         }
       } else if (o.type === 'diamond') {
-        if (!hasDiamond && overlapsX(o, 24, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26) {
+        var diamondScale = o.scale || 1;
+        if (!hasDiamond && overlapsX(o, 24 * diamondScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * diamondScale) {
           hasDiamond = true;
           o.dead = true;
           playPickup();
           spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 14);
         }
       } else if (o.type === 'gravityPortal') {
-        if (!o.used && overlapsX(o, 30, centerWorldX)) {
+        var gpTrigger = 30 * (o.scale || 1);
+        if (!o.used && overlapsX(o, gpTrigger, centerWorldX)) {
           o.used = true;
           player.gravityDir = o.dir;
           player.vy = 0;
           playPortal();
-        } else if (o.used && !overlapsX(o, 30, centerWorldX)) {
+        } else if (o.used && !overlapsX(o, gpTrigger, centerWorldX)) {
           o.used = false; // re-armar cuando el jugador ya pasó, por si reinicia y vuelve a cruzar (no aplica en un nivel lineal, pero evita dobles disparos raros)
         }
       } else if (o.type === 'shapePortal') {
-        if (!o.used && overlapsX(o, 30, centerWorldX)) {
+        if (!o.used && overlapsX(o, 30 * (o.scale || 1), centerWorldX)) {
           o.used = true;
           player.form = o.form;
           if (o.form !== 'ship') {
@@ -1280,13 +1286,15 @@
           playPortal();
         }
       } else if (o.type === 'orb') {
-        var orbNear = Math.abs(centerWorldX - o.x) < 26 && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 30;
+        var orbScale = o.scale || 1;
+        var orbNear = Math.abs(centerWorldX - o.x) < 26 * orbScale && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 30 * orbScale;
         o.playerNear = orbNear;
       } else if (o.type === 'pad') {
         if (!o.used && overlapsX(o, 40, centerWorldX)) {
           var padLift = o.lift || 0;
+          var padHalf = 24 * (o.scale || 1);
           var padSurfaceY = o.surface === 'floor' ? FLOOR_Y - padLift : CEIL_Y + padLift;
-          var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - 24 && player.y + PLAYER_SIZE < padSurfaceY + 24 : player.y < padSurfaceY + 24 && player.y > padSurfaceY - 24;
+          var padNear = o.surface === 'floor' ? player.y + PLAYER_SIZE > padSurfaceY - padHalf && player.y + PLAYER_SIZE < padSurfaceY + padHalf : player.y < padSurfaceY + padHalf && player.y > padSurfaceY - padHalf;
           if (padNear) {
             o.used = true;
             var padV = o.color === 'yellow' ? ORB_YELLOW_V : o.color === 'pink' ? ORB_PINK_V : 0.62;
@@ -1297,7 +1305,8 @@
           }
         }
       } else if (o.type === 'key') {
-        if (!hasKey && overlapsX(o, 26, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 28) {
+        var keyScale = o.scale || 1;
+        if (!hasKey && overlapsX(o, 26 * keyScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 28 * keyScale) {
           hasKey = true;
           o.dead = true;
           keyEl.textContent = '🔑';
@@ -1312,7 +1321,8 @@
         // llave) y nunca mata, evitando una muerte injusta garantizada
         // si alguien llega sin la llave.
       } else if (o.type === 'coin') {
-        if (coinsCollected.indexOf(o.id) === -1 && overlapsX(o, 24, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26) {
+        var coinScale = o.scale || 1;
+        if (coinsCollected.indexOf(o.id) === -1 && overlapsX(o, 24 * coinScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * coinScale) {
           coinsCollected.push(o.id);
           o.dead = true;
           coinsEl.textContent = '🪙 ' + coinsCollected.length + '/3';
@@ -1420,36 +1430,41 @@
         var spikeBaseRot = o.surface === 'ceil' ? Math.PI : 0;
         var spikeExtraRot = (o.rotation || 0) * Math.PI / 180;
         var spikeLiftDraw = o.lift || 0;
+        var spikeDrawScale = o.scale || 1;
         var spikeCY = o.surface === 'ceil' ? CEIL_Y + 15 + spikeLiftDraw : FLOOR_Y - 15 - spikeLiftDraw;
         ctx.save();
         ctx.translate(sx + 14, spikeCY);
         ctx.rotate(spikeBaseRot + spikeExtraRot);
-        drawSprite(spikeSprite, -20, -15, 40, 30);
+        drawSprite(spikeSprite, -20 * spikeDrawScale, -15 * spikeDrawScale, 40 * spikeDrawScale, 30 * spikeDrawScale);
         ctx.restore();
       } else if (o.type === 'saw') {
         var sawSprite = o.variant ? 'saw_' + o.variant : 'saw';
         var sawDisabled = o.linkId && level.switches && level.switches[o.linkId];
         var sawLiftDraw = o.lift || 0;
-        var sawCY = o.surface === 'floor' ? FLOOR_Y - 22 - sawLiftDraw : CEIL_Y + 22 + sawLiftDraw;
+        var sawR2 = 22 * (o.scale || 1);
+        var sawCY = o.surface === 'floor' ? FLOOR_Y - sawR2 - sawLiftDraw : CEIL_Y + sawR2 + sawLiftDraw;
         ctx.save();
         ctx.translate(sx, sawCY);
         if (sawDisabled) ctx.globalAlpha = 0.3; else ctx.rotate(elapsedMs * 0.006);
-        drawSprite(sawSprite, -22, -22, 44, 44);
+        drawSprite(sawSprite, -sawR2, -sawR2, sawR2 * 2, sawR2 * 2);
         ctx.restore();
       } else if (o.type === 'interruptor') {
+        var swScale = o.scale || 1;
         ctx.save();
         ctx.translate(sx, (FLOOR_Y + CEIL_Y) / 2);
         var swOn = level.switches && level.switches[o.linkId];
         ctx.fillStyle = swOn ? '#7CFFB2' : '#7CF6FF';
         ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 12;
-        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 14 * swScale, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#05060f';
-        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, 6 * swScale, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       } else if (o.type === 'diamond' && !o.dead) {
+        var diamondDrawScale = o.scale || 1;
         ctx.save();
         ctx.translate(sx, o.y);
         ctx.rotate(Math.sin(elapsedMs * 0.003) * 0.15);
+        ctx.scale(diamondDrawScale, diamondDrawScale);
         ctx.fillStyle = '#7CF6FF';
         ctx.shadowColor = '#7CF6FF'; ctx.shadowBlur = 12;
         ctx.beginPath();
@@ -1457,13 +1472,14 @@
         ctx.closePath(); ctx.fill();
         ctx.restore();
       } else if (o.type === 'platform') {
-        var py = surfaceYFor(o) - (o.surface === 'floor' ? 14 : 0);
+        var platformDrawH = 14 * (o.scale || 1);
+        var py = surfaceYFor(o) - (o.surface === 'floor' ? platformDrawH : 0);
         ctx.save();
         // Las plataformas "letales" se ven con un tinte rojo -- es un
         // peligro real (mata al tocarla), así que tiene que ser visible
         // en vez de una trampa invisible.
         if (o.lethal) { ctx.filter = 'sepia(1) saturate(6) hue-rotate(-40deg) brightness(.9)'; }
-        drawSprite(o.variant ? 'platform_' + o.variant : 'platform', sx, py, o.w, 14);
+        drawSprite(o.variant ? 'platform_' + o.variant : 'platform', sx, py, o.w, platformDrawH);
         ctx.restore();
       } else if (o.type === 'gravityPortal') {
         // Tamaño fijo y centrado en la pantalla -- antes se estiraba
@@ -1471,24 +1487,32 @@
         // sprite. El área donde el portal REALMENTE activa sigue
         // siendo la franja completa (overlapsX de abajo), esto es
         // solo el dibujo.
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - PORTAL_W / 2, MID_Y - PORTAL_H / 2, PORTAL_W, PORTAL_H);
+        var gpDrawScale = o.scale || 1;
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_gravity', sx - PORTAL_W * gpDrawScale / 2, MID_Y - PORTAL_H * gpDrawScale / 2, PORTAL_W * gpDrawScale, PORTAL_H * gpDrawScale);
       } else if (o.type === 'shapePortal') {
-        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W / 2, MID_Y - PORTAL_H / 2, PORTAL_W, PORTAL_H);
+        var spDrawScale = o.scale || 1;
+        drawSprite(o.variant ? 'portal_' + o.variant : 'portal_shape', sx - PORTAL_W * spDrawScale / 2, MID_Y - PORTAL_H * spDrawScale / 2, PORTAL_W * spDrawScale, PORTAL_H * spDrawScale);
       } else if (o.type === 'orb') {
         var sy = o.y;
+        var orbDrawScale = o.scale || 1;
+        var orbSz = 32 * orbDrawScale;
         ctx.save();
         if (o.playerNear) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 14; }
-        drawSprite('orb_' + o.color, sx - 16, sy - 16, 32, 32);
+        drawSprite('orb_' + o.color, sx - orbSz / 2, sy - orbSz / 2, orbSz, orbSz);
         ctx.restore();
       } else if (o.type === 'pad') {
         var padLiftDraw = o.lift || 0;
-        var padY = o.surface === 'floor' ? FLOOR_Y - 16 - padLiftDraw : CEIL_Y + padLiftDraw;
+        var padDrawScale = o.scale || 1;
+        var padW = 40 * padDrawScale, padH = 16 * padDrawScale;
+        var padY = o.surface === 'floor' ? FLOOR_Y - padH - padLiftDraw : CEIL_Y + padLiftDraw;
         ctx.save();
-        if (o.surface === 'ceil') { ctx.translate(sx, padY + 16); ctx.rotate(Math.PI); drawSprite('pad_' + o.color, -20, -16, 40, 16); }
-        else { drawSprite('pad_' + o.color, sx - 20, padY, 40, 16); }
+        if (o.surface === 'ceil') { ctx.translate(sx, padY + padH); ctx.rotate(Math.PI); drawSprite('pad_' + o.color, -padW / 2, -padH, padW, padH); }
+        else { drawSprite('pad_' + o.color, sx - padW / 2, padY, padW, padH); }
         ctx.restore();
       } else if (o.type === 'key' && !o.dead) {
-        drawSprite('key', sx - 15, o.y - 15, 30, 30);
+        var keyDrawScale = o.scale || 1;
+        var keySz = 30 * keyDrawScale;
+        drawSprite('key', sx - keySz / 2, o.y - keySz / 2, keySz, keySz);
       } else if (o.type === 'door') {
         ctx.save();
         var doorW = o.x2 - o.x;
@@ -1496,9 +1520,10 @@
         if (!o.open) drawSprite('door', sx, CEIL_Y, doorW, FLOOR_Y - CEIL_Y);
         ctx.restore();
       } else if (o.type === 'coin' && !o.dead) {
+        var coinDrawScale = o.scale || 1;
         ctx.save();
         ctx.translate(sx, o.y);
-        ctx.scale(Math.abs(Math.cos(elapsedMs * 0.004)), 1);
+        ctx.scale(Math.abs(Math.cos(elapsedMs * 0.004)) * coinDrawScale, coinDrawScale);
         ctx.fillStyle = '#FFC93D';
         ctx.shadowColor = '#FFC93D'; ctx.shadowBlur = 10;
         ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
