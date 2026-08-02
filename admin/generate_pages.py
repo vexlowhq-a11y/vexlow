@@ -1062,12 +1062,6 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
               <div class="gravity-player-avatar"><img id="gravityHomeAvatar" src="../img/gravitycover/sliced/skin_01.png" alt=""></div>
               <div class="gravity-player-info">
                 <strong id="gravityHomeName">PLAYER</strong>
-                <div class="gravity-player-stars">⭐ <span id="gravityHomeStars">0/30</span></div>
-                <div class="gravity-player-stars gravity-player-diamonds">💎 <span id="gravityHomeDiamonds">0</span></div>
-                <div class="gravity-player-progress-row">
-                  <div class="gravity-player-progress-bar"><div class="gravity-player-progress-fill" id="gravityHomeProgressFill"></div></div>
-                  <span class="gravity-player-lvl" id="gravityHomeLvl">LVL 0</span>
-                </div>
               </div>
             </div>
             <div class="gravity-home-icons">
@@ -1076,24 +1070,32 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
             </div>
           </div>
           <h2 class="gravity-home-title"><span class="line line-1">GRAVITY</span><span class="line line-2">FLIP</span></h2>
-          <div class="gravity-home-actions">
-            <button type="button" class="gravity-oct gravity-oct-side" id="gravityHomeLevelsBtn">
-              <span class="gravity-oct-icon">🗺️</span><span>NIVELES</span>
-              <i class="gravity-oct-tri"></i>
-            </button>
-            <button type="button" class="gravity-oct gravity-oct-play" id="gravityHomePlayBtn">
-              <span class="gravity-oct-icon">▶</span><span>JUGAR</span>
-              <i class="gravity-oct-tri"></i>
-            </button>
-            <button type="button" class="gravity-oct gravity-oct-side" id="gravityHomeSkinsBtn">
-              <span class="gravity-oct-icon">🧑‍🚀</span><span>SKINS</span>
-              <i class="gravity-oct-tri"></i>
-            </button>
-          </div>
           <div class="gravity-home-platform" style="background-image:url('../img/gravitycover/sliced/home_platform.png')"></div>
-          <div class="gravity-home-bottom-row">
-            <span class="gravity-chip">🪙 <span id="gravityHomeCoins">0</span></span>
-            <p class="gravity-home-tip">◇ ⭐ ¡Completá niveles y conseguí recompensas! ⭐ ◇</p>
+          <div class="gravity-home-bottombar">
+            <div class="gravity-stats-pill">
+              <span class="gravity-stat gravity-stat-stars">⭐ <b id="gravityHomeStars">0/30</b></span>
+              <span class="gravity-stat gravity-stat-coins">🪙 <b id="gravityHomeCoins">0</b><button type="button" class="gravity-stat-add" id="gravityHomeCoinsAdd" aria-label="Conseguir más monedas">+</button></span>
+              <span class="gravity-stat gravity-stat-diamonds">💎 <b id="gravityHomeDiamonds">0</b><button type="button" class="gravity-stat-add" id="gravityHomeDiamondsAdd" aria-label="Conseguir más diamantes">+</button></span>
+            </div>
+            <div class="gravity-bottombar-row">
+              <button type="button" class="gravity-level-card" id="gravityHomePlayBtn">
+                <span class="gravity-level-card-top">
+                  <span class="gravity-level-card-num" id="gravityHomeLvl">NIVEL 1</span>
+                  <span class="gravity-level-card-stars" id="gravityHomeLvlStars">☆☆☆</span>
+                </span>
+                <span class="gravity-level-card-pct">TOTAL DEL NIVEL <b id="gravityHomeLvlPct">0%</b></span>
+                <span class="gravity-player-progress-bar"><span class="gravity-player-progress-fill" id="gravityHomeProgressFill"></span></span>
+              </button>
+              <button type="button" class="gravity-navtab active" id="gravityHomeHomeTab" aria-label="Home">
+                <span class="gravity-navtab-icon">🏠</span><span>HOME</span>
+              </button>
+              <button type="button" class="gravity-navtab" id="gravityHomeLevelsBtn" aria-label="Seleccionar nivel">
+                <span class="gravity-navtab-icon">🗺️</span><span>NIVELES</span>
+              </button>
+              <button type="button" class="gravity-navtab" id="gravityHomeSkinsBtn" aria-label="Skin">
+                <span class="gravity-navtab-icon">🧑‍🚀</span><span>SKIN</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -60,6 +60,10 @@
   var homeSkinsBtn = document.getElementById('gravityHomeSkinsBtn');
   var homeProgressFill = document.getElementById('gravityHomeProgressFill');
   var homeLvlEl = document.getElementById('gravityHomeLvl');
+  var homeLvlStarsEl = document.getElementById('gravityHomeLvlStars');
+  var homeLvlPctEl = document.getElementById('gravityHomeLvlPct');
+  var homeCoinsAddBtn = document.getElementById('gravityHomeCoinsAdd');
+  var homeDiamondsAddBtn = document.getElementById('gravityHomeDiamondsAdd');
   var homeTrophyBtn = document.getElementById('gravityHomeTrophyBtn');
   var homeMuteBtn = document.getElementById('gravityHomeMuteBtn');
   var levelStarsChip = document.getElementById('gravityLevelStarsChip');
@@ -79,7 +83,6 @@
   var VID_KEY = 'vexlow_vid';
   var COINS_WALLET_KEY = 'vexlow_gravity_coins'; // billetera acumulada (ya existía como "mejor cantidad de una corrida" -- se reusa como billetera)
   var DIAMONDS_WALLET_KEY = 'vexlow_gravity_diamonds';
-  var PROGRESS_KEY = 'vexlow_gravity_progress'; // JSON: ids de nivel desbloqueados
   var SKIN_KEY = 'vexlow_gravity_skin';
   var UNLOCKED_SKINS_KEY = 'vexlow_gravity_unlocked_skins'; // JSON: ids de skin desbloqueados
   function bestKeyFor(levelId) { return 'vexlow_gravity_best_' + levelId; }
@@ -91,6 +94,14 @@
     for (var i = 0; i < LEVELS.length; i++) total += starsFor(LEVELS[i].id);
     return total;
   }
+  // Estrellas totales necesarias para desbloquear cada nivel (por
+  // índice, nivel 1 siempre desbloqueado). Reemplaza el desbloqueo
+  // secuencial de antes ("completar el anterior") -- ahora depende de
+  // cuántas de las 3 estrellas por nivel juntaste en total, sin
+  // importar en qué niveles las sacaste.
+  var STAR_UNLOCK_THRESHOLDS = [0, 2, 5, 8, 11, 15, 18, 21, 25, 28];
+  function starsNeededAt(index) { return STAR_UNLOCK_THRESHOLDS[index] != null ? STAR_UNLOCK_THRESHOLDS[index] : 0; }
+  function isLevelUnlockedAt(index) { return totalStars() >= starsNeededAt(index); }
 
   function readJSON(key, fallback) {
     try { var v = JSON.parse(localStorage.getItem(key)); return v || fallback; } catch (e) { return fallback; }
@@ -99,7 +110,6 @@
 
   var coinsWallet = parseInt(localStorage.getItem(COINS_WALLET_KEY) || '0', 10) || 0;
   var diamondsWallet = parseInt(localStorage.getItem(DIAMONDS_WALLET_KEY) || '0', 10) || 0;
-  var unlockedLevels = readJSON(PROGRESS_KEY, ['level_01']);
   var unlockedSkins = readJSON(UNLOCKED_SKINS_KEY, ['skin_01']);
   var currentSkin = localStorage.getItem(SKIN_KEY) || 'skin_01';
   var muted = localStorage.getItem(MUTE_KEY) === '1';
@@ -1204,14 +1214,9 @@
       }
       updateWalletHud();
       if (typeof renderHomeMenu === 'function') renderHomeMenu();
-
-      var idx = -1;
-      for (var li = 0; li < LEVELS.length; li++) { if (LEVELS[li].id === levelId) { idx = li; break; } }
-      var nextLevel = LEVELS[idx + 1];
-      if (nextLevel && unlockedLevels.indexOf(nextLevel.id) === -1) {
-        unlockedLevels.push(nextLevel.id);
-        writeJSON(PROGRESS_KEY, unlockedLevels);
-      }
+      // El desbloqueo de niveles ya no se guarda acá -- se calcula solo
+      // a partir del total de estrellas (ver isLevelUnlockedAt()), así
+      // que no hace falta empujar nada a una lista.
     }
 
     coinsEl.textContent = '🪙 ' + coinCount + '/3';
@@ -1902,11 +1907,18 @@
     if (homeCoinsEl) homeCoinsEl.textContent = String(coinsWallet);
     if (homeDiamondsEl) homeDiamondsEl.textContent = String(diamondsWallet);
     if (homeProgressFill) homeProgressFill.style.width = Math.round((stars / maxStars) * 100) + '%';
-    if (homeLvlEl) {
-      var levelsStarted = 0;
-      for (var i = 0; i < LEVELS.length; i++) { if (starsFor(LEVELS[i].id) > 0) levelsStarted++; }
-      homeLvlEl.textContent = 'LVL ' + levelsStarted;
+    // La tarjeta de nivel de la barra de abajo muestra el nivel
+    // actual/último jugado (currentLevelIndex, ya sincronizado con
+    // "best" desde selectLevel()): su número, sus estrellas propias
+    // (no el total) y su mejor % completado.
+    if (homeLvlEl) homeLvlEl.textContent = 'NIVEL ' + (currentLevelIndex + 1);
+    if (homeLvlStarsEl) {
+      var lvlStars = starsFor(currentLevelId());
+      var row = '';
+      for (var s = 0; s < 3; s++) row += (s < lvlStars ? '★' : '☆');
+      homeLvlStarsEl.textContent = row;
     }
+    if (homeLvlPctEl) homeLvlPctEl.textContent = best + '%';
   }
 
   function goHome() {
@@ -1921,7 +1933,7 @@
     if (!levelGrid) return;
     if (levelStarsChip) levelStarsChip.textContent = '⭐ ' + totalStars() + '/' + (LEVELS.length * 3);
     levelGrid.innerHTML = LEVELS.map(function (lvl, i) {
-      var unlocked = unlockedLevels.indexOf(lvl.id) !== -1;
+      var unlocked = isLevelUnlockedAt(i);
       var current = i === currentLevelIndex;
       var stars = starsFor(lvl.id);
       var starsRow = '';
@@ -1931,7 +1943,7 @@
         '" data-index="' + i + '" data-unlocked="' + (unlocked ? '1' : '0') + '" style="border-color:' + (unlocked ? accent : '') + '">' +
         '<div class="gravity-level-num">' + (i + 1) + '</div>' +
         '<img src="../img/gravitycover/sliced/' + lvl.thumb + '.jpg" alt="' + escapeHtml(lvl.name) + '" loading="lazy">' +
-        (unlocked ? '' : '<div class="gravity-card-lock">🔒</div>') +
+        (unlocked ? '' : '<div class="gravity-card-lock">🔒<span class="gravity-card-lock-need">⭐ ' + starsNeededAt(i) + '</span></div>') +
         '<div class="gravity-card-label">' + escapeHtml(lvl.name) + '</div>' +
         '<div class="gravity-level-stars">' + starsRow + '</div>' +
         '<div class="gravity-level-meta"><span>🪙 ' + stars + '/3</span><span class="has-key">🔑</span></div>' +
@@ -1995,6 +2007,8 @@
   if (homeBtn) homeBtn.addEventListener('click', goHome);
   if (homeLevelsBtn) homeLevelsBtn.addEventListener('click', function () { leaveHomeVisual(); renderLevelGrid(); openOverlay(levelSelect); });
   if (homeSkinsBtn) homeSkinsBtn.addEventListener('click', function () { leaveHomeVisual(); openSkinScreen('collection'); });
+  if (homeCoinsAddBtn) homeCoinsAddBtn.addEventListener('click', function (e) { e.stopPropagation(); leaveHomeVisual(); openSkinScreen('shop'); });
+  if (homeDiamondsAddBtn) homeDiamondsAddBtn.addEventListener('click', function (e) { e.stopPropagation(); leaveHomeVisual(); openSkinScreen('shop'); });
   if (homePlayBtn) homePlayBtn.addEventListener('click', function () {
     homeMenuActive = false;
     leaveHomeVisual();
