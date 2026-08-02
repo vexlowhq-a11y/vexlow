@@ -1371,6 +1371,10 @@
     ctx.fillRect(0, CEIL_Y - 2, W, 2);
     ctx.restore();
 
+    // Piso y techo se eligen por separado (mismo pool de bloques,
+    // cada uno con su propia variante opcional) -- si no se eligió
+    // ninguno para un lado, ese lado sigue tileando el sprite 'floor'
+    // por defecto como siempre.
     var floorColor = level && level.floorVariant ? floorVariantColor(level.floorVariant) : null;
     if (floorColor) {
       // Los "bloques" que subió el usuario son íconos individuales, no
@@ -1379,15 +1383,21 @@
       // continua del color representativo de ese bloque.
       ctx.fillStyle = floorColor;
       ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
-      ctx.fillRect(0, 0, W, CEIL_Y);
     } else {
       var tileW = 110, floorOff = player.worldX % tileW;
-      for (var fx = -floorOff; fx < W; fx += tileW) {
-        drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
+      for (var fx = -floorOff; fx < W; fx += tileW) drawSprite('floor', fx, FLOOR_Y, tileW, H - FLOOR_Y);
+    }
+    var ceilColor = level && level.ceilVariant ? floorVariantColor(level.ceilVariant) : null;
+    if (ceilColor) {
+      ctx.fillStyle = ceilColor;
+      ctx.fillRect(0, 0, W, CEIL_Y);
+    } else {
+      var tileW2 = 110, ceilOff = player.worldX % tileW2;
+      for (var cx = -ceilOff; cx < W; cx += tileW2) {
         ctx.save();
-        ctx.translate(fx + tileW / 2, CEIL_Y);
+        ctx.translate(cx + tileW2 / 2, CEIL_Y);
         ctx.rotate(Math.PI);
-        drawSprite('floor', -tileW / 2, -CEIL_Y, tileW, CEIL_Y);
+        drawSprite('floor', -tileW2 / 2, -CEIL_Y, tileW2, CEIL_Y);
         ctx.restore();
       }
     }
@@ -1803,8 +1813,44 @@
     });
   }
 
-  resetGame();
-  renderHomeMenu();
-  requestAnimationFrame(loop);
-  loadLeaderboard();
+  /* ---- Modo vista previa (solo para el editor de niveles del admin) ----
+     Con ?preview=level_XX en la URL, en vez de jugar el nivel guardado
+     de verdad, pide el borrador sin guardar (/api/gravity-level/draft)
+     y arranca directo ahí -- así el editor puede mostrar el juego REAL
+     renderizando los cambios en el momento, sin tener que reimplementar
+     el dibujo del juego dos veces. */
+  var previewLevelId = null;
+  try { previewLevelId = new URLSearchParams(window.location.search).get('preview'); } catch (e) {}
+
+  function startGameLoop() {
+    requestAnimationFrame(loop);
+    loadLeaderboard();
+  }
+
+  if (previewLevelId) {
+    fetch('/api/gravity-level/draft?id=' + encodeURIComponent(previewLevelId))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (draft) {
+        if (draft) {
+          var idx = -1;
+          for (var i = 0; i < LEVELS.length; i++) { if (LEVELS[i].id === previewLevelId) { idx = i; break; } }
+          var patchedBuild = function () {
+            return { objects: draft.objects, length: draft.length, speedZones: draft.speedZones, floorVariant: draft.floorVariant, ceilVariant: draft.ceilVariant };
+          };
+          if (idx !== -1) { LEVELS[idx].build = patchedBuild; currentLevelIndex = idx; }
+          else { LEVELS.push({ id: previewLevelId, name: 'Vista previa', build: patchedBuild, thumb: previewLevelId }); currentLevelIndex = LEVELS.length - 1; }
+        }
+        homeMenuActive = false;
+        if (dashWrap) dashWrap.classList.remove('gravity-home-active');
+        closeOverlay(homeMenu);
+        resetGame();
+        overlay.classList.remove('hidden');
+        startGameLoop();
+      })
+      .catch(function () { resetGame(); renderHomeMenu(); startGameLoop(); });
+  } else {
+    resetGame();
+    renderHomeMenu();
+    startGameLoop();
+  }
 })();
