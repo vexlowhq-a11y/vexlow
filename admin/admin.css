@@ -367,25 +367,22 @@ body { padding: 0; }
 }
 .gravity-palette-variants-label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
 
-.gravity-editor-dual { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 6px; }
 .gravity-editor-canvas-wrap {
-  flex: 1 1 420px; min-width: 280px; max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border);
-  border-radius: var(--radius-m); background: #05060f; margin-bottom: 0;
+  width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--border);
+  border-radius: var(--radius-m); background: #05060f; margin-bottom: 6px;
 }
 #gravityEditorCanvas { display: block; cursor: crosshair; }
 
 .gravity-editor-preview {
-  flex: 0 0 300px; border: 1px solid var(--border); border-radius: var(--radius-m); background: #05060f; overflow: hidden;
+  width: 100%; max-width: 620px; margin: 0 auto 14px; border: 1px solid var(--border); border-radius: var(--radius-m);
+  background: #05060f; overflow: hidden;
 }
 .gravity-editor-preview-head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px;
   background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text-muted);
 }
 .gravity-editor-preview-head button { padding: 4px 8px; font-size: 11px; }
-#gravityEditorPreviewFrame { display: block; width: 100%; height: 230px; border: 0; background: #000; }
-@media (max-width: 900px) {
-  .gravity-editor-preview { flex-basis: 100%; }
-}
+#gravityEditorPreviewFrame { display: block; width: 100%; aspect-ratio: 800 / 360; border: 0; background: #000; }
 
 .gravity-editor-props {
   margin: 14px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-m);

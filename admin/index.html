@@ -256,19 +256,18 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
     <div class="gravity-editor-palette" id="gravityEditorPalette"></div>
     <div class="gravity-editor-palette-variants" id="gravityEditorPaletteVariants"></div>
 
-    <div class="gravity-editor-dual">
-      <div class="gravity-editor-canvas-wrap" id="gravityEditorCanvasWrap">
-        <canvas id="gravityEditorCanvas" height="230"></canvas>
+    <div class="gravity-editor-preview" id="gravityEditorPreviewWrap">
+      <div class="gravity-editor-preview-head">
+        <span>Vista previa real (el juego de verdad)</span>
+        <button type="button" class="btn-secondary" id="gravityEditorPreviewReload">⟳ Recargar</button>
       </div>
-      <div class="gravity-editor-preview" id="gravityEditorPreviewWrap">
-        <div class="gravity-editor-preview-head">
-          <span>Vista previa real (el juego de verdad)</span>
-          <button type="button" class="btn-secondary" id="gravityEditorPreviewReload">⟳ Recargar</button>
-        </div>
-        <iframe id="gravityEditorPreviewFrame" title="Vista previa de Gravity Flip"></iframe>
-      </div>
+      <iframe id="gravityEditorPreviewFrame" title="Vista previa de Gravity Flip"></iframe>
     </div>
-    <p class="admin-hint">Clic en la pista: agrega el obstáculo elegido arriba. Clic sobre uno ya puesto: lo selecciona (arrastralo para moverlo). Supr / Backspace: borra el seleccionado. La vista previa de la derecha se actualiza sola con cada cambio (el juego real, no una simulación).</p>
+
+    <div class="gravity-editor-canvas-wrap" id="gravityEditorCanvasWrap">
+      <canvas id="gravityEditorCanvas" height="230"></canvas>
+    </div>
+    <p class="admin-hint">Clic en la pista: agrega el obstáculo elegido arriba. Clic sobre uno ya puesto: lo selecciona (arrastralo para moverlo). Supr / Backspace: borra el seleccionado. La vista previa de arriba se actualiza sola con cada cambio (el juego real, no una simulación).</p>
 
     <div class="gravity-editor-props" id="gravityEditorProps"></div>
 
