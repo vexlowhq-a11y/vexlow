@@ -45,6 +45,7 @@
 
   var state = { levelId: null, levelName: '', objects: [], speedZones: [], length: 4000, selectedIndex: -1, tool: 'spike', toolVariant: null, zoom: 0.4 };
   var drag = null; // { index, offsetWorldX, movedY }
+  var resizeDrag = null; // { index, centerX, centerY, startDist, startScale } -- en píxeles de canvas
 
   var levelSelect = document.getElementById('gravityEditorLevelSelect');
   var zoomInput = document.getElementById('gravityEditorZoom');
@@ -86,25 +87,105 @@
     renderPaletteVariants();
   });
 
+  // Tile "+" para subir un molde nuevo sin salir de donde se está
+  // trabajando -- reemplaza tener que ir a buscarlo a la pestaña
+  // "Sprites" aparte (confusa, mezclaba todo). El asterisco de cache
+  // (?t=) en los <img> de acá abajo es a propósito: sin eso, después
+  // de reemplazar una imagen el navegador puede seguir mostrando la
+  // vieja porque la URL no cambió.
+  function addSwatchTileHtml(title) {
+    return '<label class="gravity-variant-swatch gravity-variant-swatch-add" title="' + (title || 'Agregar nuevo') + '">+' +
+      '<input type="file" accept="image/*" hidden></label>';
+  }
+  function wireAddVariantTile(container, base) {
+    var tile = container.querySelector('.gravity-variant-swatch-add');
+    if (!tile) return;
+    var input = tile.querySelector('input[type="file"]');
+    input.addEventListener('change', function () {
+      var file = input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var base64 = reader.result.slice(reader.result.indexOf(',') + 1);
+        fetch('/api/gravity-asset/add-variant', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: base, dataBase64: base64 })
+        }).then(function (r) { return r.json(); }).then(function (res) {
+          if (!res.ok) { window.alert('Error al agregar el molde: ' + res.error); return; }
+          loadVariantCounts();
+        }).catch(function (e) { window.alert('Error al agregar el molde: ' + e.message); }).finally(function () { input.value = ''; });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  // Sprites de un solo slot fijo (no son "moldes" numerados, son la
+  // única imagen de ese objeto) -- reemplazar sube directo, sin swatch.
+  function wireReplaceSpriteTile(container, key) {
+    var tile = container.querySelector('[data-replace-key="' + key + '"] input');
+    if (!tile) return;
+    tile.addEventListener('change', function () {
+      var file = tile.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var base64 = reader.result.slice(reader.result.indexOf(',') + 1);
+        fetch('/api/gravity-asset', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, dataBase64: base64 })
+        }).then(function (r) { return r.json(); }).then(function (res) {
+          if (!res.ok) { window.alert('Error al reemplazar ' + key + ': ' + res.error); return; }
+          delete spriteImgCache[key];
+          renderPaletteVariants();
+          render();
+        }).catch(function (e) { window.alert('Error al reemplazar ' + key + ': ' + e.message); }).finally(function () { tile.value = ''; });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  // Slots fijos con sprite propio por tipo de herramienta (no son
+  // "moldes" -- key/door tienen una sola imagen, orb/pad tienen una
+  // por color). Se muestran para poder reemplazarlas sin ir a buscar
+  // otra pestaña.
+  var FIXED_SPRITE_SLOTS = {
+    key: [{ key: 'key', label: 'Llave' }],
+    door: [{ key: 'door', label: 'Puerta' }],
+    orb: [{ key: 'orb_yellow', label: 'Amarillo' }, { key: 'orb_pink', label: 'Rosa' }, { key: 'orb_green', label: 'Verde' }],
+    pad: [{ key: 'pad_cyan', label: 'Cian' }, { key: 'pad_yellow', label: 'Amarilla' }, { key: 'pad_pink', label: 'Rosa' }]
+  };
   function renderPaletteVariants() {
     var def = OBJECT_TYPES[state.tool];
+    if (!def) { paletteVariantsEl.innerHTML = ''; return; }
     var vc = variantCountFor(state.tool);
-    if (!def || !vc) { paletteVariantsEl.innerHTML = ''; return; }
-    var html = '<span class="gravity-palette-variants-label">Molde de "' + def.label + '" a usar:</span><div class="gravity-variant-swatches">';
-    html += '<button type="button" class="gravity-variant-swatch' + (!state.toolVariant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
-    for (var vi = 1; vi <= vc; vi++) {
-      var vid = 'v' + vi;
-      html += '<button type="button" class="gravity-variant-swatch' + (state.toolVariant === vid ? ' selected' : '') +
-        '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
+    var html = '';
+    if (def.variantBase) {
+      html += '<span class="gravity-palette-variants-label">Molde de "' + def.label + '" a usar:</span><div class="gravity-variant-swatches">';
+      html += '<button type="button" class="gravity-variant-swatch' + (!state.toolVariant ? ' selected' : '') + '" data-variant="">Por defecto</button>';
+      for (var vi = 1; vi <= vc; vi++) {
+        var vid = 'v' + vi;
+        html += '<button type="button" class="gravity-variant-swatch' + (state.toolVariant === vid ? ' selected' : '') +
+          '" data-variant="' + vid + '"><img src="/site/img/gravitycover/sliced/' + def.variantBase + '_' + vid + '.png" alt="' + vid + '"></button>';
+      }
+      html += addSwatchTileHtml('Subir un molde nuevo de ' + def.label.toLowerCase());
+      html += '</div>';
+    } else if (FIXED_SPRITE_SLOTS[state.tool]) {
+      html += '<span class="gravity-palette-variants-label">Sprite de "' + def.label + '":</span><div class="gravity-variant-swatches">';
+      FIXED_SPRITE_SLOTS[state.tool].forEach(function (slot) {
+        html += '<label class="gravity-variant-swatch" data-replace-key="' + slot.key + '" title="Reemplazar ' + slot.label + '">' +
+          '<img src="/site/img/gravitycover/sliced/' + slot.key + '.png?t=' + Date.now() + '" alt="' + slot.label + '">' +
+          '<input type="file" accept="image/*" hidden></label>';
+      });
+      html += '</div>';
     }
-    html += '</div>';
     paletteVariantsEl.innerHTML = html;
-    paletteVariantsEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+    if (!html) return;
+    paletteVariantsEl.querySelectorAll('.gravity-variant-swatch[data-variant]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.toolVariant = btn.getAttribute('data-variant') || null;
-        paletteVariantsEl.querySelectorAll('.gravity-variant-swatch').forEach(function (b) { b.classList.toggle('selected', b === btn); });
+        paletteVariantsEl.querySelectorAll('.gravity-variant-swatch[data-variant]').forEach(function (b) { b.classList.toggle('selected', b === btn); });
       });
     });
+    if (def.variantBase) wireAddVariantTile(paletteVariantsEl, def.variantBase);
+    if (FIXED_SPRITE_SLOTS[state.tool]) {
+      FIXED_SPRITE_SLOTS[state.tool].forEach(function (slot) { wireReplaceSpriteTile(paletteVariantsEl, slot.key); });
+    }
   }
   renderPaletteVariants();
 
@@ -118,15 +199,17 @@
       html += '<button type="button" class="gravity-variant-swatch' + (state.floorVariant === vid ? ' selected' : '') +
         '" data-floor="' + vid + '"><img src="/site/img/gravitycover/sliced/floor_' + vid + '.png" alt="' + vid + '"></button>';
     }
+    html += addSwatchTileHtml('Subir un piso nuevo');
     html += '</div>';
     floorPickerEl.innerHTML = html;
-    floorPickerEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+    floorPickerEl.querySelectorAll('.gravity-variant-swatch[data-floor]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.floorVariant = btn.getAttribute('data-floor') || null;
         renderFloorPicker();
         render();
       });
     });
+    wireAddVariantTile(floorPickerEl, 'floor');
   }
 
   /* ---- Techo / paredes del nivel (pool de bloques propio, aparte del piso) ---- */
@@ -139,15 +222,17 @@
       html += '<button type="button" class="gravity-variant-swatch' + (state.ceilVariant === vid ? ' selected' : '') +
         '" data-ceil="' + vid + '"><img src="/site/img/gravitycover/sliced/wall_' + vid + '.png" alt="' + vid + '"></button>';
     }
+    html += addSwatchTileHtml('Subir una pared/techo nuevo');
     html += '</div>';
     ceilPickerEl.innerHTML = html;
-    ceilPickerEl.querySelectorAll('.gravity-variant-swatch').forEach(function (btn) {
+    ceilPickerEl.querySelectorAll('.gravity-variant-swatch[data-ceil]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.ceilVariant = btn.getAttribute('data-ceil') || null;
         renderCeilPicker();
         render();
       });
     });
+    wireAddVariantTile(ceilPickerEl, 'wall');
   }
 
   /* ---- Nivel seleccionado ---- */
@@ -433,6 +518,42 @@
         ctx.strokeRect(o.x * state.zoom, ceilCy, (o.x2 - o.x) * state.zoom, floorCy - ceilCy);
       }
     });
+
+    // agarradera de tamaño -- solo en el objeto seleccionado, solo si
+    // su tipo tiene "Tamaño" (scale). Arrastrarla cambia o.scale en
+    // vivo, sin tener que ir al campo numérico del panel.
+    if (state.selectedIndex !== -1) {
+      var selObj = state.objects[state.selectedIndex];
+      if (selObj && hasScale(selObj)) {
+        var h = handleScreenPos(selObj);
+        ctx.fillStyle = '#7CFFB2';
+        ctx.strokeStyle = '#05060f'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(h.x, h.y, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+    }
+  }
+
+  function hasScale(o) {
+    var def = OBJECT_TYPES[o.type];
+    return !!(def && def.fields && def.fields.indexOf('scale') !== -1);
+  }
+  // Caja del objeto en píxeles de canvas -- mismas anclas que el
+  // dibujo real (plataforma/pared ancladas arriba-izquierda, el
+  // resto centrado en cx,cy). Se usa tanto para dibujar la agarradera
+  // de tamaño como para saber si un clic le pegó.
+  function objectScreenBox(o) {
+    var cx = o.x * state.zoom;
+    var cy = objectDrawY(o) * state.zoom;
+    var sizeW = spriteWorldSize(o);
+    var drawW = sizeW.w * state.zoom, drawH = sizeW.h * state.zoom;
+    if (o.type === 'platform' || o.type === 'wall') {
+      return { left: cx, top: cy - drawH / 2, right: cx + drawW, bottom: cy + drawH / 2 };
+    }
+    return { left: cx - drawW / 2, top: cy - drawH / 2, right: cx + drawW / 2, bottom: cy + drawH / 2 };
+  }
+  function handleScreenPos(o) {
+    var box = objectScreenBox(o);
+    return { x: box.right, y: box.bottom };
   }
 
   function worldFromEvent(e) {
@@ -453,7 +574,32 @@
     return best;
   }
 
+  function eventCanvasPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
   canvas.addEventListener('mousedown', function (e) {
+    // Si ya hay un objeto seleccionado con "Tamaño" y el clic pegó en
+    // su agarradera, arrastrar cambia el tamaño en vez de mover.
+    if (state.selectedIndex !== -1) {
+      var selObj = state.objects[state.selectedIndex];
+      if (selObj && hasScale(selObj)) {
+        var cp = eventCanvasPos(e);
+        var h = handleScreenPos(selObj);
+        if (Math.hypot(cp.x - h.x, cp.y - h.y) < 10) {
+          var box = objectScreenBox(selObj);
+          var cxCanvas = (box.left + box.right) / 2, cyCanvas = (box.top + box.bottom) / 2;
+          resizeDrag = {
+            index: state.selectedIndex,
+            centerX: cxCanvas, centerY: cyCanvas,
+            startDist: Math.max(6, Math.hypot(h.x - cxCanvas, h.y - cyCanvas)),
+            startScale: selObj.scale || 1
+          };
+          return;
+        }
+      }
+    }
     var w = worldFromEvent(e);
     var isMoveMode = state.tool === 'move';
     var hitThreshold = (isMoveMode ? 26 : 14) / state.zoom;
@@ -475,6 +621,17 @@
     render();
   });
   window.addEventListener('mousemove', function (e) {
+    if (resizeDrag) {
+      var o2 = state.objects[resizeDrag.index];
+      if (!o2) { resizeDrag = null; return; }
+      var cp = eventCanvasPos(e);
+      var dist = Math.hypot(cp.x - resizeDrag.centerX, cp.y - resizeDrag.centerY);
+      var newScale = resizeDrag.startScale * (dist / resizeDrag.startDist);
+      o2.scale = Math.round(Math.max(0.4, Math.min(3, newScale)) * 100) / 100;
+      renderProps();
+      render();
+      return;
+    }
     if (!drag) return;
     var w = worldFromEvent(e);
     var o = state.objects[drag.index];
@@ -492,6 +649,7 @@
     render();
   });
   window.addEventListener('mouseup', function () {
+    if (resizeDrag) { resizeDrag = null; renderProps(); }
     if (drag) { drag = null; renderProps(); }
   });
   window.addEventListener('keydown', function (e) {
@@ -685,20 +843,14 @@
     }).catch(function (e) { addLevelStatus.textContent = 'Error: ' + e.message; });
   });
 
-  /* ---- Sprites (galería de assets reemplazables) ---- */
+  /* ---- Sprites (galería de assets reemplazables que no son un molde
+     de obstáculo -- esos se suben desde la paleta de "Editar
+     niveles", al lado de cada herramienta) ---- */
   var assetGroupsEl = document.getElementById('gravityAssetGroups');
-  var OBSTACLE_VARIANT_LABELS = { spike: 'pincho', saw: 'sierra', platform: 'plataforma', portal: 'portal' };
-  var FLOOR_WALL_LABELS = { floor: 'piso', wall: 'pared/techo' };
   function loadAssets() {
     fetch('/api/gravity-assets').then(function (r) { return r.json(); }).then(function (groups) {
       assetGroupsEl.innerHTML = groups.map(function (g) {
-        var labelSet = g.group.indexOf('Variantes') === 0 ? OBSTACLE_VARIANT_LABELS
-          : (g.group === 'Piso / paredes' ? FLOOR_WALL_LABELS : null);
-        var addButtons = labelSet ? Object.keys(labelSet).map(function (base) {
-          return '<label class="gravity-add-variant-btn">+ Agregar ' + labelSet[base] + ' nuevo' +
-            '<input type="file" accept="image/*" data-add-variant="' + base + '" hidden></label>';
-        }).join('') : '';
-        return '<div class="gravity-asset-group"><h3>' + g.group + '</h3>' + addButtons + '<div class="gravity-asset-grid">' +
+        return '<div class="gravity-asset-group"><h3>' + g.group + '</h3><div class="gravity-asset-grid">' +
           g.items.map(function (item) {
             return '<div class="gravity-asset-card" data-key="' + item.key + '">' +
               (item.exists ? '<img src="' + item.url + '?t=' + Date.now() + '" alt="' + item.key + '">' : '<div class="missing">sin imagen</div>') +
@@ -708,9 +860,6 @@
       }).join('');
       assetGroupsEl.querySelectorAll('input[data-key]').forEach(function (input) {
         input.addEventListener('change', function () { uploadAsset(input); });
-      });
-      assetGroupsEl.querySelectorAll('input[data-add-variant]').forEach(function (input) {
-        input.addEventListener('change', function () { uploadNewVariant(input); });
       });
     }).catch(function (e) { assetGroupsEl.textContent = 'Error al cargar los sprites: ' + e.message; });
   }
@@ -732,26 +881,6 @@
         var missing = card.querySelector('.missing');
         if (missing) missing.replaceWith(img);
       }).catch(function (e) { window.alert('Error al subir ' + key + ': ' + e.message); }).finally(function () {
-        input.value = '';
-      });
-    };
-    reader.readAsDataURL(file);
-  }
-  function uploadNewVariant(input) {
-    var file = input.files[0];
-    if (!file) return;
-    var base = input.getAttribute('data-add-variant');
-    var reader = new FileReader();
-    reader.onload = function () {
-      var dataUrl = reader.result;
-      var base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
-      fetch('/api/gravity-asset/add-variant', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base: base, dataBase64: base64 })
-      }).then(function (r) { return r.json(); }).then(function (res) {
-        if (!res.ok) { window.alert('Error al agregar la variante: ' + res.error); return; }
-        loadAssets(); // re-pinta la galería con la variante nueva ya incluida
-        loadVariantCounts(); // y refresca los selectores del editor de niveles
-      }).catch(function (e) { window.alert('Error al agregar la variante: ' + e.message); }).finally(function () {
         input.value = '';
       });
     };

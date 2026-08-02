@@ -120,7 +120,6 @@ function loadLevel(id) {
 const SPRITE_KEYS = ['floor', 'platform', 'spike', 'spike_triple', 'saw', 'portal_gravity', 'portal_shape',
   'orb_green', 'orb_pink', 'orb_yellow', 'pad_cyan', 'pad_yellow', 'pad_pink', 'key', 'door', 'lock'];
 const VARIANT_BASES = ['spike', 'saw', 'platform', 'portal', 'floor', 'wall'];
-const FLOOR_WALL_BASES = ['floor', 'wall'];
 const HOME_DECOR_KEYS = ['home_portal', 'home_gear', 'home_platform'];
 const LEVEL_THUMB_KEYS = Array.from({ length: 10 }, function (_, i) { return 'level_' + String(i + 1).padStart(2, '0'); });
 const SKIN_KEYS = Array.from({ length: 72 }, function (_, i) { return 'skin_' + String(i + 1).padStart(2, '0'); });
@@ -151,20 +150,13 @@ function addVariant(base, dataBase64) {
 }
 
 function listAssets() {
-  var obstacleVariantKeys = [];
-  ['spike', 'saw', 'platform', 'portal'].forEach(function (base) {
-    var n = countVariant(base);
-    for (var i = 1; i <= n; i++) obstacleVariantKeys.push(base + '_v' + i);
-  });
-  var floorWallKeys = [];
-  FLOOR_WALL_BASES.forEach(function (base) {
-    var n = countVariant(base);
-    for (var i = 1; i <= n; i++) floorWallKeys.push(base + '_v' + i);
-  });
+  // Los "moldes" (variantes de pincho/sierra/plataforma/pared/portal/
+  // piso) ya NO se listan acá -- se suben directo desde la paleta de
+  // "Editar niveles" (al lado de cada herramienta), donde tiene
+  // sentido usarlos. Esta pestaña quedó solo para lo que no es un
+  // molde de obstáculo: sprites base, decoración, miniaturas y skins.
   var groups = [
     { group: 'Sprites del juego', keys: SPRITE_KEYS, ext: 'png' },
-    { group: 'Variantes (pincho/sierra/plataforma/portal)', keys: obstacleVariantKeys, ext: 'png' },
-    { group: 'Piso / paredes', keys: floorWallKeys, ext: 'png' },
     { group: 'Decoración del menú principal', keys: HOME_DECOR_KEYS, ext: 'png' },
     { group: 'Miniaturas de nivel', keys: LEVEL_THUMB_KEYS, ext: 'jpg' },
     { group: 'Skins', keys: SKIN_KEYS, ext: 'png' }
