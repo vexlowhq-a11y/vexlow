@@ -341,7 +341,19 @@
      Bola: tap invierte la dirección de gravedad al instante (con
      impulso), se pega a la superficie donde cae — es la misma
      mecánica que tenía el Gravity Flip original. */
-  var CUBE_GRAVITY = 0.0032, CUBE_JUMP_V = 0.85, CUBE_MAX_VY = 1.3;
+  // El salto del cubo (tap simple, sin orbe) se calibra en "bloques"
+  // de BLOCK_SIZE px -- con esta velocidad+gravedad llega justo a ~2
+  // bloques de alto (antes llegaba a ~113px, más de 3 bloques y
+  // medio, de ahí que se sintiera "flotante"). Gravedad y velocidad
+  // se bajaron juntas manteniendo la MISMA duración/alcance
+  // horizontal que el salto original (~530ms, ~149px a velocidad
+  // base) -- así el arco queda más bajo y "chato" sin volverse más
+  // corto, y el espaciado ya calibrado entre obstáculos sigue
+  // sirviendo tal cual. Los orbes (ORB_YELLOW_V/PINK_V) NO se tocan a
+  // propósito: siguen siendo el boost especial, ahora claramente más
+  // alto que el salto normal en vez de igual.
+  var BLOCK_SIZE = 32; // = PLAYER_SIZE, unidad de referencia para pinchos/plataformas/paredes
+  var CUBE_GRAVITY = 0.0018, CUBE_JUMP_V = 0.48, CUBE_MAX_VY = 1.3;
   var SHIP_THRUST = 0.0021, SHIP_FALL = 0.0021, SHIP_MAX_VY = 0.46;
   var BALL_GRAVITY = 0.0028, BALL_FLIP_KICK = 0.34, BALL_MAX_VY = 1.0;
   var ORB_YELLOW_V = 0.85, ORB_PINK_V = 0.46;
@@ -373,7 +385,7 @@
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
     cursor += GAP_CUBE + 30;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'gravityPortal', dir: -1 });
     cursor += 40;
@@ -385,7 +397,7 @@
     cursor += 130;
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'ceil', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'ceil', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     cursor += 130;
@@ -423,7 +435,7 @@
     cursor += 140;
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE_FAST;
     add({ type: 'orb', color: 'green', y: FLOOR_Y - 130 });
     cursor += 40;
@@ -459,7 +471,7 @@
     cursor += 150;
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE_FAST;
     add({ type: 'gravityPortal', dir: -1 });
     cursor += 40;
@@ -514,7 +526,7 @@
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
     cursor += GAP_CUBE;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'floor', w: 28 });
@@ -523,7 +535,7 @@
     cursor += GAP_CUBE;
     add({ type: 'diamond', y: FLOOR_Y - 160 });
     cursor += 40;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     add({ type: 'orb', color: 'green', y: FLOOR_Y - 130 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
@@ -531,7 +543,7 @@
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
     cursor += GAP_CUBE + 40;
-    add({ type: 'platform', surface: 'floor', w: 220, lift: 46 }); // puente largo
+    add({ type: 'platform', surface: 'floor', w: 220, lift: 26 }); // puente largo
     cursor += 260;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
@@ -560,7 +572,7 @@
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     cursor += GAP_CUBE;
-    add({ type: 'platform', surface: 'ceil', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'ceil', w: 90, lift: 26 });
     add({ type: 'coin', id: 0, y: CEIL_Y + 120 });
     cursor += GAP_CUBE;
     add({ type: 'orb', color: 'green', y: CEIL_Y + 130 }); // vuelve a piso normal
@@ -603,7 +615,7 @@
     cursor += GAP_CUBE;
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
@@ -690,7 +702,7 @@
     cursor += GAP_CUBE;
     // Plataforma móvil: oscila en Y, alcance moderado, período largo
     // para que esté "abajo" (fácil de alcanzar) buena parte del ciclo.
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46, moving: true, amp: 30, periodMs: 2600 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26, moving: true, amp: 30, periodMs: 2600 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
@@ -713,7 +725,7 @@
     setSpeed(cursor, 0.28);
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'pad', color: 'yellow', surface: 'floor' });
     cursor += GAP_CUBE;
@@ -740,7 +752,7 @@
     cursor += GAP_CUBE;
     add({ type: 'shapePortal', form: 'ball' });
     cursor += 40;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
     cursor += GAP_CUBE;
@@ -872,7 +884,7 @@
     cursor += GAP_CUBE;
     add({ type: 'orb', color: 'yellow', y: FLOOR_Y - 150 });
     cursor += 150;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 46 });
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
