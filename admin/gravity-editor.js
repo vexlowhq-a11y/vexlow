@@ -76,7 +76,12 @@ function patchForExport(src) {
     '    LEVELS: LEVELS,\n' +
     '    selectLevel: selectLevel,\n' +
     '    press: press,\n' +
-    '    getState: function () { return { state: state, player: player, level: level }; }\n' +
+    '    getState: function () {\n' +
+    '      return {\n' +
+    '        state: state, player: player, level: level,\n' +
+    '        coinsCollected: coinsCollected, collectedDiamondIds: collectedDiamondIds, moneyCount: moneyCount\n' +
+    '      };\n' +
+    '    }\n' +
     '  };\n';
   return src.slice(0, lastIdx) + exportLine + src.slice(lastIdx);
 }
@@ -345,6 +350,11 @@ function runBotSim(window, maxRealMs) {
   function tapUp() { canvas.dispatchEvent(new window.MouseEvent('mouseup', { bubbles: true, button: 0 })); }
 
   var attempts = 0, wins = 0, deaths = 0, bestPct = 0, overlayWasVisible = false;
+  // Prueba de que un pickup se agarró de verdad en una corrida GANADA
+  // (no alcanza con wins>0 -- un nivel se puede ganar sin haber
+  // tocado un diamante en particular). Guarda el máximo visto en
+  // cualquier corrida ganada durante esta verificación.
+  var bestDiamondsInWin = 0, bestStarsInWin = 0, bestMoneyInWin = 0;
   var botMem = { holding: false, lastActionAt: -9999, lastTappedObj: null };
   var fakeNow = 0;
 
@@ -370,6 +380,11 @@ function runBotSim(window, maxRealMs) {
     } else {
       return false;
     }
+    // Estado fresco DESPUÉS del update de este frame -- si no, un
+    // pickup agarrado justo en el mismo frame que se gana quedaría
+    // sin contar (moneyCount es un número, no una referencia que se
+    // vaya actualizando sola como los arrays/mapas de arriba).
+    var stAfter = window.__adminExport.getState();
     var overlayHidden = window.document.getElementById('gravityOverlay').classList.contains('hidden');
     var adBreak = window.document.getElementById('gravityAdBreak');
     if (adBreak && !adBreak.classList.contains('hidden')) {
@@ -384,6 +399,14 @@ function runBotSim(window, maxRealMs) {
         var pctMatch = /Reached (\d+)%/.exec(t);
         var pct = win ? 100 : (pctMatch ? parseInt(pctMatch[1], 10) : 0);
         if (pct > bestPct) bestPct = pct;
+        if (win) {
+          var diamondsThisWin = stAfter.collectedDiamondIds ? Object.keys(stAfter.collectedDiamondIds).length : 0;
+          var starsThisWin = stAfter.coinsCollected ? stAfter.coinsCollected.length : 0;
+          var moneyThisWin = stAfter.moneyCount || 0;
+          if (diamondsThisWin > bestDiamondsInWin) bestDiamondsInWin = diamondsThisWin;
+          if (starsThisWin > bestStarsInWin) bestStarsInWin = starsThisWin;
+          if (moneyThisWin > bestMoneyInWin) bestMoneyInWin = moneyThisWin;
+        }
       }
       overlayWasVisible = isResult;
     } else {
@@ -397,7 +420,10 @@ function runBotSim(window, maxRealMs) {
     if (!step(16)) break;
     elapsed += 16;
   }
-  return { attempts: attempts, wins: wins, deaths: deaths, bestPct: bestPct };
+  return {
+    attempts: attempts, wins: wins, deaths: deaths, bestPct: bestPct,
+    bestDiamondsInWin: bestDiamondsInWin, bestStarsInWin: bestStarsInWin, bestMoneyInWin: bestMoneyInWin
+  };
 }
 
 // Corre el bot contra una versión CANDIDATA (sin guardar) de un nivel.

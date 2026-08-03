@@ -86,7 +86,7 @@
   var SKIN_KEY = 'vexlow_gravity_skin';
   var UNLOCKED_SKINS_KEY = 'vexlow_gravity_unlocked_skins'; // JSON: ids de skin desbloqueados
   function bestKeyFor(levelId) { return 'vexlow_gravity_best_' + levelId; }
-  function diamondClaimedKeyFor(levelId) { return 'vexlow_gravity_diamond_' + levelId; }
+  function diamondClaimedKeyFor(levelId, id) { return 'vexlow_gravity_diamond_' + levelId + '_' + id; }
   function starsKeyFor(levelId) { return 'vexlow_gravity_stars_' + levelId; }
   function starsFor(levelId) { return parseInt(localStorage.getItem(starsKeyFor(levelId)) || '0', 10) || 0; }
   function totalStars() {
@@ -641,24 +641,101 @@
 
   // @gravity-editor:start level_02
   function buildGreenCircuit() {
-    // Editado con el panel de admin (Gravity Flip -> Niveles).
-    var objs = [], speedZone = [];
+    var objs = [], cursor = 500, speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
-    function add(o) { objs.push(o); return o; }
+    function add(o) { o.x = cursor; objs.push(o); return o; }
     setSpeed(0, 0.28);
-    add({ type: "spike", surface: "floor", w: 28, x: 752, variant: "v1", lift: -3, hitboxScale: 1.28 });
-    add({ type: "spike", surface: "floor", w: 28, x: 786, variant: "v1", hitboxScale: 1.44, lift: -3 });
-    add({ type: "spike", surface: "floor", w: 28, x: 1220 });
-    add({ type: "diamond", y: 160, x: 1590 });
-    add({ type: "coin", id: 0, y: 200, x: 1860 });
-    add({ type: "spike", surface: "floor", w: 28, x: 2090 });
-    add({ type: "spike", surface: "floor", w: 28, x: 2116 });
-    add({ type: "coin", id: 1, y: 200, x: 2620 });
-    add({ type: "coin", id: 2, y: 200, risky: true, x: 2850 });
-    add({ type: "key", y: 294, x: 2906, keyId: "1" });
-    add({ type: "door", x2: 3068, x: 3028, scale: 0.25, y: 283, keyId: "1" });
-    add({ type: "finish", x: 3420 });
-    return { objects: objs, length: 3720, speedZones: speedZone, floorVariant: 'v20', backgroundDim: 0.45 };
+
+    // Nota de diseño (aplica a los 9 niveles de esta tanda): un
+    // diamante/moneda/estrella NUNCA se pone a menos de ~120px antes
+    // de un obstáculo real -- el bot (y el criterio de "ventana de
+    // reacción" en general) elige como objetivo el objeto más
+    // cercano sin importar el tipo; si un pickup queda más cerca que
+    // el obstáculo que sigue, tapa al obstáculo hasta que ya es
+    // tarde para reaccionar. Por eso todos los pickups van pegados
+    // DESPUÉS de superar un obstáculo (ya "atrás" antes de que
+    // empiece la ventana del próximo), nunca metidos justo antes.
+
+    // Tramo 1 -- cubo, hazards sueltos, fáciles de leer. Los pickups
+    // se agregan SUMANDO distancia extra después de cada obstáculo,
+    // nunca restando del gap ya calibrado hacia el próximo -- así el
+    // espacio real entre obstáculos nunca queda más corto que
+    // GAP_CUBE/GAP_SHIP, sin importar cuántos pickups se agreguen.
+    cursor += 260;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 90;
+    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'floor', w: 28 });
+    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+    cursor += GAP_CUBE;
+
+    // Tramo 2 -- nave: los 3 diamantes van acá, a MID_Y, con la misma
+    // separación que ya prueban los niveles existentes (una sierra,
+    // margen de sobra, diamante, margen de sobra, próxima sierra) --
+    // patrón ya verificado por el bot en otros niveles, no inventado.
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+
+    // Tramo 3 -- techo, cierre.
+    add({ type: 'gravityPortal', dir: -1 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
+    cursor += GAP_CUBE;
+    add({ type: 'spike', surface: 'ceil', w: 28 });
+    cursor += GAP_CUBE;
+    add({ type: 'gravityPortal', dir: 1 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
+    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
+    cursor += GAP_CUBE;
+
+    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+    return { objects: objs, length: cursor, speedZones: speedZone, floorVariant: 'v20', backgroundDim: 0.45 };
   }
   // @gravity-editor:end level_02
 
@@ -672,6 +749,10 @@
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'gravityPortal', dir: -1 });
     cursor += GAP_CUBE;
@@ -680,26 +761,57 @@
     add({ type: 'platform', surface: 'ceil', w: 90, lift: 26 });
     add({ type: 'coin', id: 0, y: CEIL_Y + 120 });
     cursor += GAP_CUBE;
-    cursor += 40;
-    add({ type: 'diamond', y: CEIL_Y + 160 });
-    cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
-    cursor += GAP_CUBE;
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
     cursor += GAP_CUBE;
     add({ type: 'gravityPortal', dir: 1 });
     cursor += GAP_CUBE;
-    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
+
+    // Tramo nave -- los 3 diamantes acá, mismo patrón ya verificado
+    // por el bot (sierra, margen de sobra, diamante a MID_Y, margen
+    // de sobra, próxima sierra).
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += GAP_SHIP;
+    add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
+    cursor += GAP_SHIP;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'floor', w: 28 });
-    cursor += 140;
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
-    cursor += 40;
-
-    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
+    cursor += GAP_CUBE;
 
     objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
+    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
     return { objects: objs, length: cursor, speedZones: speedZone };
   }
   // @gravity-editor:end level_03
@@ -714,6 +826,10 @@
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     cursor += 150;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
@@ -724,19 +840,41 @@
     setSpeed(cursor + 20, 0.28);
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
     add({ type: 'saw', surface: 'ceil' });
-    cursor += 100;
-    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    // A diferencia de los otros dos, acá la nave todavía viene "de
+    // pasada" bajando desde el esquive anterior en vez de estar
+    // asentada en MID_Y -- medido con el bot, pasa más cerca de
+    // y=230 en este punto exacto.
+    add({ type: 'diamond', id: 2, y: 228 });
+    cursor += 400;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
     add({ type: 'saw', surface: 'ceil', xOff: 180 });
     cursor += GAP_SHIP + 180;
+    add({ type: 'money', y: MID_Y });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += GAP_SHIP;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.28);
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
     cursor += GAP_CUBE;
 
@@ -759,19 +897,54 @@
     cursor += 40;
     cursor += 260;
     add({ type: 'saw', surface: 'floor' });
-    cursor += 260;
-    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
     cursor += 260;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += 260;
     add({ type: 'gravityPortal', dir: -1 });
     cursor += 260;
     add({ type: 'saw', surface: 'ceil' });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
     cursor += 260;
     add({ type: 'coin', id: 1, y: CEIL_Y + 120 });
     cursor += 260;
     setSpeed(cursor, 0.35);
     add({ type: 'gravityPortal', dir: 1 });
+    cursor += 300;
+
+    // Tramo nave -- los 3 diamantes, mismo patrón ya verificado.
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.35);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    // Medido con el bot para este tramo puntual: acá la nave pasa
+    // más cerca de y=228 que de MID_Y en el primer diamante, y de
+    // y=162 en el tercero (no siempre es MID_Y -- depende de qué
+    // esquive haya hecho justo antes).
+    add({ type: 'diamond', id: 0, y: 228 });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: 162 });
+    cursor += 400;
+    add({ type: 'shapePortal', form: 'ball' });
+    cursor += 40;
+    setSpeed(cursor, 0.35);
+
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += 300;
     add({ type: 'saw', surface: 'floor' });
     cursor += 300;
@@ -780,6 +953,11 @@
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.28);
+
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
 
     addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
 
@@ -798,6 +976,10 @@
     cursor += 260;
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     // Plataforma móvil: oscila en Y, alcance moderado, período largo
     // para que esté "abajo" (fácil de alcanzar) buena parte del ciclo.
@@ -805,16 +987,30 @@
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
+
+    // Tramo nave -- los 3 diamantes, mismo patrón ya verificado.
     add({ type: 'shapePortal', form: 'ship' });
     setSpeed(cursor + 20, 0.35);
     cursor += GAP_SHIP;
-    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
-    cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'ceil' });
@@ -826,6 +1022,14 @@
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'pad', color: 'yellow', surface: 'floor' });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
     cursor += GAP_CUBE;
@@ -847,14 +1051,20 @@
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'shapePortal', form: 'ball' });
     cursor += 40;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
-    cursor += GAP_CUBE;
-    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
     cursor += GAP_CUBE;
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
@@ -866,6 +1076,38 @@
     cursor += GAP_CUBE;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
+    setSpeed(cursor, 0.28);
+
+    // Tramo nave -- los 3 diamantes, mismo patrón ya verificado.
+    add({ type: 'shapePortal', form: 'ship' });
+    setSpeed(cursor + 20, 0.28);
+    cursor += GAP_SHIP;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    // Medido con el bot: acá la nave todavía viene bajando desde la
+    // entrada al tramo, pasa más cerca de y=248 que de MID_Y.
+    add({ type: 'diamond', id: 0, y: 248 });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
+    add({ type: 'shapePortal', form: 'cube' });
+    cursor += 40;
+    setSpeed(cursor, 0.28);
+
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
     cursor += GAP_CUBE;
 
@@ -888,28 +1130,51 @@
     setSpeed(cursor + 20, 0.28);
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 80 });
     cursor += GAP_SHIP;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.28);
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
     add({ type: 'gravityPortal', dir: -1 });
     cursor += GAP_CUBE;
     add({ type: 'spike', surface: 'ceil', w: 28 });
     cursor += 140;
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
+    cursor += 90;
+    add({ type: 'money', y: CEIL_Y + 90 });
     cursor += GAP_CUBE;
-    add({ type: 'diamond', y: CEIL_Y + 160 });
-    cursor += GAP_CUBE;
-    cursor += 40;
     add({ type: 'shapePortal', form: 'ball' });
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
     cursor += GAP_CUBE;
 
@@ -929,25 +1194,49 @@
 
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
-    cursor += GAP_CUBE;
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
     add({ type: 'saw', surface: 'floor' });
     cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
     cursor += GAP_CUBE;
-    add({ type: 'diamond', y: FLOOR_Y - 160 });
-    cursor += GAP_CUBE;
+
+    // Tramo nave -- los 3 diamantes, mismo patrón ya verificado.
     add({ type: 'shapePortal', form: 'ship' });
     setSpeed(cursor + 20, 0.28);
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'ceil' });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
     add({ type: 'coin', id: 1, y: FLOOR_Y - 80 });
     cursor += GAP_SHIP;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.28);
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
     cursor += GAP_CUBE;
 
@@ -965,33 +1254,59 @@
     function add(o) { o.x = cursor; objs.push(o); return o; }
     setSpeed(0, 0.28);
 
-    // Cubo
+    // Cubo -- más denso que en los niveles anteriores (varios
+    // obstáculos encadenados), el nivel más difícil de la tanda,
+    // acercándose al estilo del nivel 1 sin copiar su cantidad de
+    // objetos.
     cursor += 260;
     add({ type: 'spike', surface: 'floor', w: 28 });
     add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
-    cursor += GAP_CUBE;
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE - 150;
     cursor += 150;
     add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
     cursor += GAP_CUBE;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += GAP_CUBE;
     add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
     cursor += GAP_CUBE;
-    // Nave
+    // Nave -- los 3 diamantes acá, mismo patrón ya verificado.
     add({ type: 'shapePortal', form: 'ship' });
     setSpeed(cursor + 20, 0.35);
     cursor += GAP_SHIP;
     add({ type: 'saw', surface: 'floor' });
-    cursor += GAP_SHIP;
-    add({ type: 'diamond', y: (FLOOR_Y + CEIL_Y) / 2 });
-    cursor += GAP_SHIP;
+    cursor += 400;
+    add({ type: 'diamond', id: 0, y: MID_Y });
+    cursor += 400;
+    add({ type: 'saw', surface: 'ceil' });
+    // Medido con el bot: acá la nave recién pasa por MID_Y bastante
+    // más lejos de la sierra que en los otros niveles -- se ajusta
+    // la distancia en vez del y, para no perder margen con la
+    // próxima sierra.
+    cursor += 462;
+    add({ type: 'diamond', id: 1, y: MID_Y });
+    cursor += 338;
+    add({ type: 'saw', surface: 'floor' });
+    cursor += 400;
+    add({ type: 'diamond', id: 2, y: MID_Y });
+    cursor += 400;
     add({ type: 'saw', surface: 'ceil' });
     cursor += GAP_SHIP;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.35);
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 90 });
+    cursor += GAP_CUBE_FAST - 180;
     // Gravedad
     add({ type: 'gravityPortal', dir: -1 });
     cursor += GAP_CUBE_FAST;
     add({ type: 'spike', surface: 'ceil', w: 28 });
+    add({ type: 'spike', surface: 'ceil', w: 28, xOff: 26 });
     cursor += 150;
     cursor += 40;
     add({ type: 'coin', id: 1, y: CEIL_Y + 120 });
@@ -1001,12 +1316,20 @@
     setSpeed(cursor + 20, 0.45);
     cursor += 280;
     add({ type: 'saw', surface: 'floor' });
-    cursor += 280;
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += 90;
+    add({ type: 'money', y: MID_Y });
+    cursor += 280 - 180;
     add({ type: 'pad', color: 'yellow', surface: 'floor' });
     cursor += 280;
     add({ type: 'shapePortal', form: 'cube' });
     cursor += 40;
     setSpeed(cursor, 0.35);
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += 90;
+    add({ type: 'money', y: FLOOR_Y - 150 });
+    cursor += GAP_CUBE_FAST - 180;
     add({ type: 'coin', id: 2, y: FLOOR_Y - 150, risky: true });
     cursor += GAP_CUBE_FAST;
     setSpeed(cursor, 0.28);
@@ -1049,12 +1372,17 @@
   // moneda (type: 'money'), separada a propósito -- solo suma a la
   // billetera para comprar skins, no tiene tope de 3 ni afecta
   // estrellas/desbloqueo.
-  var coinsCollected, moneyCount, hasKey, hasDiamond, deaths;
+  var coinsCollected, moneyCount, hasKey, deaths;
   // Sistema de llaves con etiqueta (1/2/3): además de hasKey (compat,
   // "tengo alguna llave", usado para el ícono y las puertas viejas sin
   // keyId asignado), se guarda por separado cuál llave específica se
   // juntó -- así una puerta con keyId puesto solo abre con SU llave.
   var collectedKeyIds;
+  // Mismo patrón para diamantes (hasta 3 por nivel, con id 0/1/2):
+  // mapa por id en vez de un solo booleano, con fallback a 'default'
+  // para diamantes sin id (los que ya tenía puestos el nivel 1, que
+  // no se toca -- así sigue funcionando exactamente igual que antes).
+  var collectedDiamondIds;
   var KEY_COLORS = { '1': '#FF7A3D', '2': '#3DDBFF', '3': '#C63DFF', 'default': '#FF7A3D' };
 
   function selectLevel(index) {
@@ -1080,10 +1408,15 @@
   function resetGame() {
     var levelId = currentLevelId();
     level = LEVELS[currentLevelIndex].build();
-    var diamondClaimed = localStorage.getItem(diamondClaimedKeyFor(levelId)) === '1';
-    if (diamondClaimed) {
-      level.objects = level.objects.filter(function (o) { return o.type !== 'diamond'; });
-    }
+    // Cada diamante (hasta 3 por nivel, por id) se saca del nivel por
+    // separado si YA está reclamado para siempre -- a diferencia de
+    // antes (un solo flag para todos), ahora puede haber 1 o 2 ya
+    // reclamados y el resto todavía disponible.
+    level.objects = level.objects.filter(function (o) {
+      if (o.type !== 'diamond') return true;
+      var did = o.id != null ? String(o.id) : 'default';
+      return localStorage.getItem(diamondClaimedKeyFor(levelId, did)) !== '1';
+    });
     best = parseInt(localStorage.getItem(bestKeyFor(levelId)) || '0', 10) || 0;
     if (bestEl) bestEl.textContent = 'Best: ' + best + '%';
     player = {
@@ -1113,7 +1446,7 @@
     lastTime = null;
     coinsCollected = [];
     moneyCount = 0;
-    hasDiamond = false;
+    collectedDiamondIds = {};
     state = 'ready';
     scoreEl.textContent = 'Progress: 0%';
     coinsEl.textContent = '⭐ 0/3';
@@ -1185,11 +1518,16 @@
       // Las estrellas del nivel reflejan la MEJOR corrida (0-3 monedas
       // secretas encontradas esa vez que se completó), no se pueden bajar.
       if (coinCount > starsFor(levelId)) localStorage.setItem(starsKeyFor(levelId), String(coinCount));
-      if (hasDiamond && localStorage.getItem(diamondClaimedKeyFor(levelId)) !== '1') {
-        diamondsWallet += 1;
-        localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
-        localStorage.setItem(diamondClaimedKeyFor(levelId), '1');
-      }
+      // Cada diamante que se trajo hasta la meta esta corrida se
+      // acredita por separado (hasta 3 por nivel) -- el que ya estaba
+      // reclamado de antes no vuelve a sumar.
+      Object.keys(collectedDiamondIds).forEach(function (did) {
+        if (localStorage.getItem(diamondClaimedKeyFor(levelId, did)) !== '1') {
+          diamondsWallet += 1;
+          localStorage.setItem(DIAMONDS_WALLET_KEY, String(diamondsWallet));
+          localStorage.setItem(diamondClaimedKeyFor(levelId, did), '1');
+        }
+      });
       updateWalletHud();
       if (typeof renderHomeMenu === 'function') renderHomeMenu();
       // El desbloqueo de niveles ya no se guarda acá -- se calcula solo
@@ -1428,8 +1766,9 @@
         }
       } else if (o.type === 'diamond') {
         var diamondScale = o.scale || 1;
-        if (!hasDiamond && overlapsX(o, 24 * diamondScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * diamondScale) {
-          hasDiamond = true;
+        var did = o.id != null ? String(o.id) : 'default';
+        if (!collectedDiamondIds[did] && overlapsX(o, 24 * diamondScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 26 * diamondScale) {
+          collectedDiamondIds[did] = true;
           o.dead = true;
           playPickup();
           spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#7CF6FF', 14);

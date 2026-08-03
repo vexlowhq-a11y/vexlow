@@ -34,7 +34,7 @@
     door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'free', fields: ['x2', 'y', 'scale', 'keyId'] },
     coin: { label: 'Estrella', color: '#FFC93D', icon: '⭐', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
     money: { label: 'Moneda', color: '#FFC93D', icon: '🪙', anchor: 'free', fields: ['y', 'scale'] },
-    diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y', 'scale'] },
+    diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['id', 'y', 'scale'] },
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
   var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'pad', 'key', 'door', 'coin', 'money', 'diamond', 'finish'];
@@ -358,7 +358,7 @@
       case 'door': obj = { type: 'door', x2: x + 130, y: y, x: x }; break;
       case 'coin': obj = { type: 'coin', id: countOf('coin'), y: y, x: x }; break;
       case 'money': obj = { type: 'money', y: y, x: x }; break;
-      case 'diamond': obj = { type: 'diamond', y: y, x: x }; break;
+      case 'diamond': obj = { type: 'diamond', id: countOf('diamond'), y: y, x: x }; break;
       case 'finish': obj = { type: 'finish', x: x }; break;
       default: obj = { type: type, x: x };
     }
@@ -982,7 +982,7 @@
   /* ---- Panel de propiedades ---- */
   var FIELD_LABEL = {
     surface: 'Superficie', w: 'Ancho', lift: 'Altura', moving: 'Móvil', amp: 'Amplitud', periodMs: 'Período (ms)',
-    dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'ID estrella', risky: 'Riesgosa',
+    dir: 'Dirección', form: 'Forma', color: 'Color', y: 'Altura (y)', id: 'Número (0/1/2)', risky: 'Riesgosa',
     x2: 'Hasta x', rotation: 'Rotación (°)', lethal: '¿Hace perder?', scale: 'Tamaño',
     height: 'Altura de la pared', hitboxScale: 'Colisión (qué tan justo choca)', power: 'Fuerza del salto',
     keyId: 'Llave que le corresponde'
