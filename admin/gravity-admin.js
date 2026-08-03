@@ -33,10 +33,11 @@
     key: { label: 'Llave', color: '#FFC93D', icon: '🔑', anchor: 'free', fields: ['y', 'scale', 'keyId'] },
     door: { label: 'Puerta', color: '#FF7A3D', icon: '▯', anchor: 'free', fields: ['x2', 'y', 'scale', 'keyId'] },
     coin: { label: 'Estrella', color: '#FFC93D', icon: '⭐', anchor: 'free', fields: ['id', 'y', 'risky', 'scale'] },
+    money: { label: 'Moneda', color: '#FFC93D', icon: '🪙', anchor: 'free', fields: ['y', 'scale'] },
     diamond: { label: 'Diamante', color: '#7CF6FF', icon: '♦', anchor: 'free', fields: ['y', 'scale'] },
     finish: { label: 'Meta', color: '#7CFFB2', icon: '🏁', anchor: 'full', fields: [] }
   };
-  var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'pad', 'key', 'door', 'coin', 'diamond', 'finish'];
+  var TOOL_ORDER = ['spike', 'saw', 'platform', 'wall', 'gravityPortal', 'shapePortal', 'pad', 'key', 'door', 'coin', 'money', 'diamond', 'finish'];
   function variantCountFor(type) {
     var def = OBJECT_TYPES[type];
     return def && def.variantBase ? (variantCounts[def.variantBase] || 0) : 0;
@@ -356,6 +357,7 @@
       case 'key': obj = { type: 'key', y: y, x: x }; break;
       case 'door': obj = { type: 'door', x2: x + 130, y: y, x: x }; break;
       case 'coin': obj = { type: 'coin', id: countOf('coin'), y: y, x: x }; break;
+      case 'money': obj = { type: 'money', y: y, x: x }; break;
       case 'diamond': obj = { type: 'diamond', y: y, x: x }; break;
       case 'finish': obj = { type: 'finish', x: x }; break;
       default: obj = { type: type, x: x };

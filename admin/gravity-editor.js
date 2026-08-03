@@ -327,7 +327,7 @@ function decide(st, botMem) {
     return { hold: p.y > targetY };
   }
   if (!upcoming) return { tap: false };
-  var passiveTypes = ['gravityPortal', 'shapePortal', 'pad', 'door', 'coin', 'key', 'finish', 'diamond'];
+  var passiveTypes = ['gravityPortal', 'shapePortal', 'pad', 'door', 'coin', 'money', 'key', 'finish', 'diamond'];
   if (passiveTypes.indexOf(upcoming.type) !== -1) return { tap: false };
   var jumpWindow = p.form === 'ball' ? 230 : 60;
   if (upcomingDist < jumpWindow && upcomingDist > -10) {

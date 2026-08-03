@@ -521,7 +521,6 @@
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 3914, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 3955, variant: "v2" });
     add({ type: "spike", surface: "ceil", w: 28, x: 3955, variant: "v1", hitboxScale: 1.35, lift: 74 });
-    add({ type: "spike", surface: "ceil", w: 28, x: 3987, variant: "v1", lift: 74, hitboxScale: 1.37 });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 3995, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4036, variant: "v2" });
     add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4067, variant: "v2" });
@@ -536,14 +535,12 @@
     setSpeed(4520, 0.2);
     add({ type: "spike", surface: "floor", w: 28, x: 4665, variant: "v9", lift: -3, hitboxScale: 1.58 });
     add({ type: "spike", surface: "floor", w: 28, x: 4820, variant: "v1", lift: -3, hitboxScale: 1.46 });
-    add({ type: "spike", surface: "floor", w: 28, x: 4838, variant: "v1", lift: -3, hitboxScale: 1.5 });
     add({ type: "pad", color: "yellow", surface: "floor", x: 4970, dir: -1 });
     add({ type: "spike", surface: "floor", w: 28, x: 5034, variant: "v1", lift: -3 });
     add({ type: "spike", surface: "floor", w: 28, x: 5066, variant: "v1", lift: -3 });
     add({ type: "spike", surface: "floor", w: 28, x: 5099, variant: "v1", lift: -3 });
     add({ type: "saw", surface: "floor", x: 5267, variant: "v7", lift: 5 });
-    add({ type: "saw", surface: "floor", x: 5493, variant: "v7", lift: 5 });
-    add({ type: "saw", surface: "floor", x: 5694, variant: "v7", lift: 5 });
+    add({ type: "saw", surface: "floor", x: 5606, variant: "v7", lift: 3 });
     add({ type: "pad", color: "yellow", surface: "floor", x: 5765, power: 1, lift: 0, dir: -1 });
     add({ type: "spike", surface: "floor", w: 28, x: 5819, variant: "v1", lift: -2, hitboxScale: 1.46 });
     add({ type: "spike", surface: "floor", w: 28, x: 5852, variant: "v1", lift: -2, hitboxScale: 1.46 });
@@ -1046,7 +1043,13 @@
   }
 
   var state, player, particles, speed, elapsedMs, lastTime;
-  var coinsCollected, hasKey, hasDiamond, deaths;
+  // coinsCollected: las 3 secretas por nivel (type: 'coin' en los
+  // datos -- nombre heredado, hoy son las "estrellas" que se ven y
+  // que definen el desbloqueo de niveles). moneyCount: la NUEVA
+  // moneda (type: 'money'), separada a propósito -- solo suma a la
+  // billetera para comprar skins, no tiene tope de 3 ni afecta
+  // estrellas/desbloqueo.
+  var coinsCollected, moneyCount, hasKey, hasDiamond, deaths;
   // Sistema de llaves con etiqueta (1/2/3): además de hasKey (compat,
   // "tengo alguna llave", usado para el ícono y las puertas viejas sin
   // keyId asignado), se guarda por separado cuál llave específica se
@@ -1109,6 +1112,7 @@
     elapsedMs = 0;
     lastTime = null;
     coinsCollected = [];
+    moneyCount = 0;
     hasDiamond = false;
     state = 'ready';
     scoreEl.textContent = 'Progress: 0%';
@@ -1171,11 +1175,12 @@
     var coinCount = coinsCollected.length;
 
     if (won) {
-      // Las monedas de la corrida se acreditan siempre que se complete
-      // el nivel (se pueden volver a ganar repitiendo). El diamante,
-      // en cambio, solo se acredita la primera vez que se lo trae
-      // hasta la meta -- después queda marcado y no vuelve a aparecer.
-      coinsWallet += coinCount;
+      // Las monedas (type: 'money', distintas de las estrellas) de la
+      // corrida se acreditan siempre que se complete el nivel (se
+      // pueden volver a ganar repitiendo). El diamante, en cambio,
+      // solo se acredita la primera vez que se lo trae hasta la meta
+      // -- después queda marcado y no vuelve a aparecer.
+      coinsWallet += moneyCount;
       localStorage.setItem(COINS_WALLET_KEY, String(coinsWallet));
       // Las estrellas del nivel reflejan la MEJOR corrida (0-3 monedas
       // secretas encontradas esa vez que se completó), no se pueden bajar.
@@ -1322,16 +1327,19 @@
     // Puerta con llave asignada (keyId): bloquea de verdad el avance
     // hasta tener SU llave -- a diferencia de una puerta sin keyId
     // (la de siempre), que nunca bloqueó, así que los niveles ya
-    // hechos no cambian. Como acá no se puede retroceder, esto solo
-    // es justo si la llave siempre queda antes que su puerta en el
-    // nivel -- por eso hay que verificar con el bot como cualquier
-    // otro cambio (si la llave no es alcanzable, el bot se queda
-    // trabado ahí y avisa que el nivel quedó imposible).
+    // hechos no cambian. Como acá no se puede retroceder ni esperar
+    // (el mundo se sigue moviendo solo), simplemente frenar al
+    // jugador contra la puerta lo dejaba trabado ahí para siempre --
+    // ahora pierde como con cualquier otro obstáculo, así el juego
+    // vuelve al intento siguiente en vez de quedar congelado. Como
+    // antes, esto solo es justo si la llave siempre queda antes que
+    // su puerta en el nivel -- por eso hay que verificar con el bot
+    // como cualquier otro cambio.
     level.objects.forEach(function (o) {
       if (o.type !== 'door') return;
       o.open = o.keyId != null ? !!collectedKeyIds[String(o.keyId)] : hasKey;
       if (o.keyId != null && !o.open && player.worldX + PLAYER_SIZE > o.x) {
-        player.worldX = o.x - PLAYER_SIZE;
+        endGame(); return;
       }
     });
     player.x = PLAYER_SCREEN_X;
@@ -1501,6 +1509,18 @@
           coinsEl.textContent = '⭐ ' + coinsCollected.length + '/3';
           playPickup();
           spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFC93D', 12);
+        }
+      } else if (o.type === 'money') {
+        // Moneda de billetera -- distinta de la estrella (type: 'coin'
+        // arriba): no tiene tope de 3 ni ID, se puede poner cuantas se
+        // quiera, y solo sirve para comprar skins, no afecta el
+        // desbloqueo de niveles.
+        var moneyScale = o.scale || 1;
+        if (!o.dead && overlapsX(o, 22 * moneyScale, centerWorldX) && Math.abs((player.y + PLAYER_SIZE / 2) - o.y) < 24 * moneyScale) {
+          moneyCount++;
+          o.dead = true;
+          playPickup();
+          spawnParticles(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2, '#FFC93D', 10);
         }
       } else if (o.type === 'finish') {
         if (overlapsX(o, 20, centerWorldX)) { winGame(); return; }
@@ -1725,6 +1745,18 @@
         ctx.shadowColor = '#FFC93D'; ctx.shadowBlur = 10;
         traceStar(13, 5.5);
         ctx.fill();
+        ctx.restore();
+      } else if (o.type === 'money' && !o.dead) {
+        var moneyDrawScale = o.scale || 1;
+        ctx.save();
+        ctx.translate(sx, o.y);
+        ctx.scale(Math.abs(Math.cos(elapsedMs * 0.004)) * moneyDrawScale, moneyDrawScale);
+        ctx.fillStyle = '#FFC93D';
+        ctx.shadowColor = '#FFC93D'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#05060f';
+        ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('$', 0, 1);
         ctx.restore();
       } else if (o.type === 'finish') {
         ctx.save();
