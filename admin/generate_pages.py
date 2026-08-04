@@ -1282,23 +1282,29 @@ def format_date(iso):
     return UI_STRINGS["date_format"].format(d=int(d), month=month, y=y)
 
 
-def localize(html):
-    """ Agrega '../../' a los links entre páginas del mismo árbol (siempre
-        igual, las páginas de categoria/tema/artículo están 2 carpetas
-        adentro de la raíz). """
-    html = html.replace('href="index.html"', 'href="../../index.html"')
-    html = html.replace('href="play/index.html"', 'href="../../play/index.html"')
-    html = html.replace('src="img/', 'src="../../img/')
-    html = html.replace("url('img/", "url('../../img/")
+def localize(html, depth=2):
+    """ Agrega el prefijo '../' que corresponda a los links entre páginas
+        del mismo árbol, según qué tan adentro de la raíz esté la página
+        que va a recibir este bloque compartido (sidebar/footer, siempre
+        extraídos de index.html en la raíz). Las páginas de categoría/
+        tema/artículo están 2 carpetas adentro (depth=2); las de play/
+        están 1 carpeta adentro (depth=1); las páginas estáticas están
+        en la raíz (depth=0, sin prefijo -- no hace falta llamar a esta
+        función para esas). """
+    prefix = "../" * depth
+    html = html.replace('href="index.html"', 'href="{}index.html"'.format(prefix))
+    html = html.replace('href="play/index.html"', 'href="{}play/index.html"'.format(prefix))
+    html = html.replace('src="img/', 'src="{}img/'.format(prefix))
+    html = html.replace("url('img/", "url('{}img/".format(prefix))
     for cat in CATEGORY_SLUGS:
         html = html.replace(
             'href="categoria/{}/index.html"'.format(cat["slug"]),
-            'href="../../categoria/{}/index.html"'.format(cat["slug"]),
+            'href="{}categoria/{}/index.html"'.format(prefix, cat["slug"]),
         )
     for page in STATIC_PAGES:
         html = html.replace(
             'href="{}.html"'.format(page["slug"]),
-            'href="../../{}.html"'.format(page["slug"]),
+            'href="{}{}.html"'.format(prefix, page["slug"]),
         )
     return html
 
@@ -1311,10 +1317,23 @@ def generate():
         index_html = f.read()
     sidebar_start = index_html.index('<div class="mobile-topbar">')
     sidebar_end = index_html.index('</aside>') + len('</aside>')
-    sidebar_block = localize(index_html[sidebar_start:sidebar_end])
+    sidebar_raw = index_html[sidebar_start:sidebar_end]
     footer_start = index_html.index('    <footer class="site-footer">')
     footer_end = index_html.index('</footer>', footer_start) + len('</footer>')
-    footer_block = localize(index_html[footer_start:footer_end])
+    footer_raw = index_html[footer_start:footer_end]
+
+    # Mismo bloque de sidebar/footer, pero con el prefijo de ruta correcto
+    # según a qué profundidad va cada página -- antes se usaba SIEMPRE el
+    # de 2 niveles (categoria/tema/artículo), incluso en páginas estáticas
+    # (privacy, terms, etc., en la raíz) y en play/ (1 nivel adentro),
+    # rompiendo el logo y todos los links del sidebar/footer en esas
+    # páginas (apuntaban 1-2 carpetas más arriba de lo que correspondía).
+    sidebar_block = localize(sidebar_raw, depth=2)     # categoria/<cat>/*.html
+    footer_block = localize(footer_raw, depth=2)
+    sidebar_block_play = localize(sidebar_raw, depth=1)  # play/*.html
+    footer_block_play = localize(footer_raw, depth=1)
+    sidebar_block_root = sidebar_raw                     # páginas estáticas en la raíz
+    footer_block_root = footer_raw
 
     with open(TOPICS_FILE, "r", encoding="utf-8") as f:
         topic_groups = json.load(f)
@@ -1535,7 +1554,7 @@ def generate():
         slug = page["slug"]
         html = STATIC_PAGE_TEMPLATE.format(
             slug=slug, title=page["label"], desc=STATIC_PAGE_DESCRIPTIONS[slug],
-            sidebar_block=sidebar_block, footer_block=footer_block,
+            sidebar_block=sidebar_block_root, footer_block=footer_block_root,
             body_html=render_article_body(STATIC_PAGE_BODIES[slug], strings["ad_inarticle"]),
             home=strings["home"], asset_prefix=asset_prefix_root, articulos_asset=ARTICULOS_ASSET,
         )
@@ -1558,7 +1577,7 @@ def generate():
         ("pulse.html", PLAY_PULSE_TEMPLATE, "monthly"),
     ):
         page_html = template.format(
-            sidebar_block=sidebar_block, footer_block=footer_block, articulos_asset=ARTICULOS_ASSET,
+            sidebar_block=sidebar_block_play, footer_block=footer_block_play, articulos_asset=ARTICULOS_ASSET,
             cache_bust=str(int(time.time())),
         )
         page_path = os.path.join(play_dir, filename)
