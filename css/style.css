@@ -528,21 +528,6 @@ main { min-width: 0; padding: 26px 32px 90px; }
 }
 .article-share a:hover { border-color: var(--blue-fill); color: var(--blue); }
 
-.contact-callout {
-  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
-  margin: 38px 0 8px; padding: 26px 28px;
-  background: var(--blue-tint); border: 1px solid var(--border); border-radius: var(--radius-l);
-  box-shadow: var(--shadow);
-}
-.contact-callout-text h3 { font-size: 1.1rem; margin: 0 0 4px; }
-.contact-callout-text p { margin: 0; font-size: 14.5px; color: var(--text-muted); }
-.contact-callout-btn {
-  flex-shrink: 0;
-  background: var(--blue); color: #fff; font-weight: 600; font-size: 14.5px;
-  padding: 12px 22px; border-radius: 999px; white-space: nowrap;
-}
-.contact-callout-btn:hover { background: var(--blue-fill); }
-
 .article-reactions {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin: 36px 0 0; padding: 18px 0; border-top: 1px solid var(--border);

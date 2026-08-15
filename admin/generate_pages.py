@@ -135,14 +135,6 @@ STATIC_PAGE_BODIES = {
         ("p", "We're an independent, still-small project. We use AI tools to help us research and draft faster, but every story is reviewed before it goes live. Being upfront about that is part of doing this right, even at our size."),
         ("h2", "Where we're headed"),
         ("p", "The goal is simple: grow one story at a time, keep raising the bar on quality, and build a source people can trust to keep them current without wasting their time."),
-        ("raw",
-         '      <div class="contact-callout">\n'
-         '        <div class="contact-callout-text">\n'
-         '          <h3>Got something to tell us?</h3>\n'
-         '          <p>Corrections, tips, or just feedback — we read every message.</p>\n'
-         '        </div>\n'
-         '        <a class="contact-callout-btn" href="mailto:contact@vexlowhq.com">Email contact@vexlowhq.com</a>\n'
-         '      </div>'),
     ],
     "editorial-policy": [
         ("h2", "How we choose what to publish"),
@@ -383,8 +375,6 @@ def render_article_body(body, asset_prefix=""):
             html += "      </ul>\n"
         elif kind == "ad":
             pass  # los espacios publicitarios se sacaron del sitio hasta tener AdSense aprobado
-        elif kind == "raw":
-            html += content + "\n"
         elif kind == "img":
             alt, src = content
             alt_esc = alt.replace('"', "&quot;")
