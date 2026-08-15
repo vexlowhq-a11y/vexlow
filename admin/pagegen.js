@@ -241,7 +241,7 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">\n' +
 '<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">\n' +
 '<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">\n' +
-'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>\n' +
+'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>\n' +
 '<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>\n' +
 '<script>\n' +
 '  window.dataLayer = window.dataLayer || [];\n' +

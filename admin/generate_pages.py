@@ -310,7 +310,7 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -432,7 +432,7 @@ ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -507,7 +507,7 @@ STATIC_PAGE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -556,7 +556,7 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -631,7 +631,7 @@ PLAY_TRIVIA_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -700,7 +700,7 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -811,7 +811,7 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -924,7 +924,7 @@ PLAY_ORBIT_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1030,7 +1030,7 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1234,7 +1234,7 @@ PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
