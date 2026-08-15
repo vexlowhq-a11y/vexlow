@@ -697,6 +697,7 @@
       article.sourceTitle = pendingDraft.sourceTitle;
     }
     article.href = articleHrefFor(article);
+    var isNewArticleToday = articleEditIndex === null && article.date === todayISO();
     if (articleEditIndex !== null) {
       articlesData[articleEditIndex] = article;
     } else {
@@ -708,6 +709,12 @@
         articlePreviewLink.innerHTML = 'Página publicada: <a href="/site/' + article.href + '" target="_blank" rel="noopener">' + article.href + ' ↗</a>';
       } else {
         articlePreviewLink.textContent = '';
+      }
+      if (isNewArticleToday) {
+        var publishedToday = articlesData.filter(function (a) { return a.date === article.date; }).length;
+        if (publishedToday > 3) {
+          toast('Van ' + publishedToday + ' artículos publicados hoy — para mantener un ritmo parejo, lo ideal es no pasar de 2-3 por día.');
+        }
       }
       resetArticleForm();
       if (usedDraft) {
