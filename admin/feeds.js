@@ -49,14 +49,21 @@ function fetchUrl(url, redirectsLeft) {
   });
 }
 
-function decodeEntities(str) {
+// Solo des-escapa entidades (&amp; -> &, etc.) sin tocar tags ni
+// espacios -- para valores como URLs, donde un "&amp;q=30" en un
+// atributo XML tiene que volver a ser "&q=30" antes de pedirlo, pero
+// no queremos que le pasen por encima el resto de la limpieza de texto.
+function unescapeEntities(str) {
   return String(str || '')
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&apos;/g, "'")
     .replace(/&#x([0-9a-fA-F]+);/g, function (m, hex) { return String.fromCodePoint(parseInt(hex, 16)); })
     .replace(/&#(\d+);/g, function (m, dec) { return String.fromCodePoint(parseInt(dec, 10)); })
-    .replace(/&amp;/g, '&')
+    .replace(/&amp;/g, '&');
+}
+
+function decodeEntities(str) {
+  return unescapeEntities(String(str || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'))
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -75,6 +82,32 @@ function linkValue(block) {
   return m ? decodeEntities(m[1]) : '';
 }
 
+// Imagen de portada que ya trae la fuente RSS (no se genera nada con
+// IA acá) -- primero los formatos estándar que traen la URL en un
+// atributo (media:content/media:thumbnail/enclosure), y si el feed no
+// trae nada de eso, como último recurso se busca el primer <img> del
+// HTML de la descripción/resumen.
+function imageValue(block) {
+  var m = block.match(/<media:content[^>]+url="([^"]+)"[^>]*medium="image"/i)
+    || block.match(/<media:content[^>]+medium="image"[^>]*url="([^"]+)"/i)
+    || block.match(/<media:thumbnail[^>]+url="([^"]+)"/i)
+    || block.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="image[^"]*"/i)
+    || block.match(/<enclosure[^>]+type="image[^"]*"[^>]*url="([^"]+)"/i);
+  if (m) return unescapeEntities(m[1]);
+  var descBlock = block.match(/<(?:description|content:encoded|content)[^>]*>([\s\S]*?)<\/(?:description|content:encoded|content)>/i);
+  if (descBlock) {
+    // Puede venir como CDATA/HTML crudo (<img ...>) o con las
+    // entidades escapadas (&lt;img ...&gt;) -- se prueban ambas.
+    var raw = descBlock[1];
+    var imgMatch = raw.match(/<img[^>]+src="([^"]+)"/i);
+    if (!imgMatch) {
+      imgMatch = unescapeEntities(raw).match(/<img[^>]+src="([^"]+)"/i);
+    }
+    if (imgMatch) return unescapeEntities(imgMatch[1]);
+  }
+  return '';
+}
+
 function parseFeedItems(xml) {
   var items = [];
   var blocks = xml.match(/<item[\s\S]*?<\/item>/gi) || xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
@@ -83,8 +116,9 @@ function parseFeedItems(xml) {
     var link = linkValue(block);
     var summary = tagValue(block, 'description') || tagValue(block, 'summary') || tagValue(block, 'content');
     var pubDate = tagValue(block, 'pubDate') || tagValue(block, 'published') || tagValue(block, 'updated');
+    var image = imageValue(block);
     if (!title || !link) return;
-    items.push({ title: title, link: link, summary: summary.slice(0, 600), pubDate: pubDate });
+    items.push({ title: title, link: link, summary: summary.slice(0, 600), pubDate: pubDate, image: image });
   });
   return items;
 }
@@ -102,7 +136,7 @@ async function fetchAllFeedItems() {
       var xml = await fetchUrl(entry.url);
       var items = parseFeedItems(xml);
       items.forEach(function (item) {
-        results.push({ category: entry.category, title: item.title, link: item.link, summary: item.summary, pubDate: item.pubDate });
+        results.push({ category: entry.category, title: item.title, link: item.link, summary: item.summary, pubDate: item.pubDate, image: item.image });
       });
     } catch (e) {
       errors.push({ url: entry.url, error: e.message });

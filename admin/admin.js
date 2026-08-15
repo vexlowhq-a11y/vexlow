@@ -756,6 +756,9 @@
       info.innerHTML = '<div class="ttl"></div><div class="meta"></div>';
       info.querySelector('.ttl').textContent = d.title;
       var metaText = (d.categoryLabel || meta.label) + ' · ' + (d.dek || '');
+      if (d.similarityWarning) {
+        metaText = '⚠️ Revisar: se parece mucho al texto original (' + (d.similarityScore || 0) + '%) · ' + metaText;
+      }
       info.querySelector('.meta').textContent = metaText;
 
       var actions = document.createElement('div');
@@ -830,6 +833,7 @@
       draftsFetchStatus.textContent = '';
       var errorList = result.errors || [];
       var msg = (result.added || 0) + ' borrador(es) nuevo(s)';
+      if (result.flaggedForSimilarity) msg += ' — ⚠️ ' + result.flaggedForSimilarity + ' marcado(s) por parecerse mucho al texto original, revisalos antes de publicar';
       if (errorList.length) msg += ' — ' + errorList.length + ' error(es): ' + errorList.map(function (e) { return e.error; }).join(' | ');
       toast(msg, (result.added || 0) === 0 && errorList.length > 0);
       return getJSON('/api/drafts').then(function (list) {
