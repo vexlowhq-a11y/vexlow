@@ -45,6 +45,23 @@ const SIMILARITY_LOOKBACK_DAYS = 21;
 // pero empieza a acercarse a artículos genuinamente distintos que
 // solo comparten vocabulario de tema (ej. "chip"/"artificial
 // intelligence" entre dos empresas distintas).
+// Bloqueo duro para candidatos que tocan explotación/abuso sexual
+// infantil (o material derivado, como fotos de menores manipuladas a
+// contenido explícito con IA) -- se descartan ANTES de redactar, no
+// después. A propósito conservador: mejor perder alguna nota legítima
+// de política de seguridad infantil (rara, y sin las palabras "child"
+// + término explícito juntas) que arriesgarse a redactar algo de esta
+// categoría. No es solo un tema de AdSense -- es la clase de contenido
+// que no debería llegar a la cola de revisión ni una vez, encontrado
+// después de que un candidato real (menor + imagen manipulada a
+// contenido explícito) llegó a redactarse el 2026-08-15.
+const CHILD_SAFETY_TERMS = /\b(child|minor|childhood|kid|underage)\b/i;
+const EXPLICIT_TERMS = /\b(explicit|nude|nudity|naked|sexual(?:ly)?|pornographic|porn|csam|sexual abuse|sex abuse|molest)/i;
+function isChildSafetyRisk(text) {
+  var t = String(text || '');
+  return CHILD_SAFETY_TERMS.test(t) && EXPLICIT_TERMS.test(t);
+}
+
 const SAME_STORY_OVERLAP_THRESHOLD = 0.4;
 // Umbral para el chequeo de "copia literal de la fuente" (ver
 // verbatimOverlapRatio() abajo) -- distinto del de arriba: éste no
@@ -279,6 +296,7 @@ async function buildCandidates() {
 
   var fetched = await feeds.fetchAllFeedItems();
   var candidates = fetched.items.filter(function (item) {
+    if (isChildSafetyRisk((item.title || '') + ' ' + (item.summary || ''))) return false;
     if (knownLinks.has(item.link)) return false;
     if (knownTitles.has(normalizeTitle(item.title))) return false;
     if (!isRecent(item.pubDate)) return false;
