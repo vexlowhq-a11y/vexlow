@@ -40,9 +40,6 @@ CATEGORY_SLUGS = [
     {"slug": "gaming", "icon": "🎮"},
     {"slug": "entertainment", "icon": "🎬"},
     {"slug": "sports", "icon": "⚽"},
-    {"slug": "world", "icon": "🌎"},
-    {"slug": "curiosities", "icon": "💡"},
-    {"slug": "guides", "icon": "📚"},
     {"slug": "social", "icon": "📱"},
     {"slug": "business", "icon": "💰"},
 ]
@@ -50,8 +47,7 @@ CATEGORY_SLUGS = [
 CATEGORY_LABELS = {
     "trending": "Trending", "ai": "AI", "technology": "Technology",
     "science": "Science & Space", "gaming": "Gaming", "entertainment": "Entertainment",
-    "sports": "Sports", "world": "World", "curiosities": "Curiosities",
-    "guides": "Guides", "social": "Social Media", "business": "Business",
+    "sports": "Sports", "social": "Social Media", "business": "Business",
 }
 
 DESCRIPTIONS = {
@@ -62,9 +58,6 @@ DESCRIPTIONS = {
     "gaming": "Releases, updates, guides, consoles, and mobile games.",
     "entertainment": "Movies, TV series, streaming, music, and celebrities.",
     "sports": "Soccer, the World Cup, NBA, Formula 1, and sports records.",
-    "world": "Odd news, economy, major events, and culture.",
-    "curiosities": "Did you know...? Rankings, surprising facts, inventions, and amazing places.",
-    "guides": "Content that lasts for years: step-by-step tutorials and guides.",
     "social": "TikTok, Instagram, YouTube, X, Twitch, Discord, and everything happening on social media.",
     "business": "Startups, cryptocurrency, investing, marketing, and the world of business.",
 }
@@ -114,7 +107,7 @@ STATIC_PAGE_BODIES = {
     "about-vexlowhq": [
         ("p", "VexlowHQ started with a simple idea: bring the most interesting things happening in the world into one place, whether that's artificial intelligence, a big game launch, a scientific discovery, or the story everyone's talking about on social media."),
         ("h2", "What we cover"),
-        ("p", "We publish across eleven categories: AI, Technology, Science & Space, Gaming, Entertainment, Sports, World, Curiosities, Guides, Social Media, and Business. Every day we add news, guides, and analysis built for readers who want to stay current without hunting across a dozen sites."),
+        ("p", "We publish across eight categories: AI, Technology, Science & Space, Gaming, Entertainment, Sports, Social Media, and Business. Every day we add news, guides, and analysis built for readers who want to stay current without hunting across a dozen sites."),
         ("h2", "How we work"),
         ("p", "We're an independent, still-small project. We use AI tools to help us research and draft faster, but every story is reviewed before it goes live. Being upfront about that is part of doing this right, even at our size."),
         ("h2", "Where we're headed"),
@@ -139,7 +132,7 @@ STATIC_PAGE_BODIES = {
     ],
     "advertise": [
         ("h2", "Why advertise on VexlowHQ"),
-        ("p", "VexlowHQ is a content discovery site covering artificial intelligence, technology, science, gaming, entertainment, sports, world news, curiosities, guides, social media, and business — built for a general audience that wants to stay current."),
+        ("p", "VexlowHQ is a content discovery site covering artificial intelligence, technology, science, gaming, entertainment, sports, social media, and business — built for a general audience that wants to stay current."),
         ("h2", "Available formats"),
         ("ul", [
             "Display ad placements integrated into the article feed and category pages.",
@@ -205,51 +198,6 @@ def camel_to_label(name):
     return spaced.replace("_", " ").replace("-", " ").strip()
 
 
-def img_thumbs_for(cat):
-    folder = cat.get("img_folder", cat["slug"])
-    base = os.path.join(IMG_DIR, folder)
-    thumbs = {}
-    if not os.path.isdir(base):
-        return thumbs
-    for entry in sorted(os.listdir(base)):
-        full = os.path.join(base, entry)
-        if not os.path.isdir(full):
-            continue
-        for f in sorted(os.listdir(full)):
-            if os.path.splitext(f)[1].lower() in IMAGE_EXT:
-                thumbs[entry.lower()] = "img/{}/{}/{}".format(folder, entry, f)
-                break
-    return thumbs
-
-
-# Igual que img_thumbs_for, pero un nivel más adentro: img/{folder}/{topic_slug}/{subtopic_slug}/
-def subtopic_img_thumbs_for(cat, topic_slug):
-    folder = cat.get("img_folder", cat["slug"])
-    base = os.path.join(IMG_DIR, folder, topic_slug)
-    thumbs = {}
-    if not os.path.isdir(base):
-        return thumbs
-    for entry in sorted(os.listdir(base)):
-        full = os.path.join(base, entry)
-        if not os.path.isdir(full):
-            continue
-        for f in sorted(os.listdir(full)):
-            if os.path.splitext(f)[1].lower() in IMAGE_EXT:
-                thumbs[entry.lower()] = "img/{}/{}/{}/{}".format(folder, topic_slug, entry, f)
-                break
-    return thumbs
-
-
-def find_topics_auto(cat):
-    thumbs = img_thumbs_for(cat)
-    topics = []
-    for slug, thumb in thumbs.items():
-        if slug == "index":
-            continue
-        topics.append({"slug": slug, "label": camel_to_label(slug), "thumb": thumb})
-    return topics
-
-
 CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -308,91 +256,6 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
-TOPIC_CARD_TEMPLATE = """        <a class="guide-card" href="{slug}.html">{thumb_or_icon}<h3>{label}</h3><p>{view_more}</p></a>
-"""
-
-TOPICS_GROUP_SECTION_TEMPLATE = """    <div class="home-section" style="margin-top:0;">
-      <div class="section-head"><h2>{group_name}</h2></div>
-      <div class="guides-grid">
-{topic_cards}      </div>
-    </div>
-
-"""
-
-TOPIC_PAGE_TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{topic_label} — {cat_label} — VexlowHQ</title>
-<meta name="description" content="{meta_desc}">
-<meta name="robots" content="noindex, follow">
-<link rel="stylesheet" href="{asset_prefix}css/style.css">
-<link rel="icon" type="image/x-icon" href="{asset_prefix}favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="{asset_prefix}favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="{asset_prefix}favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="{asset_prefix}apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1908947394595965" crossorigin="anonymous"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  gtag('js', new Date());
-  gtag('config', 'G-20Z63KYZ3K');
-</script>
-</head>
-<body data-category="{cat_slug}" data-topic="{topic_slug}"{subtopic_attr}>
-
-{sidebar_block}
-
-  <main>
-
-    <nav class="breadcrumb">
-      <a href="../../index.html">{home}</a><span class="sep">/</span><a href="index.html">{cat_label}</a>{parent_crumb}<span class="sep">/</span><span class="current">{topic_label}</span>
-    </nav>
-
-    <div class="category-header">
-      <span class="ic-badge">{cat_icon}</span>
-      <div>
-        <h1>{topic_label}</h1>
-        <p>{everything_about}</p>
-        <span class="count" id="categoryCount">{loading}</span>
-      </div>
-    </div>
-
-{content_block}
-    <div class="home-section" style="margin-top: 32px;">
-      <div class="ad-slot">{ad_infeed}</div>
-    </div>
-
-{footer_block}
-
-  </main>
-</div>
-
-<script src="{asset_prefix}{articulos_asset}"></script>
-<script src="{asset_prefix}js/script.js"></script>
-</body>
-</html>
-"""
-
-# Contenido por defecto de una página de tema/subtema: la grilla plana de
-# artículos, llenada en el cliente por js/script.js según data-category/
-# data-topic/data-subtopic. Se usa siempre en subtemas (nivel hoja) y en
-# temas que todavía no tienen subtemas propios.
-ARTICLES_GRID_BLOCK = (
-    '    <div class="home-section" id="noticias">\n'
-    '      <div class="section-head"><h2>{latest_news}</h2></div>\n'
-    '      <div class="rail-grid" id="categoryGrid"></div>\n'
-    '    </div>\n'
-    '\n'
-)
-
-
-def thumb_or_icon_html(thumb, icon, asset_prefix):
-    if thumb:
-        return '<span class="ic" style="width:100%;height:64px;border-radius:8px;background-image:url(\'{}{}\');background-size:cover;background-position:center;display:block;margin-bottom:4px;"></span>'.format(asset_prefix, thumb)
-    return '<span class="ic">{}</span>'.format(icon)
 
 
 AD_SLOT_HTML_TPL = '      <div class="ad-slot" style="margin: 30px 0;">{}</div>\n'
@@ -1335,31 +1198,6 @@ def generate():
     sidebar_block_root = sidebar_raw                     # páginas estáticas en la raíz
     footer_block_root = footer_raw
 
-    with open(TOPICS_FILE, "r", encoding="utf-8") as f:
-        topic_groups = json.load(f)
-
-    try:
-        with open(SUBTOPICS_FILE, "r", encoding="utf-8") as f:
-            subtopics_data = json.load(f)
-    except (IOError, OSError):
-        subtopics_data = {}
-
-    def topic_label_for(cat_slug, topic_slug):
-        for group_name, items in topic_groups.get(cat_slug, []):
-            for slug, label in items:
-                if slug == topic_slug:
-                    return label
-        return None
-
-    def subtopics_for(cat_slug, topic_slug):
-        return subtopics_data.get("{}/{}".format(cat_slug, topic_slug), [])
-
-    def subtopic_label_for(cat_slug, topic_slug, subtopic_slug):
-        for slug, label in subtopics_for(cat_slug, topic_slug):
-            if slug == subtopic_slug:
-                return label
-        return None
-
     asset_prefix_page = "../../"  # para páginas de categoría/tema/artículo (2 niveles adentro)
     asset_prefix_root = ""  # para páginas estáticas / index (en la raíz)
 
@@ -1378,54 +1216,20 @@ def generate():
         if cat.get("has_note"):
             note_html = '    <p style="font-size:12.5px;color:var(--text-muted);margin:-14px 0 26px;max-width:60ch;">{}</p>\n'.format(strings["trending_note"])
 
-        feed_html = ""
-        if slug == "trending":
-            feed_html = (
-                '    <div class="home-section" id="noticias">\n'
-                '      <div class="section-head"><h2>{}</h2></div>\n'
-                '      <div class="rail-grid" id="categoryGrid"></div>\n'
-                '    </div>\n'
-            ).format(strings["most_talked_about"])
+        feed_heading = strings["most_talked_about"] if slug == "trending" else strings["latest_news"]
+        feed_html = (
+            '    <div class="home-section" id="noticias">\n'
+            '      <div class="section-head"><h2>{}</h2></div>\n'
+            '      <div class="rail-grid" id="categoryGrid"></div>\n'
+            '    </div>\n'
+        ).format(feed_heading)
 
+        # El sistema de temas/subtemas (grilla "Topics we cover" + páginas
+        # de tema individuales) se retiró: la navegación quedó plana por
+        # categoría, sin la capa intermedia de temas.
         topics_html = ""
         search_html = ""
         flat_topics = []
-
-        if slug in topic_groups:
-            thumbs = img_thumbs_for(cat)
-            seen = set()
-            for group_name, items in topic_groups[slug]:
-                cards = ""
-                for topic_slug, topic_label in items:
-                    thumb = thumbs.get(topic_slug)
-                    cards += TOPIC_CARD_TEMPLATE.format(
-                        slug=topic_slug, label=topic_label,
-                        thumb_or_icon=thumb_or_icon_html(thumb, cat["icon"], asset_prefix_page),
-                        view_more=strings["view_more_cards"],
-                    )
-                    if topic_slug not in seen:
-                        seen.add(topic_slug)
-                        flat_topics.append({"slug": topic_slug, "label": topic_label, "thumb": thumb})
-                topics_html += TOPICS_GROUP_SECTION_TEMPLATE.format(group_name=group_name, topic_cards=cards)
-            search_html = (
-                '    <div class="topic-search">\n'
-                '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>\n'
-                '      <input type="search" id="topicSearch" placeholder="{}">\n'
-                '    </div>\n'
-                '    <p class="topic-no-results" id="topicNoResults">{}</p>\n'
-            ).format(strings["search_placeholder"], strings["no_topic_results"])
-        else:
-            auto_topics = find_topics_auto(cat)
-            if auto_topics:
-                cards = ""
-                for t in auto_topics:
-                    cards += TOPIC_CARD_TEMPLATE.format(
-                        slug=t["slug"], label=t["label"],
-                        thumb_or_icon=thumb_or_icon_html(t["thumb"], cat["icon"], asset_prefix_page),
-                        view_more=strings["view_more_cards"],
-                    )
-                topics_html = TOPICS_GROUP_SECTION_TEMPLATE.format(group_name=strings["topics_we_cover"], topic_cards=cards)
-                flat_topics = auto_topics
 
         page = CATEGORY_PAGE_TEMPLATE.format(
             label=label, slug=slug, icon=cat["icon"], desc=desc,
@@ -1439,58 +1243,8 @@ def generate():
         out_path = os.path.join(cat_dir, "index.html")
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(page)
-        print("categoría:", out_path, "({} temas)".format(len(flat_topics)))
+        print("categoría:", out_path)
         sitemap_urls.append(("/categoria/{}/".format(slug), today, "daily"))
-
-        for t in flat_topics:
-            sub_items = subtopics_for(slug, t["slug"])
-
-            if sub_items:
-                sub_thumbs = subtopic_img_thumbs_for(cat, t["slug"])
-                sub_cards = ""
-                for sub_slug, sub_label in sub_items:
-                    sub_cards += TOPIC_CARD_TEMPLATE.format(
-                        slug=t["slug"] + "-" + sub_slug, label=sub_label,
-                        thumb_or_icon=thumb_or_icon_html(sub_thumbs.get(sub_slug), cat["icon"], asset_prefix_page),
-                        view_more=strings["view_more_cards"],
-                    )
-                content_block = TOPICS_GROUP_SECTION_TEMPLATE.format(group_name=strings["topics_we_cover"], topic_cards=sub_cards)
-            else:
-                content_block = ARTICLES_GRID_BLOCK.format(latest_news=strings["latest_news"])
-
-            topic_page = TOPIC_PAGE_TEMPLATE.format(
-                topic_label=t["label"], topic_slug=t["slug"],
-                cat_label=label, cat_slug=slug, cat_icon=cat["icon"],
-                sidebar_block=sidebar_block, footer_block=footer_block,
-                home=strings["home"], loading=strings["loading"], ad_infeed=strings["ad_infeed"],
-                content_block=content_block, subtopic_attr="", parent_crumb="",
-                everything_about=strings["everything_about"].format(topic=t["label"]),
-                meta_desc=strings["all_coverage_of"].format(topic=t["label"]),
-                asset_prefix=asset_prefix_page, articulos_asset=ARTICULOS_ASSET,
-            )
-            topic_path = os.path.join(cat_dir, t["slug"] + ".html")
-            with open(topic_path, "w", encoding="utf-8") as f:
-                f.write(topic_page)
-            # noindex (ver TOPIC_PAGE_TEMPLATE): no tiene sentido sumarla al
-            # sitemap si le pedimos a Google que no la indexe.
-
-            parent_crumb_html = '<span class="sep">/</span><a href="{}.html">{}</a>'.format(t["slug"], t["label"])
-            for sub_slug, sub_label in sub_items:
-                sub_page = TOPIC_PAGE_TEMPLATE.format(
-                    topic_label=sub_label, topic_slug=t["slug"],
-                    cat_label=label, cat_slug=slug, cat_icon=cat["icon"],
-                    sidebar_block=sidebar_block, footer_block=footer_block,
-                    home=strings["home"], loading=strings["loading"], ad_infeed=strings["ad_infeed"],
-                    content_block=ARTICLES_GRID_BLOCK.format(latest_news=strings["latest_news"]),
-                    subtopic_attr=' data-subtopic="{}"'.format(sub_slug), parent_crumb=parent_crumb_html,
-                    everything_about=strings["everything_about"].format(topic=sub_label),
-                    meta_desc=strings["all_coverage_of"].format(topic=sub_label),
-                    asset_prefix=asset_prefix_page, articulos_asset=ARTICULOS_ASSET,
-                )
-                sub_path = os.path.join(cat_dir, t["slug"] + "-" + sub_slug + ".html")
-                with open(sub_path, "w", encoding="utf-8") as f:
-                    f.write(sub_page)
-                # noindex (ver TOPIC_PAGE_TEMPLATE): no la sumamos al sitemap.
 
     print("\nGenerando artículos...\n")
     with open(ARTICULOS_JSON, "r", encoding="utf-8") as f:
@@ -1505,25 +1259,12 @@ def generate():
         cat_dir = os.path.join(CATEGORIA_DIR, cat["slug"])
         os.makedirs(cat_dir, exist_ok=True)
 
-        topic_slug = art.get("topic")
-        topic_label = topic_label_for(art["category"], topic_slug) if topic_slug else None
+        # Las páginas de tema/subtema se retiraron junto con la navegación
+        # por temas -- el breadcrumb y "Want more news about..." de cada
+        # artículo apuntan directo a su categoría.
         topic_crumb = ""
         topic_href = "index.html"
-        if topic_slug and topic_label:
-            topic_crumb = '<span class="sep">/</span><a href="{}.html">{}</a>'.format(topic_slug, topic_label)
-            topic_href = topic_slug + ".html"
-        elif not topic_label:
-            topic_label = cat["label"]
-
-        # Subtema (un nivel más adentro de un tema) — si está asignado, se
-        # agrega como cuarto nivel del breadcrumb y pasa a ser el destino
-        # de "Want more news about...".
-        subtopic_slug = art.get("subtopic")
-        subtopic_label = subtopic_label_for(art["category"], topic_slug, subtopic_slug) if (topic_slug and subtopic_slug) else None
-        if topic_slug and subtopic_slug and subtopic_label:
-            topic_crumb += '<span class="sep">/</span><a href="{}-{}.html">{}</a>'.format(topic_slug, subtopic_slug, subtopic_label)
-            topic_label = subtopic_label
-            topic_href = "{}-{}.html".format(topic_slug, subtopic_slug)
+        topic_label = cat["label"]
 
         title_short = art["title"] if len(art["title"]) <= 40 else art["title"][:37] + "..."
         body_blocks = art["body"]

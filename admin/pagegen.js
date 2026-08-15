@@ -34,9 +34,6 @@ const CATEGORIES = [
   { slug: 'gaming', label: 'Gaming', icon: '🎮' },
   { slug: 'entertainment', label: 'Entertainment', icon: '🎬' },
   { slug: 'sports', label: 'Sports', icon: '⚽' },
-  { slug: 'world', label: 'World', icon: '🌎' },
-  { slug: 'curiosities', label: 'Curiosities', icon: '💡' },
-  { slug: 'guides', label: 'Guides', icon: '📚' },
   { slug: 'social', label: 'Social Media', icon: '📱' },
   { slug: 'business', label: 'Business', icon: '💰' }
 ];

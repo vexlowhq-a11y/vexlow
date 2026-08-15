@@ -514,7 +514,7 @@
   }
 
   /* ---- Home: rieles por categoría (últimos 4 de cada una) ---- */
-  var RAIL_CATEGORIES = ['ai', 'technology', 'science', 'gaming', 'entertainment', 'sports', 'world', 'guides'];
+  var RAIL_CATEGORIES = ['ai', 'technology', 'science', 'gaming', 'entertainment', 'sports'];
   if (typeof VEXLOW_ARTICLES !== 'undefined') {
     var sortedForRails = articlesSortedByDate();
     RAIL_CATEGORIES.forEach(function (cat) {

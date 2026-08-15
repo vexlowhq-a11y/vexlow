@@ -1109,20 +1109,11 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .card .meta { font-size: 11px; color: var(--text-muted); margin-top: auto; display: flex; gap: 8px; align-items: center; }
 .card .meta .dot::before { content: "·"; margin-right: 8px; }
 
-/* Ad slot */
+/* Ad slot — hidden until real AdSense units are live; the visible
+   "ADVERTISEMENT" placeholder boxes read as an unfinished site to
+   reviewers, so keep the layout markup but don't render it. */
 .ad-slot {
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-m);
-  background: var(--surface-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 110px;
-  color: var(--text-muted);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  display: none;
 }
 
 .btn-primary {
