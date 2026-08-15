@@ -656,6 +656,23 @@ PLAY_TRIVIA_TEMPLATE = """<!DOCTYPE html>
 
       <div id="triviaGame">Loading today's question…</div>
 
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>One trivia question shows up each day, pulled from the same beat we cover across the site — AI, technology, science, gaming, entertainment, sports, social media, and business. Pick an answer and you'll see immediately whether you got it right. You get one attempt per question, then it's locked until tomorrow's question replaces it.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Questions are usually tied to something recent or well-known in that category, so a guess based on what's been in the news lately is often a reasonable bet if you're unsure.</li>
+          <li>There's only one question a day, so there's no advantage to rushing — take the extra few seconds to read the full question before you answer.</li>
+          <li>Come back at the same time each day if you want to build a streak; the question resets daily, not on a rolling 24-hour timer from your last answer.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Daily quiz, one question</li>
+          <li><b>Frequency</b>New question every day</li>
+          <li><b>Categories</b>AI, Technology, Science &amp; Space, Gaming, Entertainment, Sports, Social Media, Business</li>
+        </ul>
+      </section>
+
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
     </article>
 
@@ -747,6 +764,24 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
         <ol class="dash-leaderboard-list" id="dashLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
         <p class="dash-lb-you" id="dashYouRank" hidden></p>
       </div>
+
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>Vex Dash is a single-button endless runner — tap, click, or press Space to jump over the spikes. Timing is everything, since the run only ends when you hit one. Along the way, hidden checkpoints let you collect the letters of VEXLOWHQ; get a letter once and it stays checked off across future runs, even if that specific run ends early.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Spike groups get denser and faster as your score climbs, so the run genuinely gets harder in real time, not just longer — don't get comfortable with the opening pace.</li>
+          <li>Letters spawn at fixed points along the run, not randomly. Miss one and you'll get another shot at it on your next attempt, since every run starts from the same beginning.</li>
+          <li>Short, early taps clear spikes more reliably than holding the button down — the jump arc is tuned for quick presses, not long holds.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Endless runner</li>
+          <li><b>Controls</b>Tap / click / Space</li>
+          <li><b>Built with</b>HTML5 Canvas, Web Audio API</li>
+          <li><b>Scoring</b>Global leaderboard, synced live</li>
+        </ul>
+      </section>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
@@ -843,6 +878,24 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
         <p class="dash-lb-you" id="snakeYouRank" hidden></p>
       </div>
 
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>Classic snake with a neon glow. Swipe, use the arrow keys, or use the on-screen d-pad to steer. The snake moves on its own — guide it into the glowing orbs to grow and score. The walls are solid: hit the edge of the board, or run into your own tail, and the run ends immediately.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Each orb is worth 10 points, and the snake's speed increases with every orb eaten — plan turns a few moves ahead once your snake gets long, since there's less time to react at higher speeds.</li>
+          <li>Loop through the center of the board in short, deliberate passes rather than long spirals — long spirals are where most runs end up trapped in your own tail.</li>
+          <li>Keep sound on if you can: the eat/turn cues make it easier to track your own pace without staring at the score counter.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Arcade / Snake</li>
+          <li><b>Controls</b>Swipe, arrow keys, or on-screen d-pad</li>
+          <li><b>Built with</b>HTML5 Canvas, Web Audio API</li>
+          <li><b>Scoring</b>Global leaderboard, synced live</li>
+        </ul>
+      </section>
+
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
     </article>
@@ -930,6 +983,24 @@ PLAY_ORBIT_TEMPLATE = """<!DOCTYPE html>
         <ol class="dash-leaderboard-list" id="orbitLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
         <p class="dash-lb-you" id="orbitYouRank" hidden></p>
       </div>
+
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>A ball orbits a glowing core on its own — tap, or press Space, to flip its spin direction between clockwise and counter-clockwise. Blocks spawn from the outer edge and move inward; if one reaches your orbit exactly where you're standing, the run ends. It's a single-input game, so every decision is about timing, not aiming.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>The inward speed of incoming blocks ramps up the longer you survive, so early runs feel much calmer than late ones — don't get used to the opening pace.</li>
+          <li>Each dodged block is worth 5 points, and you also earn a small, steady trickle of points just for staying alive — survival time matters as much as clean dodges.</li>
+          <li>Watch a block's entry angle as soon as it spawns, not its current position as it closes in — by the time it's close, you've already committed to a direction.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Single-input arcade / reflex</li>
+          <li><b>Controls</b>Tap or Space to flip direction</li>
+          <li><b>Built with</b>HTML5 Canvas, Web Audio API</li>
+          <li><b>Scoring</b>Global leaderboard, synced live</li>
+        </ul>
+      </section>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
@@ -1115,6 +1186,26 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
         <p class="dash-lb-you" id="gravityYouRank" hidden></p>
       </div>
 
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>A 10-level rhythm platformer in the style of Geometry Dash. Tap or hold to control your character, which switches between three forms as you move through each level: cube (jump), ship (fly), and ball (flip gravity). Dodge spikes and saws, ride moving platforms, and reach the finish to complete a level. Each level also hides a key and matching door, 3 secret coins, and — in later levels — an interruptor that opens a gate elsewhere on the map.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Progress is scored by the percentage of the level you complete, and your best percentage per level is saved — so even a run that ends early still counts toward your personal best.</li>
+          <li>Coins collected during a completed run go straight into your permanent wallet, and you can replay a finished level to earn more. Each level's diamond, once grabbed and the level finished, is credited exactly once and won't reappear on future runs.</li>
+          <li>Spend coins and diamonds in the skin menu to unlock new looks for your character — purely cosmetic, it doesn't change the physics or hitboxes.</li>
+          <li>Levels unlock in order: beat one to open the next. Difficulty comes from stacking more mechanics together, not just going faster, so a level that feels manageable early on can layer on a second or third obstacle type without much warning.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Rhythm platformer, 10 levels</li>
+          <li><b>Controls</b>Tap / hold (jump, fly, or flip gravity, depending on form)</li>
+          <li><b>Built with</b>HTML5 Canvas, Web Audio API</li>
+          <li><b>Scoring</b>Per-level leaderboard by completion %, synced live</li>
+          <li><b>Economy</b>Coins + diamonds, unlockable skins</li>
+        </ul>
+      </section>
+
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
     </article>
@@ -1202,6 +1293,24 @@ PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
         <ol class="dash-leaderboard-list" id="pulseLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
         <p class="dash-lb-you" id="pulseYouRank" hidden></p>
       </div>
+
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>A ball rolls forward on its own through a series of colored gates. Tap, or press Space, to cycle the ball's color through a fixed loop: red → blue → green → yellow → red. You can only pass through a gate if your color matches it at the exact moment you reach it — mismatch, and the run ends there.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Speed climbs continuously from the moment you start, with no early plateau — the biggest skill jump is getting comfortable tapping faster without losing track of your current color.</li>
+          <li>Because the color cycle is always in the same fixed order, you can count taps ahead of time for a gate that's still a few seconds out, instead of reacting at the last second.</li>
+          <li>Matching a gate is worth 10 points, and surviving longer at higher speed adds up steadily too — smooth, evenly-timed taps beat panicked last-second ones.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Rhythm / reflex, single input</li>
+          <li><b>Controls</b>Tap or Space to cycle color</li>
+          <li><b>Built with</b>HTML5 Canvas, Web Audio API</li>
+          <li><b>Scoring</b>Global leaderboard, synced live</li>
+        </ul>
+      </section>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 

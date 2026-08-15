@@ -918,6 +918,20 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .dash-lb-score { font-family: 'IBM Plex Mono', monospace; color: var(--blue); }
 .dash-lb-you { text-align: center; font-size: 12.5px; color: var(--text-muted); margin-top: 10px; cursor: pointer; text-decoration: underline; }
 
+.game-guide { max-width: 800px; margin: 40px auto 0; padding-top: 28px; border-top: 1px solid var(--border); }
+.game-guide h2 { font-size: 1.15rem; margin: 26px 0 12px; }
+.game-guide h2:first-child { margin-top: 0; }
+.game-guide p { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 0; }
+.game-guide ul { margin: 0; padding-left: 20px; }
+.game-guide ul + h2 { margin-top: 26px; }
+.game-guide li { margin-bottom: 10px; font-size: 15px; line-height: 1.65; }
+.game-tech-specs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.game-tech-specs li {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-m);
+  padding: 10px 14px; font-size: 13px; margin-bottom: 0;
+}
+.game-tech-specs b { display: block; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+
 .dash-name-modal {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
