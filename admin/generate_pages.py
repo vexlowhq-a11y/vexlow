@@ -130,7 +130,7 @@ STATIC_PAGE_BODIES = {
         ("h2", "What we cover"),
         ("p", _category_list_sentence()),
         ("h2", "Who's behind it"),
-        ("p", "VexlowHQ is founded and edited by Leonardo Beltran. It's still a small, independent project — one person setting the editorial direction and reviewing every story before it goes live."),
+        ("p", "VexlowHQ was created and is maintained by Leonardo Beltran, a web developer who has been building software professionally since graduating in 2016. That technical background — working with modern web technologies and digital systems day to day — shapes how VexlowHQ approaches AI tools, software trends, and tech developments: every article is reviewed with a developer's eye for accuracy and real-world relevance before it goes live."),
         ("h2", "How we work"),
         ("p", "We're an independent, still-small project. We use AI tools to help us research and draft faster, but every story is reviewed before it goes live. Being upfront about that is part of doing this right, even at our size."),
         ("h2", "Where we're headed"),
