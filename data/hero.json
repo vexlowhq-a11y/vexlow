@@ -2,11 +2,29 @@
   {
     "category": "science",
     "chip": "🚀 Science & Space",
+    "title": "Setback for UK Space Launch as Rocket Issue Delays Orbital Mission",
+    "dek": "The first attempt at an orbital rocket launch from the UK has been postponed due to an issue identified during testing at SaxaVord Spaceport, highlighting the challenges faced by emerging spaceports.",
+    "image": "img/temas/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.jpg",
+    "textColor": "auto",
+    "href": "categoria/science/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.html"
+  },
+  {
+    "category": "science",
+    "chip": "🚀 Science & Space",
     "title": "The Enduring Enigma of the 'Wow!' Signal: A Milestone in the Search for Extraterrestrial Life",
     "dek": "The 'Wow!' signal, detected on August 15, 1977, continues to captivate scientists and enthusiasts in the hunt for extraterrestrial intelligence, raising questions about its origin and implications for the search for life beyond Earth.",
     "image": "img/drafts/the-enduring-enigma-of-the-wow-signal-a-b9c1.jpg",
     "textColor": "#0E1116",
     "href": "categoria/science/the-enduring-enigma-of-the-wow-signal-a-milestone-in-the-sea.html"
+  },
+  {
+    "category": "technology",
+    "chip": "💻 Technology",
+    "title": "Reimagining Founder Culture: A New Approach to Preventing Burnout",
+    "dek": "In London, a unique founder house is shifting paradigms by focusing on work-life balance to combat burnout among startup leaders.",
+    "image": "img/temas/reimagining-founder-culture-a-new-approach-to-preventing-bur.jpg",
+    "textColor": "auto",
+    "href": "categoria/technology/reimagining-founder-culture-a-new-approach-to-preventing-bur.html"
   },
   {
     "category": "entertainment",
