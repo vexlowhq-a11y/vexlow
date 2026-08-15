@@ -265,7 +265,7 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '      <h1>{title}</h1>\n' +
 '      <p class="dek">{dek}</p>\n' +
 '      <div class="article-meta">\n' +
-'        <span>VexlowHQ Staff</span><span class="dot">·</span><span>{dateLabel}</span><span class="dot">·</span><span>{readTime}</span>\n' +
+'        <span>Leonardo Beltran</span><span class="dot">·</span><span>{dateLabel}</span><span class="dot">·</span><span>{readTime}</span>\n' +
 '      </div>\n' +
 '\n' +
 '{bannerHtml}\n' +
