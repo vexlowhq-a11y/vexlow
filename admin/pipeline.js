@@ -237,8 +237,9 @@ function todayISO() {
 
 // Trae feeds, descarta lo ya visto (publicado, en borradores, o
 // descartado a mano) y devuelve hasta MAX_NEW_DRAFTS candidatos
-// nuevos, repartidos entre categorías. Compartido entre el flujo
-// manual (fetchNewDrafts, abajo) y admin/auto-publish.js.
+// nuevos, priorizados por cuántas fuentes distintas cubren cada
+// historia (lo más grande/buscado del momento primero, sin importar
+// la categoría). Usado por el flujo manual (fetchNewDrafts, abajo).
 async function buildCandidates() {
   var drafts = readJSON(DRAFTS_FILE, []);
   var discarded = readJSON(DISCARDED_FILE, []);
@@ -289,51 +290,42 @@ async function buildCandidates() {
   // (varios feeds suelen cubrir la misma noticia el mismo día) -- primero
   // por título exacto, y después por superposición de palabras entre
   // los candidatos que van quedando, para el caso de títulos distintos
-  // sobre el mismo hecho.
-  var seenThisRun = new Set();
-  candidates = candidates.filter(function (item) {
-    var key = normalizeTitle(item.title);
-    if (seenThisRun.has(key)) return false;
-    seenThisRun.add(key);
-    return true;
-  });
-  var acceptedWordSets = [];
-  candidates = candidates.filter(function (item) {
-    var words = significantWords((item.title || '') + ' ' + (item.summary || ''));
-    for (var i = 0; i < acceptedWordSets.length; i++) {
-      if (wordOverlapScore(words, acceptedWordSets[i]) >= SAME_STORY_OVERLAP_THRESHOLD) return false;
-    }
-    acceptedWordSets.push(words);
-    return true;
-  });
-
-  // Repartir entre categorías (uno de cada por turno) en vez de tomar
-  // "los primeros N en aparecer" — si no, las categorías con feeds que
-  // publican mucho (ej. IA) tapan a las demás.
-  var byCategory = {};
-  var categoryOrder = [];
+  // sobre el mismo hecho. En vez de solo descartar los duplicados, se
+  // cuentan (sourceCount) -- esa cuenta es la señal real de "esto es
+  // grande ahora mismo" que se usa más abajo para priorizar.
+  var seenTitles = new Set();
+  var deduped = [];
   candidates.forEach(function (item) {
-    if (!byCategory[item.category]) {
-      byCategory[item.category] = [];
-      categoryOrder.push(item.category);
+    var key = normalizeTitle(item.title);
+    if (seenTitles.has(key)) {
+      var exactMatch = deduped.filter(function (d) { return normalizeTitle(d.title) === key; })[0];
+      if (exactMatch) exactMatch.sourceCount++;
+      return;
     }
-    byCategory[item.category].push(item);
-  });
-  var balanced = [];
-  var round = 0;
-  while (balanced.length < candidates.length) {
-    var addedThisRound = false;
-    for (var c = 0; c < categoryOrder.length; c++) {
-      var bucket = byCategory[categoryOrder[c]];
-      if (round < bucket.length) {
-        balanced.push(bucket[round]);
-        addedThisRound = true;
+    seenTitles.add(key);
+
+    var words = significantWords((item.title || '') + ' ' + (item.summary || ''));
+    for (var i = 0; i < deduped.length; i++) {
+      if (wordOverlapScore(words, deduped[i]._words) >= SAME_STORY_OVERLAP_THRESHOLD) {
+        deduped[i].sourceCount++;
+        return;
       }
     }
-    if (!addedThisRound) break;
-    round++;
-  }
-  candidates = balanced.slice(0, MAX_NEW_DRAFTS);
+    item.sourceCount = 1;
+    item._words = words;
+    deduped.push(item);
+  });
+  deduped.forEach(function (item) { delete item._words; });
+  candidates = deduped;
+
+  // Priorizar lo que más fuentes distintas están cubriendo ahora mismo
+  // (mismo hecho real reportado por 2+ feeds a la vez) en vez de repartir
+  // parejo entre categorías -- la intención del sitio es maximizar
+  // visitas con lo más buscado del momento, no llenar cada categoría
+  // por igual. Empate en sourceCount: se conserva el orden en que
+  // aparecieron los feeds (los primeros configurados/más recientes).
+  candidates.sort(function (a, b) { return b.sourceCount - a.sourceCount; });
+  candidates = candidates.slice(0, MAX_NEW_DRAFTS);
 
   var takenSlugs = new Set();
   drafts.forEach(function (d) { takenSlugs.add(d.slug); });
