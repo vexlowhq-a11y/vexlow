@@ -130,7 +130,6 @@ var SYSTEM_PROMPT = [
   '- A blank line between two lines means a paragraph break.',
   '- A line starting with "## " is a subheading (use 2-4 of these to break up the article into clear sections).',
   '- Consecutive lines starting with "- " form a bullet list (use only if it genuinely fits the content). Bullet items are plain text, never bold.',
-  '- Insert a line that is EXACTLY "[publicidad]" once, roughly in the middle of the article, as an ad-slot marker.',
   '',
   'You will also be given the category the source feed is filed under, plus the full list of valid site categories. Some source feeds are broad (e.g. a general tech feed) and mis-file stories that actually belong elsewhere (e.g. a gaming or business story filed under "technology") — read the actual headline/summary and pick the single best-fitting "category" slug from the full list. If the feed\'s original category is genuinely the best fit, just confirm it.',
   '',

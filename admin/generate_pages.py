@@ -65,7 +65,6 @@ UI_STRINGS = {
     "all_coverage_of": "All VexlowHQ coverage of {topic}.",
     "everything_about": "Everything we've published about {topic}, in one place.",
     "latest_news": "📰 Latest News", "most_talked_about": "📰 What's Trending",
-    "ad_infeed": "Advertisement · in-feed responsive", "ad_inarticle": "Advertisement · in-article",
     "byline": "VexlowHQ Staff", "share": "Share",
     "want_more_about": "Want more news about <strong>{topic}</strong>?",
     "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
@@ -342,10 +341,6 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 {search_block}
 {topics_block}
 {feed_block}
-    <div class="home-section" style="margin-top: 32px;">
-      <div class="ad-slot">{ad_infeed}</div>
-    </div>
-
 {footer_block}
 
   </main>
@@ -359,20 +354,16 @@ CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
 
 
 
-AD_SLOT_HTML_TPL = '      <div class="ad-slot" style="margin: 30px 0;">{}</div>\n'
-
-
 def apply_inline(text):
     """ "**texto**" -> <strong>texto</strong>, dentro de párrafos, subtítulos,
         ítems de lista y pies de foto (nunca dentro del atributo alt). """
     return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
 
 
-def render_article_body(body, default_ad_text="Advertisement · in-article", asset_prefix=""):
+def render_article_body(body, asset_prefix=""):
     html = ""
     for block in body:
         kind, content = block[0], block[1]
-        ad_text = block[2] if len(block) > 2 else default_ad_text
         if kind == "p":
             html += "      <p>{}</p>\n".format(apply_inline(content))
         elif kind == "h2":
@@ -383,7 +374,7 @@ def render_article_body(body, default_ad_text="Advertisement · in-article", ass
                 html += "        <li>{}</li>\n".format(apply_inline(item))
             html += "      </ul>\n"
         elif kind == "ad":
-            html += AD_SLOT_HTML_TPL.format(ad_text)
+            pass  # los espacios publicitarios se sacaron del sitio hasta tener AdSense aprobado
         elif kind == "img":
             alt, src = content
             alt_esc = alt.replace('"', "&quot;")
@@ -615,7 +606,6 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
         </a>
       </div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -748,7 +738,6 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
       <div class="dash-name-modal hidden" id="dashAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
           <button type="button" id="dashAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
@@ -761,7 +750,6 @@ PLAY_DASH_TEMPLATE = """<!DOCTYPE html>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -845,7 +833,6 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
       <div class="dash-name-modal hidden" id="snakeAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
           <button type="button" id="snakeAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
@@ -858,7 +845,6 @@ PLAY_SNAKE_TEMPLATE = """<!DOCTYPE html>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -935,7 +921,6 @@ PLAY_ORBIT_TEMPLATE = """<!DOCTYPE html>
       <div class="dash-name-modal hidden" id="orbitAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
           <button type="button" id="orbitAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
@@ -948,7 +933,6 @@ PLAY_ORBIT_TEMPLATE = """<!DOCTYPE html>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -1121,7 +1105,6 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
       <div class="dash-name-modal hidden" id="gravityAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
           <button type="button" id="gravityAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
@@ -1134,7 +1117,6 @@ PLAY_GRAVITY_TEMPLATE = """<!DOCTYPE html>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -1211,7 +1193,6 @@ PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
       <div class="dash-name-modal hidden" id="pulseAdBreak">
         <div class="dash-name-card">
           <h3>⏸️ Quick break</h3>
-          <div class="ad-slot" style="margin: 4px 0 18px;">Advertisement</div>
           <button type="button" id="pulseAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
@@ -1224,7 +1205,6 @@ PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
 
       <div class="play-more"><a href="index.html">← Back to all games</a></div>
 
-      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>
     </article>
 
 {footer_block}
@@ -1358,7 +1338,7 @@ def generate():
             label=label, slug=slug, icon=cat["icon"], desc=desc,
             sidebar_block=sidebar_block, footer_block=footer_block,
             note_block=note_html, search_block=search_html, topics_block=topics_html, feed_block=feed_html,
-            home=strings["home"], loading=strings["loading"], ad_infeed=strings["ad_infeed"],
+            home=strings["home"], loading=strings["loading"],
             asset_prefix=asset_prefix_page, articulos_asset=ARTICULOS_ASSET,
         )
         cat_dir = os.path.join(CATEGORIA_DIR, slug)
@@ -1399,7 +1379,7 @@ def generate():
             cat_slug=cat["slug"], cat_label=cat["label"], cat_icon=cat["icon"],
             date_label=format_date(art["date"]), read_time=art.get("readTime", ""),
             banner_html=banner_html_for(art, cat, asset_prefix_page),
-            body_html=render_article_body(body_blocks, strings["ad_inarticle"], asset_prefix_page),
+            body_html=render_article_body(body_blocks, asset_prefix_page),
             topic_crumb=topic_crumb, topic_label=topic_label, topic_href=topic_href,
             sidebar_block=sidebar_block, footer_block=footer_block,
             home=strings["home"], byline=strings["byline"], share=strings["share"],
@@ -1419,7 +1399,7 @@ def generate():
         html = STATIC_PAGE_TEMPLATE.format(
             slug=slug, title=page["label"], desc=STATIC_PAGE_DESCRIPTIONS[slug],
             sidebar_block=sidebar_block_root, footer_block=footer_block_root,
-            body_html=render_article_body(STATIC_PAGE_BODIES[slug], strings["ad_inarticle"]),
+            body_html=render_article_body(STATIC_PAGE_BODIES[slug]),
             home=strings["home"], asset_prefix=asset_prefix_root, articulos_asset=ARTICULOS_ASSET,
         )
         out_path = os.path.join(PROJECT, slug + ".html")
@@ -1471,8 +1451,11 @@ def write_sitemap(urls):
 
 def parse_simple_body(text):
     """ Convierte el formato de texto simple del panel de admin (líneas en
-        blanco = párrafo, '## ' = subtítulo, '- ' = lista, '[publicidad]' =
-        anuncio) al mismo formato de bloques que usa render_article_body. """
+        blanco = párrafo, '## ' = subtítulo, '- ' = lista) al mismo formato
+        de bloques que usa render_article_body. Una línea '[publicidad]' se
+        sigue reconociendo (por los artículos viejos que la tienen guardada
+        en el texto) pero ya no genera nada al renderizar -- ver el caso
+        "ad" en render_article_body. """
     blocks = []
     lines = text.replace("\r\n", "\n").split("\n")
     buf = []

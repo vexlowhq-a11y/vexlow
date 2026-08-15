@@ -15,7 +15,10 @@
     - Párrafos separados por una línea en blanco.
     - "## Texto" al principio de una línea = subtítulo (h2).
     - Líneas seguidas que empiezan con "- " = lista.
-    - Una línea que diga exactamente "[publicidad]" = espacio publicitario.
+    - Una línea que diga exactamente "[publicidad]" se ignora al renderizar
+      (quedó de cuando había espacios publicitarios en el cuerpo; se sacaron
+      hasta tener AdSense aprobado, pero el parser la sigue reconociendo por
+      los artículos viejos que todavía la tienen en el texto guardado).
     - "![alt](ruta)" en su propia línea = imagen suelta en medio del cuerpo.
 */
 
@@ -410,8 +413,6 @@ function parseBody(text) {
   return blocks;
 }
 
-var AD_SLOT_HTML = '      <div class="ad-slot" style="margin: 30px 0;">Advertisement · in-article</div>\n';
-
 /* "**texto**" -> <strong>texto</strong>, dentro de párrafos, subtítulos,
    ítems de lista y pies de foto (nunca dentro del atributo alt). */
 function applyInline(text) {
@@ -428,8 +429,6 @@ function renderBodyHtml(bodyText) {
       html += '      <ul>\n';
       b.items.forEach(function (it) { html += '        <li>' + applyInline(it) + '</li>\n'; });
       html += '      </ul>\n';
-    } else if (b.type === 'ad') {
-      html += AD_SLOT_HTML;
     } else if (b.type === 'img') {
       var altEsc = (b.alt || '').replace(/"/g, '&quot;');
       html += '      <figure class="article-inline-image"><img src="../../' + b.src + '" alt="' + altEsc + '" loading="lazy">';

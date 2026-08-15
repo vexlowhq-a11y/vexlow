@@ -1109,13 +1109,6 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .card .meta { font-size: 11px; color: var(--text-muted); margin-top: auto; display: flex; gap: 8px; align-items: center; }
 .card .meta .dot::before { content: "·"; margin-right: 8px; }
 
-/* Ad slot — hidden until real AdSense units are live; the visible
-   "ADVERTISEMENT" placeholder boxes read as an unfinished site to
-   reviewers, so keep the layout markup but don't render it. */
-.ad-slot {
-  display: none;
-}
-
 .btn-primary {
   background: var(--blue-fill);
   color: #061024;
