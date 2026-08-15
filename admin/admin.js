@@ -1422,6 +1422,135 @@
     });
   });
 
+  /* =====================================================
+     CATEGORÍAS — alta/baja/rename de las categorías principales del
+     sitio (menú, footer, chips). Mismo patrón que el gestor de temas:
+     acción -> POST/PATCH/DELETE a /api/categories -> refrescar la lista
+     local -> /api/regenerate para que generate_pages.py reconstruya el
+     sidebar/footer/chips/páginas de categoría con los datos nuevos.
+     ===================================================== */
+  var categoriesList = document.getElementById('categoriesList');
+  var categoryForm = document.getElementById('categoryForm');
+  var categoryLabelInput = document.getElementById('categoryLabel');
+  var categoryIconInput = document.getElementById('categoryIcon');
+  var categoryDescriptionInput = document.getElementById('categoryDescription');
+
+  function articleCountFor(slug) {
+    return articlesData.filter(function (a) { return a.category === slug; }).length;
+  }
+
+  function renderCategoriesManager() {
+    categoriesList.innerHTML = '';
+    if (!categories.length) {
+      categoriesList.innerHTML = '<p class="admin-empty">Todavía no hay categorías.</p>';
+      return;
+    }
+    categories.forEach(function (cat) {
+      var count = articleCountFor(cat.slug);
+      var item = document.createElement('div');
+      item.className = 'admin-item';
+
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      thumb.textContent = cat.icon || '📄';
+      item.appendChild(thumb);
+
+      var info = document.createElement('div');
+      info.className = 'info';
+      var ttl = document.createElement('div');
+      ttl.className = 'ttl';
+      ttl.textContent = cat.label;
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML = '<span>/' + cat.slug + '</span><span>' + count + ' artículo(s)</span>';
+      info.appendChild(ttl);
+      info.appendChild(meta);
+      item.appendChild(info);
+
+      var actions = document.createElement('div');
+      actions.className = 'item-actions';
+
+      var renameBtn = document.createElement('button');
+      renameBtn.type = 'button';
+      renameBtn.textContent = 'Renombrar';
+      renameBtn.addEventListener('click', function () { renameCategoryPrompt(cat); });
+      actions.appendChild(renameBtn);
+
+      if (cat.slug !== 'trending') {
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'danger';
+        delBtn.textContent = 'Eliminar';
+        delBtn.addEventListener('click', function () { deleteCategoryConfirm(cat, count); });
+        actions.appendChild(delBtn);
+      }
+
+      item.appendChild(actions);
+      categoriesList.appendChild(item);
+    });
+  }
+
+  function refreshCategories() {
+    return getJSON('/api/categories').then(function (list) {
+      categories = list;
+      renderCategoriesManager();
+      fillSelect(heroCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });
+      fillSelect(articleCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });
+    });
+  }
+
+  function renameCategoryPrompt(cat) {
+    var newLabel = window.prompt('Nuevo nombre para "' + cat.label + '":', cat.label);
+    if (newLabel === null) return;
+    newLabel = newLabel.trim();
+    if (!newLabel) return;
+    var newIcon = window.prompt('Ícono para "' + newLabel + '" (dejar igual si no querés cambiarlo):', cat.icon || '');
+    if (newIcon === null) newIcon = cat.icon;
+    apiRequest('PATCH', '/api/categories', { slug: cat.slug, label: newLabel, icon: newIcon }).then(function () {
+      toast('Categoría renombrada a "' + newLabel + '"');
+      return refreshCategories();
+    }).then(function () {
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo renombrar la categoría', true);
+    });
+  }
+
+  function deleteCategoryConfirm(cat, count) {
+    if (count > 0) {
+      toast('Esta categoría todavía tiene ' + count + ' artículo(s). Movelos o eliminalos antes de borrar la categoría.', true);
+      return;
+    }
+    if (!window.confirm('¿Eliminar la categoría "' + cat.label + '"? Se borra también su página.')) return;
+    apiRequest('DELETE', '/api/categories', { slug: cat.slug }).then(function () {
+      toast('Categoría "' + cat.label + '" eliminada');
+      return refreshCategories();
+    }).then(function () {
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo eliminar la categoría', true);
+    });
+  }
+
+  categoryForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var label = categoryLabelInput.value.trim();
+    if (!label) return;
+    postJSON('/api/categories', {
+      label: label,
+      icon: categoryIconInput.value.trim(),
+      description: categoryDescriptionInput.value.trim()
+    }).then(function () {
+      toast('Categoría "' + label + '" agregada');
+      categoryForm.reset();
+      return refreshCategories();
+    }).then(function () {
+      return postJSON('/api/regenerate', {});
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo agregar la categoría', true);
+    });
+  });
+
   /* ---- Reacciones del sitio en vivo (solo para mostrar popularidad acá) ---- */
   function loadReactions() {
     fetch('https://vexlowhq.com/api/react?all=1')
@@ -1474,6 +1603,7 @@
     renderHeroList();
     renderArticlesList();
     renderDraftsList();
+    renderCategoriesManager();
     loadReactions();
   }).catch(function () {
     toast('No se pudo conectar con el panel. Fijate que server.js esté corriendo.', true);

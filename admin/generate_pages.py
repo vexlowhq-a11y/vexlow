@@ -15,6 +15,7 @@ Cómo correrlo (doble clic en regenerate-pages.bat, o desde la terminal):
 No hace falta instalar nada, usa solo la librería estándar de Python.
 """
 
+import html
 import json
 import os
 import re
@@ -32,35 +33,29 @@ SOURCE_INDEX = os.path.join(PROJECT, "index.html")
 SITE_URL = "https://vexlowhq.com"
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".jfif", ".gif", ".webp", ".avif", ".svg"}
 
-CATEGORY_SLUGS = [
-    {"slug": "trending", "icon": "🌍", "has_note": True},
-    {"slug": "ai", "icon": "🤖"},
-    {"slug": "technology", "icon": "💻"},
-    {"slug": "science", "icon": "🚀", "img_folder": "science-space"},
-    {"slug": "gaming", "icon": "🎮"},
-    {"slug": "entertainment", "icon": "🎬"},
-    {"slug": "sports", "icon": "⚽"},
-    {"slug": "social", "icon": "📱"},
-    {"slug": "business", "icon": "💰"},
-]
+# Las categorías viven en data/categories.json -- la misma fuente que
+# usa el panel de administración (admin/pagegen.js) para poder agregar,
+# renombrar o eliminar categorías sin tocar este script. CATEGORY_SLUGS/
+# CATEGORY_LABELS/DESCRIPTIONS se derivan acá una sola vez (este script
+# es un comando de una sola corrida, no un servidor de larga duración,
+# así que no hace falta releer el archivo en cada uso como sí hace el
+# panel) manteniendo la forma que ya esperaba el resto del script.
+CATEGORIES_FILE = os.path.join(DATA_DIR, "categories.json")
+with open(CATEGORIES_FILE, "r", encoding="utf-8") as _f:
+    _CATEGORIES_DATA = json.load(_f)
 
-CATEGORY_LABELS = {
-    "trending": "Trending", "ai": "AI", "technology": "Technology",
-    "science": "Science & Space", "gaming": "Gaming", "entertainment": "Entertainment",
-    "sports": "Sports", "social": "Social Media", "business": "Business",
-}
-
-DESCRIPTIONS = {
-    "trending": "The most talked-about stories of the day: viral moments, records, major events, and social media trends.",
-    "ai": "Everything about artificial intelligence: new models, tools, tutorials, comparisons, and prompts.",
-    "technology": "Phones, computers, apps, software, and the gadgets that matter.",
-    "science": "NASA, SpaceX, discoveries, medicine, and nature.",
-    "gaming": "Releases, updates, guides, consoles, and mobile games.",
-    "entertainment": "Movies, TV series, streaming, music, and celebrities.",
-    "sports": "Soccer, the World Cup, NBA, Formula 1, and sports records.",
-    "social": "TikTok, Instagram, YouTube, X, Twitch, Discord, and everything happening on social media.",
-    "business": "Startups, cryptocurrency, investing, marketing, and the world of business.",
-}
+CATEGORY_SLUGS = []
+CATEGORY_LABELS = {}
+DESCRIPTIONS = {}
+for _cat in _CATEGORIES_DATA:
+    _entry = {"slug": _cat["slug"], "icon": _cat["icon"]}
+    if _cat.get("hasNote"):
+        _entry["has_note"] = True
+    if _cat.get("imgFolder"):
+        _entry["img_folder"] = _cat["imgFolder"]
+    CATEGORY_SLUGS.append(_entry)
+    CATEGORY_LABELS[_cat["slug"]] = _cat["label"]
+    DESCRIPTIONS[_cat["slug"]] = _cat.get("description", "")
 
 UI_STRINGS = {
     "home": "Home", "loading": "Loading…",
@@ -103,11 +98,40 @@ STATIC_PAGE_DESCRIPTIONS = {
     "cookies": "What cookies we use and how to manage them.",
 }
 
+# Lista de categorías (sin Trending, que es más una vista que un tema) en
+# prosa, para las páginas estáticas de about/etc -- se arma dinámicamente
+# desde data/categories.json en vez de quedar hardcodeada, para no tener
+# que acordarse de editar esto también al agregar/sacar una categoría.
+_NUMBER_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+                 7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+
+
+def _category_labels_list():
+    return [CATEGORY_LABELS[c["slug"]] for c in CATEGORY_SLUGS if c["slug"] != "trending"]
+
+
+def _category_list_sentence():
+    labels = _category_labels_list()
+    if len(labels) > 1:
+        joined = ", ".join(labels[:-1]) + ", and " + labels[-1]
+    else:
+        joined = labels[0] if labels else ""
+    count_word = _NUMBER_WORDS.get(len(labels), str(len(labels)))
+    return "We publish across {} categories: {}. Every day we add news, guides, and analysis built for readers who want to stay current without hunting across a dozen sites.".format(count_word, joined)
+
+
+def _category_list_lowercase_sentence():
+    labels = [l.lower() for l in _category_labels_list()]
+    if len(labels) > 1:
+        return ", ".join(labels[:-1]) + ", and " + labels[-1]
+    return labels[0] if labels else ""
+
+
 STATIC_PAGE_BODIES = {
     "about-vexlowhq": [
         ("p", "VexlowHQ started with a simple idea: bring the most interesting things happening in the world into one place, whether that's artificial intelligence, a big game launch, a scientific discovery, or the story everyone's talking about on social media."),
         ("h2", "What we cover"),
-        ("p", "We publish across eight categories: AI, Technology, Science & Space, Gaming, Entertainment, Sports, Social Media, and Business. Every day we add news, guides, and analysis built for readers who want to stay current without hunting across a dozen sites."),
+        ("p", _category_list_sentence()),
         ("h2", "How we work"),
         ("p", "We're an independent, still-small project. We use AI tools to help us research and draft faster, but every story is reviewed before it goes live. Being upfront about that is part of doing this right, even at our size."),
         ("h2", "Where we're headed"),
@@ -132,7 +156,7 @@ STATIC_PAGE_BODIES = {
     ],
     "advertise": [
         ("h2", "Why advertise on VexlowHQ"),
-        ("p", "VexlowHQ is a content discovery site covering artificial intelligence, technology, science, gaming, entertainment, sports, social media, and business — built for a general audience that wants to stay current."),
+        ("p", "VexlowHQ is a content discovery site covering {} — built for a general audience that wants to stay current.".format(_category_list_lowercase_sentence())),
         ("h2", "Available formats"),
         ("ul", [
             "Display ad placements integrated into the article feed and category pages.",
@@ -196,6 +220,83 @@ def camel_to_label(name):
     spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", name)
     spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)
     return spaced.replace("_", " ").replace("-", " ").strip()
+
+
+# ============================================================================
+# Nav de categorías (sidebar, footer, chips de filtro) -- se reconstruye acá
+# desde data/categories.json cada vez que se corre el generador, en vez de
+# quedar escrito a mano en index.html, así una categoría agregada/renombrada/
+# eliminada desde el panel se ve en todo el sitio con solo publicar.
+# ============================================================================
+
+def build_category_nav_html():
+    items = [
+        '      <div class="cat-item">\n'
+        '        <div class="cat-row">\n'
+        '          <a class="cat-link" href="index.html" data-cat="index"><span class="ic">🏠</span>Home</a>\n'
+        '        </div>\n'
+        '      </div>',
+        '      <div class="cat-item">\n'
+        '        <div class="cat-row">\n'
+        '          <a class="cat-link" href="play/index.html" data-cat="play"><span class="ic">🎮</span>Games</a>\n'
+        '        </div>\n'
+        '      </div>',
+    ]
+    for cat in CATEGORY_SLUGS:
+        slug = cat["slug"]
+        label = html.escape(CATEGORY_LABELS[slug])
+        items.append(
+            '      <div class="cat-item">\n'
+            '        <div class="cat-row">\n'
+            '          <a class="cat-link" href="categoria/{slug}/index.html" data-cat="{slug}"><span class="ic">{icon}</span>{label}</a>\n'
+            '        </div>\n'
+            '      </div>'.format(slug=slug, icon=cat["icon"], label=label)
+        )
+    return "\n\n".join(items) + "\n"
+
+
+def build_footer_categories_html():
+    mid = (len(CATEGORY_SLUGS) + 1) // 2
+    first_half = CATEGORY_SLUGS[:mid]
+    second_half = CATEGORY_SLUGS[mid:]
+
+    def links_for(cats):
+        return "\n".join(
+            '          <a href="categoria/{slug}/index.html">{label}</a>'.format(
+                slug=c["slug"], label=html.escape(CATEGORY_LABELS[c["slug"]])
+            )
+            for c in cats
+        )
+
+    return (
+        '<div class="footer-col">\n'
+        '          <h4>Categories</h4>\n'
+        '{links1}\n'
+        '        </div>\n'
+        '        <div class="footer-col">\n'
+        '          <h4>More categories</h4>\n'
+        '{links2}\n'
+        '        </div>\n        '
+    ).format(links1=links_for(first_half), links2=links_for(second_half))
+
+
+def build_filter_chips_html():
+    chips = ['        <button type="button" class="filter-chip active" data-filter="all">All</button>']
+    for cat in CATEGORY_SLUGS:
+        if cat["slug"] == "trending":
+            continue
+        chips.append(
+            '        <button type="button" class="filter-chip" data-filter="{slug}">{icon} {label}</button>'.format(
+                slug=cat["slug"], icon=cat["icon"], label=html.escape(CATEGORY_LABELS[cat["slug"]])
+            )
+        )
+    return "\n".join(chips) + "\n      "
+
+
+def replace_between(html_text, start_marker, end_marker, new_inner):
+    start = html_text.index(start_marker) + len(start_marker)
+    end = html_text.index(end_marker, start)
+    return html_text[:start] + "\n" + new_inner + html_text[end:]
 
 
 CATEGORY_PAGE_TEMPLATE = """<!DOCTYPE html>
@@ -1178,6 +1279,28 @@ def generate():
 
     with open(SOURCE_INDEX, "r", encoding="utf-8") as f:
         index_html = f.read()
+
+    # Reconstruye el nav de categorías (sidebar, footer, chips de filtro)
+    # desde data/categories.json y lo escribe de vuelta en index.html --
+    # así queda como la fuente real para todas las páginas (ver más abajo,
+    # sidebar_raw/footer_raw se extraen de acá mismo).
+    index_html = replace_between(
+        index_html, '<span class="side-label">Categories</span>', '</nav>',
+        build_category_nav_html(),
+    )
+    index_html = replace_between(
+        index_html,
+        '<p>The most interesting stuff on the internet, every day. Discovery, not just news.</p>\n        </div>',
+        '<div class="footer-col">\n          <h4>Trust</h4>',
+        build_footer_categories_html() + "\n",
+    )
+    index_html = replace_between(
+        index_html, '<div class="filter-row" id="filterRow">', '</div>',
+        build_filter_chips_html(),
+    )
+    with open(SOURCE_INDEX, "w", encoding="utf-8") as f:
+        f.write(index_html)
+
     sidebar_start = index_html.index('<div class="mobile-topbar">')
     sidebar_end = index_html.index('</aside>') + len('</aside>')
     sidebar_raw = index_html[sidebar_start:sidebar_end]

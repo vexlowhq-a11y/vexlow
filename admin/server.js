@@ -31,8 +31,12 @@ const CONFIG_FILE = path.join(ADMIN_DIR, 'config.json');
 const AUTOMATION_LOG_FILE = path.join(DATA_DIR, 'automation-log.json');
 const PORT = 4321;
 
-const CATEGORIES = pagegen.CATEGORIES;
-const RESERVED_SLUGS = new Set(CATEGORIES.map(function (c) { return c.slug; }).concat(['index']));
+// Recargadas del disco en cada uso (pagegen.loadCategories), no una
+// constante fija -- así un alta/baja de categoría hecha desde el panel
+// se ve al toque, sin reiniciar el servidor.
+function reservedSlugs() {
+  return new Set(pagegen.loadCategories().map(function (c) { return c.slug; }).concat(['index']));
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -101,7 +105,7 @@ function topicThumbPath(cat, slug) {
 function listTopics() {
   var topicGroups = pagegen.loadTopicGroups();
   var result = {};
-  CATEGORIES.forEach(function (cat) {
+  pagegen.loadCategories().forEach(function (cat) {
     var seen = new Set();
     var topics = [];
 
@@ -125,7 +129,7 @@ function listTopics() {
     entries.forEach(function (entry) {
       if (!entry.isDirectory()) return;
       var slug = entry.name.toLowerCase();
-      if (RESERVED_SLUGS.has(slug) || seen.has(slug)) return;
+      if (reservedSlugs().has(slug) || seen.has(slug)) return;
       seen.add(slug);
       topics.push({ slug: slug, label: camelToLabel(entry.name), thumb: topicThumbPath(cat, slug) });
     });
@@ -152,7 +156,7 @@ function listSubtopics() {
   var result = {};
   Object.keys(all).forEach(function (key) {
     var parts = key.split('/');
-    var cat = CATEGORIES.find(function (c) { return c.slug === parts[0]; });
+    var cat = pagegen.categoryBySlug(parts[0]);
     var topicSlug = parts[1];
     result[key] = all[key].map(function (pair) {
       var slug = pair[0], label = pair[1];
@@ -237,7 +241,7 @@ function sanitizeFilename(name) {
 }
 
 function uploadImage(category, filename, dataBase64) {
-  var cat = CATEGORIES.find(function (c) { return c.slug === category; });
+  var cat = pagegen.categoryBySlug(category);
   if (!cat) throw new Error('Categoría desconocida: ' + category);
 
   var buffer = Buffer.from(dataBase64, 'base64');
@@ -263,7 +267,7 @@ function uploadImage(category, filename, dataBase64) {
 var TOPIC_SLUG_RE = /^[a-z0-9-]+$/;
 
 function topicImageDir(category, topicSlug) {
-  var cat = CATEGORIES.find(function (c) { return c.slug === category; });
+  var cat = pagegen.categoryBySlug(category);
   if (!cat) throw new Error('Categoría desconocida: ' + category);
   if (!TOPIC_SLUG_RE.test(topicSlug)) throw new Error('Tema inválido: ' + topicSlug);
   var folder = cat.imgFolder || cat.slug;
@@ -299,7 +303,7 @@ function removeTopicImage(category, topicSlug) {
 }
 
 function subtopicImageDir(category, topicSlug, subtopicSlug) {
-  var cat = CATEGORIES.find(function (c) { return c.slug === category; });
+  var cat = pagegen.categoryBySlug(category);
   if (!cat) throw new Error('Categoría desconocida: ' + category);
   if (!TOPIC_SLUG_RE.test(topicSlug)) throw new Error('Tema inválido: ' + topicSlug);
   if (!TOPIC_SLUG_RE.test(subtopicSlug)) throw new Error('Subtema inválido: ' + subtopicSlug);
@@ -338,7 +342,57 @@ var server = http.createServer(function (req, res) {
 
   // ---- API ----
   if (urlPath === '/api/categories' && req.method === 'GET') {
-    return sendJSON(res, 200, CATEGORIES);
+    return sendJSON(res, 200, pagegen.loadCategories());
+  }
+  if (urlPath === '/api/categories' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.label) {
+        return sendJSON(res, 400, { error: 'Falta el nombre de la categoría' });
+      }
+      try {
+        var created = pagegen.addCategory(data.label, data.icon, data.description);
+        return sendJSON(res, 200, { ok: true, category: created });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/categories' && req.method === 'PATCH') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.slug) {
+        return sendJSON(res, 400, { error: 'Falta la categoría a editar' });
+      }
+      try {
+        var renamed = pagegen.renameCategory(data.slug, data.label, data.icon, data.description);
+        return sendJSON(res, 200, { ok: true, category: renamed });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/categories' && req.method === 'DELETE') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.slug) {
+        return sendJSON(res, 400, { error: 'Falta la categoría a eliminar' });
+      }
+      var articles = [];
+      try { articles = readJSON(path.join(DATA_DIR, 'articulos.json')); } catch (e) { articles = []; }
+      var usedBy = articles.filter(function (a) { return a.category === data.slug; });
+      var draftUsedBy = [];
+      try { draftUsedBy = readJSON(path.join(DATA_DIR, 'drafts.json')).filter(function (a) { return a.category === data.slug; }); } catch (e) { draftUsedBy = []; }
+      if (usedBy.length || draftUsedBy.length) {
+        return sendJSON(res, 409, {
+          error: 'Esta categoría todavía tiene ' + (usedBy.length + draftUsedBy.length) + ' artículo(s)/borrador(es). Movelos o eliminalos antes de borrar la categoría.',
+          articles: usedBy.concat(draftUsedBy).map(function (a) { return a.title; })
+        });
+      }
+      try {
+        var removed = pagegen.deleteCategory(data.slug);
+        return sendJSON(res, 200, { ok: true, category: removed });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
   }
   if (urlPath === '/api/images' && req.method === 'GET') {
     return sendJSON(res, 200, listImages());

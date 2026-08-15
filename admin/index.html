@@ -29,6 +29,7 @@
     <button type="button" class="admin-tab" data-tab="articles">Últimas publicadas</button>
     <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
     <button type="button" class="admin-tab" data-tab="automation">Automatización <span id="automationTabBadge"></span></button>
+    <button type="button" class="admin-tab" data-tab="categories">Categorías</button>
     <button type="button" class="admin-tab" data-tab="gravity">🔻 Gravity Flip</button>
   </nav>
 
@@ -225,6 +226,32 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
 
     <h3>Historial de corridas</h3>
     <div class="admin-list" id="automationLogList"></div>
+  </section>
+
+  <!-- ============ CATEGORÍAS ============ -->
+  <section class="admin-panel" id="panel-categories">
+    <p class="admin-lede">Estas son las categorías principales del menú del sitio (sidebar, footer y chips de filtro). Agregar una acá no le pone su propia sección en la portada -- eso queda para cuando ya tenga artículos, así no se repite el problema de categorías vacías. Después de agregar, renombrar o eliminar, hay que publicar los cambios para que se vean en el sitio.</p>
+
+    <div class="admin-list" id="categoriesList"></div>
+
+    <form class="admin-form" id="categoryForm">
+      <h3>Agregar categoría</h3>
+      <div class="form-grid">
+        <label>Nombre
+          <input type="text" id="categoryLabel" placeholder="Ej: Health" required>
+        </label>
+        <label>Ícono (un emoji)
+          <input type="text" id="categoryIcon" placeholder="🏥" maxlength="4">
+        </label>
+        <label class="span-2">Descripción (para el meta description de la página de categoría)
+          <textarea id="categoryDescription" rows="2" placeholder="De qué trata esta categoría"></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Agregar categoría</button>
+      </div>
+      <p class="admin-hint">El slug (la URL) sale del nombre y no se puede cambiar después -- para eso hay que eliminar y crear de nuevo.</p>
+    </form>
   </section>
 
   <!-- ============ GRAVITY FLIP — EDITOR DE NIVELES ============ -->

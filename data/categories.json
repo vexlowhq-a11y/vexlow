@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "trending",
+    "label": "Trending",
+    "icon": "🌍",
+    "description": "The most talked-about stories of the day: viral moments, records, major events, and social media trends.",
+    "hasNote": true
+  },
+  {
+    "slug": "ai",
+    "label": "AI",
+    "icon": "🤖",
+    "description": "Everything about artificial intelligence: new models, tools, tutorials, comparisons, and prompts."
+  },
+  {
+    "slug": "technology",
+    "label": "Technology",
+    "icon": "💻",
+    "description": "Phones, computers, apps, software, and the gadgets that matter."
+  },
+  {
+    "slug": "science",
+    "label": "Science & Space",
+    "icon": "🚀",
+    "description": "NASA, SpaceX, discoveries, medicine, and nature.",
+    "imgFolder": "science-space"
+  },
+  {
+    "slug": "gaming",
+    "label": "Gaming",
+    "icon": "🎮",
+    "description": "Releases, updates, guides, consoles, and mobile games."
+  },
+  {
+    "slug": "entertainment",
+    "label": "Entertainment",
+    "icon": "🎬",
+    "description": "Movies, TV series, streaming, music, and celebrities."
+  },
+  {
+    "slug": "sports",
+    "label": "Sports",
+    "icon": "⚽",
+    "description": "Soccer, the World Cup, NBA, Formula 1, and sports records."
+  },
+  {
+    "slug": "social",
+    "label": "Social Media",
+    "icon": "📱",
+    "description": "TikTok, Instagram, YouTube, X, Twitch, Discord, and everything happening on social media."
+  },
+  {
+    "slug": "business",
+    "label": "Business",
+    "icon": "💰",
+    "description": "Startups, cryptocurrency, investing, marketing, and the world of business."
+  }
+]

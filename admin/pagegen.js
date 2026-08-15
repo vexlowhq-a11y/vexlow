@@ -26,19 +26,104 @@ const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
 const CATEGORIA_DIR = path.join(ROOT, 'categoria');
 
-const CATEGORIES = [
-  { slug: 'trending', label: 'Trending', icon: '🌍' },
-  { slug: 'ai', label: 'AI', icon: '🤖' },
-  { slug: 'technology', label: 'Technology', icon: '💻' },
-  { slug: 'science', label: 'Science & Space', icon: '🚀', imgFolder: 'science-space' },
-  { slug: 'gaming', label: 'Gaming', icon: '🎮' },
-  { slug: 'entertainment', label: 'Entertainment', icon: '🎬' },
-  { slug: 'sports', label: 'Sports', icon: '⚽' },
-  { slug: 'social', label: 'Social Media', icon: '📱' },
-  { slug: 'business', label: 'Business', icon: '💰' }
-];
-const CATEGORY_BY_SLUG = {};
-CATEGORIES.forEach(function (c) { CATEGORY_BY_SLUG[c.slug] = c; });
+// Las categorías viven en data/categories.json (fuente única, la misma
+// que lee admin/generate_pages.py) para poder agregarlas/editarlas/
+// borrarlas desde el panel sin tocar código. Se recargan del disco en
+// cada llamada -- mismo patrón que loadTopicGroups() -- para que un
+// cambio hecho por el panel se vea sin reiniciar el servidor.
+const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
+
+function loadCategories() {
+  return JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf8'));
+}
+function saveCategories(list) {
+  fs.writeFileSync(CATEGORIES_FILE, JSON.stringify(list, null, 2) + '\n', 'utf8');
+}
+function categoryBySlug(slug) {
+  return loadCategories().find(function (c) { return c.slug === slug; });
+}
+function categorySlugify(label) {
+  return String(label)
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+}
+
+/* Crea una categoría nueva al final de la lista. No genera HTML acá --
+   para eso está "Regenerar categorías y temas" del panel, que corre
+   generate_pages.py y arma el nav, el footer, los chips de filtro y la
+   página de la categoría. A propósito NO se agrega una sección propia
+   en la portada -- eso queda para cuando el sitio ya tenga contenido
+   real ahí, así no se repite el problema de "categoría vacía en la
+   portada" que motivó sacar el sistema de temas. */
+function addCategory(label, icon, description) {
+  if (!label || !label.trim()) throw new Error('El nombre de la categoría no puede estar vacío');
+  var slug = categorySlugify(label);
+  if (!slug) throw new Error('El nombre no generó un slug válido');
+
+  var list = loadCategories();
+  if (list.some(function (c) { return c.slug === slug; })) {
+    throw new Error('Ya existe una categoría con ese nombre');
+  }
+
+  var created = { slug: slug, label: label.trim(), icon: icon || '📄', description: description || '' };
+  list.push(created);
+  saveCategories(list);
+  return created;
+}
+
+function renameCategory(slug, newLabel, newIcon, newDescription) {
+  var list = loadCategories();
+  var cat = list.find(function (c) { return c.slug === slug; });
+  if (!cat) throw new Error('No se encontró esa categoría');
+  if (newLabel && newLabel.trim()) cat.label = newLabel.trim();
+  if (newIcon) cat.icon = newIcon;
+  if (typeof newDescription === 'string') cat.description = newDescription;
+  saveCategories(list);
+  return cat;
+}
+
+/* Si la categoría tenía su propia sección destacada en la portada
+   (<section class="home-section" id="slug">...), la saca de index.html
+   -- si no se hace esto, generate_pages.py la deja intacta (no la toca)
+   y queda un riel vacío "0 artículos" en la home, el mismo problema que
+   motivó sacar World/Curiosities/Guides. No es un error si no existía
+   (la mayoría de las categorías nunca tuvieron una, a propósito --
+   ver build_category_nav_html en generate_pages.py). */
+function removeHomepageRail(slug) {
+  var indexPath = path.join(ROOT, 'index.html');
+  var html = fs.readFileSync(indexPath, 'utf8');
+  var re = new RegExp('[ \\t]*<section class="home-section" id="' + slug + '">[\\s\\S]*?</section>\\r?\\n?', '');
+  var next = html.replace(re, '');
+  if (next !== html) fs.writeFileSync(indexPath, next, 'utf8');
+
+  var scriptPath = path.join(ROOT, 'js', 'script.js');
+  var js = fs.readFileSync(scriptPath, 'utf8');
+  var nextJs = js.replace(new RegExp("(RAIL_CATEGORIES = \\[[^\\]]*?)'" + slug + "', ?"), '$1');
+  nextJs = nextJs.replace(new RegExp("(RAIL_CATEGORIES = \\[[^\\]]*?), ?'" + slug + "'"), '$1');
+  if (nextJs !== js) fs.writeFileSync(scriptPath, nextJs, 'utf8');
+}
+
+/* Saca una categoría de data/categories.json y borra su carpeta
+   categoria/<slug>/ (a esta altura solo tiene el index.html de la
+   categoría -- server.js valida antes que no le queden artículos
+   asignados, para no dejar contenido huérfano sin avisar). */
+function deleteCategory(slug) {
+  var list = loadCategories();
+  var idx = list.findIndex(function (c) { return c.slug === slug; });
+  if (idx === -1) throw new Error('No se encontró esa categoría');
+
+  list.splice(idx, 1);
+  saveCategories(list);
+  removeHomepageRail(slug);
+
+  var dir = path.join(CATEGORIA_DIR, slug);
+  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+
+  return { slug: slug };
+}
 
 const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
   'August', 'September', 'October', 'November', 'December'];
@@ -82,7 +167,7 @@ function topicSlugify(label) {
    está el botón "Regenerar categorías y temas" del panel, que corre
    generate_pages.py y arma la tarjeta + la página del tema. */
 function addTopic(categorySlug, label, groupName) {
-  var cat = CATEGORY_BY_SLUG[categorySlug];
+  var cat = categoryBySlug(categorySlug);
   if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
 
   var slug = topicSlugify(label);
@@ -133,7 +218,7 @@ function findTopic(groups, slug) {
 }
 
 function renameTopic(categorySlug, slug, newLabel) {
-  if (!CATEGORY_BY_SLUG[categorySlug]) throw new Error('Categoría desconocida: ' + categorySlug);
+  if (!categoryBySlug(categorySlug)) throw new Error('Categoría desconocida: ' + categorySlug);
   if (!newLabel || !newLabel.trim()) throw new Error('El nuevo nombre no puede estar vacío');
 
   var topicsPath = path.join(DATA_DIR, 'topics.json');
@@ -152,7 +237,7 @@ function renameTopic(categorySlug, slug, newLabel) {
    No toca los artículos que lo tengan asignado — eso se valida antes,
    desde server.js, para no dejar links rotos sin avisar. */
 function deleteTopic(categorySlug, slug) {
-  var cat = CATEGORY_BY_SLUG[categorySlug];
+  var cat = categoryBySlug(categorySlug);
   if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
 
   var topicsPath = path.join(DATA_DIR, 'topics.json');
@@ -205,7 +290,7 @@ function subtopicLabelFor(catSlug, topicSlug, subtopicSlug) {
 }
 
 function addSubtopic(categorySlug, topicSlug, label) {
-  if (!CATEGORY_BY_SLUG[categorySlug]) throw new Error('Categoría desconocida: ' + categorySlug);
+  if (!categoryBySlug(categorySlug)) throw new Error('Categoría desconocida: ' + categorySlug);
   if (!topicLabelFor(categorySlug, topicSlug)) throw new Error('No se encontró ese tema en esta categoría');
 
   var slug = topicSlugify(label);
@@ -241,7 +326,7 @@ function renameSubtopic(categorySlug, topicSlug, slug, newLabel) {
    No toca los artículos que lo tengan asignado — eso se valida antes,
    desde server.js. */
 function deleteSubtopic(categorySlug, topicSlug, slug) {
-  var cat = CATEGORY_BY_SLUG[categorySlug];
+  var cat = categoryBySlug(categorySlug);
   if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
 
   var key = subtopicKey(categorySlug, topicSlug);
@@ -278,7 +363,7 @@ function localize(html) {
   html = html.split('href="play/index.html"').join('href="../../play/index.html"');
   html = html.split('src="img/').join('src="../../img/');
   html = html.split("url('img/").join("url('../../img/");
-  CATEGORIES.forEach(function (cat) {
+  loadCategories().forEach(function (cat) {
     html = html.split('href="categoria/' + cat.slug + '/index.html"')
       .join('href="../../categoria/' + cat.slug + '/index.html"');
   });
@@ -436,7 +521,7 @@ function fill(template, values) {
 }
 
 function articleFilePath(article) {
-  var cat = CATEGORY_BY_SLUG[article.category];
+  var cat = categoryBySlug(article.category);
   if (!cat) return null;
   return path.join(CATEGORIA_DIR, cat.slug, article.slug + '.html');
 }
@@ -483,7 +568,7 @@ function bannerHtmlFor(article, cat) {
 }
 
 function generateArticleFile(article) {
-  var cat = CATEGORY_BY_SLUG[article.category];
+  var cat = categoryBySlug(article.category);
   if (!cat) throw new Error('Categoría desconocida: ' + article.category);
   var blocks = loadSidebarFooter();
 
@@ -548,8 +633,11 @@ function deleteArticleFile(article) {
 }
 
 module.exports = {
-  CATEGORIES: CATEGORIES,
-  CATEGORY_BY_SLUG: CATEGORY_BY_SLUG,
+  loadCategories: loadCategories,
+  categoryBySlug: categoryBySlug,
+  addCategory: addCategory,
+  renameCategory: renameCategory,
+  deleteCategory: deleteCategory,
   loadTopicGroups: loadTopicGroups,
   topicLabelFor: topicLabelFor,
   addTopic: addTopic,
