@@ -31,7 +31,7 @@ const VEXLOW_HERO = [
     "title": "Reimagining Founder Culture: A New Approach to Preventing Burnout",
     "dek": "In London, a unique founder house is shifting paradigms by focusing on work-life balance to combat burnout among startup leaders.",
     "image": "img/temas/reimagining-founder-culture-a-new-approach-to-preventing-bur.jpg",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/technology/reimagining-founder-culture-a-new-approach-to-preventing-bur.html"
   },
   {
