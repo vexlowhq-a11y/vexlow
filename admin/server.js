@@ -28,7 +28,6 @@ const DATA_DIR = path.join(ROOT, 'data');
 const IMG_DIR = path.join(ROOT, 'img');
 const ADMIN_DIR = __dirname;
 const CONFIG_FILE = path.join(ADMIN_DIR, 'config.json');
-const AUTOMATION_LOG_FILE = path.join(DATA_DIR, 'automation-log.json');
 const PORT = 4321;
 
 // Recargadas del disco en cada uso (pagegen.loadCategories), no una
@@ -466,41 +465,6 @@ var server = http.createServer(function (req, res) {
         return sendJSON(res, 400, { error: e.message });
       }
     });
-  }
-
-  // ---- Publicación automática (bot) ----
-  if (urlPath === '/api/automation-config' && req.method === 'GET') {
-    var cfgGet = {};
-    try { cfgGet = readJSON(CONFIG_FILE); } catch (e) { cfgGet = {}; }
-    return sendJSON(res, 200, cfgGet.autoPublish || { enabled: false, intervalHours: 6 });
-  }
-  if (urlPath === '/api/automation-config' && req.method === 'POST') {
-    return readBody(req, function (err, data) {
-      if (err || !data) return sendJSON(res, 400, { error: 'JSON inválido' });
-      var cfgPost = {};
-      try { cfgPost = readJSON(CONFIG_FILE); } catch (e) { cfgPost = {}; }
-      cfgPost.autoPublish = Object.assign({ enabled: false, intervalHours: 6 }, cfgPost.autoPublish, { enabled: !!data.enabled });
-      writeJSON(CONFIG_FILE, cfgPost);
-      return sendJSON(res, 200, cfgPost.autoPublish);
-    });
-  }
-  if (urlPath === '/api/automation-log' && req.method === 'GET') {
-    var logGet = [];
-    try { logGet = readJSON(AUTOMATION_LOG_FILE); } catch (e) { logGet = []; }
-    return sendJSON(res, 200, logGet);
-  }
-  if (urlPath === '/api/automation-run' && req.method === 'POST') {
-    var runProc = spawn('node', [path.join(ADMIN_DIR, 'auto-publish.js'), '--force'], { cwd: ROOT });
-    var runOut = '';
-    runProc.stdout.on('data', function (d) { runOut += d.toString('utf8'); });
-    runProc.stderr.on('data', function (d) { runOut += d.toString('utf8'); });
-    runProc.on('error', function (e) {
-      sendJSON(res, 500, { ok: false, error: 'No se pudo ejecutar el bot: ' + e.message });
-    });
-    runProc.on('close', function (code) {
-      sendJSON(res, code === 0 ? 200 : 500, { ok: code === 0, output: runOut });
-    });
-    return;
   }
 
   // ---- Preview del sitio real ----

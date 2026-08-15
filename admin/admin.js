@@ -738,7 +738,7 @@
     draftsTabCount.textContent = draftsData.length ? '(' + draftsData.length + ')' : '';
     draftsList.innerHTML = '';
     if (!draftsData.length) {
-      draftsList.innerHTML = '<div class="admin-empty">No hay borradores pendientes. Tocá "Buscar temas nuevos" para revisar los feeds configurados.</div>';
+      draftsList.innerHTML = '<div class="admin-empty">No hay borradores pendientes. Tocá "Buscar noticias nuevas" para revisar los feeds configurados.</div>';
       return;
     }
     draftsData.forEach(function (d) {
@@ -839,98 +839,7 @@
     }).catch(function (err) {
       fetchDraftsBtn.disabled = false;
       draftsFetchStatus.textContent = '';
-      toast('No se pudo buscar temas nuevos: ' + (err && err.message || 'error desconocido'), true);
-    });
-  });
-
-  /* =====================================================
-     AUTOMATIZACIÓN (bot de publicación)
-     ===================================================== */
-  var automationEnabledToggle = document.getElementById('automationEnabledToggle');
-  var automationStatusLabel = document.getElementById('automationStatusLabel');
-  var automationTabBadge = document.getElementById('automationTabBadge');
-  var automationRunBtn = document.getElementById('automationRunBtn');
-  var automationRunStatus = document.getElementById('automationRunStatus');
-  var automationLogList = document.getElementById('automationLogList');
-
-  function renderAutomationStatus(cfg) {
-    automationEnabledToggle.checked = !!(cfg && cfg.enabled);
-    automationStatusLabel.textContent = 'Publicación automática: ' + (cfg && cfg.enabled ? 'prendida' : 'apagada');
-    automationTabBadge.textContent = cfg && cfg.enabled ? '●' : '';
-  }
-
-  function renderAutomationLog(log) {
-    automationLogList.innerHTML = '';
-    if (!log || !log.length) {
-      automationLogList.innerHTML = '<div class="admin-empty">Todavía no corrió ninguna vez.</div>';
-      return;
-    }
-    log.forEach(function (entry) {
-      var row = document.createElement('div');
-      row.className = 'admin-item';
-
-      var thumb = document.createElement('div');
-      thumb.className = 'thumb';
-      thumb.style.background = 'var(--surface-2)';
-      thumb.textContent = entry.ok ? '✅' : '⚠️';
-
-      var info = document.createElement('div');
-      info.className = 'info';
-      var when = entry.finishedAt || entry.startedAt || '';
-      var whenLabel = when ? new Date(when).toLocaleString('es-AR') : '(sin fecha)';
-      var parts = [];
-      parts.push((entry.published || []).length + ' artículo(s) publicado(s)');
-      if (entry.topicsCreated && entry.topicsCreated.length) parts.push(entry.topicsCreated.length + ' tema(s) nuevo(s)');
-      if (entry.imagesGenerated) parts.push(entry.imagesGenerated + ' imagen(es) generada(s)');
-      if (entry.trendingUpdated) parts.push('trending recalculado (' + entry.trendingUpdated + ')');
-      if (entry.heroRotated && entry.heroRotated.length) parts.push('carrusel rotado (' + entry.heroRotated.length + ')');
-      if (entry.deploy) parts.push(entry.deploy);
-      if (entry.errors && entry.errors.length) parts.push(entry.errors.length + ' error(es)');
-      info.innerHTML = '<div class="ttl"></div><div class="meta"></div><div class="meta" style="color:#E5484D;"></div>';
-      info.querySelector('.ttl').textContent = whenLabel + (entry.forced ? ' · manual' : ' · automática');
-      info.querySelectorAll('.meta')[0].textContent = parts.join(' · ') +
-        ((entry.published || []).length ? ' — ' + entry.published.join('; ') : '');
-      var errorTexts = (entry.errors || []).map(function (e) { return e.error || e; });
-      if (entry.error) errorTexts.unshift(entry.error);
-      info.querySelectorAll('.meta')[1].textContent = errorTexts.length ? errorTexts.join(' | ') : '';
-
-      row.appendChild(thumb);
-      row.appendChild(info);
-      automationLogList.appendChild(row);
-    });
-  }
-
-  automationEnabledToggle.addEventListener('change', function () {
-    var enabled = automationEnabledToggle.checked;
-    automationEnabledToggle.disabled = true;
-    postJSON('/api/automation-config', { enabled: enabled }).then(function (cfg) {
-      automationEnabledToggle.disabled = false;
-      renderAutomationStatus(cfg);
-      toast(enabled ? 'Publicación automática prendida' : 'Publicación automática apagada');
-    }).catch(function (err) {
-      automationEnabledToggle.disabled = false;
-      automationEnabledToggle.checked = !enabled;
-      toast('No se pudo cambiar la configuración: ' + (err && err.message || 'error desconocido'), true);
-    });
-  });
-
-  automationRunBtn.addEventListener('click', function () {
-    automationRunBtn.disabled = true;
-    automationRunStatus.textContent = 'Corriendo (puede tardar unos minutos: busca noticias, escribe, publica y sube los cambios)...';
-    postJSON('/api/automation-run', {}).then(function () {
-      automationRunBtn.disabled = false;
-      automationRunStatus.textContent = '';
-      return getJSON('/api/automation-log');
-    }).then(function (log) {
-      renderAutomationLog(log);
-      var last = log && log[0];
-      if (last) {
-        toast(last.ok ? ((last.published || []).length + ' artículo(s) publicado(s)') : 'Terminó con errores — revisá el historial', !last.ok);
-      }
-    }).catch(function (err) {
-      automationRunBtn.disabled = false;
-      automationRunStatus.textContent = '';
-      toast('No se pudo correr el bot: ' + (err && err.message || 'error desconocido'), true);
+      toast('No se pudo buscar noticias nuevas: ' + (err && err.message || 'error desconocido'), true);
     });
   });
 
@@ -1078,16 +987,12 @@
     getJSON('/api/categories'),
     getJSON('/api/hero'),
     getJSON('/api/articles'),
-    getJSON('/api/drafts'),
-    getJSON('/api/automation-config'),
-    getJSON('/api/automation-log')
+    getJSON('/api/drafts')
   ]).then(function (results) {
     categories = results[0];
     heroData = results[1];
     articlesData = results[2];
     draftsData = results[3];
-    renderAutomationStatus(results[4]);
-    renderAutomationLog(results[5]);
 
     fillSelect(heroCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });
     fillSelect(articleCategory, contentCategories(), 'slug', function (c) { return c.icon + ' ' + c.label; });

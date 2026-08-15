@@ -1,9 +1,7 @@
 /*
-  Publicar cambios (git add + commit + push) — compartido entre
+  Publicar cambios (git add + commit + push) — usado por
   POST /api/deploy (admin/server.js, botón "Publicar cambios en
-  internet") y admin/auto-publish.js (el bot de publicación
-  automática). Misma lógica en los dos casos: si no hay nada para
-  commitear, no falla, solo avisa.
+  internet"). Si no hay nada para commitear, no falla, solo avisa.
 */
 
 const path = require('path');
@@ -24,11 +22,7 @@ function runGit(args) {
 
 // "paths": opcional. Sin especificar, hace "git add -A" (todo lo que
 // haya cambiado) — es lo que usa el botón manual "Publicar cambios",
-// donde el usuario ya sabe qué tiene pendiente. admin/auto-publish.js
-// SIEMPRE pasa una lista explícita de paths (solo lo que el bot mismo
-// pudo haber tocado) para no arrastrar cambios sueltos sin relación
-// que puedan estar en el repo en ese momento (código a medio hacer,
-// imágenes que el usuario todavía no quiere subir, etc.).
+// donde el usuario ya sabe qué tiene pendiente.
 async function deploy(commitMessage, paths) {
   var add = await runGit(['add'].concat(paths && paths.length ? paths : ['-A']));
   var commit = await runGit(['commit', '-m', commitMessage]);
