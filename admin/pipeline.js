@@ -101,35 +101,11 @@ function isRecent(pubDate) {
   return ageMs <= MAX_ITEM_AGE_DAYS * 24 * 60 * 60 * 1000;
 }
 
-function listTopicsFor(category) {
-  var topicGroups = pagegen.loadTopicGroups();
-  var seen = new Set();
-  var topics = [];
-  (topicGroups[category] || []).forEach(function (group) {
-    group[1].forEach(function (pair) {
-      var slug = pair[0], label = pair[1];
-      if (seen.has(slug)) return;
-      seen.add(slug);
-      topics.push({ slug: slug, label: label });
-    });
-  });
-  return topics;
-}
-
 // Categorías de contenido reales (excluye "trending", que no es una
 // categoría propia — es un agregado de las demás).
 function listCategories() {
-  return pagegen.CATEGORIES.filter(function (c) { return c.slug !== 'trending'; })
+  return pagegen.loadCategories().filter(function (c) { return c.slug !== 'trending'; })
     .map(function (c) { return { slug: c.slug, label: c.label }; });
-}
-
-// Temas existentes de TODAS las categorías, para pasarle a draftArticle
-// (necesita saber los temas válidos de cualquier categoría a la que
-// pueda reclasificar el artículo, no solo la de origen).
-function allTopicsByCategory() {
-  var map = {};
-  listCategories().forEach(function (c) { map[c.slug] = listTopicsFor(c.slug); });
-  return map;
 }
 
 function uniqueSlug(base, taken) {
@@ -273,19 +249,18 @@ async function fetchNewDrafts() {
   var candidates = built.candidates;
   var takenSlugs = built.takenSlugs;
   var categoryOptions = listCategories();
-  var topicsMap = allTopicsByCategory();
 
   var added = 0;
   var errors = built.errors;
 
   for (var i = 0; i < candidates.length; i++) {
     var item = candidates[i];
-    var cat = pagegen.CATEGORY_BY_SLUG[item.category];
+    var cat = pagegen.categoryBySlug(item.category);
     if (!cat) continue;
 
     try {
-      var result = await draft.draftArticle(item, topicsMap, cfg, categoryOptions);
-      var finalCat = pagegen.CATEGORY_BY_SLUG[result.category] || cat;
+      var result = await draft.draftArticle(item, cfg, categoryOptions);
+      var finalCat = pagegen.categoryBySlug(result.category) || cat;
       var slug = uniqueSlug(pagegen.slugify(result.title), takenSlugs);
       drafts.push({
         title: result.title,
@@ -294,8 +269,6 @@ async function fetchNewDrafts() {
         icon: finalCat.icon,
         date: todayISO(),
         readTime: result.readTime || '',
-        topic: result.topic || '',
-        newTopicLabel: result.newTopicLabel || '',
         slug: slug,
         dek: result.dek,
         image: '',
@@ -345,9 +318,7 @@ module.exports = {
   discardDraft: discardDraft,
   removeDraft: removeDraft,
   buildCandidates: buildCandidates,
-  listTopicsFor: listTopicsFor,
   listCategories: listCategories,
-  allTopicsByCategory: allTopicsByCategory,
   uniqueSlug: uniqueSlug,
   todayISO: todayISO
 };

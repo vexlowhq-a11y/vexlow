@@ -11,23 +11,20 @@
     node admin/auto-publish.js --force (corre aunque esté apagado, para probar)
 
   Qué hace, en orden — es la versión sin manos del flujo que ya hacía
-  el usuario a mano (Buscar temas nuevos -> revisar -> Guardar ->
+  el usuario a mano (Buscar novedades -> revisar -> Guardar ->
   Regenerar -> Publicar cambios):
     1. Si el interruptor "autoPublish.enabled" de admin/config.json
        está apagado y no vino --force, no hace NADA (ni un log).
     2. Busca noticias nuevas en los feeds RSS (admin/pipeline.js).
-    3. Por cada una, le pide a la IA un artículo original — y ahora
-       también le pide que confirme/corrija la CATEGORÍA (no solo el
-       tema), porque los feeds generales venían mal categorizando
-       algunas notas (admin/draft.js).
-    4. Si la IA sugiere un tema que no existe todavía, lo crea
-       (pagegen.addTopic) en vez de dejarlo sin tema.
-    5. Le pide una imagen destacada a la API de OpenAI (gpt-image-1.5,
+    3. Por cada una, le pide a la IA un artículo original — y también
+       le pide que confirme/corrija la CATEGORÍA, porque los feeds
+       generales venían mal categorizando algunas notas (admin/draft.js).
+    4. Le pide una imagen destacada a la API de OpenAI (gpt-image-1.5,
        calidad "low" — ver admin/config.json "imageGeneration") y la
        guarda en img/temas/. Si falla (sin crédito, error de red, etc.)
        el artículo se publica igual, sin imagen — no se corta la
        corrida. Solo aplica a artículos nuevos, no reprocesa los viejos.
-    5b. Guarda cada artículo en data/articulos.json y genera su página
+    5. Guarda cada artículo en data/articulos.json y genera su página
        HTML.
     6. Una vez por día (admin/trending.js), recalcula qué artículos
        están "trending" combinando reacciones reales (api/react.js)
@@ -35,7 +32,7 @@
        Una vez por semana, arma el carrusel principal (data/hero.json,
        3 a 5 slides) a partir de los trending que ya tengan imagen,
        reemplazándolo entero (no lo acumula de a poco).
-    7. Regenera categorías/temas/sitemap (generate_pages.py) y hace
+    7. Regenera categorías/sitemap (generate_pages.py) y hace
        git add + commit + push (admin/deploy.js) — así lo publicado
        queda de verdad en vexlowhq.com, no solo en el disco local.
     8. Deja un resumen de la corrida en data/automation-log.json
@@ -113,17 +110,15 @@ async function main() {
   var draftCfg = draft.loadConfig();
   var apiKey = draftCfg.draftProvider === 'openai' ? draftCfg.openaiApiKey : draftCfg.anthropicApiKey;
   if (!apiKey) {
-    appendLog({ startedAt: startedAt, forced: FORCE, ok: false, error: 'Sin API key configurada (admin/config.json)', published: [], topicsCreated: [], trendingUpdated: false, heroRotated: false, errors: [] });
+    appendLog({ startedAt: startedAt, forced: FORCE, ok: false, error: 'Sin API key configurada (admin/config.json)', published: [], trendingUpdated: false, heroRotated: false, errors: [] });
     console.error('Sin API key configurada — nada para hacer.');
     return;
   }
 
   var built = await pipeline.buildCandidates();
   var categoryOptions = pipeline.listCategories();
-  var topicsMap = pipeline.allTopicsByCategory();
   var errors = built.errors.slice();
   var published = [];
-  var topicsCreated = [];
   var imagesGenerated = 0;
 
   var articles = readJSON(ARTICULOS_FILE, []);
@@ -133,21 +128,8 @@ async function main() {
     var item = built.candidates[i];
 
     try {
-      var result = await draft.draftArticle(item, topicsMap, draftCfg, categoryOptions);
-      var finalCat = pagegen.CATEGORY_BY_SLUG[result.category] || pagegen.CATEGORY_BY_SLUG[item.category];
-
-      var topicSlug = result.topic || '';
-      if (!topicSlug && result.newTopicLabel) {
-        try {
-          var newTopic = pagegen.addTopic(finalCat.slug, result.newTopicLabel);
-          topicSlug = newTopic.slug;
-          topicsCreated.push(finalCat.label + ' / ' + newTopic.label);
-          topicsMap[finalCat.slug] = (topicsMap[finalCat.slug] || []).concat([{ slug: newTopic.slug, label: newTopic.label }]);
-        } catch (e) {
-          // Ya existía o el nombre no dio un slug válido — el artículo
-          // sigue publicándose, simplemente sin tema asignado.
-        }
-      }
+      var result = await draft.draftArticle(item, draftCfg, categoryOptions);
+      var finalCat = pagegen.categoryBySlug(result.category) || pagegen.categoryBySlug(item.category);
 
       var slug = pipeline.uniqueSlug(pagegen.slugify(result.title), takenSlugs);
       var article = {
@@ -157,7 +139,6 @@ async function main() {
         icon: finalCat.icon,
         date: pipeline.todayISO(),
         readTime: result.readTime || '',
-        topic: topicSlug,
         slug: slug,
         dek: result.dek,
         trending: false,
@@ -170,8 +151,7 @@ async function main() {
       };
 
       try {
-        var topicLabel = topicSlug ? pagegen.topicLabelFor(finalCat.slug, topicSlug) : null;
-        var imagePath = await imageGen.generateCoverImage(article, draftCfg, topicLabel);
+        var imagePath = await imageGen.generateCoverImage(article, draftCfg);
         if (imagePath) { article.image = imagePath; imagesGenerated++; }
       } catch (e) {
         errors.push({ error: 'Imagen para "' + article.title.slice(0, 40) + '": ' + e.message });
@@ -205,7 +185,7 @@ async function main() {
   }
 
   var deployResult = { ok: true, nothingToCommit: true, output: '' };
-  if (published.length || trendingResult.updated || heroResult.rotated || topicsCreated.length) {
+  if (published.length || trendingResult.updated || heroResult.rotated) {
     try {
       await runPython(path.join(__dirname, 'generate_pages.py'));
     } catch (e) {
@@ -218,7 +198,6 @@ async function main() {
       var deployPaths = [
         'data/articulos.json', 'data/articulos.js',
         'data/hero.json', 'data/hero.js',
-        'data/topics.json',
         'data/automation-log.json',
         'data/trending-state.json',
         'categoria', 'sitemap.xml', 'img/temas'
@@ -235,7 +214,6 @@ async function main() {
     forced: FORCE,
     ok: errors.length === 0 && deployResult.ok !== false,
     published: published,
-    topicsCreated: topicsCreated,
     imagesGenerated: imagesGenerated,
     trendingUpdated: trendingResult.updated ? trendingResult.count : false,
     heroRotated: heroResult.rotated ? heroResult.titles : false,
@@ -247,7 +225,7 @@ async function main() {
 }
 
 main().catch(function (e) {
-  appendLog({ startedAt: new Date().toISOString(), forced: FORCE, ok: false, error: e.message, published: [], topicsCreated: [], trendingUpdated: false, heroRotated: false, errors: [{ error: e.message }] });
+  appendLog({ startedAt: new Date().toISOString(), forced: FORCE, ok: false, error: e.message, published: [], trendingUpdated: false, heroRotated: false, errors: [{ error: e.message }] });
   console.error('Falló la corrida del bot:', e);
   process.exitCode = 1;
 });

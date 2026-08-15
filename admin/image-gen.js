@@ -3,16 +3,13 @@
   =====================================================================
   Le pide a la API de imágenes de OpenAI (gpt-image-1.5, calidad "low"
   por defecto — ver admin/config.json "imageGeneration") una portada
-  para el artículo, a partir del título y el tema. Se guarda en
-  img/temas/<slug>.jpg. Si falla por cualquier motivo (sin crédito,
-  error de red, etc.) devuelve null — el artículo se publica igual,
-  sin imagen (usa el ícono de la categoría, como cualquier artículo
-  sin imagen puesta a mano).
+  para el artículo, a partir del título. Se guarda en img/temas/<slug>.jpg.
+  Si falla por cualquier motivo (sin crédito, error de red, etc.) devuelve
+  null — el artículo se publica igual, sin imagen (usa el ícono de la
+  categoría, como cualquier artículo sin imagen puesta a mano).
 
   Solo aplica a artículos NUEVOS publicados por el bot de acá en
-  más — no reprocesa artículos viejos (para eso, si se quiere en
-  algún momento, sería un script de backfill aparte, igual que
-  admin/backfill-topics.js).
+  más — no reprocesa artículos viejos.
 */
 
 const fs = require('fs');

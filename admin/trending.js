@@ -146,9 +146,9 @@ async function maybeRotateHero(articles) {
   }
   if (!picked.length) return { rotated: false }; // nada elegible todavía, no vaciar el carrusel actual
 
-  var CATEGORY_BY_SLUG = require('./pagegen').CATEGORY_BY_SLUG;
+  var categoryBySlug = require('./pagegen').categoryBySlug;
   var slides = picked.map(function (a) {
-    var cat = CATEGORY_BY_SLUG[a.category];
+    var cat = categoryBySlug(a.category);
     return {
       category: a.category,
       chip: (cat ? cat.icon : '') + ' ' + (cat ? cat.label : a.categoryLabel || ''),

@@ -83,11 +83,6 @@
           <option value="">Todas las categorías</option>
         </select>
       </label>
-      <label>Filtrar por tema
-        <select id="filterTopic">
-          <option value="">Todos los temas</option>
-        </select>
-      </label>
       <label class="checkbox-label">
         <input type="checkbox" id="filterTrendingOnly">
         Solo Trending ⭐
@@ -118,28 +113,6 @@
         <label>Categoría
           <select id="articleCategory" required></select>
         </label>
-        <label>Tema (opcional)
-          <select id="articleTopic">
-            <option value="">Sin tema específico</option>
-          </select>
-        </label>
-        <div class="new-topic-row span-2" id="newTopicRow" hidden>
-          <select id="newTopicGroup"></select>
-          <input type="text" id="newTopicGroupName" placeholder="Nombre de la sección nueva" hidden>
-          <input type="text" id="newTopicLabel" placeholder="Nombre del tema nuevo (ej. Starfield)">
-          <button type="button" class="btn-secondary" id="newTopicCreateBtn">Crear tema</button>
-        </div>
-        <div class="topic-manager span-2" id="topicManager"></div>
-        <label class="span-2" id="subtopicFieldWrap" hidden>Subtema (opcional)
-          <select id="articleSubtopic">
-            <option value="">Sin subtema específico</option>
-          </select>
-        </label>
-        <div class="new-topic-row span-2" id="newSubtopicRow" hidden>
-          <input type="text" id="newSubtopicLabel" placeholder="Nombre del subtema nuevo (ej. Trailers)">
-          <button type="button" class="btn-secondary" id="newSubtopicCreateBtn">Crear subtema</button>
-        </div>
-        <div class="topic-manager span-2" id="subtopicManager"></div>
         <label class="span-2">Título
           <input type="text" id="articleTitle" placeholder="Título de la noticia" required>
         </label>
@@ -175,8 +148,6 @@
 - Un guion al principio de la línea
 - crea un ítem de lista
 
-Escribí [publicidad] solo en una línea para meter un espacio publicitario ahí.
-
 Para meter una imagen extra en medio del texto, usá el botón de abajo (se inserta sola en el lugar donde tengas el cursor)."></textarea>
         </label>
         <div class="span-2 inline-image-row">
@@ -185,12 +156,11 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
           <span class="admin-hint" id="inlineImageStatus"></span>
         </div>
       </div>
-      <p class="admin-hint" id="topicHint"></p>
       <p class="admin-hint" id="articlePreviewLink"></p>
       <div class="form-actions">
         <button type="submit" class="btn-primary">Guardar artículo</button>
         <button type="button" class="btn-secondary" id="articleCancelBtn" hidden>Cancelar edición</button>
-        <button type="button" class="btn-secondary" id="regenerateBtn">Regenerar categorías y temas</button>
+        <button type="button" class="btn-secondary" id="regenerateBtn">Regenerar sitio</button>
       </div>
     </form>
   </section>

@@ -137,216 +137,6 @@ function formatDateEn(iso) {
   return MONTHS_EN[parseInt(m, 10) - 1] + ' ' + String(parseInt(d, 10)) + ', ' + y;
 }
 
-function loadTopicGroups() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'topics.json'), 'utf8'));
-  } catch (e) {
-    return {};
-  }
-}
-
-function topicLabelFor(catSlug, topicSlug) {
-  if (!topicSlug) return null;
-  var groups = loadTopicGroups()[catSlug] || [];
-  for (var g = 0; g < groups.length; g++) {
-    var items = groups[g][1];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i][0] === topicSlug) return items[i][1];
-    }
-  }
-  return null;
-}
-
-function topicSlugify(label) {
-  return String(label)
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 40);
-}
-
-/* Crea un tema nuevo en data/topics.json para una categoría, dentro de un
-   grupo "🆕 Nuevos" (se crea si no existe). No genera HTML acá — para eso
-   está el botón "Regenerar categorías y temas" del panel, que corre
-   generate_pages.py y arma la tarjeta + la página del tema. */
-function addTopic(categorySlug, label, groupName) {
-  var cat = categoryBySlug(categorySlug);
-  if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
-
-  var slug = topicSlugify(label);
-  if (!slug) throw new Error('El nombre del tema no generó un slug válido');
-
-  var topicsPath = path.join(DATA_DIR, 'topics.json');
-  var allGroups = loadTopicGroups();
-  var groups = allGroups[categorySlug] || [];
-
-  for (var g = 0; g < groups.length; g++) {
-    var items = groups[g][1];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i][0] === slug) throw new Error('Ya existe un tema con ese nombre en esta categoría');
-    }
-  }
-
-  var targetName = groupName || '🆕 Nuevos';
-  var targetGroup = null;
-  for (var g2 = 0; g2 < groups.length; g2++) {
-    if (groups[g2][0] === targetName) { targetGroup = groups[g2]; break; }
-  }
-  if (!targetGroup) {
-    targetGroup = [targetName, []];
-    groups.push(targetGroup);
-  }
-  targetGroup[1].push([slug, label]);
-
-  allGroups[categorySlug] = groups;
-  fs.writeFileSync(topicsPath, JSON.stringify(allGroups, null, 2) + '\n', 'utf8');
-  return { slug: slug, label: label, group: targetName };
-}
-
-/* Nombres de los grupos/secciones ya existentes para una categoría, en el
-   orden en que aparecen en la página (ej. "⭐ Populares", "Nintendo", ...). */
-function listGroupNames(categorySlug) {
-  var groups = loadTopicGroups()[categorySlug] || [];
-  return groups.map(function (g) { return g[0]; });
-}
-
-function findTopic(groups, slug) {
-  for (var g = 0; g < groups.length; g++) {
-    var items = groups[g][1];
-    for (var i = 0; i < items.length; i++) {
-      if (items[i][0] === slug) return { groupIndex: g, itemIndex: i };
-    }
-  }
-  return null;
-}
-
-function renameTopic(categorySlug, slug, newLabel) {
-  if (!categoryBySlug(categorySlug)) throw new Error('Categoría desconocida: ' + categorySlug);
-  if (!newLabel || !newLabel.trim()) throw new Error('El nuevo nombre no puede estar vacío');
-
-  var topicsPath = path.join(DATA_DIR, 'topics.json');
-  var allGroups = loadTopicGroups();
-  var groups = allGroups[categorySlug] || [];
-  var found = findTopic(groups, slug);
-  if (!found) throw new Error('No se encontró ese tema en esta categoría');
-
-  groups[found.groupIndex][1][found.itemIndex][1] = newLabel.trim();
-  allGroups[categorySlug] = groups;
-  fs.writeFileSync(topicsPath, JSON.stringify(allGroups, null, 2) + '\n', 'utf8');
-  return { slug: slug, label: newLabel.trim() };
-}
-
-/* Saca un tema de data/topics.json y borra su página HTML si existe.
-   No toca los artículos que lo tengan asignado — eso se valida antes,
-   desde server.js, para no dejar links rotos sin avisar. */
-function deleteTopic(categorySlug, slug) {
-  var cat = categoryBySlug(categorySlug);
-  if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
-
-  var topicsPath = path.join(DATA_DIR, 'topics.json');
-  var allGroups = loadTopicGroups();
-  var groups = allGroups[categorySlug] || [];
-  var found = findTopic(groups, slug);
-  if (!found) throw new Error('No se encontró ese tema en esta categoría');
-
-  groups[found.groupIndex][1].splice(found.itemIndex, 1);
-  if (groups[found.groupIndex][1].length === 0) {
-    groups.splice(found.groupIndex, 1);
-  }
-  allGroups[categorySlug] = groups;
-  fs.writeFileSync(topicsPath, JSON.stringify(allGroups, null, 2) + '\n', 'utf8');
-
-  var topicPage = path.join(CATEGORIA_DIR, cat.slug, slug + '.html');
-  if (fs.existsSync(topicPage)) fs.unlinkSync(topicPage);
-
-  return { slug: slug };
-}
-
-/* =====================================================================
-   SUBTEMAS — un nivel más adentro de un tema (ej. "Trailers" dentro de
-   "GTA VI" dentro de Gaming). Mismo patrón que los temas de arriba, pero
-   sin grupos (el tema ya cumple ese rol) y con clave compuesta
-   "categoria/temaSlug" en vez de solo la categoría.
-   ===================================================================== */
-
-const SUBTOPICS_FILE = path.join(DATA_DIR, 'subtopics.json');
-
-function loadSubtopics() {
-  try {
-    return JSON.parse(fs.readFileSync(SUBTOPICS_FILE, 'utf8'));
-  } catch (e) {
-    return {};
-  }
-}
-function saveSubtopics(data) {
-  fs.writeFileSync(SUBTOPICS_FILE, JSON.stringify(data, null, 2) + '\n', 'utf8');
-}
-function subtopicKey(categorySlug, topicSlug) { return categorySlug + '/' + topicSlug; }
-
-function subtopicLabelFor(catSlug, topicSlug, subtopicSlug) {
-  if (!subtopicSlug) return null;
-  var items = loadSubtopics()[subtopicKey(catSlug, topicSlug)] || [];
-  for (var i = 0; i < items.length; i++) {
-    if (items[i][0] === subtopicSlug) return items[i][1];
-  }
-  return null;
-}
-
-function addSubtopic(categorySlug, topicSlug, label) {
-  if (!categoryBySlug(categorySlug)) throw new Error('Categoría desconocida: ' + categorySlug);
-  if (!topicLabelFor(categorySlug, topicSlug)) throw new Error('No se encontró ese tema en esta categoría');
-
-  var slug = topicSlugify(label);
-  if (!slug) throw new Error('El nombre del subtema no generó un slug válido');
-
-  var key = subtopicKey(categorySlug, topicSlug);
-  var all = loadSubtopics();
-  var items = all[key] || [];
-  if (items.some(function (it) { return it[0] === slug; })) {
-    throw new Error('Ya existe un subtema con ese nombre en este tema');
-  }
-
-  items.push([slug, label]);
-  all[key] = items;
-  saveSubtopics(all);
-  return { slug: slug, label: label };
-}
-
-function renameSubtopic(categorySlug, topicSlug, slug, newLabel) {
-  if (!newLabel || !newLabel.trim()) throw new Error('El nuevo nombre no puede estar vacío');
-  var key = subtopicKey(categorySlug, topicSlug);
-  var all = loadSubtopics();
-  var items = all[key] || [];
-  var found = items.find(function (it) { return it[0] === slug; });
-  if (!found) throw new Error('No se encontró ese subtema');
-  found[1] = newLabel.trim();
-  all[key] = items;
-  saveSubtopics(all);
-  return { slug: slug, label: newLabel.trim() };
-}
-
-/* Saca un subtema de data/subtopics.json y borra su página HTML si existe.
-   No toca los artículos que lo tengan asignado — eso se valida antes,
-   desde server.js. */
-function deleteSubtopic(categorySlug, topicSlug, slug) {
-  var cat = categoryBySlug(categorySlug);
-  if (!cat) throw new Error('Categoría desconocida: ' + categorySlug);
-
-  var key = subtopicKey(categorySlug, topicSlug);
-  var all = loadSubtopics();
-  var items = all[key] || [];
-  var idx = items.findIndex(function (it) { return it[0] === slug; });
-  if (idx === -1) throw new Error('No se encontró ese subtema');
-  items.splice(idx, 1);
-  if (items.length === 0) delete all[key];
-  else all[key] = items;
-  saveSubtopics(all);
-
-  var subtopicPage = path.join(CATEGORIA_DIR, cat.slug, topicSlug + '-' + slug + '.html');
-  if (fs.existsSync(subtopicPage)) fs.unlinkSync(subtopicPage);
-
-  return { slug: slug };
-}
 
 function loadSidebarFooter() {
   var indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -571,27 +361,12 @@ function generateArticleFile(article) {
   if (!cat) throw new Error('Categoría desconocida: ' + article.category);
   var blocks = loadSidebarFooter();
 
-  var topicSlug = article.topic || '';
-  var topicLabel = topicSlug ? topicLabelFor(cat.slug, topicSlug) : null;
+  // Las páginas de tema/subtema se retiraron junto con la navegación por
+  // temas -- el breadcrumb y "Want more news about..." de cada artículo
+  // apuntan directo a su categoría.
   var topicCrumb = '';
   var topicHref = 'index.html';
-  if (topicSlug && topicLabel) {
-    topicCrumb = '<span class="sep">/</span><a href="' + topicSlug + '.html">' + topicLabel + '</a>';
-    topicHref = topicSlug + '.html';
-  } else if (!topicLabel) {
-    topicLabel = cat.label;
-  }
-
-  // Subtema (un nivel más adentro de un tema, ej. "Trailers" dentro de
-  // "GTA VI") — si está asignado, se agrega como cuarto nivel del
-  // breadcrumb y pasa a ser el destino de "Want more news about...".
-  var subtopicSlug = article.subtopic || '';
-  var subtopicLabel = (topicSlug && subtopicSlug) ? subtopicLabelFor(cat.slug, topicSlug, subtopicSlug) : null;
-  if (topicSlug && subtopicSlug && subtopicLabel) {
-    topicCrumb += '<span class="sep">/</span><a href="' + topicSlug + '-' + subtopicSlug + '.html">' + subtopicLabel + '</a>';
-    topicLabel = subtopicLabel;
-    topicHref = topicSlug + '-' + subtopicSlug + '.html';
-  }
+  var topicLabel = cat.label;
 
   var title = article.title;
   var titleShort = title.length <= 40 ? title : title.slice(0, 37) + '...';
@@ -637,17 +412,6 @@ module.exports = {
   addCategory: addCategory,
   renameCategory: renameCategory,
   deleteCategory: deleteCategory,
-  loadTopicGroups: loadTopicGroups,
-  topicLabelFor: topicLabelFor,
-  addTopic: addTopic,
-  listGroupNames: listGroupNames,
-  renameTopic: renameTopic,
-  deleteTopic: deleteTopic,
-  loadSubtopics: loadSubtopics,
-  subtopicLabelFor: subtopicLabelFor,
-  addSubtopic: addSubtopic,
-  renameSubtopic: renameSubtopic,
-  deleteSubtopic: deleteSubtopic,
   slugify: slugify,
   generateArticleFile: generateArticleFile,
   deleteArticleFile: deleteArticleFile
