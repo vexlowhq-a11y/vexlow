@@ -598,6 +598,12 @@
         viewBtn.rel = 'noopener';
         viewBtn.textContent = 'Ver';
         actions.appendChild(viewBtn);
+
+        var carouselBtn = document.createElement('button');
+        carouselBtn.type = 'button'; carouselBtn.textContent = 'Al carrusel';
+        carouselBtn.title = 'Agregar como diapositiva nueva en el carrusel de la home';
+        carouselBtn.addEventListener('click', function () { addToCarousel(a); });
+        actions.appendChild(carouselBtn);
       }
       var editBtn = document.createElement('button');
       editBtn.type = 'button'; editBtn.textContent = 'Editar';
@@ -658,6 +664,24 @@
     selectedArticleKeys.delete(articleKey(articlesData[i]));
     articlesData.splice(i, 1);
     saveArticles('Artículo eliminado');
+  }
+
+  // Arma una diapositiva nueva del carrusel a partir de un artículo ya
+  // publicado (mismo título, dek, imagen y categoría, apuntando a su
+  // página real) -- para no tener que volver a tipear todo a mano en
+  // el formulario del Hero.
+  function addToCarousel(a) {
+    var meta = categoryMeta(a.category);
+    heroData.push({
+      category: a.category,
+      chip: meta.icon + ' ' + meta.label,
+      title: a.title,
+      dek: a.dek || '',
+      image: a.image || '',
+      textColor: 'auto',
+      href: a.href || articleHrefFor(a)
+    });
+    saveHero('Agregado al carrusel');
   }
 
   function saveArticles(successMsg) {
