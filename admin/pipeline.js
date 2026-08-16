@@ -16,6 +16,7 @@ const http = require('http');
 const feeds = require('./feeds');
 const draft = require('./draft');
 const pagegen = require('./pagegen');
+const imageGen = require('./image-gen');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DRAFTS_FILE = path.join(DATA_DIR, 'drafts.json');
@@ -450,6 +451,16 @@ async function fetchNewDrafts() {
       var finalCat = pagegen.categoryBySlug(result.category) || cat;
       var slug = uniqueSlug(pagegen.slugify(result.title), takenSlugs);
       var localImage = await downloadDraftImage(item.image, result.title);
+      if (!localImage) {
+        // La fuente RSS no traía foto — se genera una con IA como
+        // respaldo (prompt blindado contra logos/personajes reales,
+        // ver admin/image-gen.js). Si falla por cualquier motivo, el
+        // borrador sigue su curso sin imagen, como antes de este cambio.
+        try {
+          var generatedImage = await imageGen.generateCoverImage({ title: result.title, categoryLabel: finalCat.label, slug: slug }, cfg, null);
+          if (generatedImage) localImage = generatedImage;
+        } catch (e) {}
+      }
       // Chequeo anti-copia: compara el resumen ORIGINAL de la fuente
       // contra el título+dek+cuerpo que redactó la IA. Es una red de
       // seguridad además de la instrucción del prompt (admin/draft.js
