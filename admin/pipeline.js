@@ -63,6 +63,22 @@ function isChildSafetyRisk(text) {
   return CHILD_SAFETY_TERMS.test(t) && EXPLICIT_TERMS.test(t);
 }
 
+// Red de seguridad estructural, además de la instrucción explícita
+// del prompt (ver SYSTEM_PROMPT en admin/draft.js): si el modelo
+// igual cae en uno de estos subtítulos de cierre genéricos —el
+// patrón real de "scaled content abuse" que encontramos en 53 de
+// 188 artículos ya publicados—, se marca el borrador para revisión
+// en vez de dejarlo pasar en silencio.
+const GENERIC_HEADINGS = new Set([
+  'looking ahead', 'conclusion', 'future considerations', 'the competitive landscape',
+  'what lies ahead', 'looking forward', 'the road ahead', 'the broader implications',
+  'final thoughts', 'the bigger picture'
+]);
+function hasGenericHeading(body) {
+  var heads = String(body || '').match(/^## (.+)$/gm) || [];
+  return heads.some(function (h) { return GENERIC_HEADINGS.has(h.replace('## ', '').trim().toLowerCase()); });
+}
+
 const SAME_STORY_OVERLAP_THRESHOLD = 0.4;
 // Umbral para el chequeo de "copia literal de la fuente" (ver
 // verbatimOverlapRatio() abajo) -- distinto del de arriba: éste no
@@ -439,6 +455,7 @@ async function fetchNewDrafts() {
 
   var added = 0;
   var flaggedForSimilarity = 0;
+  var flaggedForGenericHeading = 0;
   var errors = built.errors;
 
   for (var i = 0; i < candidates.length; i++) {
@@ -474,6 +491,8 @@ async function fetchNewDrafts() {
       var paraphraseRatio = maxSentenceSimilarity(sourceText, generatedText);
       var similarityWarning = copyRatio >= COPY_WARNING_THRESHOLD || paraphraseRatio >= PARAPHRASE_WARNING_THRESHOLD;
       if (similarityWarning) flaggedForSimilarity++;
+      var genericHeadingWarning = hasGenericHeading(result.body);
+      if (genericHeadingWarning) flaggedForGenericHeading++;
       drafts.push({
         title: result.title,
         category: finalCat.slug,
@@ -491,6 +510,7 @@ async function fetchNewDrafts() {
         sourceTitle: item.title,
         similarityWarning: similarityWarning,
         similarityScore: Math.round(Math.max(copyRatio, paraphraseRatio) * 100),
+        genericHeadingWarning: genericHeadingWarning,
         createdAt: new Date().toISOString()
       });
       added++;
@@ -501,7 +521,7 @@ async function fetchNewDrafts() {
 
   writeJSON(DRAFTS_FILE, drafts);
 
-  return { added: added, skipped: built.skipped, errors: errors, flaggedForSimilarity: flaggedForSimilarity, noApiKey: false };
+  return { added: added, skipped: built.skipped, errors: errors, flaggedForSimilarity: flaggedForSimilarity, flaggedForGenericHeading: flaggedForGenericHeading, noApiKey: false };
 }
 
 function discardDraft(slug) {

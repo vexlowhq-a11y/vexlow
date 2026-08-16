@@ -790,6 +790,9 @@
       if (d.similarityWarning) {
         metaText = '⚠️ Revisar: se parece mucho al texto original (' + (d.similarityScore || 0) + '%) · ' + metaText;
       }
+      if (d.genericHeadingWarning) {
+        metaText = '⚠️ Revisar: tiene un subtítulo genérico (ej. "Looking Ahead"/"Conclusion") · ' + metaText;
+      }
       info.querySelector('.meta').textContent = metaText;
 
       var actions = document.createElement('div');
@@ -865,6 +868,7 @@
       var errorList = result.errors || [];
       var msg = (result.added || 0) + ' borrador(es) nuevo(s)';
       if (result.flaggedForSimilarity) msg += ' — ⚠️ ' + result.flaggedForSimilarity + ' marcado(s) por parecerse mucho al texto original, revisalos antes de publicar';
+      if (result.flaggedForGenericHeading) msg += ' — ⚠️ ' + result.flaggedForGenericHeading + ' marcado(s) con subtítulo genérico, revisalos antes de publicar';
       if (errorList.length) msg += ' — ' + errorList.length + ' error(es): ' + errorList.map(function (e) { return e.error; }).join(' | ');
       toast(msg, (result.added || 0) === 0 && errorList.length > 0);
       return getJSON('/api/drafts').then(function (list) {
