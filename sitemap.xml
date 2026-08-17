@@ -2,58 +2,48 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://vexlowhq.com/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/trending/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/ai/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/technology/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/science/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/gaming/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/entertainment/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/sports/</loc>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>https://vexlowhq.com/categoria/social/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/business/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>https://vexlowhq.com/categoria/sports/world-cup-final-argentina-spain.html</loc>
-    <lastmod>2026-07-16</lastmod>
-    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/gaming/gta6-trailer3-rockstar-mystery.html</loc>
@@ -187,11 +177,6 @@
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/science/japan-successfully-tests-rv-x-reusable-rocket-prototype.html</loc>
-    <lastmod>2026-07-18</lastmod>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://vexlowhq.com/categoria/social/tiktok-trials-ai-likeness-detection-tool-for-creators.html</loc>
     <lastmod>2026-07-18</lastmod>
     <changefreq>monthly</changefreq>
   </url>
@@ -381,11 +366,6 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://vexlowhq.com/categoria/social/countries-consider-social-media-bans-for-children.html</loc>
-    <lastmod>2026-07-21</lastmod>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
     <loc>https://vexlowhq.com/categoria/science/james-webb-space-telescope-sheds-light-on-early-cosmic-dust-.html</loc>
     <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
@@ -432,11 +412,6 @@
   </url>
   <url>
     <loc>https://vexlowhq.com/categoria/entertainment/x-men-97-returns-strong-with-danger-exe-episode.html</loc>
-    <lastmod>2026-07-22</lastmod>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://vexlowhq.com/categoria/business/dimension-capital-secures-800-million-for-new-fund-focused-o.html</loc>
     <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
   </url>
@@ -991,73 +966,88 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://vexlowhq.com/about-vexlowhq.html</loc>
+    <loc>https://vexlowhq.com/categoria/ai/stripe-takes-major-step-into-ai-with-planned-acquisition-of-.html</loc>
     <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://vexlowhq.com/categoria/gaming/rumors-of-a-simpsons-hit-run-revival-gain-traction-at-d23.html</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://vexlowhq.com/categoria/ai/mark-zuckerberg-s-ai-ambitions-face-skepticism-among-consume.html</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://vexlowhq.com/about-vexlowhq.html</loc>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/editorial-policy.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/contact.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/advertise.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/privacy.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/terms.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/cookies.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/index.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/trivia.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/dash.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/snake.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/orbit.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/gravity.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://vexlowhq.com/play/pulse.html</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
   </url>
 </urlset>

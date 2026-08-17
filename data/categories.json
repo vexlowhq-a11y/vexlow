@@ -44,12 +44,6 @@
     "description": "Soccer, the World Cup, NBA, Formula 1, and sports records."
   },
   {
-    "slug": "social",
-    "label": "Social Media",
-    "icon": "📱",
-    "description": "TikTok, Instagram, YouTube, X, Twitch, Discord, and everything happening on social media."
-  },
-  {
     "slug": "business",
     "label": "Business",
     "icon": "💰",
