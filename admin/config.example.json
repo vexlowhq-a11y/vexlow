@@ -2,5 +2,9 @@
   "draftProvider": "openai",
   "openaiApiKey": "",
   "draftModel": "gpt-4o-mini",
-  "anthropicApiKey": ""
+  "anthropicApiKey": "",
+  "instagram": {
+    "igUserId": "",
+    "pageAccessToken": ""
+  }
 }

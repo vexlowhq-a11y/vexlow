@@ -22,6 +22,7 @@ const pagegen = require('./pagegen');
 const pipeline = require('./pipeline');
 const deploy = require('./deploy');
 const gravityEditor = require('./gravity-editor');
+const social = require('./social');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -350,6 +351,49 @@ var server = http.createServer(function (req, res) {
       sendJSON(res, code === 0 ? 200 : 500, { ok: code === 0, output: out });
     });
     return;
+  }
+
+  // ---- Redes sociales (Instagram) ----
+  if (urlPath === '/api/social/status' && req.method === 'GET') {
+    return sendJSON(res, 200, { instagram: social.getStatus() });
+  }
+  if (urlPath === '/api/social/config' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.instagram) {
+        return sendJSON(res, 400, { error: 'Faltan los datos de conexión' });
+      }
+      try {
+        social.saveConfigPatch(data.instagram);
+        return sendJSON(res, 200, { ok: true, instagram: social.getStatus() });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
+  if (urlPath === '/api/social/log' && req.method === 'GET') {
+    return sendJSON(res, 200, social.loadLog());
+  }
+  if (urlPath === '/api/social/instagram/publish' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.slug || !data.caption) {
+        return sendJSON(res, 400, { error: 'Falta el artículo o el texto de la publicación' });
+      }
+      var articles = [];
+      try { articles = readJSON(path.join(DATA_DIR, 'articulos.json')); } catch (e) { articles = []; }
+      var article = articles.find(function (a) { return a.slug === data.slug; });
+      if (!article) return sendJSON(res, 404, { error: 'No se encontró ese artículo' });
+      if (!article.image) return sendJSON(res, 400, { error: 'Este artículo no tiene imagen de portada' });
+
+      social.publishToInstagram({
+        imageUrl: social.publicImageUrl(article.image),
+        caption: data.caption
+      }).then(function (result) {
+        social.logPublish(data.slug, result.mediaId);
+        return sendJSON(res, 200, { ok: true, mediaId: result.mediaId });
+      }).catch(function (e) {
+        return sendJSON(res, 500, { ok: false, error: e.message });
+      });
+    });
   }
 
   // ---- Editor visual de niveles de Gravity Flip ----

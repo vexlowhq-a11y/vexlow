@@ -29,6 +29,7 @@
     <button type="button" class="admin-tab" data-tab="articles">Últimas publicadas</button>
     <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
     <button type="button" class="admin-tab" data-tab="categories">Categorías</button>
+    <button type="button" class="admin-tab" data-tab="social">📣 Redes sociales</button>
     <button type="button" class="admin-tab" data-tab="gravity">🔻 Gravity Flip</button>
   </nav>
 
@@ -200,6 +201,41 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
       </div>
       <p class="admin-hint">El slug (la URL) sale del nombre y no se puede cambiar después -- para eso hay que eliminar y crear de nuevo.</p>
     </form>
+  </section>
+
+  <!-- ============ REDES SOCIALES ============ -->
+  <section class="admin-panel" id="panel-social">
+    <p class="admin-lede">Publicá una nota ya guardada directo en Instagram (@vexlowhq), sin salir del panel. TikTok todavía no está conectado: su API solo deja subir borradores privados hasta que apruebe una revisión, así que por ahora queda para más adelante.</p>
+
+    <div class="admin-form" id="socialConfigBox">
+      <h3>Conexión con Instagram</h3>
+      <p class="admin-hint" id="socialStatusText">Cargando estado de la conexión…</p>
+      <div class="form-grid">
+        <label>ID de cuenta de Instagram (IG User ID)
+          <input type="text" id="igUserIdInput" placeholder="Ej: 17841400000000000" autocomplete="off">
+        </label>
+        <label>Token de acceso de la Página (Page Access Token)
+          <input type="password" id="igTokenInput" placeholder="Dejalo vacío para no cambiarlo" autocomplete="off">
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-primary" id="saveSocialConfigBtn">Guardar conexión</button>
+      </div>
+      <details class="admin-hint" style="margin-top:14px;">
+        <summary style="cursor:pointer;">¿Cómo consigo el ID y el token?</summary>
+        <ol style="margin:10px 0 0 18px; padding:0; line-height:1.6;">
+          <li>Entrá a <code>developers.facebook.com</code> con la cuenta de Facebook conectada a @vexlowhq y creá una app de tipo "Business".</li>
+          <li>Agregale el producto "Instagram Graph API" y vinculá la Página de Facebook de vexlow (si todavía no existe, creala primero en facebook.com/pages/create).</li>
+          <li>En la Página, conectá la cuenta de Instagram @vexlowhq (Configuración de la Página → Cuentas vinculadas).</li>
+          <li>Usá el "Graph API Explorer" (developers.facebook.com/tools/explorer) para generar un token de la Página con los permisos <code>instagram_basic</code>, <code>instagram_content_publish</code>, <code>pages_show_list</code> y <code>pages_read_engagement</code>.</li>
+          <li>Convertí ese token en uno de larga duración (60 días) con el "Access Token Debugger" o el endpoint <code>oauth/access_token</code> — si no, hay que repetir esto cada hora.</li>
+          <li>El ID de cuenta de Instagram se consigue con <code>GET /{page-id}?fields=instagram_business_account</code> en el Graph API Explorer.</li>
+        </ol>
+      </details>
+    </div>
+
+    <h3 style="margin-top:28px; font-size:15px;">Publicar una nota</h3>
+    <div class="admin-list" id="socialArticlesList"></div>
   </section>
 
   <!-- ============ GRAVITY FLIP — EDITOR DE NIVELES ============ -->

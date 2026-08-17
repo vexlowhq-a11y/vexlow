@@ -1011,6 +1011,193 @@
     });
   });
 
+  /* =====================================================
+     REDES SOCIALES (Instagram)
+     ===================================================== */
+  var socialStatusText = document.getElementById('socialStatusText');
+  var igUserIdInput = document.getElementById('igUserIdInput');
+  var igTokenInput = document.getElementById('igTokenInput');
+  var saveSocialConfigBtn = document.getElementById('saveSocialConfigBtn');
+  var socialArticlesList = document.getElementById('socialArticlesList');
+
+  var socialStatus = { configured: false, igUserId: '' };
+  var socialLog = { instagram: {} };
+  var socialExpandedSlug = null; // qué fila tiene el editor de caption abierto
+
+  function renderSocialStatus() {
+    igUserIdInput.value = socialStatus.igUserId || '';
+    if (socialStatus.configured) {
+      socialStatusText.textContent = '✅ Conectado (cuenta ' + socialStatus.igUserId + ')';
+    } else {
+      socialStatusText.textContent = '⚠️ Todavía no está conectado — completá el ID de cuenta y el token de abajo.';
+    }
+  }
+
+  function loadSocialStatus() {
+    return getJSON('/api/social/status').then(function (data) {
+      socialStatus = data.instagram;
+      renderSocialStatus();
+      renderSocialList();
+    });
+  }
+
+  function loadSocialLog() {
+    return getJSON('/api/social/log').then(function (data) {
+      socialLog = data;
+      renderSocialList();
+    });
+  }
+
+  saveSocialConfigBtn.addEventListener('click', function () {
+    var patch = { igUserId: igUserIdInput.value.trim(), pageAccessToken: igTokenInput.value.trim() };
+    if (!patch.igUserId && !patch.pageAccessToken) {
+      toast('No hay nada nuevo para guardar', true);
+      return;
+    }
+    saveSocialConfigBtn.disabled = true;
+    postJSON('/api/social/config', { instagram: patch }).then(function () {
+      igTokenInput.value = '';
+      toast('Conexión con Instagram guardada');
+      return loadSocialStatus();
+    }).catch(function (err) {
+      toast(err.message || 'No se pudo guardar la conexión', true);
+    }).then(function () {
+      saveSocialConfigBtn.disabled = false;
+    });
+  });
+
+  function buildInstagramCaption(a) {
+    var lines = [(a.icon || '📰') + ' ' + a.title];
+    if (a.dek) { lines.push(''); lines.push(a.dek); }
+    lines.push('');
+    lines.push('Full story on vexlowhq.com 🔗');
+    lines.push('');
+    lines.push('#' + (a.category || 'news') + ' #vexlow');
+    return lines.join('\n');
+  }
+
+  // Notas publicables: tienen página propia (body) e imagen de portada.
+  // Se muestran las más nuevas primero, tope 40 para no volver la
+  // pestaña interminable.
+  function socialCandidates() {
+    return articlesData
+      .filter(function (a) { return a.slug && a.image && a.body && a.body.trim(); })
+      .slice()
+      .sort(function (x, y) { return (y.date || '').localeCompare(x.date || ''); })
+      .slice(0, 40);
+  }
+
+  function renderSocialList() {
+    socialArticlesList.innerHTML = '';
+    var entries = socialCandidates();
+    if (!entries.length) {
+      socialArticlesList.innerHTML = '<div class="admin-empty">Todavía no hay notas con página propia + imagen para publicar.</div>';
+      return;
+    }
+    entries.forEach(function (a) {
+      var meta = categoryMeta(a.category);
+      var posted = socialLog.instagram && socialLog.instagram[a.slug];
+      var isStockPhoto = /^img\/drafts\//.test(a.image || '');
+
+      var row = document.createElement('div');
+      row.className = 'admin-item';
+
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      thumb.textContent = a.icon || meta.icon;
+      thumb.style.background = 'var(--surface-2)';
+
+      var info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML = '<div class="ttl"></div><div class="meta"></div>';
+      info.querySelector('.ttl').textContent = a.title;
+      var metaText = (a.categoryLabel || meta.label) + ' · ' + a.date;
+      if (posted) metaText = '✅ Publicado en Instagram el ' + new Date(posted.postedAt).toLocaleDateString('es-AR') + ' · ' + metaText;
+      if (isStockPhoto) metaText = '⚠️ Foto de prensa original (verificar derechos antes de postear) · ' + metaText;
+      info.querySelector('.meta').textContent = metaText;
+
+      var actions = document.createElement('div');
+      actions.className = 'item-actions';
+      var pubBtn = document.createElement('button');
+      pubBtn.type = 'button';
+      pubBtn.textContent = posted ? 'Publicar de nuevo' : 'Publicar en Instagram';
+      if (!socialStatus.configured) {
+        pubBtn.disabled = true;
+        pubBtn.title = 'Conectá Instagram arriba primero';
+      }
+      pubBtn.addEventListener('click', function () {
+        socialExpandedSlug = socialExpandedSlug === a.slug ? null : a.slug;
+        renderSocialList();
+      });
+      actions.appendChild(pubBtn);
+
+      row.appendChild(thumb);
+      row.appendChild(info);
+      row.appendChild(actions);
+      socialArticlesList.appendChild(row);
+
+      if (socialExpandedSlug === a.slug) {
+        socialArticlesList.appendChild(buildSocialCaptionEditor(a));
+      }
+    });
+  }
+
+  function buildSocialCaptionEditor(a) {
+    var box = document.createElement('div');
+    box.className = 'admin-form';
+    box.style.marginTop = '-8px';
+    box.style.marginBottom = '14px';
+
+    var label = document.createElement('label');
+    label.textContent = 'Texto de la publicación';
+    label.style.display = 'block';
+    label.style.fontSize = '12.5px';
+    label.style.marginBottom = '8px';
+
+    var textarea = document.createElement('textarea');
+    textarea.rows = 8;
+    textarea.style.width = '100%';
+    textarea.value = buildInstagramCaption(a);
+
+    var actions = document.createElement('div');
+    actions.className = 'form-actions';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'btn-primary';
+    confirmBtn.textContent = 'Confirmar y publicar';
+    confirmBtn.addEventListener('click', function () {
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      confirmBtn.textContent = 'Publicando…';
+      postJSON('/api/social/instagram/publish', { slug: a.slug, caption: textarea.value }).then(function () {
+        toast('¡Publicado en Instagram!');
+        socialExpandedSlug = null;
+        return loadSocialLog();
+      }).catch(function (err) {
+        toast(err.message || 'No se pudo publicar', true);
+        confirmBtn.disabled = false;
+        cancelBtn.disabled = false;
+        confirmBtn.textContent = 'Confirmar y publicar';
+      });
+    });
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.addEventListener('click', function () {
+      socialExpandedSlug = null;
+      renderSocialList();
+    });
+
+    actions.appendChild(confirmBtn);
+    actions.appendChild(cancelBtn);
+    box.appendChild(label);
+    box.appendChild(textarea);
+    box.appendChild(actions);
+    return box;
+  }
+
   /* ---- Reacciones del sitio en vivo (solo para mostrar popularidad acá) ---- */
   function loadReactions() {
     fetch('https://vexlowhq.com/api/react?all=1')
@@ -1049,6 +1236,8 @@
     renderDraftsList();
     renderCategoriesManager();
     loadReactions();
+    loadSocialStatus();
+    loadSocialLog();
   }).catch(function () {
     toast('No se pudo conectar con el panel. Fijate que server.js esté corriendo.', true);
   });
