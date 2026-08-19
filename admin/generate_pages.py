@@ -604,6 +604,10 @@ PLAY_HUB_TEMPLATE = """<!DOCTYPE html>
           <img class="game-card-cover" src="../img/games/pulse-cover.jpg" alt="Color Pulse" width="64" height="64" loading="lazy">
           <span class="game-card-desc">Tap to cycle your color and match each gate as it arrives.</span>
         </a>
+        <a class="game-card" href="wordsearch.html">
+          <img class="game-card-cover" src="../img/games/wordsearch-cover.jpg" alt="Word Search" width="64" height="64" loading="lazy">
+          <span class="game-card-desc">Drag to find every word before the clock catches up — English or Spanish.</span>
+        </a>
       </div>
 
     </article>
@@ -1328,6 +1332,152 @@ PLAY_PULSE_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+PLAY_WORDSEARCH_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Search — VexlowHQ Games</title>
+<meta name="description" content="A clean, fast word search — pick Easy through Expert (or Numbers), play in English or Spanish, and race the clock.">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-20Z63KYZ3K');
+</script>
+</head>
+<body data-static-slug="play">
+
+{sidebar_block}
+
+  <main>
+
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="index.html">Games</a><span class="sep">/</span><span class="current">Word Search</span>
+    </nav>
+
+    <article class="article-page">
+      <h1>🔤 Word Search</h1>
+      <p class="play-intro">Pick a difficulty, drag to select words in any direction, and race the clock. Play in English or Spanish.</p>
+
+      <div class="dash-wrap ws-wrap">
+        <div class="dash-hud">
+          <span id="wordsearchTimer">Time: 00:00</span>
+          <span id="wordsearchBest">Best: --:--</span>
+          <button type="button" id="wordsearchHintBtn" class="ws-btn">Hint (3)</button>
+          <button type="button" id="wordsearchGiveUpBtn" class="ws-btn">Give Up</button>
+          <button type="button" id="wordsearchNewGameBtn" class="ws-btn">New Game</button>
+          <button type="button" id="wordsearchSettingsBtn" class="ws-btn">Settings</button>
+        </div>
+
+        <div class="ws-board">
+          <div class="ws-grid-wrap"><div id="wordsearchGrid" class="ws-grid"></div></div>
+          <div class="ws-words-wrap"><ul id="wordsearchWordList" class="ws-word-list"></ul></div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal" id="wordsearchStartModal">
+        <div class="dash-name-card">
+          <h3>🔤 Word Search</h3>
+          <p id="wordsearchStartHint">Choose a difficulty to start</p>
+          <div class="ws-lang-toggle">
+            <button type="button" id="wordsearchLangEn" class="ws-lang-btn active">English</button>
+            <button type="button" id="wordsearchLangEs" class="ws-lang-btn">Español</button>
+          </div>
+          <div class="ws-difficulty-grid" id="wordsearchDifficultyButtons">
+            <button type="button" class="ws-difficulty-btn" data-difficulty="easy">Easy</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="medium">Medium</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="hard">Hard</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="expert">Expert</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="numbers">Numbers</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchWinModal">
+        <div class="dash-name-card">
+          <h3>🎉 You solved it!</h3>
+          <p>Your time: <strong id="wordsearchWinTime">00:00</strong></p>
+          <button type="button" id="wordsearchWinPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchRevealedModal">
+        <div class="dash-name-card">
+          <h3>👀 Puzzle revealed</h3>
+          <p>Better luck next time — every word is shown on the grid.</p>
+          <button type="button" id="wordsearchRevealedPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchNameModal">
+        <div class="dash-name-card">
+          <h3>🏆 Enter your name</h3>
+          <p>This is what shows up on the Word Search leaderboard.</p>
+          <input type="text" id="wordsearchNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="wordsearchNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="wordsearchNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchAdBreak">
+        <div class="dash-name-card">
+          <h3>⏸️ Quick break</h3>
+          <button type="button" id="wordsearchAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Best Times</h3>
+        <ol class="dash-leaderboard-list" id="wordsearchLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="wordsearchYouRank" hidden></p>
+      </div>
+
+      <section class="game-guide">
+        <h2>How to play</h2>
+        <p>Pick a difficulty and language from the start screen — grid size and word count scale up from Easy to Expert, and Numbers mode swaps letters for digit sequences. Click or tap a letter and drag in a straight line (horizontal, vertical, or diagonal, either direction) to select a word. A correct match locks in with its own color and gets struck off the list; the clock keeps running until every word is found.</p>
+        <h2>Tips &amp; strategy</h2>
+        <ul>
+          <li>Scan for uncommon letters first (Q, X, Z, J) — they narrow down where a word could start much faster than scanning row by row.</li>
+          <li>Words can run in any of the 8 directions and can be found back-to-front, so don't rule out a match just because it reads backwards.</li>
+          <li>Stuck? Hint reveals one full word's path for a few seconds (up to 3 per puzzle) without marking it found — you still have to trace it yourself.</li>
+        </ul>
+        <h2>Tech specs</h2>
+        <ul class="game-tech-specs">
+          <li><b>Type</b>Word search puzzle, timed</li>
+          <li><b>Controls</b>Mouse drag or touch drag</li>
+          <li><b>Difficulties</b>Easy, Medium, Hard, Expert, Numbers</li>
+          <li><b>Languages</b>English, Spanish</li>
+          <li><b>Scoring</b>Best time, global leaderboard per difficulty</li>
+        </ul>
+      </section>
+
+      <div class="play-more"><a href="index.html">← Back to all games</a></div>
+
+    </article>
+
+{footer_block}
+
+  </main>
+</div>
+
+<script src="../{articulos_asset}"></script>
+<script src="../js/script.js"></script>
+<script src="../js/wordsearch-data.js?v={cache_bust}"></script>
+<script src="../js/wordsearch.js?v={cache_bust}"></script>
+</body>
+</html>
+"""
+
 
 def format_date(iso):
     y, m, d = iso.split("-")
@@ -1528,6 +1678,7 @@ def generate():
         ("orbit.html", PLAY_ORBIT_TEMPLATE, "monthly"),
         ("gravity.html", PLAY_GRAVITY_TEMPLATE, "monthly"),
         ("pulse.html", PLAY_PULSE_TEMPLATE, "monthly"),
+        ("wordsearch.html", PLAY_WORDSEARCH_TEMPLATE, "monthly"),
     ):
         page_html = template.format(
             sidebar_block=sidebar_block_play, footer_block=footer_block_play, articulos_asset=ARTICULOS_ASSET,
