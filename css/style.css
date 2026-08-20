@@ -945,23 +945,27 @@ main { min-width: 0; padding: 26px 32px 90px; }
 
 .ws-board { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 14px; align-items: flex-start; justify-content: center; }
 .ws-grid-wrap { flex: 1 1 420px; max-width: 520px; display: flex; justify-content: center; }
+/* Paleta fija celeste/negro (no sigue el tema claro/oscuro del sitio a
+   propósito, igual que la paleta neón de Gravity Flip) -- una grilla
+   de letras oscura resultaba pesada para la vista, esto se lee cómodo
+   siempre, sin importar el tema del sitio. */
 .ws-grid {
   display: grid; grid-template-columns: repeat(var(--ws-size, 10), 1fr);
   gap: 2px; width: 100%; max-width: 480px; aspect-ratio: 1 / 1;
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m);
+  background: #8ecae6; border: 1px solid #5fb3d9; border-radius: var(--radius-m);
   padding: 4px; user-select: none; touch-action: none;
 }
 .ws-cell {
   display: flex; align-items: center; justify-content: center;
-  background: var(--surface-1); border-radius: 3px;
+  background: #eaf7fc; border-radius: 3px;
   font-family: 'IBM Plex Mono', monospace; font-weight: 700;
-  font-size: clamp(9px, 1.8vw, 16px); color: var(--text);
+  font-size: clamp(9px, 1.8vw, 16px); color: #111417;
   cursor: pointer; user-select: none;
 }
-.ws-cell.selecting { background: rgba(61, 139, 255, .35); color: #fff; }
-.ws-cell.found { background: var(--ws-found-color, var(--blue-fill)); color: #fff; }
+.ws-cell.selecting { background: #3d8bff; color: #fff; }
+.ws-cell.found { background: var(--ws-found-color, #2563eb); color: #fff; }
 .ws-cell.hint { background: #ffb703; color: #1a1300; animation: wsHintPulse 0.6s ease-in-out infinite alternate; }
-.ws-cell.revealed { background: var(--surface-2); color: var(--text-muted); outline: 1.5px dashed var(--border); }
+.ws-cell.revealed { background: #cfe3ea; color: #5b6670; outline: 1.5px dashed #8ecae6; }
 @keyframes wsHintPulse { from { opacity: 1; } to { opacity: .55; } }
 
 .ws-words-wrap { flex: 1 1 200px; max-width: 260px; }
@@ -969,12 +973,12 @@ main { min-width: 0; padding: 26px 32px 90px; }
   list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px;
 }
 .ws-word {
-  background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-m);
+  background: #eaf7fc; border: 1px solid #8ecae6; border-radius: var(--radius-m);
   padding: 5px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700;
-  color: var(--text);
+  color: #111417;
 }
 .ws-word.found { text-decoration: line-through; opacity: .75; }
-.ws-word.revealed { text-decoration: line-through; color: var(--text-muted); opacity: .6; }
+.ws-word.revealed { text-decoration: line-through; color: #5b6670; opacity: .6; }
 
 .ws-lang-toggle { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; }
 .ws-lang-btn {
