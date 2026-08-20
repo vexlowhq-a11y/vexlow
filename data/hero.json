@@ -1,5 +1,14 @@
 [
   {
+    "category": "entertainment",
+    "chip": "🎬 Entertainment",
+    "title": "Marvel Unveils New X-Men Cast with Major Names Attached",
+    "dek": "The highly anticipated introduction of the X-Men into the Marvel Cinematic Universe has begun, featuring a fresh cast led by talents like Inde Navarrette and Adam Driver.",
+    "image": "img/drafts/marvel-unveils-new-x-men-cast-with-major-adf1.jpg",
+    "textColor": "auto",
+    "href": "categoria/entertainment/marvel-unveils-new-x-men-cast-with-major-names-attached.html"
+  },
+  {
     "category": "science",
     "chip": "🚀 Science & Space",
     "title": "Setback for UK Space Launch as Rocket Issue Delays Orbital Mission",
@@ -7,15 +16,6 @@
     "image": "img/temas/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.jpg",
     "textColor": "auto",
     "href": "categoria/science/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.html"
-  },
-  {
-    "category": "science",
-    "chip": "🚀 Science & Space",
-    "title": "The Enduring Enigma of the 'Wow!' Signal: A Milestone in the Search for Extraterrestrial Life",
-    "dek": "The 'Wow!' signal, detected on August 15, 1977, continues to captivate scientists and enthusiasts in the hunt for extraterrestrial intelligence, raising questions about its origin and implications for the search for life beyond Earth.",
-    "image": "img/drafts/the-enduring-enigma-of-the-wow-signal-a-b9c1.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/science/the-enduring-enigma-of-the-wow-signal-a-milestone-in-the-sea.html"
   },
   {
     "category": "technology",
@@ -27,21 +27,21 @@
     "href": "categoria/technology/reimagining-founder-culture-a-new-approach-to-preventing-bur.html"
   },
   {
-    "category": "entertainment",
-    "chip": "🎬 Entertainment",
-    "title": "Slipknot Parts Ways with Sid Wilson After Nearly 30 Years",
-    "dek": "The iconic metal band announces the departure of founding member Sid Wilson, marking a significant moment in their history.",
-    "image": "img/drafts/slipknot-parts-ways-with-sid-wilson-afte-d07b.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/entertainment/slipknot-parts-ways-with-sid-wilson-after-nearly-30-years.html"
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "OpenAI Enhances Model Safeguards Following Hugging Face Security Incident",
+    "dek": "In response to a recent breach at Hugging Face, OpenAI has implemented new measures to strengthen the monitoring and security of its AI models throughout the development process.",
+    "image": "img/temas/openai-enhances-model-safeguards-following-hugging-face-secu.jpg",
+    "textColor": "auto",
+    "href": "categoria/ai/openai-enhances-model-safeguards-following-hugging-face-secu.html"
   },
   {
-    "category": "entertainment",
-    "chip": "🎬 Entertainment",
-    "title": "Marvel Unveils New X-Men Cast with Major Names Attached",
-    "dek": "The highly anticipated introduction of the X-Men into the Marvel Cinematic Universe has begun, featuring a fresh cast led by talents like Inde Navarrette and Adam Driver.",
-    "image": "img/drafts/marvel-unveils-new-x-men-cast-with-major-adf1.jpg",
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "OpenAI Introduces ChatGPT for Teens: A Step Towards Safer AI Interaction",
+    "dek": "With new safety measures and parental controls, OpenAI aims to provide a more secure AI experience tailored for adolescents, addressing concerns over content and academic integrity.",
+    "image": "img/temas/openai-introduces-chatgpt-for-teens-a-step-towards-safer-ai-.jpg",
     "textColor": "auto",
-    "href": "categoria/entertainment/marvel-unveils-new-x-men-cast-with-major-names-attached.html"
+    "href": "categoria/ai/openai-introduces-chatgpt-for-teens-a-step-towards-safer-ai-.html"
   }
 ]
