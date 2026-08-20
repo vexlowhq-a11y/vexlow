@@ -1,4 +1,10 @@
 {
-  "startDate": null,
-  "days": {}
+  "startDate": "2026-08-20",
+  "days": {
+    "1": {
+      "storiesDone": [
+        1
+      ]
+    }
+  }
 }
