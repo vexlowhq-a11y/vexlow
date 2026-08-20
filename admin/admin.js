@@ -1199,7 +1199,7 @@
   }
 
   /* =====================================================
-     SPRINT 14 DÍAS
+     SPRINT
      ===================================================== */
   var sprintTitle = document.getElementById('sprintTitle');
   var sprintStatusText = document.getElementById('sprintStatusText');
@@ -1228,7 +1228,7 @@
       sprintResetBtn.hidden = true;
     } else {
       var doneCount = sprintStatus.days.filter(function (d) { return d.done; }).length;
-      sprintStatusText.textContent = 'Arrancó el ' + sprintStatus.startDate + ' · Día ' + sprintStatus.currentDay + ' de 14 · ' + doneCount + ' días completados';
+      sprintStatusText.textContent = 'Arrancó el ' + sprintStatus.startDate + ' · Día ' + sprintStatus.currentDay + ' de ' + sprintStatus.days.length + ' · ' + doneCount + ' días completados';
       sprintStartBtn.hidden = true;
       sprintResetBtn.hidden = false;
     }

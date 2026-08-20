@@ -3,295 +3,422 @@
   "days": [
     {
       "day": 1,
-      "format": "reel",
-      "title": "Gears of War: E-Day — el prequel que nadie pidió",
+      "format": "carousel",
+      "title": "The Simpsons: Hit & Run — el revival que todos piden",
       "time": "19:30",
-      "hook": "They just confirmed the PREQUEL nobody asked for",
-      "beats": [
-        "3–5s: Gears of War: E-Day — set BEFORE Marcus Fenix's story",
-        "6–9s: Built from the ground up. Not a remaster.",
-        "10–12s: Darker. Grittier. Emergence Day itself.",
-        "13–15s: Would you play it? → Full story linked in bio"
+      "sourceSlug": "rumors-of-a-simpsons-hit-run-revival-gain-traction-at-d23",
+      "postTitle": "The Simpsons: Hit & Run revival is looking real 🎮",
+      "caption": "Matt Groening himself hinted at this at D23. The early-2000s classic might actually be coming back. Would you play it day one? 👇\n\n#TheSimpsons #HitAndRun #GamingNews #Nostalgia #vexlow",
+      "slides": [
+        { "text": "Matt Groening just dropped a huge hint about a Simpsons: Hit & Run revival", "slideText": "THE SIMPSONS: HIT & RUN\nIS COMING BACK?" },
+        { "text": "The original launched in 2003 and became a defining open-world game for a whole generation", "slideText": "RELEASED IN 2003\nBECAME AN INSTANT CULT CLASSIC" },
+        { "text": "The comments came straight from series creator Matt Groening at the D23 Expo", "slideText": "GROENING HIMSELF HINTED\nAT IT — AT D23" },
+        { "text": "It's one of the most requested revivals in gaming history", "slideText": "FANS HAVE WANTED THIS\nFOR OVER 20 YEARS" },
+        { "text": "Save this and follow for more gaming news", "slideText": "SAVE THIS.\nFOLLOW FOR MORE GAMING NEWS\n@vexlowhq" }
       ],
-      "music": "Instrumental de guerra/orquestal — buscá \"epic\" o \"cinematic war\" en audios en tendencia",
-      "postTitle": "Gears of War just went full prequel mode 🎮",
-      "caption": "E-Day: prequel confirmado. ¿Estás hypeado o ya es demasiado Gears? Contanos abajo 👇\n\n#GearsOfWar #GearsOfWarEDay #XboxNews #GamingNews #vexlow",
       "stories": [
-        "ENCUESTA: ¿Jugarías el prequel? Sí / No",
-        "REPOST: el Reel de hoy + sticker de link a la nota completa",
-        "PREGUNTA: caja abierta \"¿cuál es tu juego favorito de Gears?\""
+        "ENCUESTA: ¿Comprarías el remake de Hit & Run? Sí / No",
+        "REPOST: el carrusel de hoy + sticker de link a la nota completa",
+        "PREGUNTA: caja abierta \"¿cuál es tu recuerdo favorito del juego original?\""
       ]
     },
     {
       "day": 2,
-      "format": "reel",
-      "title": "Anthropic: la IA tiene un problema de confianza, no de hype",
+      "format": "carousel",
+      "title": "ChatGPT para adolescentes — controles nuevos",
       "time": "13:00",
-      "hook": "Anthropic's CEO just said the quiet part out loud",
-      "beats": [
-        "3–6s: Dario Amodei: AI backlash isn't pessimism...",
-        "7–10s: ...it's a TRUST problem.",
-        "11–13s: People don't hate AI. They don't trust who's building it.",
-        "14–15s: Agree or nah?"
+      "sourceSlug": "openai-introduces-chatgpt-for-teens-a-step-towards-safer-ai-",
+      "postTitle": "OpenAI just launched ChatGPT for Teens 🔒",
+      "caption": "New parental controls, new safety rules — built specifically for teenagers. Good move or too little too late? 👇\n\n#ChatGPT #OpenAI #AI #ParentalControls #vexlow",
+      "slides": [
+        { "text": "OpenAI just launched ChatGPT for Teens", "slideText": "OPENAI JUST LAUNCHED\nCHATGPT FOR TEENS" },
+        { "text": "Built-in parental controls plus new safety filters", "slideText": "BUILT-IN PARENTAL CONTROLS\n+ NEW SAFETY FILTERS" },
+        { "text": "Teens were already using ChatGPT unsupervised for years", "slideText": "WHY NOW?\nTEENS WERE ALREADY USING IT\n— UNSUPERVISED" },
+        { "text": "Homework help, social advice, now with guardrails", "slideText": "HOMEWORK HELP.\nSOCIAL ADVICE.\nNOW WITH GUARDRAILS" },
+        { "text": "Good move or too late? Follow for daily AI news", "slideText": "GOOD MOVE OR TOO LATE?\nFOLLOW FOR DAILY AI NEWS\n@vexlowhq" }
       ],
-      "music": "Beat lo-fi minimalista de fondo, bajo volumen — buscá \"soft lofi talking\" en tendencia",
-      "postTitle": "The AI industry has a trust problem, not a hype problem",
-      "caption": "¿Vos confiás en las empresas de IA, o solo en la tecnología en sí? Dejalo abajo 👇\n\n#AI #Anthropic #ArtificialIntelligence #TechNews #vexlow",
       "stories": [
-        "ENCUESTA: ¿Confiás en las empresas de IA? Sí / No",
-        "REPOST: el Reel de hoy",
-        "CAJA: \"Mandame tu opinión sobre IA y la respondo en historias\""
+        "ENCUESTA: ¿Dejarías que un adolescente use IA sin supervisión? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿qué controles parentales te gustaría ver en IA?\""
       ]
     },
     {
       "day": 3,
       "format": "carousel",
-      "title": "3 rumores de este mes que resultaron ser ciertos",
+      "title": "Marvel revela el elenco de X-Men",
       "time": "19:30",
-      "postTitle": "3 gaming rumors that turned out true this month",
-      "caption": "¿Cuál te sorprendió más? 👇\n\n#GamingRumors #GamingNews #Xbox #vexlow",
+      "sourceSlug": "marvel-unveils-new-x-men-cast-with-major-names-attached",
+      "postTitle": "Marvel just unveiled its X-Men cast 🦸",
+      "caption": "The MCU's X-Men era officially starts now. Big names, bigger expectations. Who are you most excited to see? 👇\n\n#XMen #Marvel #MCU #D23 #vexlow",
       "slides": [
-        { "text": "3 rumors this month that turned out to be TRUE", "slideText": "3 RUMORS THIS MONTH\nTHAT TURNED OUT TRUE" },
-        { "text": "Simpsons: Hit & Run revival gaining traction at D23", "slideText": "SIMPSONS: HIT & RUN\nREVIVAL — GAINING TRACTION\nAT D23" },
-        { "text": "Gears of War E-Day — prequel confirmed", "slideText": "GEARS OF WAR: E-DAY\nPREQUEL — CONFIRMED" },
-        { "text": "Halo: Campaign Evolved — launched on PS5, breaking the Xbox exclusive", "slideText": "HALO: CAMPAIGN EVOLVED\nNOW ON PS5\nBREAKING THE XBOX EXCLUSIVE" },
-        { "text": "Save this for the next rumor debate. Follow for daily gaming news", "slideText": "SAVE THIS FOR THE\nNEXT RUMOR DEBATE\n\n@vexlowhq" }
+        { "text": "Marvel just revealed its X-Men cast at D23", "slideText": "MARVEL JUST REVEALED\nITS X-MEN CAST" },
+        { "text": "Adam Driver and Inde Navarrette lead the new lineup", "slideText": "ADAM DRIVER +\nINDE NAVARRETTE\nLEAD THE NEW LINEUP" },
+        { "text": "Sadie Sink confirmed as Jean Grey", "slideText": "SADIE SINK CONFIRMED\nAS JEAN GREY" },
+        { "text": "The MCU's X-Men era officially starts now", "slideText": "THE MCU'S X-MEN ERA\nOFFICIALLY STARTS NOW" },
+        { "text": "Who are you most hyped for? Follow for more Marvel news", "slideText": "WHO ARE YOU MOST HYPED FOR?\nFOLLOW FOR MORE MARVEL NEWS\n@vexlowhq" }
       ],
       "stories": [
-        "CUENTA REGRESIVA: a la próxima nota importante",
+        "ENCUESTA: ¿Te emociona el nuevo elenco de X-Men? Sí / No",
         "REPOST: el carrusel de hoy",
-        "ESTO O LO OTRO: dos rumores — cuál creés real vs falso"
+        "PREGUNTA: \"¿qué personaje de X-Men querés ver en la MCU?\""
       ]
     },
     {
       "day": 4,
-      "format": "reel",
-      "title": "SpaceX compró una startup de código con IA",
+      "format": "carousel",
+      "title": "La señal Wow! — el misterio de 1977",
       "time": "13:00",
-      "hook": "Elon just bought an AI CODING tool. Why?",
-      "beats": [
-        "3–6s: SpaceX completed its acquisition of Cursor",
-        "7–10s: An AI coding startup. Not a rocket company.",
-        "11–13s: This is where AI is really heading: writing the code behind your rockets",
-        "14–15s: Wild timeline."
+      "sourceSlug": "the-enduring-enigma-of-the-wow-signal-a-milestone-in-the-sea",
+      "postTitle": "The mystery signal from 1977 still isn't solved 👽",
+      "caption": "The 'Wow!' signal lasted 72 seconds. Scientists still can't explain where it came from. Real alien contact or coincidence? 👇\n\n#WowSignal #Space #Science #Aliens #vexlow",
+      "slides": [
+        { "text": "In 1977, a radio telescope picked up an unexplained signal", "slideText": "IN 1977, A TELESCOPE\nPICKED UP THIS SIGNAL" },
+        { "text": "It lasted 72 seconds, then nothing", "slideText": "IT LASTED 72 SECONDS.\nTHEN — NOTHING." },
+        { "text": "It's called the Wow! signal and it's never been explained", "slideText": "IT'S CALLED\nTHE 'WOW!' SIGNAL\nNEVER EXPLAINED" },
+        { "text": "No one has picked it up again, ever", "slideText": "NO ONE HAS PICKED IT UP\nAGAIN — EVER" },
+        { "text": "Real signal from space? Follow for more science", "slideText": "REAL SIGNAL FROM SPACE?\nFOLLOW FOR MORE SCIENCE\n@vexlowhq" }
       ],
-      "music": "Synth futurista — buscá \"space ambient\" en tendencia",
-      "postTitle": "SpaceX just bought an AI coding startup 🚀🤖",
-      "caption": "Rockets + AI code. ¿Sorprendido o ya lo veías venir? 👇\n\n#SpaceX #AI #TechNews #Cursor #vexlow",
       "stories": [
-        "ENCUESTA: ¿Sorprendido por la compra? Sí / No",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Qué empresa creés que compra algo raro después?\""
+        "ENCUESTA: ¿Creés que fue una señal alienígena? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿qué otro misterio espacial querés que expliquemos?\""
       ]
     },
     {
       "day": 5,
-      "format": "reel",
-      "title": "Marvel reveló el elenco de X-Men — internet se dividió",
+      "format": "carousel",
+      "title": "LeBron se va a Philadelphia",
       "time": "19:30",
-      "hook": "Marvel just dropped the X-Men cast. Internet is SPLIT.",
-      "beats": [
-        "3–6s: New X-Men cast revealed — major names attached",
-        "7–10s: Some names are already dividing fans",
-        "11–13s: This is the MCU's biggest gamble in years",
-        "14–15s: Who's your pick to be Wolverine?"
+      "sourceSlug": "lebron-james-makes-surprise-move-to-philadelphia-a-new-chapt",
+      "postTitle": "LeBron just made a shocking career move 🏀",
+      "caption": "LeBron James is joining the Philadelphia 76ers. Not for the franchise's legacy — for his own philosophy. Surprised? 👇\n\n#LeBronJames #NBA #Sixers #vexlow",
+      "slides": [
+        { "text": "LeBron James is joining the 76ers", "slideText": "LEBRON JAMES\nIS JOINING THE 76ERS" },
+        { "text": "A 22-time NBA All-Star making a surprise move", "slideText": "A 22-TIME NBA ALL-STAR\nMAKING A SURPRISE MOVE" },
+        { "text": "Not about franchise legacy, about personal loyalty", "slideText": "NOT ABOUT FRANCHISE LEGACY —\nABOUT PERSONAL LOYALTY" },
+        { "text": "One of the biggest career moves in NBA history", "slideText": "ONE OF THE BIGGEST\nCAREER MOVES IN NBA HISTORY" },
+        { "text": "Did you see this coming? Follow for more NBA news", "slideText": "DID YOU SEE THIS COMING?\nFOLLOW FOR MORE NBA NEWS\n@vexlowhq" }
       ],
-      "music": "Orquestal de trailer — buscá \"cinematic reveal\" en tendencia",
-      "postTitle": "Marvel's X-Men cast is here and fans are NOT holding back",
-      "caption": "Team hyped o team escéptico? Dejá tu pick para Wolverine 👇\n\n#XMen #Marvel #MCU #Entertainment #vexlow",
-      "warning": "No uses la foto de prensa del evento (copyright de agencia). Armá el video con texto + fondo/gráfico propio.",
       "stories": [
-        "ENCUESTA: ¿Team hype o team escéptico?",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Quién debería ser Wolverine?\""
+        "ENCUESTA: ¿Esperabas este movimiento de LeBron? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "PREGUNTA: \"¿qué significa esto para el legado de LeBron?\""
       ]
     },
     {
       "day": 6,
-      "format": "reel",
-      "title": "Google vs Anthropic: apuestas opuestas sobre marcas de agua IA",
+      "format": "carousel",
+      "title": "Zuckerberg y el modelo abierto Glimmer",
       "time": "13:00",
-      "hook": "Google just made deepfakes easier. On purpose.",
-      "beats": [
-        "3–6s: New Google feature removes visible AI watermarks",
-        "7–10s: Meant for editing. Also perfect for hiding AI content.",
-        "11–13s: Same week Anthropic added watermarking to Claude.",
-        "14–15s: Two companies. Opposite bets."
+      "sourceSlug": "mark-zuckerberg-advocates-for-open-ai-with-glimmer-release",
+      "postTitle": "Zuckerberg just released a fully open AI model 🌐",
+      "caption": "Meta's new model, Glimmer, can be downloaded and run on your own hardware. Zuckerberg says AI shouldn't belong to a few companies. Agree? 👇\n\n#Meta #AI #OpenSource #Zuckerberg #vexlow",
+      "slides": [
+        { "text": "Meta just released an open AI model", "slideText": "META JUST RELEASED\nAN OPEN AI MODEL" },
+        { "text": "It's called Glimmer, download it and run it yourself", "slideText": "IT'S CALLED GLIMMER —\nDOWNLOAD IT.\nRUN IT YOURSELF." },
+        { "text": "No API, no lock-in, your own hardware", "slideText": "NO API. NO LOCK-IN.\nYOUR OWN HARDWARE." },
+        { "text": "Zuckerberg's bet: AI shouldn't belong to a few companies", "slideText": "ZUCKERBERG'S BET:\nAI SHOULDN'T BELONG\nTO A FEW COMPANIES" },
+        { "text": "Open AI, good or risky? Follow for more AI news", "slideText": "OPEN AI —\nGOOD OR RISKY?\nFOLLOW FOR MORE AI NEWS\n@vexlowhq" }
       ],
-      "music": "Tensión sutil — buscá \"suspense minimal\" en tendencia",
-      "postTitle": "Google vs Anthropic: opposite bets on AI watermarks",
-      "caption": "¿El contenido de IA siempre debería estar etiquetado? Sí o no 👇\n\n#GoogleAI #Anthropic #AI #TechNews #vexlow",
       "stories": [
-        "ENCUESTA: ¿Debería etiquetarse el contenido IA? Sí / No",
-        "REPOST: el Reel de hoy",
-        "CAJA: preguntas sobre ética de IA"
+        "ENCUESTA: ¿La IA debería ser open-source? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿probarías correr una IA en tu propia compu?\""
       ]
     },
     {
       "day": 7,
       "format": "carousel",
-      "title": "Recap semanal: todo en 5 slides",
+      "title": "Recap semanal 1: todo en 5 slides",
       "time": "19:30",
-      "postTitle": "This week in gaming + AI, in under 60 seconds",
-      "caption": "¿Cuál te sorprendió más? Guardá esto antes de que se te olvide 👇\n\n#WeeklyRecap #GamingNews #AI #vexlow",
+      "sourceSlug": null,
+      "postTitle": "This week in tech, gaming & entertainment 📰",
+      "caption": "Your 60-second recap of everything we covered this week. Which story surprised you most? 👇\n\n#WeeklyRecap #TechNews #GamingNews #vexlow",
       "slides": [
-        { "text": "Everything that happened this week, in 5 slides", "slideText": "EVERYTHING THAT HAPPENED\nTHIS WEEK\nIN 5 SLIDES" },
-        { "text": "Gears of War E-Day — prequel confirmed", "slideText": "GEARS OF WAR: E-DAY\nPREQUEL CONFIRMED" },
-        { "text": "SpaceX bought Cursor", "slideText": "SPACEX BOUGHT\nAN AI CODING STARTUP" },
-        { "text": "Google removes AI watermarks — Anthropic adds them", "slideText": "GOOGLE REMOVES\nAI WATERMARKS\nANTHROPIC ADDS THEM" },
-        { "text": "Follow for daily recaps, zero fluff", "slideText": "FOLLOW FOR DAILY\nRECAPS\nZERO FLUFF\n\n@vexlowhq" }
+        { "text": "This week in 60 seconds", "slideText": "THIS WEEK\nIN 60 SECONDS" },
+        { "text": "Simpsons: Hit & Run might be coming back", "slideText": "SIMPSONS: HIT & RUN\nMIGHT BE COMING BACK" },
+        { "text": "ChatGPT for Teens launched, and Marvel revealed its new X-Men cast", "slideText": "CHATGPT FOR TEENS\n+ MARVEL'S NEW X-MEN CAST" },
+        { "text": "The Wow! signal mystery, and LeBron's shock move to Philly", "slideText": "THE 'WOW!' SIGNAL MYSTERY\n+ LEBRON'S SHOCK MOVE\nTO PHILLY" },
+        { "text": "Save this recap and follow for daily news", "slideText": "SAVE THIS RECAP.\nFOLLOW FOR DAILY NEWS\n@vexlowhq" }
       ],
       "stories": [
-        "CUENTA REGRESIVA: al próximo recap semanal",
+        "ENCUESTA: ¿cuál historia de la semana te gustó más?",
         "REPOST: el carrusel de recap",
-        "ENCUESTA: ¿cuál historia te sorprendió más?"
+        "PREGUNTA: \"¿qué tipo de contenido querés ver más seguido?\""
       ]
     },
     {
       "day": 8,
-      "format": "reel",
-      "title": "Los rumores de Simpsons: Hit & Run vuelven a sonar",
+      "format": "carousel",
+      "title": "Winamp vuelve — checkpoint de la semana 1",
       "time": "checkpoint",
-      "checkpoint": "Hoy es el día para abrir Insights → Audiencia por primera vez. Si ves un pico real de actividad, usalo desde mañana en vez de la hipótesis de 19:30/13:00.",
-      "hook": "The Simpsons: Hit & Run might actually come back",
-      "beats": [
-        "3–6s: Rumors gaining traction at D23",
-        "7–10s: One of the most requested game revivals EVER",
-        "11–13s: 20+ years later and it's still on everyone's wishlist",
-        "14–15s: Would you buy it day one?"
+      "sourceSlug": "winamp-set-to-make-a-nostalgic-comeback-with-a-new-deezer-po",
+      "postTitle": "Winamp is actually coming back 🎧",
+      "caption": "Yes, THAT Winamp. It's partnering with Deezer for a full streaming comeback. Who else just felt 15 years younger? 👇\n\n#Winamp #Nostalgia #MusicTech #vexlow",
+      "slides": [
+        { "text": "Winamp is making a real comeback", "slideText": "WINAMP IS MAKING\nA REAL COMEBACK" },
+        { "text": "The music player you had open all the time in the 2000s", "slideText": "THE MUSIC PLAYER\nYOU HAD OPEN 24/7\nIN THE 2000s" },
+        { "text": "New partnership with Deezer, full streaming, all-in-one", "slideText": "NEW PARTNERSHIP\nWITH DEEZER —\nFULL STREAMING, ALL-IN-ONE" },
+        { "text": "Built for old fans and new users", "slideText": "BUILT FOR OLD FANS\nAND NEW LISTENERS" },
+        { "text": "Would you download it again? Follow for more tech news", "slideText": "WOULD YOU DOWNLOAD IT AGAIN?\nFOLLOW FOR MORE TECH NEWS\n@vexlowhq" }
       ],
-      "music": "Nostálgico Y2K — buscá \"y2k nostalgia\" en tendencia",
-      "postTitle": "Simpsons: Hit & Run revival rumors are heating up 👀",
-      "caption": "Sé honesto — ¿le metiste 200 horas a este juego de chico? 👇\n\n#SimpsonsHitAndRun #GamingNostalgia #D23 #vexlow",
       "stories": [
-        "ENCUESTA: ¿Lo comprarías día uno? Sí / No",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Qué otro juego viejo querés de vuelta?\""
+        "ENCUESTA: ¿Usabas Winamp? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿qué reproductor de música usás hoy?\""
       ]
     },
     {
       "day": 9,
-      "format": "reel",
-      "title": "La empresa de $21.000 millones que nadie conoce",
+      "format": "carousel",
+      "title": "GTA 6: el silencio de Rockstar",
       "time": "winner",
-      "hook": "A company you've never heard of is worth $21 BILLION",
-      "beats": [
-        "3–6s: Meet Etched — an AI chip startup",
-        "7–10s: Just hit a $21B valuation",
-        "11–13s: Built specifically to make AI models run faster — not general-purpose chips",
-        "14–15s: The chip wars are just getting started"
+      "sourceSlug": "gta6-trailer3-rockstar-mystery",
+      "postTitle": "Rockstar is staying silent on GTA 6's third trailer 🤫",
+      "caption": "GTA VI drops November 19. Still no Trailer 3. Is Rockstar planning a surprise August reveal? 👇\n\n#GTA6 #GTAVI #Rockstar #GamingNews #vexlow",
+      "slides": [
+        { "text": "GTA 6 launches November 19, 2026", "slideText": "GTA 6 LAUNCHES\nNOVEMBER 19, 2026" },
+        { "text": "Still no Trailer 3, Rockstar has gone quiet", "slideText": "STILL NO TRAILER 3.\nROCKSTAR HAS GONE QUIET." },
+        { "text": "Pre-orders are already open but the marketing stopped", "slideText": "PRE-ORDERS ARE ALREADY OPEN —\nBUT THE MARKETING STOPPED" },
+        { "text": "Theories point to a surprise August drop", "slideText": "THEORIES POINT TO\nA SURPRISE AUGUST DROP" },
+        { "text": "When do you think it drops? Follow for more gaming news", "slideText": "WHEN DO YOU THINK IT DROPS?\nFOLLOW FOR MORE GAMING NEWS\n@vexlowhq" }
       ],
-      "music": "Beat corporativo tech — buscá \"tech corporate\" en tendencia",
-      "postTitle": "The $21 billion AI chip company you've never heard of",
-      "caption": "Nvidia tiene competencia. ¿Conocías Etched antes de esto? 👇\n\n#AI #TechNews #Etched #ArtificialIntelligence #vexlow",
       "stories": [
-        "QUIZ: ¿Conocías Etched? Sí / No",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Qué startup de IA seguís de cerca?\""
+        "ENCUESTA: ¿Trailer 3 este mes? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CUENTA REGRESIVA: al lanzamiento de GTA 6"
       ]
     },
     {
       "day": 10,
-      "format": "reel",
-      "title": "Detrás de cámara: el juego que estás construyendo",
+      "format": "carousel",
+      "title": "Slipknot y la salida de Sid Wilson",
       "time": "winner",
-      "requiresFootage": true,
-      "warning": "Requiere grabaciones reales del proyecto DisenoDeJuegos. Si no hay footage listo, saltalo por otra nota del pipeline.",
-      "hook": "We're not just covering games. We're building one.",
-      "beats": [
-        "3–6s: [cortes rápidos de gameplay/editor del proyecto en curso]",
-        "7–10s: vexlow studio — est. 2016",
-        "11–13s: This is what we've been building behind the scenes",
-        "14–15s: Want the full look?"
+      "sourceSlug": "slipknot-parts-ways-with-sid-wilson-after-nearly-30-years",
+      "postTitle": "Slipknot just parted ways with a founding member 🤘",
+      "caption": "Sid Wilson is out after nearly 30 years with Slipknot. The announcement came — and disappeared — from their Instagram. What's your take? 👇\n\n#Slipknot #Metal #MusicNews #vexlow",
+      "slides": [
+        { "text": "Slipknot just split with a founding member", "slideText": "SLIPKNOT JUST SPLIT\nWITH A FOUNDING MEMBER" },
+        { "text": "Sid Wilson, with the band for nearly 30 years", "slideText": "SID WILSON — WITH THE BAND\nFOR NEARLY 30 YEARS" },
+        { "text": "The announcement was posted, then quickly deleted", "slideText": "THE ANNOUNCEMENT WAS POSTED —\nTHEN QUICKLY DELETED" },
+        { "text": "We wish him the best in his future endeavors, the band said", "slideText": "\"WE WISH HIM THE BEST\nIN HIS FUTURE ENDEAVORS\"" },
+        { "text": "What do you think happened? Follow for more music news", "slideText": "WHAT DO YOU THINK HAPPENED?\nFOLLOW FOR MORE MUSIC NEWS\n@vexlowhq" }
       ],
-      "music": "Chiptune / synth indie — buscá \"indie game dev\" en tendencia",
-      "postTitle": "Behind the scenes: the game we're building at vexlow 🎮",
-      "caption": "Primera mirada a lo que viene. ¿Querés un dev log completo la próxima semana? Comentá YES 👇\n\n#IndieGame #GameDev #vexlow #BehindTheScenes",
       "stories": [
-        "CUENTA REGRESIVA: al dev log completo",
-        "REPOST: el teaser de hoy",
-        "CAJA: \"Preguntame lo que quieras del juego\""
+        "ENCUESTA: ¿Te sorprendió la salida de Sid Wilson? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "PREGUNTA: \"¿cuál es tu canción favorita de Slipknot?\""
       ]
     },
     {
       "day": 11,
-      "format": "reel",
-      "title": "Calificando las noticias gamer de la semana, sin filtro",
+      "format": "carousel",
+      "title": "5 señales de que hackearon tu cuenta de IA",
       "time": "winner",
-      "hook": "Rating this week's gaming news, no filter",
-      "beats": [
-        "3–6s: Gears of War E-Day prequel → 8/10, bold move",
-        "7–10s: Simpsons Hit & Run rumors → 6/10, believe it when I see it",
-        "11–13s: Halo on PS5 → 10/10, historic",
-        "14–15s: Which one deserved higher?"
+      "sourceSlug": "protecting-your-ai-accounts-signs-of-a-hacking-attempt",
+      "postTitle": "5 signs your AI account might be hacked 🚨",
+      "caption": "AI accounts are becoming a bigger target. Here's what to watch for — save this before you need it. 👇\n\n#AISecurity #CyberSecurity #AI #TechTips #vexlow",
+      "slides": [
+        { "text": "Is your AI account safe? Here's what to watch for", "slideText": "IS YOUR AI ACCOUNT SAFE?\nHERE'S WHAT TO WATCH FOR" },
+        { "text": "Unfamiliar login locations or devices you don't recognize", "slideText": "UNFAMILIAR LOGIN LOCATIONS\nOR DEVICES YOU DON'T RECOGNIZE" },
+        { "text": "Chat history or settings you didn't change", "slideText": "CHAT HISTORY OR SETTINGS\nYOU DIDN'T CHANGE" },
+        { "text": "Unexpected password reset or verification emails", "slideText": "UNEXPECTED PASSWORD RESET\nOR VERIFICATION EMAILS" },
+        { "text": "Save this for later, follow for more AI news", "slideText": "SAVE THIS FOR LATER\nFOLLOW FOR MORE AI NEWS\n@vexlowhq" }
       ],
-      "music": "Beat rápido de ritmo alto — buscá \"rapid fire\" en tendencia",
-      "postTitle": "Rating this week's gaming news (no filter)",
-      "caption": "¿De acuerdo con las calificaciones? Decime cuál merecía más puntos 👇\n\n#GamingNews #HotTake #vexlow",
       "stories": [
-        "ENCUESTA: ¿De acuerdo con las calificaciones? Sí / No",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Qué noticia le hubieras dado más puntaje?\""
+        "ENCUESTA: ¿Activaste 2FA en tus cuentas de IA? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿te hackearon alguna cuenta? contanos qué pasó\""
       ]
     },
     {
       "day": 12,
-      "format": "reel",
-      "title": "La noticia de IA \"aburrida\" que importa más que las flashy",
+      "format": "carousel",
+      "title": "La Gran Grieta escondida en la Vía Láctea",
       "time": "winner",
-      "hook": "The boring AI story that actually matters more than the flashy ones",
-      "beats": [
-        "3–6s: Warp Factories — simplifying AI infrastructure",
-        "7–10s: Not a chatbot. Not a model. The plumbing underneath.",
-        "11–13s: This unglamorous stuff decides who actually wins the AI race",
-        "14–15s: Infra > hype."
+      "sourceSlug": "discovering-the-great-rift-a-hidden-feature-of-the-milky-way",
+      "postTitle": "There's a hidden feature in the Milky Way you've probably missed 🌌",
+      "caption": "It's called the Great Rift — dark dust clouds stretching across our galaxy. Visible right now if you know where to look. 👇\n\n#MilkyWay #Space #Stargazing #Astronomy #vexlow",
+      "slides": [
+        { "text": "There's a hidden feature in the Milky Way", "slideText": "THERE'S A HIDDEN FEATURE\nIN THE MILKY WAY" },
+        { "text": "It's called the Great Rift, a dark dust trail across the galaxy", "slideText": "IT'S CALLED THE GREAT RIFT —\nA DARK DUST TRAIL\nACROSS THE GALAXY" },
+        { "text": "Stretches from Cygnus all the way to Sagittarius", "slideText": "STRETCHES FROM CYGNUS\nALL THE WAY TO SAGITTARIUS" },
+        { "text": "Visible right now on clear summer nights", "slideText": "VISIBLE RIGHT NOW\nON CLEAR SUMMER NIGHTS" },
+        { "text": "Have you seen it? Follow for more space content", "slideText": "HAVE YOU SEEN IT?\nFOLLOW FOR MORE SPACE CONTENT\n@vexlowhq" }
       ],
-      "music": "Ambiente tech minimal — buscá \"tech minimal\" en tendencia",
-      "postTitle": "The unglamorous AI story that matters more than the hype",
-      "caption": "Infraestructura o los modelos flashy — ¿qué importa más en realidad? 👇\n\n#AI #Infrastructure #TechNews #vexlow",
       "stories": [
-        "QUIZ: trivia corta sobre infraestructura de IA",
-        "REPOST: el Reel de hoy",
-        "PREGUNTA: \"¿Te interesa más el hardware o los modelos?\""
+        "ENCUESTA: ¿Viste alguna vez la Vía Láctea a simple vista? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"mandanos tu foto del cielo nocturno\""
       ]
     },
     {
       "day": 13,
       "format": "carousel",
-      "title": "3 predicciones para el gaming en 2027",
+      "title": "Halo rompe su regla más grande — ahora en PS5",
       "time": "winner",
-      "postTitle": "3 predictions for gaming in 2027 (screenshot this)",
-      "caption": "¿Cuál predicción creés que se cumple primero? 👇\n\n#GamingPredictions #2027 #vexlow",
+      "sourceSlug": "halo-campaign-evolved-launches-for-ps5-and-xbox-series-x",
+      "postTitle": "Halo just broke its biggest tradition 🎮",
+      "caption": "Halo: Campaign Evolved is now on PS5 — not just Xbox. A first for the franchise. How does this change things? 👇\n\n#Halo #PS5 #Xbox #GamingNews #vexlow",
       "slides": [
-        { "text": "3 predictions for gaming in 2027 (screenshot this)", "slideText": "3 PREDICTIONS FOR\nGAMING IN 2027\n\n(SCREENSHOT THIS)" },
-        { "text": "Every major franchise goes multiplatform — Xbox exclusivity basically dies", "slideText": "EVERY MAJOR FRANCHISE\nGOES MULTIPLATFORM" },
-        { "text": "AI-generated NPC dialogue becomes a standard feature, not a gimmick", "slideText": "AI-GENERATED NPC DIALOGUE\nBECOMES STANDARD" },
-        { "text": "Remakes of Y2K-era games outsell half the new releases", "slideText": "Y2K-ERA REMAKES\nOUTSELL HALF OF THE\nNEW RELEASES" },
-        { "text": "Which one do you think actually happens? Follow for more", "slideText": "WHICH ONE ACTUALLY\nHAPPENS?\n\n@vexlowhq" }
+        { "text": "Halo just launched on PlayStation 5", "slideText": "HALO JUST LAUNCHED\nON PLAYSTATION 5" },
+        { "text": "For years, Halo meant Xbox exclusive, not anymore", "slideText": "FOR YEARS, HALO MEANT\nXBOX EXCLUSIVE.\nNOT ANYMORE." },
+        { "text": "Campaign Evolved, now on PS5 and Xbox Series X", "slideText": "CAMPAIGN EVOLVED —\nNOW ON PS5\nAND XBOX SERIES X" },
+        { "text": "Multiple editions for different kinds of players", "slideText": "MULTIPLE EDITIONS\nFOR DIFFERENT KINDS OF PLAYERS" },
+        { "text": "Big move or end of an era? Follow for more gaming news", "slideText": "BIG MOVE OR END OF AN ERA?\nFOLLOW FOR MORE GAMING NEWS\n@vexlowhq" }
       ],
       "stories": [
-        "ENCUESTA: votá tu predicción favorita de las 3",
+        "ENCUESTA: ¿Jugás en Xbox o en PS5?",
         "REPOST: el carrusel de hoy",
-        "PREGUNTA: \"¿Qué predicción agregarías vos?\""
+        "PREGUNTA: \"¿qué opinás de que Halo salga de Xbox?\""
       ]
     },
     {
       "day": 14,
-      "format": "reel",
-      "title": "Cierre del sprint: todo lo que te perdiste en 14 días",
+      "format": "carousel",
+      "title": "Recap semanal 2: todo en 5 slides",
       "time": "winner",
-      "hook": "14 days. Here's everything you missed.",
-      "beats": [
-        "3–11s: Flash-cuts rápidos de las miniaturas/momentos de los días 1 a 13, un corte por segundo",
-        "12–15s: New gaming + AI news, every day. Follow so you don't miss the next one."
+      "sourceSlug": null,
+      "postTitle": "Week 2 recap — you don't want to miss this 📰",
+      "caption": "6 more stories, all in one carousel. Swipe through everything that happened this week 👇\n\n#WeeklyRecap #TechNews #vexlow",
+      "slides": [
+        { "text": "Week 2 recap time", "slideText": "WEEK 2\nRECAP TIME" },
+        { "text": "Winamp's comeback, and GTA 6's trailer mystery", "slideText": "WINAMP'S COMEBACK\n+ GTA 6'S TRAILER MYSTERY" },
+        { "text": "Slipknot's shakeup and how to spot a hacked AI account", "slideText": "SLIPKNOT'S SHAKEUP\n+ HOW TO SPOT\nA HACKED AI ACCOUNT" },
+        { "text": "A hidden Milky Way feature, and Halo breaks its biggest rule", "slideText": "A HIDDEN MILKY WAY FEATURE\n+ HALO BREAKS\nITS BIGGEST RULE" },
+        { "text": "Save this recap and follow for daily news", "slideText": "SAVE THIS RECAP.\nFOLLOW FOR DAILY NEWS\n@vexlowhq" }
       ],
-      "music": "Montaje energético — buscá \"highlight reel\" en tendencia",
-      "postTitle": "14 days of gaming + AI news in 15 seconds",
-      "caption": "¿Qué historia de esta semana te pegó más fuerte? 👇 Seguime para las próximas\n\n#GamingNews #AI #vexlow #RecapReel",
       "stories": [
-        "CUENTA REGRESIVA: \"nueva semana, nuevo contenido\"",
-        "REPOST: el Reel recopilatorio",
-        "ENCUESTA: \"¿Querés que sigamos así? Sí / Más todavía\""
+        "ENCUESTA: ¿cuál historia de la semana te gustó más?",
+        "REPOST: el carrusel de recap",
+        "PREGUNTA: \"¿qué tipo de contenido querés ver más seguido?\""
+      ]
+    },
+    {
+      "day": 15,
+      "format": "carousel",
+      "title": "Joshua Baez hace historia en su debut — checkpoint semana 2",
+      "time": "checkpoint",
+      "sourceSlug": "joshua-baez-makes-baseball-history-with-three-home-runs-in-m",
+      "postTitle": "This rookie just made MLB history in his FIRST game ⚾",
+      "caption": "3 home runs. First 3 at-bats. Ever. Joshua Baez just did what no one has done before in a debut. 👇\n\n#MLB #Cardinals #Baseball #vexlow",
+      "slides": [
+        { "text": "A rookie just made MLB history", "slideText": "A ROOKIE JUST MADE\nMLB HISTORY" },
+        { "text": "3 home runs, his first 3 at-bats, ever", "slideText": "3 HOME RUNS.\nHIS FIRST 3 AT-BATS.\nEVER." },
+        { "text": "Joshua Baez, St. Louis Cardinals", "slideText": "JOSHUA BAEZ —\nST. LOUIS CARDINALS" },
+        { "text": "No one has ever done this in their MLB debut", "slideText": "NO ONE HAS EVER DONE THIS\nIN THEIR MLB DEBUT" },
+        { "text": "Is he the next big star? Follow for more sports news", "slideText": "IS HE THE NEXT BIG STAR?\nFOLLOW FOR MORE SPORTS NEWS\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿Va a ser estrella? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿cuál fue el mejor debut que viste en el deporte?\""
+      ]
+    },
+    {
+      "day": 16,
+      "format": "carousel",
+      "title": "Google retira Earth AI en un día",
+      "time": "winner",
+      "sourceSlug": "google-quickly-retracts-earth-ai-feature-after-backlash-over",
+      "postTitle": "Google pulled this AI feature after just ONE day 😳",
+      "caption": "Earth AI let you generate fake imagery on real Google Maps locations. The backlash was immediate. 👇\n\n#Google #AI #TechNews #Misinformation #vexlow",
+      "slides": [
+        { "text": "Google launched a new AI feature", "slideText": "GOOGLE LAUNCHED\nA NEW AI FEATURE..." },
+        { "text": "And pulled it one day later", "slideText": "...AND PULLED IT\nONE DAY LATER" },
+        { "text": "Earth AI let you place fake AI images on real maps", "slideText": "EARTH AI LET YOU PLACE\nFAKE AI IMAGES ON REAL MAPS" },
+        { "text": "Critics warned it could spread misinformation fast", "slideText": "CRITICS WARNED IT COULD\nSPREAD MISINFORMATION FAST" },
+        { "text": "Should it have launched at all? Follow for more AI news", "slideText": "SHOULD IT HAVE LAUNCHED AT ALL?\nFOLLOW FOR MORE AI NEWS\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿Google tomó la decisión correcta? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "PREGUNTA: \"¿qué feature de IA te parece más riesgosa?\""
+      ]
+    },
+    {
+      "day": 17,
+      "format": "carousel",
+      "title": "Barbie 2 podría perder a todo su elenco",
+      "time": "winner",
+      "sourceSlug": "warner-bros-faces-deadline-for-barbie-2-as-negotiations-stal",
+      "postTitle": "Barbie 2 might lose its entire cast 👗",
+      "caption": "Warner Bros has a hard deadline to lock in Greta Gerwig, Margot Robbie, and Ryan Gosling — or start from scratch. 👇\n\n#Barbie #WarnerBros #MovieNews #vexlow",
+      "slides": [
+        { "text": "Barbie 2 is in serious trouble", "slideText": "BARBIE 2 IS IN\nSERIOUS TROUBLE" },
+        { "text": "Warner Bros has a deadline to lock in the original team", "slideText": "WARNER BROS HAS A DEADLINE\nTO LOCK IN THE ORIGINAL TEAM" },
+        { "text": "Greta Gerwig, Margot Robbie, Ryan Gosling, all at risk", "slideText": "GRETA GERWIG. MARGOT ROBBIE.\nRYAN GOSLING.\nALL AT RISK." },
+        { "text": "Miss it, and the studio starts from scratch", "slideText": "MISS IT, AND THE STUDIO\nSTARTS FROM SCRATCH" },
+        { "text": "Should they wait for the original cast? Follow for more movie news", "slideText": "SHOULD THEY WAIT\nFOR THE ORIGINAL CAST?\nFOLLOW FOR MORE MOVIE NEWS\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿Barbie 2 sin el elenco original? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿qué actor querés ver si cambia el elenco?\""
+      ]
+    },
+    {
+      "day": 18,
+      "format": "carousel",
+      "title": "Waymo vuelve a las autopistas",
+      "time": "winner",
+      "sourceSlug": "waymo-s-robotaxis-prepare-to-re-enter-freeways-amid-scrutiny",
+      "postTitle": "Waymo's self-driving cars are going back on the highway 🚗",
+      "caption": "After pausing over safety concerns, Waymo is resuming freeway operations — under heavy scrutiny. Ready to trust it? 👇\n\n#Waymo #SelfDriving #TechNews #vexlow",
+      "slides": [
+        { "text": "Waymo is putting robotaxis back on freeways", "slideText": "WAYMO IS PUTTING\nROBOTAXIS BACK ON FREEWAYS" },
+        { "text": "They paused after concerns over emergency response handling", "slideText": "THEY PAUSED AFTER CONCERNS\nOVER EMERGENCY RESPONSE HANDLING" },
+        { "text": "Now returning, under heavy regulatory scrutiny", "slideText": "NOW RETURNING —\nUNDER HEAVY REGULATORY SCRUTINY" },
+        { "text": "A key test for the future of self-driving cars", "slideText": "A KEY TEST FOR THE FUTURE\nOF SELF-DRIVING CARS" },
+        { "text": "Would you ride one on the highway? Follow for more tech news", "slideText": "WOULD YOU RIDE ONE\nON THE HIGHWAY?\nFOLLOW FOR MORE TECH NEWS\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿Confiás en los autos autónomos en autopista? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "PREGUNTA: \"¿te subirías a un Waymo?\""
+      ]
+    },
+    {
+      "day": 19,
+      "format": "carousel",
+      "title": "Final Fantasy 14 llega a Switch 2",
+      "time": "winner",
+      "sourceSlug": "final-fantasy-14-arrives-on-nintendo-switch-2-what-players-c",
+      "postTitle": "Final Fantasy 14 is finally going portable 🎮",
+      "caption": "One of the biggest MMORPGs ever is landing on Nintendo Switch 2. Years of fan requests, finally answered. 👇\n\n#FinalFantasy14 #NintendoSwitch2 #FFXIV #vexlow",
+      "slides": [
+        { "text": "Final Fantasy 14 is coming to Switch 2", "slideText": "FINAL FANTASY 14\nIS COMING TO SWITCH 2" },
+        { "text": "One of the biggest MMORPGs ever made, now portable", "slideText": "ONE OF THE BIGGEST MMORPGS\nEVER MADE — NOW PORTABLE" },
+        { "text": "Years of fan requests, finally answered", "slideText": "YEARS OF FAN REQUESTS,\nFINALLY ANSWERED" },
+        { "text": "From a rocky 2010 launch to one of gaming's best comebacks", "slideText": "FROM A ROCKY 2010 LAUNCH\nTO ONE OF GAMING'S\nBEST COMEBACKS" },
+        { "text": "Will you play it on the go? Follow for more gaming news", "slideText": "WILL YOU PLAY IT ON THE GO?\nFOLLOW FOR MORE GAMING NEWS\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿Jugarías FFXIV portátil? Sí / No",
+        "REPOST: el carrusel de hoy",
+        "CAJA: \"¿cuál es tu Final Fantasy favorito?\""
+      ]
+    },
+    {
+      "day": 20,
+      "format": "carousel",
+      "title": "Cierre del sprint: 20 días, 20 historias",
+      "time": "winner",
+      "sourceSlug": null,
+      "postTitle": "20 days, 20 stories — thank you for following along 🙌",
+      "caption": "That's a wrap on this run. Which story from the last 20 days was your favorite? Tell us below — more daily news coming right after this 👇\n\n#Recap #vexlow",
+      "slides": [
+        { "text": "20 days, 20 stories", "slideText": "20 DAYS.\n20 STORIES." },
+        { "text": "From GTA 6 rumors to SpaceX-adjacent tech milestones", "slideText": "FROM GTA 6 RUMORS\nTO SELF-DRIVING CARS" },
+        { "text": "From AI safety debates to Marvel casting news", "slideText": "FROM AI SAFETY\nTO MARVEL CASTING NEWS" },
+        { "text": "Thank you for following along", "slideText": "THANK YOU\nFOR FOLLOWING ALONG" },
+        { "text": "More daily news starts tomorrow", "slideText": "MORE DAILY NEWS\nSTARTS TOMORROW\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: ¿qué historia de estos 20 días fue tu favorita?",
+        "REPOST: el carrusel de cierre",
+        "CAJA: \"¿qué te gustaría que cubramos en la próxima tanda?\""
       ]
     }
   ],

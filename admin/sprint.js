@@ -1,5 +1,5 @@
 /*
-  Sprint de 14 días de @vexlowhq — usado por admin/server.js
+  Sprint de @vexlowhq — usado por admin/server.js
   ==============================================================
   Junta el plan fijo (data/sprint-plan.json, el guion día por día)
   con el progreso real (data/sprint-log.json, que arranca vacío hasta
@@ -45,9 +45,12 @@ function resetSprint() {
   return log;
 }
 
-// Día 1..14 según cuántos días pasaron desde el inicio -- si el
-// sprint no arrancó todavía, no hay "día actual".
-function currentDayNumber(log) {
+// Día 1..N según cuántos días pasaron desde el inicio -- si el
+// sprint no arrancó todavía, no hay "día actual". N sale de la
+// cantidad de días real del plan cargado (no hardcodeado), para que
+// no haya que tocar este archivo cada vez que cambia el largo del
+// sprint.
+function currentDayNumber(log, totalDays) {
   if (!log.startDate) return null;
   var start = new Date(log.startDate + 'T00:00:00');
   var today = new Date();
@@ -55,7 +58,7 @@ function currentDayNumber(log) {
     Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) / 86400000);
   var day = diffDays + 1;
   if (day < 1) return 1;
-  if (day > 14) return 14;
+  if (day > totalDays) return totalDays;
   return day;
 }
 
@@ -106,7 +109,7 @@ function saveKpi(day, pct) {
 function getStatus() {
   var plan = loadPlan();
   var log = loadLog();
-  var currentDay = currentDayNumber(log);
+  var currentDay = currentDayNumber(log, plan.days.length);
   var days = plan.days.map(function (d) {
     var entry = log.days[String(d.day)] || {};
     return Object.assign({}, d, {
