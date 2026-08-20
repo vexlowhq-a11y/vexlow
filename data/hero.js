@@ -13,7 +13,7 @@ const VEXLOW_HERO = [
     "title": "Marvel Unveils New X-Men Cast with Major Names Attached",
     "dek": "The highly anticipated introduction of the X-Men into the Marvel Cinematic Universe has begun, featuring a fresh cast led by talents like Inde Navarrette and Adam Driver.",
     "image": "img/drafts/marvel-unveils-new-x-men-cast-with-major-adf1.jpg",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/entertainment/marvel-unveils-new-x-men-cast-with-major-names-attached.html"
   },
   {
@@ -49,7 +49,7 @@ const VEXLOW_HERO = [
     "title": "OpenAI Introduces ChatGPT for Teens: A Step Towards Safer AI Interaction",
     "dek": "With new safety measures and parental controls, OpenAI aims to provide a more secure AI experience tailored for adolescents, addressing concerns over content and academic integrity.",
     "image": "img/temas/openai-introduces-chatgpt-for-teens-a-step-towards-safer-ai-.jpg",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/ai/openai-introduces-chatgpt-for-teens-a-step-towards-safer-ai-.html"
   }
 ];
