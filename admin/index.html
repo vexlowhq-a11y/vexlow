@@ -30,6 +30,7 @@
     <button type="button" class="admin-tab" data-tab="drafts">Borradores sugeridos <span id="draftsTabCount"></span></button>
     <button type="button" class="admin-tab" data-tab="categories">Categorías</button>
     <button type="button" class="admin-tab" data-tab="social">📣 Redes sociales</button>
+    <button type="button" class="admin-tab" data-tab="sprint">🚀 Sprint 14 días</button>
     <button type="button" class="admin-tab" data-tab="gravity">🔻 Gravity Flip</button>
   </nav>
 
@@ -236,6 +237,27 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
 
     <h3 style="margin-top:28px; font-size:15px;">Publicar una nota</h3>
     <div class="admin-list" id="socialArticlesList"></div>
+  </section>
+
+  <!-- ============ SPRINT 14 DÍAS ============ -->
+  <section class="admin-panel" id="panel-sprint">
+    <p class="admin-lede">El plan de crecimiento orgánico de 14 días para @vexlowhq. Los carruseles se generan y publican solos (con tu confirmación); los Reels los grabás vos siguiendo el guion, y acá solo los marcás como hechos para llevar la cuenta.</p>
+
+    <div class="admin-form" id="sprintHeader">
+      <h3 id="sprintTitle">Vexlow Reach Sprint</h3>
+      <p class="admin-hint" id="sprintStatusText">Cargando…</p>
+      <div class="form-actions">
+        <button type="button" class="btn-primary" id="sprintStartBtn">Iniciar sprint hoy</button>
+        <button type="button" class="danger" id="sprintResetBtn" hidden>Reiniciar sprint</button>
+      </div>
+    </div>
+
+    <div class="admin-list" id="sprintDaysList"></div>
+
+    <div class="admin-form" id="sprintAccountsBox">
+      <h3>Paso 5 — Cuentas para interactuar</h3>
+      <div id="sprintAccountsList"></div>
+    </div>
   </section>
 
   <!-- ============ GRAVITY FLIP — EDITOR DE NIVELES ============ -->

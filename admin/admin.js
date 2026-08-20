@@ -1198,6 +1198,337 @@
     return box;
   }
 
+  /* =====================================================
+     SPRINT 14 DÍAS
+     ===================================================== */
+  var sprintTitle = document.getElementById('sprintTitle');
+  var sprintStatusText = document.getElementById('sprintStatusText');
+  var sprintStartBtn = document.getElementById('sprintStartBtn');
+  var sprintResetBtn = document.getElementById('sprintResetBtn');
+  var sprintDaysList = document.getElementById('sprintDaysList');
+  var sprintAccountsList = document.getElementById('sprintAccountsList');
+
+  var sprintStatus = null;
+  var sprintGenerated = {}; // { [day]: { images, caption, postTitle } } -- carruseles ya generados en esta sesión, pendientes de publicar
+
+  function loadSprintStatus() {
+    return getJSON('/api/sprint/status').then(function (data) {
+      sprintStatus = data;
+      renderSprintHeader();
+      renderSprintDays();
+      renderSprintAccounts();
+    });
+  }
+
+  function renderSprintHeader() {
+    sprintTitle.textContent = sprintStatus.name || 'Vexlow Reach Sprint';
+    if (!sprintStatus.startDate) {
+      sprintStatusText.textContent = 'Todavía no arrancó. Tocá "Iniciar sprint hoy" cuando estés listo para publicar el Día 1.';
+      sprintStartBtn.hidden = false;
+      sprintResetBtn.hidden = true;
+    } else {
+      var doneCount = sprintStatus.days.filter(function (d) { return d.done; }).length;
+      sprintStatusText.textContent = 'Arrancó el ' + sprintStatus.startDate + ' · Día ' + sprintStatus.currentDay + ' de 14 · ' + doneCount + ' días completados';
+      sprintStartBtn.hidden = true;
+      sprintResetBtn.hidden = false;
+    }
+  }
+
+  sprintStartBtn.addEventListener('click', function () {
+    postJSON('/api/sprint/start', {}).then(function () {
+      toast('Sprint iniciado — hoy es el Día 1');
+      return loadSprintStatus();
+    }).catch(function (err) { toast(err.message || 'No se pudo iniciar el sprint', true); });
+  });
+  sprintResetBtn.addEventListener('click', function () {
+    if (!window.confirm('¿Reiniciar el sprint? Se borra el progreso (días marcados, KPIs cargados). Las publicaciones que ya salieron en Instagram no se tocan.')) return;
+    postJSON('/api/sprint/reset', {}).then(function () {
+      toast('Sprint reiniciado');
+      return loadSprintStatus();
+    }).catch(function (err) { toast(err.message || 'No se pudo reiniciar', true); });
+  });
+
+  function renderSprintAccounts() {
+    sprintAccountsList.innerHTML = '';
+    (sprintStatus.accounts || []).forEach(function (a) {
+      var row = document.createElement('div');
+      row.style.padding = '8px 0';
+      row.style.borderBottom = '1px solid var(--border)';
+      row.innerHTML = '<b>' + a.handle + '</b> — <span style="color:var(--text-muted);font-size:13px;">' + a.why + '</span>';
+      sprintAccountsList.appendChild(row);
+    });
+  }
+
+  function fieldBlock(label, contentEl) {
+    var wrap = document.createElement('div');
+    wrap.style.marginBottom = '10px';
+    var lbl = document.createElement('div');
+    lbl.className = 'admin-hint';
+    lbl.style.marginTop = '0';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+    wrap.appendChild(contentEl);
+    return wrap;
+  }
+
+  function textBox(text) {
+    var box = document.createElement('div');
+    box.style.background = 'var(--surface-2)';
+    box.style.border = '1px solid var(--border)';
+    box.style.borderRadius = 'var(--radius-m)';
+    box.style.padding = '8px 10px';
+    box.style.fontSize = '13px';
+    box.style.whiteSpace = 'pre-wrap';
+    box.textContent = text;
+    return box;
+  }
+
+  function buildReelBlock(d) {
+    var wrap = document.createElement('div');
+
+    wrap.appendChild(fieldBlock('Gancho (0–2s)', textBox(d.hook || '')));
+    if (d.beats && d.beats.length) {
+      wrap.appendChild(fieldBlock('Desarrollo', textBox(d.beats.join('\n'))));
+    }
+    if (d.music) wrap.appendChild(fieldBlock('Música', textBox(d.music)));
+    wrap.appendChild(fieldBlock('Título', textBox(d.postTitle || '')));
+    wrap.appendChild(fieldBlock('Descripción', textBox(d.caption || '')));
+
+    if (d.done) {
+      var doneMsg = document.createElement('div');
+      doneMsg.className = 'admin-hint';
+      doneMsg.textContent = '✅ Marcado como publicado' + (d.postUrl ? (' — ' + d.postUrl) : '');
+      wrap.appendChild(doneMsg);
+    } else {
+      var urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.placeholder = 'Link del Reel en Instagram (opcional)';
+      urlInput.style.width = '100%';
+      urlInput.style.marginBottom = '8px';
+      var markBtn = document.createElement('button');
+      markBtn.type = 'button';
+      markBtn.className = 'btn-primary';
+      markBtn.textContent = 'Marcar Reel como publicado hoy';
+      markBtn.addEventListener('click', function () {
+        postJSON('/api/sprint/mark-reel', { day: d.day, postUrl: urlInput.value.trim() || null }).then(function () {
+          toast('Día ' + d.day + ' marcado como hecho');
+          return loadSprintStatus();
+        }).catch(function (err) { toast(err.message || 'No se pudo marcar', true); });
+      });
+      wrap.appendChild(urlInput);
+      wrap.appendChild(markBtn);
+    }
+    return wrap;
+  }
+
+  function buildCarouselBlock(d) {
+    var wrap = document.createElement('div');
+    var pending = sprintGenerated[d.day];
+
+    var captionArea = document.createElement('textarea');
+    captionArea.rows = 4;
+    captionArea.style.width = '100%';
+    captionArea.value = (pending && pending.caption) || d.caption || '';
+    wrap.appendChild(fieldBlock('Descripción (editable)', captionArea));
+
+    var previewRow = document.createElement('div');
+    previewRow.style.display = 'flex';
+    previewRow.style.gap = '8px';
+    previewRow.style.flexWrap = 'wrap';
+    previewRow.style.marginBottom = '10px';
+    var imagesToShow = pending ? pending.images : null;
+    if (imagesToShow) {
+      imagesToShow.forEach(function (relPath) {
+        var img = document.createElement('img');
+        img.src = '/site/' + relPath + '?t=' + Date.now();
+        img.style.width = '110px';
+        img.style.height = '110px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        img.style.border = '1px solid var(--border)';
+        previewRow.appendChild(img);
+      });
+      wrap.appendChild(previewRow);
+    }
+
+    if (d.done) {
+      var doneMsg = document.createElement('div');
+      doneMsg.className = 'admin-hint';
+      doneMsg.textContent = '✅ Carrusel publicado (media ' + d.mediaId + ')';
+      wrap.appendChild(doneMsg);
+      return wrap;
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'form-actions';
+
+    var genBtn = document.createElement('button');
+    genBtn.type = 'button';
+    genBtn.textContent = imagesToShow ? 'Generar de nuevo' : 'Generar carrusel';
+    genBtn.addEventListener('click', function () {
+      genBtn.disabled = true;
+      genBtn.textContent = 'Generando…';
+      postJSON('/api/sprint/carousel/generate', { day: d.day }).then(function (result) {
+        sprintGenerated[d.day] = { images: result.images, caption: captionArea.value, postTitle: result.postTitle };
+        toast('Carrusel generado — revisá las imágenes');
+        renderSprintDays();
+      }).catch(function (err) {
+        toast(err.message || 'No se pudo generar el carrusel', true);
+        genBtn.disabled = false;
+        genBtn.textContent = 'Generar carrusel';
+      });
+    });
+    actions.appendChild(genBtn);
+
+    if (imagesToShow) {
+      var pubBtn = document.createElement('button');
+      pubBtn.type = 'button';
+      pubBtn.className = 'btn-primary';
+      pubBtn.textContent = 'Confirmar y publicar';
+      pubBtn.addEventListener('click', function () {
+        pubBtn.disabled = true;
+        pubBtn.textContent = 'Publicando… (subiendo el sitio y esperando el deploy)';
+        postJSON('/api/sprint/carousel/publish', { day: d.day, caption: captionArea.value }).then(function () {
+          toast('¡Carrusel publicado en Instagram!');
+          delete sprintGenerated[d.day];
+          return loadSprintStatus();
+        }).catch(function (err) {
+          toast(err.message || 'No se pudo publicar', true);
+          pubBtn.disabled = false;
+          pubBtn.textContent = 'Confirmar y publicar';
+        });
+      });
+      actions.appendChild(pubBtn);
+    }
+    wrap.appendChild(actions);
+    return wrap;
+  }
+
+  function buildStoriesBlock(d) {
+    var wrap = document.createElement('div');
+    wrap.style.marginTop = '10px';
+    wrap.style.paddingTop = '10px';
+    wrap.style.borderTop = '1px dashed var(--border)';
+    var lbl = document.createElement('div');
+    lbl.className = 'admin-hint';
+    lbl.style.marginTop = '0';
+    lbl.textContent = 'Historias de hoy';
+    wrap.appendChild(lbl);
+    (d.stories || []).forEach(function (storyText, i) {
+      var line = document.createElement('label');
+      line.style.display = 'flex';
+      line.style.gap = '8px';
+      line.style.alignItems = 'flex-start';
+      line.style.fontSize = '13px';
+      line.style.margin = '4px 0';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = d.storiesDone.indexOf(i) !== -1;
+      cb.addEventListener('change', function () {
+        postJSON('/api/sprint/toggle-story', { day: d.day, index: i }).then(function () {
+          return loadSprintStatus();
+        }).catch(function (err) { toast(err.message || 'No se pudo guardar', true); });
+      });
+      line.appendChild(cb);
+      var span = document.createElement('span');
+      span.textContent = storyText;
+      line.appendChild(span);
+      wrap.appendChild(line);
+    });
+    return wrap;
+  }
+
+  function buildKpiBlock(d) {
+    var wrap = document.createElement('div');
+    wrap.style.marginTop = '10px';
+    wrap.style.paddingTop = '10px';
+    wrap.style.borderTop = '1px dashed var(--border)';
+    var lbl = document.createElement('div');
+    lbl.className = 'admin-hint';
+    lbl.style.marginTop = '0';
+    lbl.textContent = '% de alcance de no-seguidores (Insights del post)';
+    wrap.appendChild(lbl);
+
+    var row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.gap = '8px';
+    row.style.alignItems = 'center';
+
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0'; input.max = '100';
+    input.style.width = '80px';
+    input.placeholder = '%';
+    if (d.nonFollowerReachPct != null) input.value = d.nonFollowerReachPct;
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.textContent = 'Guardar';
+    saveBtn.addEventListener('click', function () {
+      var val = Number(input.value);
+      if (isNaN(val)) return;
+      postJSON('/api/sprint/kpi', { day: d.day, pct: val }).then(function () {
+        return loadSprintStatus();
+      }).catch(function (err) { toast(err.message || 'No se pudo guardar', true); });
+    });
+
+    row.appendChild(input);
+    row.appendChild(saveBtn);
+
+    if (d.kpiVerdict) {
+      var badge = document.createElement('span');
+      badge.style.fontSize = '13px';
+      badge.style.marginLeft = '6px';
+      var color = d.kpiVerdict.level === 'good' ? '#30A46C' : (d.kpiVerdict.level === 'mid' ? '#FFB020' : '#E5484D');
+      badge.style.color = color;
+      badge.textContent = d.kpiVerdict.message;
+      row.appendChild(badge);
+    }
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  function renderSprintDays() {
+    sprintDaysList.innerHTML = '';
+    if (!sprintStatus) return;
+    sprintStatus.days.forEach(function (d) {
+      var row = document.createElement('div');
+      row.className = 'admin-item';
+      row.style.flexDirection = 'column';
+      row.style.alignItems = 'stretch';
+      row.style.gap = '4px';
+      if (sprintStatus.currentDay === d.day && sprintStatus.startDate) {
+        row.style.borderColor = 'var(--blue-fill)';
+      }
+
+      var head = document.createElement('div');
+      var isToday = sprintStatus.currentDay === d.day && sprintStatus.startDate;
+      var badges = (isToday ? ' · <span style="color:var(--blue-fill);font-weight:700;">HOY</span>' : '') + (d.done ? ' · ✅' : '');
+      head.innerHTML = '<b>Día ' + d.day + '</b> · ' + (d.format === 'carousel' ? 'Carrusel' : 'Reel') + ' · ' + (d.time === 'winner' ? 'horario ganador de la semana 1' : (d.time === 'checkpoint' ? 'revisar Insights hoy' : d.time + ' hs')) + badges +
+        '<div style="font-size:13px;color:var(--text-muted);margin-top:2px;font-weight:400;">' + d.title + '</div>';
+      row.appendChild(head);
+
+      if (d.warning) {
+        var warn = document.createElement('div');
+        warn.className = 'admin-hint';
+        warn.textContent = '⚠ ' + d.warning;
+        row.appendChild(warn);
+      }
+      if (d.checkpoint) {
+        var chk = document.createElement('div');
+        chk.className = 'admin-hint';
+        chk.textContent = '📍 ' + d.checkpoint;
+        row.appendChild(chk);
+      }
+
+      row.appendChild(d.format === 'reel' ? buildReelBlock(d) : buildCarouselBlock(d));
+      row.appendChild(buildStoriesBlock(d));
+      if (d.done) row.appendChild(buildKpiBlock(d));
+
+      sprintDaysList.appendChild(row);
+    });
+  }
+
   /* ---- Reacciones del sitio en vivo (solo para mostrar popularidad acá) ---- */
   function loadReactions() {
     fetch('https://vexlowhq.com/api/react?all=1')
@@ -1238,6 +1569,7 @@
     loadReactions();
     loadSocialStatus();
     loadSocialLog();
+    loadSprintStatus();
   }).catch(function () {
     toast('No se pudo conectar con el panel. Fijate que server.js esté corriendo.', true);
   });

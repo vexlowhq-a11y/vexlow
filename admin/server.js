@@ -23,6 +23,8 @@ const pipeline = require('./pipeline');
 const deploy = require('./deploy');
 const gravityEditor = require('./gravity-editor');
 const social = require('./social');
+const sprint = require('./sprint');
+const carouselGen = require('./carousel-gen');
 
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -393,6 +395,89 @@ var server = http.createServer(function (req, res) {
       }).catch(function (e) {
         return sendJSON(res, 500, { ok: false, error: e.message });
       });
+    });
+  }
+
+  // ---- Sprint de 14 días (crecimiento en Instagram) ----
+  if (urlPath === '/api/sprint/status' && req.method === 'GET') {
+    try {
+      return sendJSON(res, 200, sprint.getStatus());
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+  if (urlPath === '/api/sprint/start' && req.method === 'POST') {
+    return sendJSON(res, 200, { ok: true, log: sprint.startSprint() });
+  }
+  if (urlPath === '/api/sprint/reset' && req.method === 'POST') {
+    return sendJSON(res, 200, { ok: true, log: sprint.resetSprint() });
+  }
+  if (urlPath === '/api/sprint/mark-reel' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.day) return sendJSON(res, 400, { error: 'Falta el día' });
+      var entry = sprint.markDayDone(data.day, { type: 'reel', postUrl: data.postUrl || null });
+      return sendJSON(res, 200, { ok: true, entry: entry });
+    });
+  }
+  if (urlPath === '/api/sprint/toggle-story' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.day || data.index == null) return sendJSON(res, 400, { error: 'Faltan datos' });
+      var entry = sprint.toggleStory(data.day, data.index);
+      return sendJSON(res, 200, { ok: true, entry: entry });
+    });
+  }
+  if (urlPath === '/api/sprint/kpi' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.day || data.pct == null) return sendJSON(res, 400, { error: 'Faltan datos' });
+      var result = sprint.saveKpi(data.day, Number(data.pct));
+      return sendJSON(res, 200, { ok: true, entry: result.entry, verdict: result.verdict });
+    });
+  }
+  if (urlPath === '/api/sprint/carousel/generate' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.day) return sendJSON(res, 400, { error: 'Falta el día' });
+      var plan = sprint.loadPlan();
+      var dayPlan = plan.days.find(function (d) { return d.day === data.day; });
+      if (!dayPlan || dayPlan.format !== 'carousel') return sendJSON(res, 400, { error: 'Ese día no es un carrusel' });
+      var cfg = readJSON(CONFIG_FILE);
+      carouselGen.generateCarouselImages(dayPlan, cfg).then(function (images) {
+        return sendJSON(res, 200, { ok: true, images: images, postTitle: dayPlan.postTitle, caption: dayPlan.caption });
+      }).catch(function (e) {
+        return sendJSON(res, 500, { ok: false, error: e.message });
+      });
+    });
+  }
+  if (urlPath === '/api/sprint/carousel/publish' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !data.day || !data.caption) return sendJSON(res, 400, { error: 'Faltan datos' });
+      var dayDir = path.join(IMG_DIR, 'carousels', 'day-' + data.day);
+      var files;
+      try {
+        files = fs.readdirSync(dayDir).filter(function (f) { return /^slide-\d+\.jpg$/.test(f); })
+          .sort(function (a, b) { return parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10); });
+      } catch (e) {
+        return sendJSON(res, 400, { error: 'No hay imágenes generadas para este día. Generá el carrusel primero.' });
+      }
+      if (!files.length) return sendJSON(res, 400, { error: 'No hay imágenes generadas para este día. Generá el carrusel primero.' });
+
+      var relPaths = files.map(function (f) { return 'img/carousels/day-' + data.day + '/' + f; });
+      var publicUrls = relPaths.map(function (p) { return social.publicImageUrl(p); });
+
+      deploy.deploy('Sprint día ' + data.day + ' — carrusel generado desde el panel')
+        .then(function (deployResult) {
+          if (!deployResult.ok) throw new Error('No se pudo publicar los cambios al sitio: ' + deployResult.output.slice(-300));
+          return Promise.all(publicUrls.map(function (u) { return social.waitUntilPublic(u, 30, 4000); }));
+        })
+        .then(function () {
+          return social.publishCarouselToInstagram({ imageUrls: publicUrls, caption: data.caption });
+        })
+        .then(function (result) {
+          sprint.markDayDone(data.day, { type: 'carousel', mediaId: result.mediaId });
+          return sendJSON(res, 200, { ok: true, mediaId: result.mediaId });
+        })
+        .catch(function (e) {
+          return sendJSON(res, 500, { ok: false, error: e.message });
+        });
     });
   }
 

@@ -1,0 +1,305 @@
+{
+  "name": "Vexlow Reach Sprint",
+  "days": [
+    {
+      "day": 1,
+      "format": "reel",
+      "title": "Gears of War: E-Day — el prequel que nadie pidió",
+      "time": "19:30",
+      "hook": "They just confirmed the PREQUEL nobody asked for",
+      "beats": [
+        "3–5s: Gears of War: E-Day — set BEFORE Marcus Fenix's story",
+        "6–9s: Built from the ground up. Not a remaster.",
+        "10–12s: Darker. Grittier. Emergence Day itself.",
+        "13–15s: Would you play it? → Full story linked in bio"
+      ],
+      "music": "Instrumental de guerra/orquestal — buscá \"epic\" o \"cinematic war\" en audios en tendencia",
+      "postTitle": "Gears of War just went full prequel mode 🎮",
+      "caption": "E-Day: prequel confirmado. ¿Estás hypeado o ya es demasiado Gears? Contanos abajo 👇\n\n#GearsOfWar #GearsOfWarEDay #XboxNews #GamingNews #vexlow",
+      "stories": [
+        "ENCUESTA: ¿Jugarías el prequel? Sí / No",
+        "REPOST: el Reel de hoy + sticker de link a la nota completa",
+        "PREGUNTA: caja abierta \"¿cuál es tu juego favorito de Gears?\""
+      ]
+    },
+    {
+      "day": 2,
+      "format": "reel",
+      "title": "Anthropic: la IA tiene un problema de confianza, no de hype",
+      "time": "13:00",
+      "hook": "Anthropic's CEO just said the quiet part out loud",
+      "beats": [
+        "3–6s: Dario Amodei: AI backlash isn't pessimism...",
+        "7–10s: ...it's a TRUST problem.",
+        "11–13s: People don't hate AI. They don't trust who's building it.",
+        "14–15s: Agree or nah?"
+      ],
+      "music": "Beat lo-fi minimalista de fondo, bajo volumen — buscá \"soft lofi talking\" en tendencia",
+      "postTitle": "The AI industry has a trust problem, not a hype problem",
+      "caption": "¿Vos confiás en las empresas de IA, o solo en la tecnología en sí? Dejalo abajo 👇\n\n#AI #Anthropic #ArtificialIntelligence #TechNews #vexlow",
+      "stories": [
+        "ENCUESTA: ¿Confiás en las empresas de IA? Sí / No",
+        "REPOST: el Reel de hoy",
+        "CAJA: \"Mandame tu opinión sobre IA y la respondo en historias\""
+      ]
+    },
+    {
+      "day": 3,
+      "format": "carousel",
+      "title": "3 rumores de este mes que resultaron ser ciertos",
+      "time": "19:30",
+      "postTitle": "3 gaming rumors that turned out true this month",
+      "caption": "¿Cuál te sorprendió más? 👇\n\n#GamingRumors #GamingNews #Xbox #vexlow",
+      "slides": [
+        { "text": "3 rumors this month that turned out to be TRUE", "slideText": "3 RUMORS THIS MONTH\nTHAT TURNED OUT TRUE" },
+        { "text": "Simpsons: Hit & Run revival gaining traction at D23", "slideText": "SIMPSONS: HIT & RUN\nREVIVAL — GAINING TRACTION\nAT D23" },
+        { "text": "Gears of War E-Day — prequel confirmed", "slideText": "GEARS OF WAR: E-DAY\nPREQUEL — CONFIRMED" },
+        { "text": "Halo: Campaign Evolved — launched on PS5, breaking the Xbox exclusive", "slideText": "HALO: CAMPAIGN EVOLVED\nNOW ON PS5\nBREAKING THE XBOX EXCLUSIVE" },
+        { "text": "Save this for the next rumor debate. Follow for daily gaming news", "slideText": "SAVE THIS FOR THE\nNEXT RUMOR DEBATE\n\n@vexlowhq" }
+      ],
+      "stories": [
+        "CUENTA REGRESIVA: a la próxima nota importante",
+        "REPOST: el carrusel de hoy",
+        "ESTO O LO OTRO: dos rumores — cuál creés real vs falso"
+      ]
+    },
+    {
+      "day": 4,
+      "format": "reel",
+      "title": "SpaceX compró una startup de código con IA",
+      "time": "13:00",
+      "hook": "Elon just bought an AI CODING tool. Why?",
+      "beats": [
+        "3–6s: SpaceX completed its acquisition of Cursor",
+        "7–10s: An AI coding startup. Not a rocket company.",
+        "11–13s: This is where AI is really heading: writing the code behind your rockets",
+        "14–15s: Wild timeline."
+      ],
+      "music": "Synth futurista — buscá \"space ambient\" en tendencia",
+      "postTitle": "SpaceX just bought an AI coding startup 🚀🤖",
+      "caption": "Rockets + AI code. ¿Sorprendido o ya lo veías venir? 👇\n\n#SpaceX #AI #TechNews #Cursor #vexlow",
+      "stories": [
+        "ENCUESTA: ¿Sorprendido por la compra? Sí / No",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Qué empresa creés que compra algo raro después?\""
+      ]
+    },
+    {
+      "day": 5,
+      "format": "reel",
+      "title": "Marvel reveló el elenco de X-Men — internet se dividió",
+      "time": "19:30",
+      "hook": "Marvel just dropped the X-Men cast. Internet is SPLIT.",
+      "beats": [
+        "3–6s: New X-Men cast revealed — major names attached",
+        "7–10s: Some names are already dividing fans",
+        "11–13s: This is the MCU's biggest gamble in years",
+        "14–15s: Who's your pick to be Wolverine?"
+      ],
+      "music": "Orquestal de trailer — buscá \"cinematic reveal\" en tendencia",
+      "postTitle": "Marvel's X-Men cast is here and fans are NOT holding back",
+      "caption": "Team hyped o team escéptico? Dejá tu pick para Wolverine 👇\n\n#XMen #Marvel #MCU #Entertainment #vexlow",
+      "warning": "No uses la foto de prensa del evento (copyright de agencia). Armá el video con texto + fondo/gráfico propio.",
+      "stories": [
+        "ENCUESTA: ¿Team hype o team escéptico?",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Quién debería ser Wolverine?\""
+      ]
+    },
+    {
+      "day": 6,
+      "format": "reel",
+      "title": "Google vs Anthropic: apuestas opuestas sobre marcas de agua IA",
+      "time": "13:00",
+      "hook": "Google just made deepfakes easier. On purpose.",
+      "beats": [
+        "3–6s: New Google feature removes visible AI watermarks",
+        "7–10s: Meant for editing. Also perfect for hiding AI content.",
+        "11–13s: Same week Anthropic added watermarking to Claude.",
+        "14–15s: Two companies. Opposite bets."
+      ],
+      "music": "Tensión sutil — buscá \"suspense minimal\" en tendencia",
+      "postTitle": "Google vs Anthropic: opposite bets on AI watermarks",
+      "caption": "¿El contenido de IA siempre debería estar etiquetado? Sí o no 👇\n\n#GoogleAI #Anthropic #AI #TechNews #vexlow",
+      "stories": [
+        "ENCUESTA: ¿Debería etiquetarse el contenido IA? Sí / No",
+        "REPOST: el Reel de hoy",
+        "CAJA: preguntas sobre ética de IA"
+      ]
+    },
+    {
+      "day": 7,
+      "format": "carousel",
+      "title": "Recap semanal: todo en 5 slides",
+      "time": "19:30",
+      "postTitle": "This week in gaming + AI, in under 60 seconds",
+      "caption": "¿Cuál te sorprendió más? Guardá esto antes de que se te olvide 👇\n\n#WeeklyRecap #GamingNews #AI #vexlow",
+      "slides": [
+        { "text": "Everything that happened this week, in 5 slides", "slideText": "EVERYTHING THAT HAPPENED\nTHIS WEEK\nIN 5 SLIDES" },
+        { "text": "Gears of War E-Day — prequel confirmed", "slideText": "GEARS OF WAR: E-DAY\nPREQUEL CONFIRMED" },
+        { "text": "SpaceX bought Cursor", "slideText": "SPACEX BOUGHT\nAN AI CODING STARTUP" },
+        { "text": "Google removes AI watermarks — Anthropic adds them", "slideText": "GOOGLE REMOVES\nAI WATERMARKS\nANTHROPIC ADDS THEM" },
+        { "text": "Follow for daily recaps, zero fluff", "slideText": "FOLLOW FOR DAILY\nRECAPS\nZERO FLUFF\n\n@vexlowhq" }
+      ],
+      "stories": [
+        "CUENTA REGRESIVA: al próximo recap semanal",
+        "REPOST: el carrusel de recap",
+        "ENCUESTA: ¿cuál historia te sorprendió más?"
+      ]
+    },
+    {
+      "day": 8,
+      "format": "reel",
+      "title": "Los rumores de Simpsons: Hit & Run vuelven a sonar",
+      "time": "checkpoint",
+      "checkpoint": "Hoy es el día para abrir Insights → Audiencia por primera vez. Si ves un pico real de actividad, usalo desde mañana en vez de la hipótesis de 19:30/13:00.",
+      "hook": "The Simpsons: Hit & Run might actually come back",
+      "beats": [
+        "3–6s: Rumors gaining traction at D23",
+        "7–10s: One of the most requested game revivals EVER",
+        "11–13s: 20+ years later and it's still on everyone's wishlist",
+        "14–15s: Would you buy it day one?"
+      ],
+      "music": "Nostálgico Y2K — buscá \"y2k nostalgia\" en tendencia",
+      "postTitle": "Simpsons: Hit & Run revival rumors are heating up 👀",
+      "caption": "Sé honesto — ¿le metiste 200 horas a este juego de chico? 👇\n\n#SimpsonsHitAndRun #GamingNostalgia #D23 #vexlow",
+      "stories": [
+        "ENCUESTA: ¿Lo comprarías día uno? Sí / No",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Qué otro juego viejo querés de vuelta?\""
+      ]
+    },
+    {
+      "day": 9,
+      "format": "reel",
+      "title": "La empresa de $21.000 millones que nadie conoce",
+      "time": "winner",
+      "hook": "A company you've never heard of is worth $21 BILLION",
+      "beats": [
+        "3–6s: Meet Etched — an AI chip startup",
+        "7–10s: Just hit a $21B valuation",
+        "11–13s: Built specifically to make AI models run faster — not general-purpose chips",
+        "14–15s: The chip wars are just getting started"
+      ],
+      "music": "Beat corporativo tech — buscá \"tech corporate\" en tendencia",
+      "postTitle": "The $21 billion AI chip company you've never heard of",
+      "caption": "Nvidia tiene competencia. ¿Conocías Etched antes de esto? 👇\n\n#AI #TechNews #Etched #ArtificialIntelligence #vexlow",
+      "stories": [
+        "QUIZ: ¿Conocías Etched? Sí / No",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Qué startup de IA seguís de cerca?\""
+      ]
+    },
+    {
+      "day": 10,
+      "format": "reel",
+      "title": "Detrás de cámara: el juego que estás construyendo",
+      "time": "winner",
+      "requiresFootage": true,
+      "warning": "Requiere grabaciones reales del proyecto DisenoDeJuegos. Si no hay footage listo, saltalo por otra nota del pipeline.",
+      "hook": "We're not just covering games. We're building one.",
+      "beats": [
+        "3–6s: [cortes rápidos de gameplay/editor del proyecto en curso]",
+        "7–10s: vexlow studio — est. 2016",
+        "11–13s: This is what we've been building behind the scenes",
+        "14–15s: Want the full look?"
+      ],
+      "music": "Chiptune / synth indie — buscá \"indie game dev\" en tendencia",
+      "postTitle": "Behind the scenes: the game we're building at vexlow 🎮",
+      "caption": "Primera mirada a lo que viene. ¿Querés un dev log completo la próxima semana? Comentá YES 👇\n\n#IndieGame #GameDev #vexlow #BehindTheScenes",
+      "stories": [
+        "CUENTA REGRESIVA: al dev log completo",
+        "REPOST: el teaser de hoy",
+        "CAJA: \"Preguntame lo que quieras del juego\""
+      ]
+    },
+    {
+      "day": 11,
+      "format": "reel",
+      "title": "Calificando las noticias gamer de la semana, sin filtro",
+      "time": "winner",
+      "hook": "Rating this week's gaming news, no filter",
+      "beats": [
+        "3–6s: Gears of War E-Day prequel → 8/10, bold move",
+        "7–10s: Simpsons Hit & Run rumors → 6/10, believe it when I see it",
+        "11–13s: Halo on PS5 → 10/10, historic",
+        "14–15s: Which one deserved higher?"
+      ],
+      "music": "Beat rápido de ritmo alto — buscá \"rapid fire\" en tendencia",
+      "postTitle": "Rating this week's gaming news (no filter)",
+      "caption": "¿De acuerdo con las calificaciones? Decime cuál merecía más puntos 👇\n\n#GamingNews #HotTake #vexlow",
+      "stories": [
+        "ENCUESTA: ¿De acuerdo con las calificaciones? Sí / No",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Qué noticia le hubieras dado más puntaje?\""
+      ]
+    },
+    {
+      "day": 12,
+      "format": "reel",
+      "title": "La noticia de IA \"aburrida\" que importa más que las flashy",
+      "time": "winner",
+      "hook": "The boring AI story that actually matters more than the flashy ones",
+      "beats": [
+        "3–6s: Warp Factories — simplifying AI infrastructure",
+        "7–10s: Not a chatbot. Not a model. The plumbing underneath.",
+        "11–13s: This unglamorous stuff decides who actually wins the AI race",
+        "14–15s: Infra > hype."
+      ],
+      "music": "Ambiente tech minimal — buscá \"tech minimal\" en tendencia",
+      "postTitle": "The unglamorous AI story that matters more than the hype",
+      "caption": "Infraestructura o los modelos flashy — ¿qué importa más en realidad? 👇\n\n#AI #Infrastructure #TechNews #vexlow",
+      "stories": [
+        "QUIZ: trivia corta sobre infraestructura de IA",
+        "REPOST: el Reel de hoy",
+        "PREGUNTA: \"¿Te interesa más el hardware o los modelos?\""
+      ]
+    },
+    {
+      "day": 13,
+      "format": "carousel",
+      "title": "3 predicciones para el gaming en 2027",
+      "time": "winner",
+      "postTitle": "3 predictions for gaming in 2027 (screenshot this)",
+      "caption": "¿Cuál predicción creés que se cumple primero? 👇\n\n#GamingPredictions #2027 #vexlow",
+      "slides": [
+        { "text": "3 predictions for gaming in 2027 (screenshot this)", "slideText": "3 PREDICTIONS FOR\nGAMING IN 2027\n\n(SCREENSHOT THIS)" },
+        { "text": "Every major franchise goes multiplatform — Xbox exclusivity basically dies", "slideText": "EVERY MAJOR FRANCHISE\nGOES MULTIPLATFORM" },
+        { "text": "AI-generated NPC dialogue becomes a standard feature, not a gimmick", "slideText": "AI-GENERATED NPC DIALOGUE\nBECOMES STANDARD" },
+        { "text": "Remakes of Y2K-era games outsell half the new releases", "slideText": "Y2K-ERA REMAKES\nOUTSELL HALF OF THE\nNEW RELEASES" },
+        { "text": "Which one do you think actually happens? Follow for more", "slideText": "WHICH ONE ACTUALLY\nHAPPENS?\n\n@vexlowhq" }
+      ],
+      "stories": [
+        "ENCUESTA: votá tu predicción favorita de las 3",
+        "REPOST: el carrusel de hoy",
+        "PREGUNTA: \"¿Qué predicción agregarías vos?\""
+      ]
+    },
+    {
+      "day": 14,
+      "format": "reel",
+      "title": "Cierre del sprint: todo lo que te perdiste en 14 días",
+      "time": "winner",
+      "hook": "14 days. Here's everything you missed.",
+      "beats": [
+        "3–11s: Flash-cuts rápidos de las miniaturas/momentos de los días 1 a 13, un corte por segundo",
+        "12–15s: New gaming + AI news, every day. Follow so you don't miss the next one."
+      ],
+      "music": "Montaje energético — buscá \"highlight reel\" en tendencia",
+      "postTitle": "14 days of gaming + AI news in 15 seconds",
+      "caption": "¿Qué historia de esta semana te pegó más fuerte? 👇 Seguime para las próximas\n\n#GamingNews #AI #vexlow #RecapReel",
+      "stories": [
+        "CUENTA REGRESIVA: \"nueva semana, nuevo contenido\"",
+        "REPOST: el Reel recopilatorio",
+        "ENCUESTA: \"¿Querés que sigamos así? Sí / Más todavía\""
+      ]
+    }
+  ],
+  "accounts": [
+    { "handle": "@ign", "why": "La referencia global en noticias gamer — tu nicho exacto, escala enorme" },
+    { "handle": "@gamespot", "why": "Mismo formato de noticia rápida que estás publicando vos" },
+    { "handle": "@kotaku", "why": "Tono más editorial/opinión — bueno para practicar comentarios con punto de vista" },
+    { "handle": "@pcgamer", "why": "Cubre el cruce gaming + tech/hardware, igual que tus notas de IA" },
+    { "handle": "@theverge", "why": "Tu ángulo de tech/IA — audiencia que también puede interesarse en gaming" }
+  ]
+}

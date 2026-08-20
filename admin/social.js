@@ -179,11 +179,82 @@ async function publishToInstagram(opts) {
   return { ok: true, mediaId: published.id };
 }
 
+// Publica un carrusel (2 a 10 imágenes). Cada imagen se sube primero
+// como "item de carrusel" (is_carousel_item), y recién con todos los
+// IDs se crea el contenedor CAROUSEL y se publica -- son 2 pasos más
+// que una foto sola, pero el mismo mecanismo de fondo.
+async function publishCarouselToInstagram(opts) {
+  var cfg = loadConfig();
+  var ig = cfg.instagram || {};
+  if (!ig.igUserId || !ig.pageAccessToken) {
+    throw new Error('Instagram todavía no está conectado (falta el ID de cuenta o el token). Configuralo en la pestaña "Redes sociales".');
+  }
+  if (!opts || !opts.imageUrls || !opts.imageUrls.length || !opts.caption) {
+    throw new Error('Faltan las imágenes o el texto de la publicación.');
+  }
+
+  var childIds = [];
+  for (var i = 0; i < opts.imageUrls.length; i++) {
+    var child = await graphPost('/' + ig.igUserId + '/media', {
+      image_url: opts.imageUrls[i],
+      is_carousel_item: 'true',
+      access_token: ig.pageAccessToken
+    });
+    if (!child.id) throw new Error('Instagram no devolvió un ID para la imagen ' + (i + 1) + ' del carrusel.');
+    await waitUntilReady(child.id, ig.pageAccessToken);
+    childIds.push(child.id);
+  }
+
+  var created = await graphPost('/' + ig.igUserId + '/media', {
+    media_type: 'CAROUSEL',
+    children: childIds.join(','),
+    caption: opts.caption,
+    access_token: ig.pageAccessToken
+  });
+  if (!created.id) throw new Error('Instagram no devolvió un ID de publicación al crear el carrusel.');
+
+  var published = await graphPost('/' + ig.igUserId + '/media_publish', {
+    creation_id: created.id,
+    access_token: ig.pageAccessToken
+  });
+  if (!published.id) throw new Error('Instagram no confirmó la publicación del carrusel.');
+
+  return { ok: true, mediaId: published.id };
+}
+
 // URL pública de una imagen del sitio a partir de su ruta relativa
 // (ej. "img/temas/foo.jpg" -> "https://vexlowhq.com/img/temas/foo.jpg").
 function publicImageUrl(relativePath) {
   var clean = String(relativePath || '').replace(/^\/+/, '');
   return SITE_ORIGIN + '/' + clean;
+}
+
+// Espera a que una URL del sitio en vivo responda 200 -- se usa antes
+// de publicar un carrusel recién generado, porque Meta descarga la
+// imagen de vexlowhq.com y el deploy (Vercel) tarda uno o dos minutos
+// en propagarse después del git push.
+function waitUntilPublic(url, maxAttempts, intervalMs) {
+  return new Promise(function (resolve, reject) {
+    var attempt = 0;
+    function tryOnce() {
+      attempt++;
+      var req = https.request(url, { method: 'HEAD', timeout: 10000 }, function (res) {
+        res.resume();
+        if (res.statusCode === 200) return resolve();
+        retryOrFail();
+      });
+      req.on('timeout', function () { req.destroy(); retryOrFail(); });
+      req.on('error', function () { retryOrFail(); });
+      req.end();
+    }
+    function retryOrFail() {
+      if (attempt >= maxAttempts) {
+        return reject(new Error('La imagen todavía no está disponible en ' + url + ' después de esperar el deploy. Probá de nuevo en un minuto.'));
+      }
+      setTimeout(tryOnce, intervalMs);
+    }
+    tryOnce();
+  });
 }
 
 module.exports = {
@@ -192,5 +263,7 @@ module.exports = {
   loadLog: loadLog,
   logPublish: logPublish,
   publishToInstagram: publishToInstagram,
-  publicImageUrl: publicImageUrl
+  publishCarouselToInstagram: publishCarouselToInstagram,
+  publicImageUrl: publicImageUrl,
+  waitUntilPublic: waitUntilPublic
 };

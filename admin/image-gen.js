@@ -137,4 +137,8 @@ async function generateCoverImage(article, cfg, topicLabel) {
   }
 }
 
-module.exports = { generateCoverImage: generateCoverImage };
+module.exports = {
+  generateCoverImage: generateCoverImage,
+  callOpenAIImageWithRetry: callOpenAIImageWithRetry,
+  pngToJpeg: pngToJpeg
+};
