@@ -224,9 +224,22 @@ async function publishCarouselToInstagram(opts) {
 
 // URL pública de una imagen del sitio a partir de su ruta relativa
 // (ej. "img/temas/foo.jpg" -> "https://vexlowhq.com/img/temas/foo.jpg").
-function publicImageUrl(relativePath) {
+// cacheBust (opcional) agrega "?v=<valor>" -- necesario para imágenes
+// recién generadas/regeneradas: el CDN de Vercel puede servir una
+// copia en caché del archivo VIEJO en esa misma ruta durante un rato
+// después del deploy, y waitUntilPublic() de abajo solo chequea que
+// la URL responda 200 (que la caché también responde) -- no que el
+// contenido sea el nuevo. Una URL con query string nunca vista antes
+// no puede venir de una entrada de caché existente, así que fuerza
+// que tanto el chequeo como la descarga real de Meta traigan el
+// archivo recién subido. (Bug real: un carrusel se publicó con la
+// imagen vieja de una diapositiva pese a que el deploy con la
+// corregida ya se había subido.)
+function publicImageUrl(relativePath, cacheBust) {
   var clean = String(relativePath || '').replace(/^\/+/, '');
-  return SITE_ORIGIN + '/' + clean;
+  var url = SITE_ORIGIN + '/' + clean;
+  if (cacheBust) url += '?v=' + encodeURIComponent(cacheBust);
+  return url;
 }
 
 // Espera a que una URL del sitio en vivo responda 200 -- se usa antes

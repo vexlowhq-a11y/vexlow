@@ -461,7 +461,8 @@ var server = http.createServer(function (req, res) {
       if (!files.length) return sendJSON(res, 400, { error: 'No hay imágenes generadas para este día. Generá el carrusel primero.' });
 
       var relPaths = files.map(function (f) { return 'img/carousels/day-' + data.day + '/' + f; });
-      var publicUrls = relPaths.map(function (p) { return social.publicImageUrl(p); });
+      var cacheBust = Date.now();
+      var publicUrls = relPaths.map(function (p) { return social.publicImageUrl(p, cacheBust); });
 
       deploy.deploy('Sprint día ' + data.day + ' — carrusel generado desde el panel')
         .then(function (deployResult) {
