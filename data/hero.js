@@ -17,6 +17,15 @@ const VEXLOW_HERO = [
     "href": "categoria/entertainment/marvel-unveils-new-x-men-cast-with-major-names-attached.html"
   },
   {
+    "category": "gaming",
+    "chip": "🎮 Gaming",
+    "title": "Riot Games Halts Development of League of Legends Fighting Game 2XKO",
+    "dek": "Riot Games announces it is winding down development on 2XKO, the free-to-play fighting game set in the League of Legends universe, citing low player retention as a key factor.",
+    "image": "img/drafts/riot-games-halts-development-of-league-o-f442.jpg",
+    "textColor": "auto",
+    "href": "categoria/gaming/riot-games-halts-development-of-league-of-legends-fighting-g.html"
+  },
+  {
     "category": "science",
     "chip": "🚀 Science & Space",
     "title": "Setback for UK Space Launch as Rocket Issue Delays Orbital Mission",
