@@ -28,6 +28,18 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
 const CATEGORIA_DIR = path.join(ROOT, 'categoria');
+const ARTICULOS_FILE = path.join(DATA_DIR, 'articulos.json');
+
+// Se recarga del disco en cada llamada, mismo patrón que loadCategories()
+// -- así una nota publicada un segundo antes ya entra como candidata a
+// "relacionada" sin reiniciar el servidor.
+function loadArticles() {
+  try {
+    return JSON.parse(fs.readFileSync(ARTICULOS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
 
 // Las categorías viven en data/categories.json (fuente única, la misma
 // que lee admin/generate_pages.py) para poder agregarlas/editarlas/
@@ -291,6 +303,8 @@ var ARTICLE_PAGE_TEMPLATE = '<!DOCTYPE html>\n' +
 '        <p>Want more news about <strong>{topicLabel}</strong>?</p>\n' +
 '        <a class="see-all" href="{topicHref}">See full coverage →</a>\n' +
 '      </div>\n' +
+'\n' +
+'{relatedBlock}\n' +
 '    </article>\n' +
 '\n' +
 '{footer}\n' +
@@ -356,6 +370,62 @@ function bannerHtmlFor(article, cat) {
   return '      <div class="article-banner media ' + cat.slug + '">' + cat.icon + '</div>\n';
 }
 
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' }[c];
+  });
+}
+
+// Mismo criterio que related_articles_for() en admin/generate_pages.py
+// -- las dos implementaciones tienen que coincidir, porque cuál de las
+// dos generó la página de una nota depende de si se guardó desde el
+// panel (pagegen.js, esto de acá) o se regeneró en bloque (Python).
+function relatedArticlesFor(article, allArticles, limit) {
+  limit = limit || 4;
+  var slug = article.slug;
+  var topic = article.topic || '';
+  var category = article.category;
+
+  var sameTopic = allArticles.filter(function (a) { return a.slug !== slug && topic && a.topic === topic; });
+  sameTopic.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+  var picked = sameTopic.slice(0, limit);
+
+  if (picked.length < limit) {
+    var pickedSlugs = {};
+    picked.forEach(function (a) { pickedSlugs[a.slug] = true; });
+    var sameCat = allArticles.filter(function (a) {
+      return a.slug !== slug && !pickedSlugs[a.slug] && a.category === category;
+    });
+    sameCat.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    picked = picked.concat(sameCat.slice(0, limit - picked.length));
+  }
+
+  return picked;
+}
+
+function renderRelatedBlock(related, currentCatSlug) {
+  if (!related.length) return '';
+  var cards = related.map(function (r) {
+    var rCat = r.category || '';
+    var href = rCat === currentCatSlug ? r.slug + '.html' : '../' + rCat + '/' + r.slug + '.html';
+    var media = r.image
+      ? '<span class="media ' + rCat + '" style="background-image:url(\'../../' + r.image + '\');background-size:cover;background-position:center;"></span>'
+      : '<span class="media ' + rCat + '">' + (r.icon || '') + '</span>';
+    var meta = escapeHtml(r.categoryLabel || '') + ' · ' + escapeHtml(r.readTime || '') + ' · ' + formatDateEn(r.date || '');
+    return '          <a class="card" href="' + href + '">' + media + '\n' +
+      '            <div class="body"><h3>' + escapeHtml(r.title || '') + '</h3><div class="meta">' + meta + '</div></div>\n' +
+      '          </a>\n';
+  });
+  return (
+    '      <div class="related-articles">\n' +
+    '        <h2>📌 You might also like</h2>\n' +
+    '        <div class="rail-grid">\n' +
+    cards.join('') +
+    '        </div>\n' +
+    '      </div>\n'
+  );
+}
+
 function generateArticleFile(article) {
   var cat = categoryBySlug(article.category);
   if (!cat) throw new Error('Categoría desconocida: ' + article.category);
@@ -370,6 +440,10 @@ function generateArticleFile(article) {
 
   var title = article.title;
   var titleShort = title.length <= 40 ? title : title.slice(0, 37) + '...';
+
+  var allArticles = loadArticles();
+  var related = relatedArticlesFor(article, allArticles);
+  var relatedBlock = renderRelatedBlock(related, cat.slug);
 
   var html = fill(ARTICLE_PAGE_TEMPLATE, {
     title: title,
@@ -386,6 +460,7 @@ function generateArticleFile(article) {
     topicCrumb: topicCrumb,
     topicLabel: topicLabel,
     topicHref: topicHref,
+    relatedBlock: relatedBlock,
     subtopicAttr: '',
     sidebar: blocks.sidebar,
     footer: blocks.footer
