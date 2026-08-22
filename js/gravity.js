@@ -1342,9 +1342,9 @@
   // @gravity-editor:end level_10
 
   var LEVELS = [
-    { id: 'level_01', name: 'First Pulse', build: buildNeonPulse, thumb: 'level_01' },
     { id: 'level_02', name: 'Green Circuit', build: buildGreenCircuit, thumb: 'level_02' },
     { id: 'level_03', name: 'Gravity Garden', build: buildGravityGarden, thumb: 'level_03' },
+    { id: 'level_01', name: 'First Pulse', build: buildNeonPulse, thumb: 'level_01' },
     { id: 'level_04', name: 'Sky Rider', build: buildSkyRider, thumb: 'level_04' },
     { id: 'level_05', name: 'Rolling Light', build: buildRollingLight, thumb: 'level_05' },
     { id: 'level_06', name: 'Fire Factory', build: buildFireFactory, thumb: 'level_06' },

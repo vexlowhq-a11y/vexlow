@@ -499,6 +499,19 @@ var server = http.createServer(function (req, res) {
       return sendJSON(res, 400, { error: e.message });
     }
   }
+  if (urlPath === '/api/gravity-levels/reorder' && req.method === 'POST') {
+    return readBody(req, function (err, data) {
+      if (err || !data || !Array.isArray(data.order) || !data.order.length) {
+        return sendJSON(res, 400, { error: 'Falta el nuevo orden de niveles' });
+      }
+      try {
+        gravityEditor.reorderLevels(data.order);
+        return sendJSON(res, 200, { ok: true, levels: gravityEditor.listLevels() });
+      } catch (e) {
+        return sendJSON(res, 400, { error: e.message });
+      }
+    });
+  }
   if (urlPath === '/api/gravity-level/verify' && req.method === 'POST') {
     return readBody(req, function (err, data) {
       if (err || !data || !data.id || !Array.isArray(data.objects)) {

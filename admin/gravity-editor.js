@@ -106,6 +106,53 @@ function listLevels() {
   return window.__adminExport.LEVELS.map(function (l) { return { id: l.id, name: l.name, thumb: l.thumb }; });
 }
 
+// Reordena el array LEVELS de gravity.js para que quede en el orden
+// de ids dado -- el número de nivel mostrado en el juego, el orden
+// del menú de selección y los umbrales de desbloqueo por estrellas
+// (STAR_UNLOCK_THRESHOLDS, indexados por posición) dependen todos de
+// la posición en este array, no del id -- así que reordenar acá
+// alcanza, no hace falta tocar nada más.
+function reorderLevels(newOrder) {
+  var src = readSrc();
+  var startMarker = 'var LEVELS = [';
+  var startIdx = src.indexOf(startMarker);
+  if (startIdx === -1) throw new Error('No se encontró el array LEVELS en gravity.js');
+  var contentStart = startIdx + startMarker.length;
+  var closeIdx = src.indexOf('\n  ];', contentStart);
+  if (closeIdx === -1) throw new Error('No se encontró el cierre del array LEVELS en gravity.js');
+
+  var block = src.slice(contentStart, closeIdx);
+  var lines = block.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+  var byId = {};
+  lines.forEach(function (line) {
+    var m = /id:\s*'([^']+)'/.exec(line);
+    if (!m) throw new Error('No se pudo leer una entrada del array LEVELS: ' + line);
+    byId[m[1]] = line.replace(/,\s*$/, '');
+  });
+
+  var currentIds = Object.keys(byId);
+  var sameSet = newOrder.length === currentIds.length && newOrder.every(function (id) { return byId[id]; });
+  if (!sameSet) throw new Error('El nuevo orden no coincide exactamente con los niveles existentes');
+
+  var newBlock = newOrder.map(function (id, i) {
+    return '\n    ' + byId[id] + (i < newOrder.length - 1 ? ',' : '');
+  }).join('');
+  var newSrc = src.slice(0, contentStart) + newBlock + src.slice(closeIdx);
+
+  var tmpFile = path.join(os.tmpdir(), 'gravity-editor-reorder-check-' + Date.now() + '.js');
+  fs.writeFileSync(tmpFile, newSrc, 'utf8');
+  try {
+    execFileSync(process.execPath, ['--check', tmpFile]);
+  } catch (e) {
+    throw new Error('Reordenar generó JavaScript inválido: ' + (e.stderr ? e.stderr.toString('utf8') : e.message));
+  } finally {
+    try { fs.unlinkSync(tmpFile); } catch (e2) {}
+  }
+
+  fs.writeFileSync(GRAVITY_JS_PATH, newSrc, 'utf8');
+  return newOrder.map(function (id) { return { id: id }; });
+}
+
 function loadLevel(id) {
   const { window } = loadSandbox(readSrc());
   const LEVELS = window.__adminExport.LEVELS;
@@ -524,6 +571,7 @@ function saveLevel(id, levelData) {
 
 module.exports = {
   listLevels: listLevels,
+  reorderLevels: reorderLevels,
   loadLevel: loadLevel,
   verifyLevel: verifyLevel,
   saveLevel: saveLevel,

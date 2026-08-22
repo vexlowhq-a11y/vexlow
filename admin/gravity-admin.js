@@ -301,8 +301,67 @@
   function loadLevelList() {
     fetch('/api/gravity-levels').then(function (r) { return r.json(); }).then(function (levels) {
       levelSelect.innerHTML = levels.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+      renderLevelOrderList(levels);
       loadLevel(levels[0].id);
     }).catch(function (e) { setStatus('No se pudo cargar la lista de niveles: ' + e.message, true); });
+  }
+
+  /* ---- Orden de los niveles (▲/▼, mismo patrón que el carrusel de
+     Home) -- el número que ve el jugador y los umbrales de
+     desbloqueo por estrellas salen de esta posición, no del id/nombre. ---- */
+  var levelOrderList = document.getElementById('gravityLevelOrderList');
+  function renderLevelOrderList(levels) {
+    if (!levelOrderList) return;
+    levelOrderList.innerHTML = '';
+    levels.forEach(function (lvl, i) {
+      var row = document.createElement('div');
+      row.className = 'admin-item';
+
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      thumb.textContent = String(i + 1);
+      thumb.style.background = 'var(--surface-2)';
+      thumb.style.display = 'flex';
+      thumb.style.alignItems = 'center';
+      thumb.style.justifyContent = 'center';
+      thumb.style.fontWeight = '700';
+
+      var info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML = '<div class="ttl"></div><div class="meta"></div>';
+      info.querySelector('.ttl').textContent = lvl.name;
+      info.querySelector('.meta').textContent = 'Nivel ' + (i + 1) + ' · ' + lvl.id;
+
+      var order = document.createElement('div');
+      order.className = 'order-controls';
+      var up = document.createElement('button');
+      up.type = 'button'; up.textContent = '▲'; up.title = 'Subir';
+      up.disabled = i === 0;
+      up.addEventListener('click', function () { moveLevel(levels, i, -1); });
+      var down = document.createElement('button');
+      down.type = 'button'; down.textContent = '▼'; down.title = 'Bajar';
+      down.disabled = i === levels.length - 1;
+      down.addEventListener('click', function () { moveLevel(levels, i, 1); });
+      order.appendChild(up);
+      order.appendChild(down);
+
+      row.appendChild(thumb);
+      row.appendChild(info);
+      row.appendChild(order);
+      levelOrderList.appendChild(row);
+    });
+  }
+  function moveLevel(levels, index, dir) {
+    var target = index + dir;
+    if (target < 0 || target >= levels.length) return;
+    var order = levels.map(function (l) { return l.id; });
+    var tmp = order[index]; order[index] = order[target]; order[target] = tmp;
+    fetch('/api/gravity-levels/reorder', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order: order })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res.ok) { setStatus('No se pudo reordenar: ' + res.error, true); return; }
+      loadLevelList();
+    }).catch(function (e) { setStatus('No se pudo reordenar: ' + e.message, true); });
   }
   function loadLevel(id) {
     setStatus('Cargando...');

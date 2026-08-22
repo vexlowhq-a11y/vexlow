@@ -272,6 +272,12 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
     <div class="gravity-subpanel active" id="gravitySub-edit">
     <p class="admin-lede">Elegí un nivel, tocá la pista para agregar el obstáculo seleccionado en la paleta, arrastrá lo que ya está puesto para moverlo (o usá "✋ Mover" para arrastrar sin riesgo de agregar uno de más). Al elegir una herramienta aparece abajo su molde/sprite, con un "+" para subir uno propio ahí mismo. "Verificar con bot" corre el mismo bot que se usó para probar que cada nivel sea pasable — hacelo antes de guardar.</p>
 
+    <div class="admin-form">
+      <h3>Orden de los niveles</h3>
+      <p class="admin-hint">El número que ve el jugador y cuántas estrellas hacen falta para desbloquear cada nivel dependen de esta posición, no del nombre. Usá ▲/▼ para moverlos a donde quieras.</p>
+      <div class="admin-list" id="gravityLevelOrderList"></div>
+    </div>
+
     <div class="gravity-editor-toolbar">
       <label>Nivel
         <select id="gravityEditorLevelSelect"></select>
