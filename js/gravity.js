@@ -641,101 +641,109 @@
 
   // @gravity-editor:start level_02
   function buildGreenCircuit() {
-    var objs = [], cursor = 500, speedZone = [];
+    // Editado con el panel de admin (Gravity Flip -> Niveles).
+    var objs = [], speedZone = [];
     function setSpeed(x, s) { speedZone.push({ x: x, speed: s }); }
-    function add(o) { o.x = cursor; objs.push(o); return o; }
-    setSpeed(0, 0.28);
-
-    // Nota de diseño (aplica a los 9 niveles de esta tanda): un
-    // diamante/moneda/estrella NUNCA se pone a menos de ~120px antes
-    // de un obstáculo real -- el bot (y el criterio de "ventana de
-    // reacción" en general) elige como objetivo el objeto más
-    // cercano sin importar el tipo; si un pickup queda más cerca que
-    // el obstáculo que sigue, tapa al obstáculo hasta que ya es
-    // tarde para reaccionar. Por eso todos los pickups van pegados
-    // DESPUÉS de superar un obstáculo (ya "atrás" antes de que
-    // empiece la ventana del próximo), nunca metidos justo antes.
-
-    // Tramo 1 -- cubo, hazards sueltos, fáciles de leer. Los pickups
-    // se agregan SUMANDO distancia extra después de cada obstáculo,
-    // nunca restando del gap ya calibrado hacia el próximo -- así el
-    // espacio real entre obstáculos nunca queda más corto que
-    // GAP_CUBE/GAP_SHIP, sin importar cuántos pickups se agreguen.
-    cursor += 260;
-    add({ type: 'spike', surface: 'floor', w: 28 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += GAP_CUBE;
-    add({ type: 'saw', surface: 'floor' });
-    cursor += 90;
-    add({ type: 'coin', id: 0, y: FLOOR_Y - 120 });
-    cursor += GAP_CUBE;
-    add({ type: 'platform', surface: 'floor', w: 90, lift: 26 });
-    cursor += GAP_CUBE;
-    add({ type: 'spike', surface: 'floor', w: 28 });
-    add({ type: 'spike', surface: 'floor', w: 28, xOff: 26 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += GAP_CUBE;
-    add({ type: 'coin', id: 1, y: FLOOR_Y - 120 });
-    cursor += GAP_CUBE;
-
-    // Tramo 2 -- nave: los 3 diamantes van acá, a MID_Y, con la misma
-    // separación que ya prueban los niveles existentes (una sierra,
-    // margen de sobra, diamante, margen de sobra, próxima sierra) --
-    // patrón ya verificado por el bot en otros niveles, no inventado.
-    add({ type: 'shapePortal', form: 'ship' });
-    setSpeed(cursor + 20, 0.28);
-    cursor += GAP_SHIP;
-    add({ type: 'saw', surface: 'floor' });
-    cursor += 400;
-    add({ type: 'diamond', id: 0, y: MID_Y });
-    cursor += 400;
-    add({ type: 'saw', surface: 'ceil' });
-    cursor += 400;
-    add({ type: 'diamond', id: 1, y: MID_Y });
-    cursor += 400;
-    add({ type: 'saw', surface: 'floor' });
-    cursor += 400;
-    add({ type: 'diamond', id: 2, y: MID_Y });
-    cursor += 400;
-    add({ type: 'saw', surface: 'ceil' });
-    cursor += GAP_SHIP;
-    add({ type: 'shapePortal', form: 'cube' });
-    cursor += 40;
-    setSpeed(cursor, 0.28);
-
-    // Tramo 3 -- techo, cierre.
-    add({ type: 'gravityPortal', dir: -1 });
-    cursor += GAP_CUBE;
-    add({ type: 'spike', surface: 'ceil', w: 28 });
-    cursor += 90;
-    add({ type: 'money', y: CEIL_Y + 90 });
-    cursor += 90;
-    add({ type: 'money', y: CEIL_Y + 90 });
-    cursor += GAP_CUBE;
-    add({ type: 'spike', surface: 'ceil', w: 28 });
-    cursor += GAP_CUBE;
-    add({ type: 'gravityPortal', dir: 1 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += 90;
-    add({ type: 'money', y: FLOOR_Y - 90 });
-    cursor += GAP_CUBE;
-    add({ type: 'coin', id: 2, y: FLOOR_Y - 120, risky: true });
-    cursor += GAP_CUBE;
-
-    objs.forEach(function (o) { if (o.xOff) { o.x += o.xOff; delete o.xOff; } });
-    addKeyDoorFinish(add, function () { return cursor; }, function (v) { cursor = v; }, FLOOR_Y - 170, 0.28);
-    return { objects: objs, length: cursor, speedZones: speedZone, floorVariant: 'v20', backgroundDim: 0.45 };
+    function add(o) { objs.push(o); return o; }
+    setSpeed(0, 0.2);
+    add({ type: "spike", surface: "floor", w: 28, x: 277, variant: "v2", lift: -4, hitboxScale: 1.22 });
+    add({ type: "money", y: 255, x: 507 });
+    add({ type: "spike", surface: "floor", w: 28, x: 508, variant: "v2", lift: -4, hitboxScale: 1.26 });
+    add({ type: "spike", surface: "floor", w: 28, x: 768, variant: "v2", lift: -3, hitboxScale: 1.34 });
+    add({ type: "coin", id: 0, y: 246, x: 1169 });
+    add({ type: "saw", surface: "floor", x: 1170 });
+    add({ type: "spike", surface: "floor", w: 28, x: 1714, variant: "v2", lift: -4 });
+    add({ type: "spike", surface: "floor", w: 28, x: 1731, variant: "v2", lift: -3 });
+    add({ type: "money", y: 260.2604064941406, x: 1737 });
+    add({ type: "wall", surface: "floor", w: 40, height: 31, lift: 0, x: 2135, variant: "v3", hitboxScale: 1.1 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2212, variant: "v2", lift: -3 });
+    add({ type: "wall", surface: "floor", w: 40, height: 31, lift: 56, x: 2239, variant: "v3", hitboxScale: 1.1 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2244, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2277, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "floor", w: 28, x: 2306, variant: "v2", lift: -3 });
+    add({ type: "coin", id: 1, y: 203.62499237060547, x: 2316 });
+    add({ type: "saw", surface: "floor", x: 2620 });
+    add({ type: "pad", color: "cyan", surface: "floor", x: 2788, lift: -2 });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 0, x: 2859, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 0, x: 2899, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 0, x: 2932, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 0, x: 2972, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 0, x: 3012, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3014, variant: "v3" });
+    setSpeed(3040, 0.1);
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3048, variant: "v3" });
+    add({ type: "shapePortal", form: "ship", y: 215, x: 3067, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3084, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3124, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3132, variant: "v3" });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3133, variant: "v2", lift: 46 });
+    add({ type: "spike", surface: "floor", w: 28, x: 3134, variant: "v2", lift: -2 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3162, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3173, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3179, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3202, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3213, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3219, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3242, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3253, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3259, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3282, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3293, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3299, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3322, variant: "v3" });
+    add({ type: "coin", id: 2, y: 200, x: 3327 });
+    add({ type: "spike", surface: "floor", w: 28, x: 3333, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3342, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3362, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3373, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3379, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3402, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3413, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3417, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3442, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3453, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3459, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3482, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3493, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3499, variant: "v2", lift: 46 });
+    add({ type: "wall", surface: "floor", w: 40, height: 50, lift: 230, x: 3522, variant: "v3" });
+    add({ type: "spike", surface: "floor", w: 28, x: 3533, variant: "v2", lift: -3 });
+    add({ type: "spike", surface: "ceil", w: 28, x: 3539, variant: "v2", lift: 46 });
+    add({ type: "shapePortal", form: "cube", y: 221, x: 3558, variant: "v3" });
+    setSpeed(3579, 0.2);
+    add({ type: "money", y: 299.2916564941406, x: 3759 });
+    add({ type: "key", y: 294, x: 3983 });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4063, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4063, variant: "v3" });
+    add({ type: "wall", surface: "floor", w: 40, height: 80, lift: 64, x: 4064, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4094, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4103, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4103, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4103, variant: "v3" });
+    add({ type: "door", x2: 4250, y: 290, x: 4120, scale: 0.22 });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4134, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4143, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4143, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4174, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4183, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4183, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4214, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4223, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4223, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4254, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4263, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4263, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4294, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4303, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4303, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 79, x: 4303, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4325, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 0, x: 4331, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 138, x: 4334, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 62, x: 4335, variant: "v3" });
+    add({ type: "wall", surface: "ceil", w: 40, height: 80, lift: 1, x: 4335, variant: "v3" });
+    add({ type: "finish", x: 4590 });
+    return { objects: objs, length: 4890, speedZones: speedZone, floorVariant: 'v21', ceilVariant: 'v3', backgroundDim: 0.45 };
   }
   // @gravity-editor:end level_02
 
@@ -1343,8 +1351,8 @@
 
   var LEVELS = [
     { id: 'level_02', name: 'Green Circuit', build: buildGreenCircuit, thumb: 'level_02' },
-    { id: 'level_03', name: 'Gravity Garden', build: buildGravityGarden, thumb: 'level_03' },
     { id: 'level_01', name: 'First Pulse', build: buildNeonPulse, thumb: 'level_01' },
+    { id: 'level_03', name: 'Gravity Garden', build: buildGravityGarden, thumb: 'level_03' },
     { id: 'level_04', name: 'Sky Rider', build: buildSkyRider, thumb: 'level_04' },
     { id: 'level_05', name: 'Rolling Light', build: buildRollingLight, thumb: 'level_05' },
     { id: 'level_06', name: 'Fire Factory', build: buildFireFactory, thumb: 'level_06' },
