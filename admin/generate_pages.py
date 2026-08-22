@@ -65,6 +65,7 @@ UI_STRINGS = {
     "latest_news": "📰 Latest News", "most_talked_about": "📰 What's Trending",
     "byline": "Leonardo Beltran", "share": "Share",
     "want_more_about": "Want more news about <strong>{topic}</strong>?",
+    "you_might_also_like": "📌 You might also like",
     "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     "date_format": "{month} {d}, {y}",
     "view_more_cards": "See full coverage",
@@ -420,6 +421,64 @@ def banner_html_for(art, cat, asset_prefix):
     return '      <div class="article-banner media {}">{}</div>\n'.format(cat["slug"], cat["icon"])
 
 
+def related_articles_for(article, all_articles, limit=4):
+    """ Notas relacionadas para el bloque "You might also like" al pie
+        de cada artículo -- más enlaces internos y más info por página
+        sin tocar el cuerpo redactado por la IA ni gastar nada extra.
+        Prioridad 1: mismo `topic` (más específico, ej. "gtavi",
+        "spacex"). Si faltan para completar el cupo, se rellena con
+        artículos de la misma categoría, ambos ordenados por fecha
+        descendente (lo más reciente primero). """
+    slug = article.get("slug")
+    topic = article.get("topic") or ""
+    category = article.get("category")
+
+    same_topic = [a for a in all_articles if a.get("slug") != slug and topic and a.get("topic") == topic]
+    same_topic.sort(key=lambda a: a.get("date", ""), reverse=True)
+    picked = same_topic[:limit]
+
+    if len(picked) < limit:
+        picked_slugs = {a["slug"] for a in picked}
+        same_cat = [a for a in all_articles if a.get("slug") != slug and a.get("slug") not in picked_slugs and a.get("category") == category]
+        same_cat.sort(key=lambda a: a.get("date", ""), reverse=True)
+        picked += same_cat[: limit - len(picked)]
+
+    return picked
+
+
+def render_related_block(related, current_cat_slug, asset_prefix, heading):
+    """ Renderiza el mismo markup de tarjeta (.card/.media/.body) que ya
+        arma buildCard() en js/script.js para los rieles de Home/categoría
+        -- pero server-side y con enlaces reales en el HTML crudo, para
+        que quede como contenido/enlace interno real de la página (no
+        algo que solo aparece si corre el JS). """
+    if not related:
+        return ""
+    cards = []
+    for r in related:
+        r_cat = r.get("category", "")
+        href = r["slug"] + ".html" if r_cat == current_cat_slug else "../{}/{}.html".format(r_cat, r["slug"])
+        title_esc = html.escape(r.get("title", ""))
+        if r.get("image"):
+            media = '<span class="media {}" style="background-image:url(\'{}{}\');background-size:cover;background-position:center;"></span>'.format(r_cat, asset_prefix, r["image"])
+        else:
+            media = '<span class="media {}">{}</span>'.format(r_cat, r.get("icon", ""))
+        meta = "{} · {} · {}".format(html.escape(r.get("categoryLabel", "")), html.escape(r.get("readTime", "")), format_date(r.get("date", "")))
+        cards.append(
+            '          <a class="card" href="{href}">{media}\n'
+            '            <div class="body"><h3>{title}</h3><div class="meta">{meta}</div></div>\n'
+            '          </a>\n'.format(href=href, media=media, title=title_esc, meta=meta)
+        )
+    return (
+        '      <div class="related-articles">\n'
+        '        <h2>{heading}</h2>\n'
+        '        <div class="rail-grid">\n'
+        + "".join(cards) +
+        '        </div>\n'
+        '      </div>\n'
+    ).format(heading=heading)
+
+
 ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -482,6 +541,8 @@ ARTICLE_PAGE_TEMPLATE = """<!DOCTYPE html>
         <p>{want_more}</p>
         <a class="see-all" href="{topic_href}">{see_full_coverage}</a>
       </div>
+
+{related_block}
     </article>
 
 {footer_block}
@@ -1633,6 +1694,9 @@ def generate():
         if isinstance(body_blocks, str):
             body_blocks = parse_simple_body(body_blocks)
 
+        related = related_articles_for(art, articles)
+        related_block = render_related_block(related, cat["slug"], asset_prefix_page, strings["you_might_also_like"])
+
         page = ARTICLE_PAGE_TEMPLATE.format(
             title=art["title"], title_short=title_short, slug=art["slug"], dek=art.get("dek", ""),
             cat_slug=cat["slug"], cat_label=cat["label"], cat_icon=cat["icon"],
@@ -1640,6 +1704,7 @@ def generate():
             banner_html=banner_html_for(art, cat, asset_prefix_page),
             body_html=render_article_body(body_blocks, asset_prefix_page),
             topic_crumb=topic_crumb, topic_label=topic_label, topic_href=topic_href,
+            related_block=related_block,
             sidebar_block=sidebar_block, footer_block=footer_block,
             home=strings["home"], byline=strings["byline"], share=strings["share"],
             want_more=strings["want_more_about"].format(topic=topic_label),

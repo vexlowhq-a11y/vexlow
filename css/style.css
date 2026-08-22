@@ -1031,6 +1031,9 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .article-continue p { font-size: 13.5px; color: var(--text-muted); }
 .article-continue strong { color: var(--text); }
 
+.related-articles { margin-top: 40px; }
+.related-articles h2 { font-size: 1.4rem; margin-bottom: 16px; }
+
 .home-section { margin-bottom: 60px; scroll-margin-top: 20px; }
 .section-head {
   display: flex;
