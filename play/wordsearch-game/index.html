@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Demo — Sopa de letras</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    color-scheme: light dark;
+    /* Mismos colores que scripts/sopa_de_letras_sprites/mapping.json (difficulty_colors),
+       para que combinen con los íconos de categoría ya coloreados por dificultad. */
+    --color-facil: #3ecf5e; --color-facil-oscuro: #299043;
+    --color-medio: #2fb6c4; --color-medio-oscuro: #1f8792;
+    --color-dificil: #8b5cf6; --color-dificil-oscuro: #6d28d9;
+    --color-extremo: #e8543e; --color-extremo-oscuro: #b93326;
+  }
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: #0f172a; color: #e2e8f0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  /* Cada pantalla ocupa toda la ventana como si fuera una app nativa — nunca
+     "página larga" con cosas más abajo. Si su contenido no entra, hace scroll
+     ADENTRO de sí misma, nunca empuja el documento entero. */
+  .pantalla[hidden] { display: none; }
+  .pantalla {
+    position: fixed; inset: 0; padding: 20px; overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  h1 { font-size: 1.15rem; margin: 0 0 12px; }
+  button { font: inherit; cursor: pointer; }
+
+  /* ---------- Menú principal ---------- */
+  #pantallaMenu {
+    align-items: center; justify-content: center;
+    background-color: #140f2e;
+    background-image: url('scripts/sopa_de_letras_sprites/ui/background_stars.svg');
+    background-size: cover; background-position: center;
+  }
+  .menu-lienzo {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .titulo-juego {
+    font-size: 2.5rem; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;
+    background: linear-gradient(135deg, #fde047, #f97316);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  }
+  .subtitulo-juego { color: #c7d2fe; margin-bottom: 36px; font-size: 0.9rem; letter-spacing: 0.02em; }
+  .menu-botones { display: flex; flex-direction: column; gap: 16px; width: 280px; }
+  .boton-sprite {
+    width: 100%; aspect-ratio: 420 / 100; border: none; cursor: pointer;
+    background-color: transparent; padding: 0;
+    transition: transform 0.08s ease, filter 0.08s ease;
+  }
+  .boton-sprite svg { width: 100%; height: 100%; display: block; }
+  .boton-sprite:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .boton-sprite:active { transform: translateY(1px); filter: brightness(0.95); }
+  /* Sin sprite propio (no vino uno de "Logros" en el pack) — mismo estilo 3D que el
+     resto de botones secundarios, para que no desentone. */
+  .boton-secundario-css {
+    width: 100%; padding: 14px; margin-top: 4px; border-radius: 14px; border: none;
+    background: linear-gradient(180deg, #a78bfa, #6d28d9); color: #fff;
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.03em;
+    box-shadow: 0 4px 0 #4c1d95, 0 8px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .boton-secundario-css:hover { transform: translateY(-2px); }
+  .boton-secundario-css:active { transform: translateY(2px); box-shadow: 0 1px 0 #4c1d95; }
+
+  /* ---------- Logros ---------- */
+  #pantallaLogros { padding-bottom: 20px; }
+  .logros-grid {
+    flex: 1; min-height: 0; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px; padding: 4px 2px 20px;
+  }
+  .logro-card {
+    background: #1e293b; border-radius: 12px; padding: 12px 8px; text-align: center;
+    border: 2px solid var(--tier-color, #334155);
+  }
+  .logro-card img {
+    width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px;
+  }
+  .logro-card.bloqueado img { filter: grayscale(1) brightness(0.45) contrast(0.9); }
+  .logro-card.bloqueado { opacity: 0.75; }
+  .logro-card .logro-nombre { font-size: 0.72rem; font-weight: 700; line-height: 1.2; }
+  .logro-card .logro-desc { font-size: 0.62rem; color: #94a3b8; margin-top: 3px; line-height: 1.25; }
+  .logro-card .logro-tier {
+    display: inline-block; margin-top: 6px; font-size: 0.58rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 8px; border-radius: 999px;
+    background: var(--tier-color, #334155); color: #140f2e;
+  }
+  .logros-resumen {
+    flex-shrink: 0; text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 10px;
+  }
+
+  /* ---------- Opciones / Créditos ---------- */
+  #pantallaOpciones, #pantallaCreditos { align-items: center; justify-content: center; }
+  .panel-secundario {
+    max-width: 420px; margin: 40px auto; background: #1e293b; border: 1px solid #334155;
+    border-radius: 12px; padding: 24px;
+  }
+  .panel-secundario h2 { margin-top: 0; }
+  .campo-opcion { margin-bottom: 18px; }
+  .campo-opcion label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: #cbd5e1; }
+  .campo-opcion input[type="range"] { width: 100%; }
+  .campo-opcion select {
+    width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #475569;
+    background: #0f172a; color: #e2e8f0;
+  }
+  .btn-volver {
+    margin-top: 10px; padding: 8px 16px; border-radius: 8px; border: 1px solid #475569;
+    background: transparent; color: #e2e8f0;
+  }
+  .btn-peligro {
+    display: block; width: 100%; margin-top: 18px; padding: 10px; border-radius: 8px;
+    border: 1px solid #7f1d1d; background: #450a0a; color: #fca5a5; font-weight: 600;
+  }
+  .creditos-texto { font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; }
+  .btn-politica {
+    display: block; width: 100%; margin-top: 14px; padding: 10px; border-radius: 8px;
+    border: none; background: #334155; color: #e2e8f0;
+  }
+
+  /* ---------- Selección de niveles (mapa) ---------- */
+  #pantallaNiveles { padding-bottom: 20px; }
+  .cabecera-pantalla {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .cabecera-pantalla h2 { margin: 0; flex: 1; }
+  .filtros-dificultad { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; flex-shrink: 0; }
+  .filtros-dificultad button {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid #475569;
+    background: #1e293b; color: #e2e8f0; font-size: 0.8rem;
+  }
+  .estrellas-jugador {
+    font-size: 0.85rem; color: #fbbf24; background: #1e293b; border: 1px solid #334155;
+    border-radius: 999px; padding: 4px 12px;
+  }
+  .mapa-scroll {
+    flex: 1; min-height: 0; overflow-y: auto; border-radius: 12px;
+    background-color: #4bb85c;
+  }
+  .mapa-container {
+    position: relative; max-width: 420px; margin: 0 auto; padding: 20px 0 60px;
+    background-color: #5fcf6e;
+    background-image: url('assets/mapa-castillo.png'), url('assets/mapa-campo-foto.jpg');
+    background-repeat: no-repeat, repeat-y;
+    background-position: top center, top center;
+    background-size: 100% auto, 100% auto;
+  }
+  svg.camino { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+  .nodo {
+    position: absolute; width: 68px; height: 68px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    z-index: 1; transform: translate(-50%, -50%); cursor: pointer;
+  }
+  .nodo.bloqueado { cursor: not-allowed; }
+  /* Base/sombra ovalada para que la ficha se vea parada sobre el camino, no flotando. */
+  .nodo::before {
+    content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 44px; height: 14px; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4); filter: blur(2px); z-index: -1;
+  }
+  .circulo {
+    position: relative;
+    width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 1.1rem; font-weight: 700; color: #fff;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.28), 0 6px 10px rgba(0,0,0,0.4);
+    border: 3px solid rgba(255,255,255,0.15);
+  }
+  /* Brillo superior, para que se sienta una ficha 3D glossy y no un círculo plano. */
+  .circulo::before {
+    content: ''; position: absolute; top: 4px; left: 9px; width: 60%; height: 34%;
+    background: rgba(255, 255, 255, 0.35); border-radius: 50%; filter: blur(1px);
+    pointer-events: none;
+  }
+  .dificultad-facil .circulo   { background: linear-gradient(135deg, var(--color-facil), var(--color-facil-oscuro)); }
+  .dificultad-medio .circulo   { background: linear-gradient(135deg, var(--color-medio), var(--color-medio-oscuro)); }
+  .dificultad-dificil .circulo { background: linear-gradient(135deg, var(--color-dificil), var(--color-dificil-oscuro)); }
+  .dificultad-extremo .circulo { background: linear-gradient(135deg, var(--color-extremo), var(--color-extremo-oscuro)); }
+  .bloqueado .circulo {
+    background-image: url('scripts/sopa_de_letras_sprites/ui/locked_badge.svg');
+    background-size: cover; border: none; box-shadow: none;
+  }
+  .jugable .circulo {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.35), 0 5px 0 rgba(0,0,0,0.28), 0 6px 10px rgba(0,0,0,0.4);
+  }
+  .circulo img.icono-nivel { width: 34px; height: 34px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+  .circulo .numero-nivel {
+    position: absolute; bottom: -4px; right: -4px; background: #140f2e; color: #fff;
+    font-size: 0.62rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.4);
+  }
+  .nodo .estrellas-nodo {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 1px;
+  }
+  .nodo .estrellas-nodo img {
+    width: 16px; height: 16px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6));
+  }
+  .nodo .estrellas-nodo.naranja img.llena { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6)) hue-rotate(-28deg) saturate(1.3); }
+  .nodo .etiqueta {
+    font-size: 0.65rem; color: #fff; margin-top: 3px; text-align: center; width: 90px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.9);
+  }
+
+  .btn-volver-imagen {
+    width: 42px; height: 42px; border: none; border-radius: 10px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #a78bfa, #6d28d9);
+    box-shadow: 0 3px 0 #4c1d95, inset 0 1px 0 rgba(255,255,255,0.3);
+    color: #ffffff; transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .btn-volver-imagen svg { width: 20px; height: 20px; }
+  .btn-volver-imagen:hover { filter: brightness(1.1); }
+  .btn-volver-imagen:active { transform: translateY(2px); box-shadow: 0 1px 0 #4c1d95; }
+
+  .avanzado-supabase {
+    max-width: 420px; width: 100%; margin: 16px auto 0; padding: 10px 14px; font-size: 0.8rem;
+    background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #94a3b8;
+    flex-shrink: 0;
+  }
+  .avanzado-supabase input { font: inherit; padding: 4px 6px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; }
+  .avanzado-supabase button { font: inherit; padding: 5px 10px; border-radius: 6px; border: none; background: #3b82f6; color: #fff; }
+
+  /* ---------- Juego ---------- */
+  .cabecera-nivel {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0;
+    background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+    padding: 10px 16px; margin-bottom: 16px; max-width: 620px;
+  }
+  .badge-dificultad { font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #fff; }
+  .numero-nivel-juego { font-size: 0.8rem; font-weight: 700; color: #94a3b8; }
+  .categoria { font-size: 0.95rem; }
+  .categoria strong { color: #fbbf24; }
+  .timer { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+  .timer.critico { color: #f87171; font-weight: 700; }
+
+  .layout {
+    display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start;
+    flex: 1; min-height: 0; overflow-y: auto;
+  }
+  .grilla {
+    display: grid; gap: 3px; touch-action: none; max-width: 100%;
+    background: #0ea5e9; padding: 10px; border-radius: 10px; border: 1px solid #0284c7;
+  }
+  .celda {
+    width: var(--celda-tam, 40px); height: var(--celda-tam, 40px);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: var(--celda-fuente, 1.05rem); border-radius: 6px;
+    background: #bae6fd; color: #0f172a; cursor: pointer;
+  }
+  .celda.seleccionando { background: #7dd3fc; color: #0f172a; }
+  .celda.pista { background: #fbbf24 !important; color: #1e293b !important; }
+  .celda.encontrada-0 { background: #16a34a; color: #fff; }
+  .celda.encontrada-1 { background: #2563eb; color: #fff; }
+  .celda.encontrada-2 { background: #db2777; color: #fff; }
+  .celda.encontrada-3 { background: #ea580c; color: #fff; }
+
+  .panel-lateral { min-width: 200px; }
+  .panel-lateral h2 { font-size: 0.85rem; text-transform: uppercase; color: #94a3b8; margin: 0 0 8px; }
+  .lista-palabras {
+    list-style: none; padding: 0; margin: 0 0 16px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .lista-palabras li {
+    padding: 5px 10px; border-radius: 6px; background: #1e293b;
+    font-size: 0.9rem; letter-spacing: 0.03em;
+  }
+  .lista-palabras li.encontrada { text-decoration: line-through; opacity: 0.5; }
+
+  #btnPista {
+    padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer;
+    background: #f59e0b; color: #1e293b; font-weight: 600; width: 100%;
+  }
+  #btnPista:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+  .nota-extremo { font-size: 0.8rem; color: #c084fc; background: #2e1065; border-radius: 8px; padding: 8px 10px; }
+  .btn-mapa {
+    margin-top: 14px; padding: 8px 14px; border-radius: 8px; border: 1px solid #475569;
+    background: transparent; color: #e2e8f0; width: 100%;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
+    align-items: center; justify-content: center; z-index: 10;
+  }
+  .overlay.visible { display: flex; }
+  .tarjeta-final {
+    background: radial-gradient(ellipse at top, #26324a, #1e293b 70%);
+    border: 1px solid #334155; border-radius: 16px;
+    padding: 24px 28px; text-align: center; max-width: 320px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  }
+  .tarjeta-final .estrellas-final { display: flex; justify-content: center; gap: 6px; margin: 12px 0; }
+  .tarjeta-final .estrellas-final img { width: 40px; height: 40px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); }
+  .tarjeta-final .estrellas-final.naranja img.llena { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)) hue-rotate(-28deg) saturate(1.3); }
+  .tarjeta-final .fila-botones { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .btn-nivel-final {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 10px 16px; border-radius: 14px; border: none;
+    color: #fff; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .btn-nivel-final:hover { transform: translateY(-2px); }
+  .btn-nivel-final:active { transform: translateY(2px); }
+  .btn-nivel-mapa {
+    background: linear-gradient(180deg, #97a2b5, #566173);
+    box-shadow: 0 4px 0 #333a47, 0 8px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  .btn-nivel-mapa:active { box-shadow: 0 1px 0 #333a47; }
+  .btn-nivel-reintentar {
+    background: linear-gradient(180deg, #ffd76a, #d9820f);
+    box-shadow: 0 4px 0 #a35d00, 0 8px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn-nivel-reintentar:active { box-shadow: 0 1px 0 #a35d00; }
+  .btn-nivel-siguiente {
+    background: linear-gradient(180deg, #6cd0f0, #1f6fb0);
+    box-shadow: 0 4px 0 #14507f, 0 8px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn-nivel-siguiente:active { box-shadow: 0 1px 0 #14507f; }
+</style>
+</head>
+<body>
+
+<!-- ===================== MENÚ PRINCIPAL ===================== -->
+<div class="pantalla" id="pantallaMenu">
+  <div class="menu-lienzo">
+    <div class="titulo-juego">SOPA DE LETRAS</div>
+    <div class="subtitulo-juego" data-i18n="subtitulo">100 niveles · 4 dificultades</div>
+    <div class="menu-botones">
+      <button class="boton-sprite" id="btnJugar" data-i18n-aria="ariaJugar" aria-label="Jugar"></button>
+      <button class="boton-sprite" id="btnOpciones" data-i18n-aria="ariaOpciones" aria-label="Opciones"></button>
+      <button class="boton-sprite" id="btnCreditos" data-i18n-aria="ariaCreditos" aria-label="Créditos"></button>
+      <button class="boton-secundario-css" id="btnLogros" data-i18n="botonLogros">Logros</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== OPCIONES ===================== -->
+<div class="pantalla" id="pantallaOpciones" hidden>
+  <div class="panel-secundario">
+    <h2 data-i18n="opcionesTitulo">Opciones</h2>
+    <div class="campo-opcion">
+      <label><span data-i18n="volumenLabel">Volumen:</span> <span id="valorVolumen">80</span>%</label>
+      <input type="range" id="inputVolumen" min="0" max="100" value="80" />
+    </div>
+    <div class="campo-opcion">
+      <label data-i18n="idiomaLabel">Idioma</label>
+      <select id="inputIdioma">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <p style="font-size:0.75rem;color:#64748b;" data-i18n="notaOpciones">
+      Volumen e idioma son solo UI por ahora — todavía no hay audio ni traducciones
+      conectadas (fase futura).
+    </p>
+    <button class="btn-peligro" id="btnReiniciarProgreso" data-i18n="reiniciarBoton">Reiniciar progreso</button>
+    <button class="btn-volver" data-volver="pantallaMenu" data-i18n="volver">← Volver</button>
+  </div>
+</div>
+
+<!-- ===================== CRÉDITOS ===================== -->
+<div class="pantalla" id="pantallaCreditos" hidden>
+  <div class="panel-secundario">
+    <h2 data-i18n="creditosTitulo">Créditos</h2>
+    <p class="creditos-texto" data-i18n-html="creditosTexto">
+      Sopa de Letras — un juego de VexlowHQ.<br />
+      Diseño, contenido y desarrollo: vos 🙂<br />
+      Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).
+    </p>
+    <button class="btn-politica" id="btnPolitica" data-i18n="politica">Política de privacidad</button>
+    <button class="btn-volver" data-volver="pantallaMenu" data-i18n="volver">← Volver</button>
+  </div>
+</div>
+
+<!-- ===================== LOGROS ===================== -->
+<div class="pantalla" id="pantallaLogros" hidden>
+  <div class="cabecera-pantalla">
+    <button class="btn-volver-imagen" data-volver="pantallaMenu" data-i18n-aria="ariaVolverMenu" aria-label="Volver al menú">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 4l-8 8 8 8V4z"/></svg>
+    </button>
+    <h2 data-i18n="logrosTitulo">Logros</h2>
+  </div>
+  <div class="logros-resumen" id="logrosResumen"></div>
+  <div class="logros-grid" id="logrosGrid"></div>
+</div>
+
+<!-- ===================== SELECCIÓN DE NIVELES ===================== -->
+<div class="pantalla" id="pantallaNiveles" hidden>
+  <div class="cabecera-pantalla">
+    <button class="btn-volver-imagen" data-volver="pantallaMenu" data-i18n-aria="ariaVolverMenu" aria-label="Volver al menú">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 4l-8 8 8 8V4z"/></svg>
+    </button>
+    <h2 id="tituloSeleccionNivel" data-i18n="seleccionaNivel">Seleccioná un nivel</h2>
+    <span class="estrellas-jugador" id="estrellasJugador">⭐ 0</span>
+  </div>
+  <div class="filtros-dificultad" id="filtrosDificultad"></div>
+  <div class="mapa-scroll">
+    <div class="mapa-container" id="mapaContainer">
+      <svg class="camino" id="svgCamino"></svg>
+    </div>
+  </div>
+  <div class="avanzado-supabase" id="avanzadoSupabase" hidden>
+    <span data-i18n-html="avanzadoHtml">
+      <strong>Avanzado:</strong> conectar a Supabase para traer niveles publicados ahí
+      (si no, se usa el contenido local de <code>scripts/contenido-niveles.json</code>).
+    </span>
+    <div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+      <input id="supaUrl" placeholder="Project URL" size="22" />
+      <input id="supaKey" placeholder="anon key" size="22" />
+      <button id="btnConectar" data-i18n="conectar">Conectar</button>
+      <button id="btnCargarPublicados" disabled data-i18n="cargarPublicados">Cargar publicados</button>
+    </div>
+    <div id="estadoConexion" style="margin-top:4px;"></div>
+  </div>
+</div>
+
+<!-- ===================== JUEGO ===================== -->
+<div class="pantalla" id="pantallaJuego" hidden>
+  <div class="cabecera-nivel">
+    <button class="btn-volver-imagen" data-volver="pantallaNiveles" data-i18n-aria="ariaVolverMapa" aria-label="Volver al mapa">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 4l-8 8 8 8V4z"/></svg>
+    </button>
+    <span class="badge-dificultad" id="badgeDificultad"></span>
+    <span class="numero-nivel-juego" id="etiquetaNumeroNivel"></span>
+    <span class="categoria"><span data-i18n="categoriaLabel">Categoría:</span> <strong id="etiquetaCategoria"></strong></span>
+    <span class="timer" id="etiquetaTimer"></span>
+  </div>
+
+  <div class="layout">
+    <div class="grilla" id="grilla"></div>
+
+    <div class="panel-lateral">
+      <h2 data-i18n="palabrasTitulo">Palabras</h2>
+      <ul class="lista-palabras" id="listaPalabras"></ul>
+      <div id="zonaAyuda"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlayFinal">
+  <div class="tarjeta-final">
+    <div id="tituloFinal">¡Nivel completado!</div>
+    <div class="estrellas-final" id="estrellasFinal"></div>
+    <div id="detalleFinal" style="font-size:0.85rem;color:#94a3b8;"></div>
+    <div class="fila-botones">
+      <button class="btn-nivel-final btn-nivel-siguiente" id="btnSiguienteNivel" hidden data-i18n="siguienteNivelBoton">Siguiente Nivel</button>
+      <button class="btn-nivel-final btn-nivel-reintentar" id="btnReintentar" data-i18n="reintentarBoton">Reintentar</button>
+      <button class="btn-nivel-final btn-nivel-mapa" id="btnVolverMapa" data-i18n="mapaBoton">Mapa</button>
+    </div>
+  </div>
+</div>
+
+<script src="generador-grilla.js"></script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const $ = (id) => document.getElementById(id);
+const RUTA_SPRITES = 'scripts/sopa_de_letras_sprites';
+
+// ---------- AdMob (pistas por anuncio) ----------
+// IDs de PRUEBA oficiales de Google — seguros para probar sin arriesgar la cuenta real.
+// Cuando exista la cuenta de AdMob (vexlowhq@gmail.com), reemplazar estos 3 valores y
+// pasar `testing` a false. No usar banner/interstitial común para esto: Google prohíbe
+// dar una recompensa (una pista) a cambio de un formato que no sea "Rewarded".
+const ADMOB = {
+  appId: 'ca-app-pub-9714873159823978~2129698219',
+  rewardedInterstitial: 'ca-app-pub-9714873159823978/5274841506', // anuncio "chico" — 1ra pista extra
+  rewarded: 'ca-app-pub-9714873159823978/4564289864', // anuncio "grande" — 2da pista extra en adelante
+  testing: true, // ⚠️ dejar en true hasta que la cuenta de AdMob esté aprobada (revisión ~24-48hs) y probada
+};
+const CapAdMob = window.Capacitor?.Plugins?.AdMob ?? null;
+if (CapAdMob) {
+  CapAdMob.initialize({ initializeForTesting: ADMOB.testing }).catch((e) => console.error('AdMob init falló', e));
+}
+
+// Muestra un anuncio recompensado y devuelve true si el usuario lo completó.
+// `tipo` es 'chico' (Rewarded Interstitial) o 'grande' (Rewarded video clásico).
+const ES_NATIVO = window.Capacitor?.getPlatform && window.Capacitor.getPlatform() !== 'web';
+
+async function mostrarAnuncioRecompensado(tipo) {
+  if (!CapAdMob) {
+    // No estamos dentro de la app nativa (ej. probando en un navegador de escritorio):
+    // no hay forma de mostrar un anuncio real, así que se concede la pista igual para no trabar la demo.
+    console.warn('AdMob no disponible en este entorno — se concede la pista sin anuncio (solo pasa fuera del APK).');
+    return true;
+  }
+  const prepararFn = tipo === 'chico' ? 'prepareRewardInterstitialAd' : 'prepareRewardVideoAd';
+  const mostrarFn = tipo === 'chico' ? 'showRewardInterstitialAd' : 'showRewardVideoAd';
+  const adId = tipo === 'chico' ? ADMOB.rewardedInterstitial : ADMOB.rewarded;
+  try {
+    await CapAdMob[prepararFn]({ adId, isTesting: ADMOB.testing });
+    await CapAdMob[mostrarFn]();
+    // La promesa de "mostrar" ya resuelve cuando se gana la recompensa (así lo
+    // documenta el plugin), pero en el APK real puede resolver un instante ANTES
+    // de que el anuncio termine de cerrarse del todo en pantalla. Sin esta pausa la
+    // pista se revela mientras el anuncio todavía tapa la pantalla y el jugador no
+    // llega a verla. Se probó escuchando el evento nativo de cierre en vez de esta
+    // pausa fija, pero en un dispositivo real terminó rompiendo la selección de
+    // palabras del juego (efecto secundario no esperado) — se revirtió a esto, que
+    // es más simple y no toca nada más del estado del juego.
+    if (ES_NATIVO) await new Promise((r) => setTimeout(r, 1200));
+    return true;
+  } catch (e) {
+    console.error('No se pudo mostrar el anuncio', e);
+    return false;
+  }
+}
+
+// ---------- Idioma / i18n ----------
+// Traduce toda la UI del juego (menú, mapa, pantalla de juego). Los NOMBRES de los
+// 100 niveles (tematica/categoría) son contenido, no interfaz, y quedan en español:
+// traducirlos de verdad implicaría rehacer las listas de palabras en inglés, no solo
+// traducir texto — eso es un trabajo de contenido aparte, no un cambio de idioma de UI.
+const IDIOMAS = {
+  es: {
+    botonJugar: 'JUGAR', botonOpciones: 'OPCIONES', botonCreditos: 'CREDITOS',
+    ariaJugar: 'Jugar', ariaOpciones: 'Opciones', ariaCreditos: 'Créditos',
+    ariaVolverMenu: 'Volver al menú', ariaVolverMapa: 'Volver al mapa',
+    subtitulo: '100 niveles · 4 dificultades',
+    opcionesTitulo: 'Opciones', volumenLabel: 'Volumen:', idiomaLabel: 'Idioma',
+    notaOpciones: 'Volumen e idioma son solo UI por ahora — todavía no hay audio conectado (fase futura). Los nombres de nivel/categoría quedan en español porque son contenido, no interfaz.',
+    volver: '← Volver',
+    reiniciarBoton: 'Reiniciar progreso', reiniciarConfirmar: '¿Seguro? Se van a borrar todos los niveles completados, estrellas y logros. Esta acción no se puede deshacer.',
+    reiniciarHecho: 'Progreso reiniciado. ¡A empezar de nuevo!',
+    creditosTitulo: 'Créditos',
+    creditosTexto: 'Sopa de Letras — un juego de VexlowHQ.<br />Diseño, contenido y desarrollo: vos 🙂<br />Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).',
+    politica: 'Política de privacidad',
+    alertaPolitica: 'Acá iría el link a tu política de privacidad ya publicada — es obligatoria para Google Play y la App Store (ver 06-web-a-movil.md).',
+    seleccionaNivel: 'Seleccioná un nivel',
+    avanzadoHtml: '<strong>Avanzado:</strong> conectar a Supabase para traer niveles publicados ahí (si no, se usa el contenido local de <code>scripts/contenido-niveles.json</code>).',
+    conectar: 'Conectar', cargarPublicados: 'Cargar publicados',
+    categoriaLabel: 'Categoría:', palabrasTitulo: 'Palabras', nivelNumero: (n) => `Nivel ${n}`,
+    mapaBoton: 'Mapa', reintentarBoton: 'Reintentar',
+    dificultad: { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil', extremo: 'Extremo' },
+    necesitaEstrellas: (n) => `Necesita ${n} ⭐`,
+    completaAnterior: 'Completá el nivel anterior',
+    pista: (n) => `Pista (${n})`, sinPistas: 'Sin pistas',
+    pistaAnuncioChico: '📺 Ver anuncio para +1 pista', pistaAnuncioGrande: '📺 Ver anuncio (más largo) para +1 pista',
+    cargandoAnuncio: 'Cargando anuncio…', anuncioFallo: 'No se pudo cargar el anuncio. Probá de nuevo en un momento.',
+    notaExtremo: 'Modo extremo: sin pistas ni referencias — la categoría de arriba es tu única ayuda.',
+    nivelCompletado: '¡Nivel completado!',
+    siguienteNivelBoton: 'Siguiente Nivel',
+    detalleFinal: (a, b) => `Pistas usadas: ${a} · Tiempo: ${b}s`,
+    conectando: 'Conectado. Click en "Cargar publicados" para traerlos.',
+    errorConexion: (msg) => `Error: ${msg}`,
+    sinPublicados: 'Conectado, pero no hay niveles publicados todavía.',
+    publicadosCargados: (n) => `${n} nivel(es) publicados cargados desde Supabase.`,
+    contenidoCargado: (n) => `${n} niveles cargados desde contenido-niveles.json.`,
+    contenidoError: (msg) => `No se pudo cargar el contenido completo (${msg}) — usando 1 nivel de respaldo.`,
+    botonLogros: 'Logros', logrosTitulo: 'Logros',
+    logrosResumen: (a, b) => `${a} / ${b} logros conseguidos`,
+    logros: {
+      primeraPalabra: { nombre: 'Primera Palabra', desc: 'Encontrá tu primera palabra.' },
+      primerPuzzle: { nombre: 'Primer Puzzle', desc: 'Completá tu primer nivel.' },
+      cincoEstrellas: { nombre: '5 Estrellas', desc: 'Acumulá 5 estrellas en total.' },
+      cienPalabras: { nombre: '100 Palabras', desc: 'Encontrá 100 palabras en total.' },
+      primerAnuncio: { nombre: 'Primer Anuncio Visto', desc: 'Mirá tu primer anuncio para conseguir una pista extra.' },
+      modoMedio: { nombre: 'Modo Medio', desc: 'Completá un nivel de dificultad media.' },
+      diezPerfectos: { nombre: '10 Niveles Perfectos', desc: 'Completá 10 niveles sin usar ninguna pista.' },
+      veinteNiveles: { nombre: '20 Niveles', desc: 'Completá 20 niveles.' },
+      cincuentaAnuncios: { nombre: '50 Anuncios Vistos', desc: 'Mirá 50 anuncios para conseguir pistas.' },
+      quinientasPalabras: { nombre: '500 Palabras', desc: 'Encontrá 500 palabras en total.' },
+      cienAyudas: { nombre: '100 Ayudas Usadas', desc: 'Usá 100 pistas en total (gratis o por anuncio).' },
+      modoDificil: { nombre: 'Modo Difícil', desc: 'Completá un nivel difícil.' },
+      mitadJuego: { nombre: 'Mitad del Juego', desc: 'Completá 50 niveles.' },
+      milPalabras: { nombre: '1000 Palabras', desc: 'Encontrá 1000 palabras en total.' },
+      anuncioSupremo: { nombre: 'Anuncio Supremo', desc: 'Mirá 200 anuncios para conseguir pistas.' },
+      facilCompleto: { nombre: 'Fácil Completo', desc: 'Completá los 25 niveles fáciles.' },
+      modoExtremo: { nombre: 'Modo Extremo', desc: 'Completá un nivel extremo — el modo a ciegas.' },
+      nivelFinal: { nombre: 'Nivel Final', desc: 'Completá los 100 niveles del juego.' },
+      cincoMilPalabras: { nombre: '5000 Palabras', desc: 'Encontrá 5000 palabras en total.' },
+      todasLasEstrellas: { nombre: 'Todas las Estrellas', desc: 'Conseguí las 3 estrellas en los 100 niveles.' },
+    },
+  },
+  en: {
+    botonJugar: 'PLAY', botonOpciones: 'OPTIONS', botonCreditos: 'CREDITS',
+    ariaJugar: 'Play', ariaOpciones: 'Options', ariaCreditos: 'Credits',
+    ariaVolverMenu: 'Back to menu', ariaVolverMapa: 'Back to map',
+    subtitulo: '100 levels · 4 difficulties',
+    opcionesTitulo: 'Options', volumenLabel: 'Volume:', idiomaLabel: 'Language',
+    notaOpciones: "Volume and language are UI-only for now — audio isn't wired up yet (future phase). Level/category names stay in Spanish because that's content, not interface.",
+    volver: '← Back',
+    reiniciarBoton: 'Reset progress', reiniciarConfirmar: 'Are you sure? This will erase all completed levels, stars, and achievements. This cannot be undone.',
+    reiniciarHecho: 'Progress reset. Fresh start!',
+    creditosTitulo: 'Credits',
+    creditosTexto: 'Word Search — a VexlowHQ game.<br />Design, content and development: you 🙂<br />Prototype generated as part of the architecture design (see <code>README.md</code>).',
+    politica: 'Privacy Policy',
+    alertaPolitica: 'This would link to your published privacy policy — required by both Google Play and the App Store (see 06-web-a-movil.md).',
+    seleccionaNivel: 'Select a level',
+    avanzadoHtml: '<strong>Advanced:</strong> connect to Supabase to pull published levels from there (otherwise it uses the local content from <code>scripts/contenido-niveles.json</code>).',
+    conectar: 'Connect', cargarPublicados: 'Load published',
+    categoriaLabel: 'Category:', palabrasTitulo: 'Words', nivelNumero: (n) => `Level ${n}`,
+    mapaBoton: 'Map', reintentarBoton: 'Retry',
+    dificultad: { facil: 'Easy', medio: 'Medium', dificil: 'Hard', extremo: 'Extreme' },
+    necesitaEstrellas: (n) => `Needs ${n} ⭐`,
+    completaAnterior: 'Complete the previous level',
+    pista: (n) => `Hint (${n})`, sinPistas: 'No hints',
+    pistaAnuncioChico: '📺 Watch ad for +1 hint', pistaAnuncioGrande: '📺 Watch ad (longer) for +1 hint',
+    cargandoAnuncio: 'Loading ad…', anuncioFallo: "Couldn't load the ad. Try again in a moment.",
+    notaExtremo: 'Extreme mode: no hints or references — the category above is your only clue.',
+    nivelCompletado: 'Level complete!',
+    siguienteNivelBoton: 'Next Level',
+    detalleFinal: (a, b) => `Hints used: ${a} · Time: ${b}s`,
+    conectando: 'Connected. Click "Load published" to fetch them.',
+    errorConexion: (msg) => `Error: ${msg}`,
+    sinPublicados: 'Connected, but there are no published levels yet.',
+    publicadosCargados: (n) => `${n} published level(s) loaded from Supabase.`,
+    contenidoCargado: (n) => `${n} levels loaded from contenido-niveles.json.`,
+    contenidoError: (msg) => `Couldn't load the full content (${msg}) — using 1 fallback level.`,
+    botonLogros: 'Achievements', logrosTitulo: 'Achievements',
+    logrosResumen: (a, b) => `${a} / ${b} achievements unlocked`,
+    logros: {
+      primeraPalabra: { nombre: 'First Word', desc: 'Find your first word.' },
+      primerPuzzle: { nombre: 'First Puzzle', desc: 'Complete your first level.' },
+      cincoEstrellas: { nombre: '5 Stars', desc: 'Earn 5 stars in total.' },
+      cienPalabras: { nombre: '100 Words', desc: 'Find 100 words in total.' },
+      primerAnuncio: { nombre: 'First Ad Watched', desc: 'Watch your first ad to get an extra hint.' },
+      modoMedio: { nombre: 'Medium Mode', desc: 'Complete a medium-difficulty level.' },
+      diezPerfectos: { nombre: '10 Perfect Levels', desc: 'Complete 10 levels without using any hints.' },
+      veinteNiveles: { nombre: '20 Levels', desc: 'Complete 20 levels.' },
+      cincuentaAnuncios: { nombre: '50 Ads Watched', desc: 'Watch 50 ads to get hints.' },
+      quinientasPalabras: { nombre: '500 Words', desc: 'Find 500 words in total.' },
+      cienAyudas: { nombre: '100 Hints Used', desc: 'Use 100 hints in total (free or from ads).' },
+      modoDificil: { nombre: 'Hard Mode', desc: 'Complete a hard level.' },
+      mitadJuego: { nombre: 'Halfway There', desc: 'Complete 50 levels.' },
+      milPalabras: { nombre: '1000 Words', desc: 'Find 1000 words in total.' },
+      anuncioSupremo: { nombre: 'Supreme Ad Watcher', desc: 'Watch 200 ads to get hints.' },
+      facilCompleto: { nombre: 'Easy Complete', desc: 'Complete all 25 easy levels.' },
+      modoExtremo: { nombre: 'Extreme Mode', desc: 'Complete an extreme level — the blind mode.' },
+      nivelFinal: { nombre: 'Final Level', desc: 'Complete all 100 levels of the game.' },
+      cincoMilPalabras: { nombre: '5000 Words', desc: 'Find 5000 words in total.' },
+      todasLasEstrellas: { nombre: 'All the Stars', desc: 'Get 3 stars on all 100 levels.' },
+    },
+  },
+};
+
+let idiomaActual = localStorage.getItem('sopa_opt_idioma') || 'es';
+const t = () => IDIOMAS[idiomaActual];
+const NOMBRE_TEXTO_BOTON = { btnJugar: 'botonJugar', btnOpciones: 'botonOpciones', btnCreditos: 'botonCreditos' };
+
+async function cargarBotonesMenu() {
+  for (const [id, archivo] of [['btnJugar', 'button_jugar'], ['btnOpciones', 'button_opciones'], ['btnCreditos', 'button_creditos']]) {
+    try {
+      $(id).innerHTML = await (await fetch(`${RUTA_SPRITES}/ui/${archivo}.svg`)).text();
+    } catch { /* si falla, el botón sigue siendo clickeable, solo queda sin dibujo */ }
+  }
+}
+
+function aplicarIdioma() {
+  const dic = t();
+  document.documentElement.lang = idiomaActual;
+
+  document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = dic[el.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = dic[el.dataset.i18nHtml]; });
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', dic[el.dataset.i18nAria]); });
+
+  Object.entries(NOMBRE_TEXTO_BOTON).forEach(([id, clave]) => {
+    const textoSvg = $(id).querySelector('text');
+    if (textoSvg) textoSvg.textContent = dic[clave];
+  });
+
+  // Si ya hay algo cargado en pantalla, repintarlo para que también cambie de idioma.
+  if (Object.keys(catalogoNiveles).length) renderMapaNiveles();
+  if (nivel) {
+    $('badgeDificultad').textContent = dic.dificultad[nivel.dificultad].toUpperCase();
+    $('etiquetaNumeroNivel').textContent = t().nivelNumero(nivel.orden);
+    renderAyuda();
+  }
+  if (!$('pantallaLogros').hidden) renderLogros();
+}
+
+// ---------- Navegación entre pantallas ----------
+function mostrarPantalla(id) {
+  document.querySelectorAll('.pantalla').forEach((p) => (p.hidden = p.id !== id));
+  if (id === 'pantallaNiveles') {
+    // Siempre repintar al entrar al mapa — si no, cualquier camino que se salte esta
+    // pantalla (como "Siguiente Nivel", que va directo al próximo nivel sin pasar por
+    // acá) deja el mapa con el desbloqueo viejo hasta que se refresque la página.
+    if (Object.keys(catalogoNiveles).length) renderMapaNiveles();
+    // El mapa no arranca arriba del todo (eso sería el nivel 100) — arranca centrado
+    // en el último nivel desbloqueado, para no obligar a deslizar cada vez que se abre.
+    // setTimeout (no requestAnimationFrame) para no depender del ciclo de compositing.
+    if (idNivelActual) {
+      setTimeout(() => {
+        document.getElementById('nodo-' + idNivelActual)?.scrollIntoView({ block: 'center' });
+      }, 0);
+    }
+  } else {
+    $(id).scrollTop = 0; // el resto de las pantallas sí arrancan siempre arriba
+  }
+}
+document.querySelectorAll('[data-volver]').forEach((btn) =>
+  btn.addEventListener('click', () => mostrarPantalla(btn.dataset.volver))
+);
+
+// ---------- Panel "Avanzado" (Supabase) oculto para jugadores ----------
+// No es algo que un jugador real deba ver — queda escondido, pero accesible para
+// testing: 5 clicks seguidos en el título del mapa lo muestran/ocultan.
+let clicksTitulo = 0, temporizadorClicks = null;
+$('tituloSeleccionNivel').addEventListener('click', () => {
+  clicksTitulo++;
+  clearTimeout(temporizadorClicks);
+  temporizadorClicks = setTimeout(() => (clicksTitulo = 0), 1500);
+  if (clicksTitulo >= 5) {
+    clicksTitulo = 0;
+    $('avanzadoSupabase').hidden = !$('avanzadoSupabase').hidden;
+  }
+});
+$('btnJugar').addEventListener('click', () => mostrarPantalla('pantallaNiveles'));
+$('btnOpciones').addEventListener('click', () => mostrarPantalla('pantallaOpciones'));
+$('btnCreditos').addEventListener('click', () => mostrarPantalla('pantallaCreditos'));
+$('btnReiniciarProgreso').addEventListener('click', () => {
+  if (!confirm(t().reiniciarConfirmar)) return;
+  localStorage.removeItem(CLAVE_PROGRESO);
+  localStorage.removeItem(CLAVE_STATS);
+  alert(t().reiniciarHecho);
+});
+$('btnLogros').addEventListener('click', () => {
+  mostrarPantalla('pantallaLogros');
+  renderLogros();
+});
+$('btnVolverMapa').addEventListener('click', () => {
+  $('overlayFinal').classList.remove('visible');
+  clearInterval(intervaloTimer);
+  mostrarPantalla('pantallaNiveles');
+});
+
+// ---------- Opciones (solo UI por ahora, ver nota en pantalla) ----------
+$('inputVolumen').value = localStorage.getItem('sopa_opt_volumen') ?? 80;
+$('valorVolumen').textContent = $('inputVolumen').value;
+$('inputVolumen').addEventListener('input', (e) => {
+  $('valorVolumen').textContent = e.target.value;
+  localStorage.setItem('sopa_opt_volumen', e.target.value);
+});
+$('inputIdioma').value = idiomaActual;
+$('inputIdioma').addEventListener('change', (e) => {
+  idiomaActual = e.target.value;
+  localStorage.setItem('sopa_opt_idioma', idiomaActual);
+  aplicarIdioma();
+});
+
+$('btnPolitica').addEventListener('click', () => alert(t().alertaPolitica));
+
+// ---------- Contenido: 100 niveles reales desde scripts/contenido-niveles.json ----------
+// La grilla NO se guarda — se genera al jugar con generarGrilla(). Por eso alcanza con
+// tener tematica+palabras por nivel para que los 100 sean jugables, sin Supabase.
+const FORMULA_TIEMPO = {
+  facil: { base: 30, porLetra: 3.5 },
+  medio: { base: 45, porLetra: 3 },
+  dificil: { base: 60, porLetra: 2.5 },
+  extremo: { base: 90, porLetra: 2.2 },
+};
+const redondearA5 = (n) => Math.round(n / 5) * 5;
+function calcularTiempo(dificultad, palabras) {
+  const { base, porLetra } = FORMULA_TIEMPO[dificultad];
+  const totalLetras = palabras.reduce((s, p) => s + GeneradorGrilla.limpiarPalabra(p).length, 0);
+  return redondearA5(base + porLetra * totalLetras);
+}
+const calcularEstrellasDesbloqueo = (nivel) => 2 * (nivel - 1);
+
+let catalogoNiveles = {};
+let idNivelActual = null; // último nivel desbloqueado — a dónde hacer scroll al abrir el mapa
+
+// Fallback por si el fetch falla (por ejemplo, si esta carpeta se sirve sola).
+const CATALOGO_RESPALDO = {
+  demo_facil: {
+    id_nivel: 'demo_facil', titulo: 'Animales (ejemplo)', categoria: 'Animales',
+    dificultad: 'facil', orden: 1, tiempo_limite_segundos: 105, pistas_maximas_gratis: 1,
+    estrellas_para_desbloquear: 0, palabras: ['GATO', 'PERRO', 'RANA', 'PATO', 'LOBO'],
+  },
+};
+
+async function cargarContenidoReal() {
+  let iconoPorNivel = {};
+  try {
+    const rIconos = await fetch(`${RUTA_SPRITES}/mapping.json`);
+    if (rIconos.ok) {
+      const mapa = await rIconos.json();
+      mapa.niveles.forEach((n) => { iconoPorNivel[n.nivel] = n.icono; });
+    }
+  } catch { /* sin íconos no pasa nada, el nodo muestra solo el número */ }
+
+  try {
+    const r = await fetch('scripts/contenido-niveles.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const items = await r.json();
+    const catalogo = {};
+    for (const item of items) {
+      const idNivel = `nivel_${String(item.nivel).padStart(3, '0')}`;
+      catalogo[idNivel] = {
+        id_nivel: idNivel,
+        titulo: item.tematica,
+        categoria: item.tematica,
+        dificultad: item.dificultad,
+        orden: item.nivel,
+        icono: iconoPorNivel[item.nivel] || null,
+        estrellas_para_desbloquear: calcularEstrellasDesbloqueo(item.nivel),
+        tiempo_limite_segundos: calcularTiempo(item.dificultad, item.palabras),
+        pistas_maximas_gratis: item.dificultad === 'extremo' ? 0 : 1,
+        palabras: item.palabras,
+      };
+    }
+    catalogoNiveles = catalogo;
+    $('estadoConexion').textContent = t().contenidoCargado(items.length);
+  } catch (e) {
+    catalogoNiveles = CATALOGO_RESPALDO;
+    $('estadoConexion').textContent = t().contenidoError(e.message);
+  }
+  renderMapaNiveles();
+}
+
+// ---------- Progreso del jugador (local, ver 07-mapa-niveles-y-progreso.md) ----------
+const CLAVE_PROGRESO = 'sopa_progreso';
+function cargarProgreso() {
+  try { return JSON.parse(localStorage.getItem(CLAVE_PROGRESO)) || {}; } catch { return {}; }
+}
+function guardarProgreso(p) { localStorage.setItem(CLAVE_PROGRESO, JSON.stringify(p)); }
+function estrellasTotales(progreso) {
+  return Object.values(progreso).reduce((s, n) => s + (n.mejorEstrellas || 0), 0);
+}
+function registrarResultado(idNivel, estrellas) {
+  const progreso = cargarProgreso();
+  const anterior = progreso[idNivel]?.mejorEstrellas ?? 0;
+  progreso[idNivel] = { completado: true, mejorEstrellas: Math.max(anterior, estrellas) };
+  guardarProgreso(progreso);
+}
+
+// ---------- Estadísticas acumuladas (para los Logros) ----------
+const CLAVE_STATS = 'sopa_stats';
+const STATS_POR_DEFECTO = { palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0 };
+function cargarStats() {
+  try { return { ...STATS_POR_DEFECTO, ...JSON.parse(localStorage.getItem(CLAVE_STATS)) }; }
+  catch { return { ...STATS_POR_DEFECTO }; }
+}
+function guardarStats(s) { localStorage.setItem(CLAVE_STATS, JSON.stringify(s)); }
+function registrarPalabraEncontrada() {
+  const s = cargarStats();
+  s.palabrasTotal++;
+  guardarStats(s);
+}
+function registrarPistaUsada() {
+  const s = cargarStats();
+  s.pistasTotal++;
+  guardarStats(s);
+}
+function registrarSiSinPistas(pistasUsadas) {
+  if (pistasUsadas > 0) return;
+  const s = cargarStats();
+  s.algunoSinPistas = true;
+  s.perfectosContador++;
+  guardarStats(s);
+}
+function registrarAnuncioVisto() {
+  const s = cargarStats();
+  s.anunciosVistos++;
+  guardarStats(s);
+}
+
+// ---------- Conexión a Supabase opcional (mismo patrón que 03-admin-panel/admin.js) ----------
+let supabase = null;
+function cargarCredencialesGuardadas() {
+  const url = localStorage.getItem('sopa_supa_url');
+  const key = localStorage.getItem('sopa_supa_key');
+  if (url) $('supaUrl').value = url;
+  if (key) $('supaKey').value = key;
+  if (url && key) conectar();
+}
+function conectar() {
+  const url = $('supaUrl').value.trim();
+  const key = $('supaKey').value.trim();
+  if (!url || !key) return;
+  supabase = createClient(url, key);
+  localStorage.setItem('sopa_supa_url', url);
+  localStorage.setItem('sopa_supa_key', key);
+  $('btnCargarPublicados').disabled = false;
+  $('estadoConexion').textContent = t().conectando;
+}
+async function cargarNivelesDesdeSupabase() {
+  const { data, error } = await supabase.from('niveles').select('*').eq('estado', 'publicado').order('orden');
+  if (error) { $('estadoConexion').textContent = t().errorConexion(error.message); return; }
+  if (!data.length) { $('estadoConexion').textContent = t().sinPublicados; return; }
+  data.forEach((n) => { catalogoNiveles[n.id_nivel] = n; });
+  $('estadoConexion').textContent = t().publicadosCargados(data.length);
+  renderMapaNiveles();
+}
+$('btnConectar').addEventListener('click', conectar);
+$('btnCargarPublicados').addEventListener('click', cargarNivelesDesdeSupabase);
+
+// ---------- Mapa de niveles ----------
+// Mismos colores que scripts/sopa_de_letras_sprites/mapping.json (difficulty_colors).
+const COLORES_DIFICULTAD = { facil: '#3ecf5e', medio: '#2fb6c4', dificil: '#8b5cf6', extremo: '#e8543e' };
+const ORDEN_DIFICULTADES = ['facil', 'medio', 'dificil', 'extremo'];
+
+function renderFiltrosDificultad(niveles) {
+  const cont = $('filtrosDificultad');
+  cont.innerHTML = '';
+  const presentes = ORDEN_DIFICULTADES.filter((d) => niveles.some((n) => n.dificultad === d));
+  presentes.forEach((dif) => {
+    const btn = document.createElement('button');
+    btn.textContent = t().dificultad[dif];
+    btn.style.borderColor = COLORES_DIFICULTAD[dif];
+    btn.addEventListener('click', () => {
+      document.getElementById('nodo-' + niveles.find((n) => n.dificultad === dif).id_nivel)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    cont.appendChild(btn);
+  });
+}
+
+// ---------- Logros ----------
+// Curados a partir de scripts/logros_sopa_de_letras/logros.jpg (30 trofeos ahí, varios
+// de mecánicas que este juego no tiene — desafíos diarios, temporadas, "fundador").
+// Se usan solo los que corresponden a algo que el juego realmente puede medir.
+// A diferencia de la tanda anterior, ACÁ SÍ hay logros por mirar anuncios — ahora que
+// AdMob está conectado de verdad (ver 05-flujo-pistas-anuncios.md), tiene sentido
+// incentivar explícitamente que se vean: 1, 50 y 200 anuncios (bronce/plata/oro).
+// Tiers: bronce = fácil, plata = moderado, oro = difícil, diamante = lo más difícil
+// de conseguir (superar el modo extremo, terminar el juego entero, sacar todas las
+// estrellas) — no hay logros de diamante "fáciles" a propósito.
+const RUTA_LOGROS = 'assets/logros';
+const LOGROS = [
+  // Bronce
+  { id: 'primeraPalabra', archivo: `${RUTA_LOGROS}/01-primera-palabra.png`, tier: 'bronze',
+    check: (p, s, c) => s.palabrasTotal >= 1 },
+  { id: 'primerPuzzle', archivo: `${RUTA_LOGROS}/02-primer-puzzle.png`, tier: 'bronze',
+    check: (p, s, c) => c.completados >= 1 },
+  { id: 'cincoEstrellas', archivo: `${RUTA_LOGROS}/03-cinco-estrellas.png`, tier: 'bronze',
+    check: (p, s, c) => c.totalesEstrellas >= 5 },
+  { id: 'cienPalabras', archivo: `${RUTA_LOGROS}/04-cien-palabras.png`, tier: 'bronze',
+    check: (p, s, c) => s.palabrasTotal >= 100 },
+  { id: 'primerAnuncio', archivo: `${RUTA_LOGROS}/05-primer-anuncio.png`, tier: 'bronze',
+    check: (p, s, c) => s.anunciosVistos >= 1 },
+  // Plata
+  { id: 'modoMedio', archivo: `${RUTA_LOGROS}/06-modo-medio.png`, tier: 'silver',
+    check: (p, s, c) => c.dificultades.has('medio') },
+  { id: 'diezPerfectos', archivo: `${RUTA_LOGROS}/10-diez-perfectos.png`, tier: 'silver',
+    check: (p, s, c) => s.perfectosContador >= 10 },
+  { id: 'veinteNiveles', archivo: `${RUTA_LOGROS}/09-veinte-niveles.png`, tier: 'silver',
+    check: (p, s, c) => c.completados >= 20 },
+  { id: 'cincuentaAnuncios', archivo: `${RUTA_LOGROS}/12-cincuenta-anuncios.png`, tier: 'silver',
+    check: (p, s, c) => s.anunciosVistos >= 50 },
+  { id: 'quinientasPalabras', archivo: `${RUTA_LOGROS}/11-quinientas-palabras.png`, tier: 'silver',
+    check: (p, s, c) => s.palabrasTotal >= 500 },
+  { id: 'cienAyudas', archivo: `${RUTA_LOGROS}/15b-cien-ayudas.png`, tier: 'silver',
+    check: (p, s, c) => s.pistasTotal >= 100 },
+  // Oro
+  { id: 'modoDificil', archivo: `${RUTA_LOGROS}/07-modo-dificil-tier.png`, tier: 'gold',
+    check: (p, s, c) => c.dificultades.has('dificil') },
+  { id: 'mitadJuego', archivo: `${RUTA_LOGROS}/14-mitad-juego.png`, tier: 'gold',
+    check: (p, s, c) => c.completados >= 50 },
+  { id: 'milPalabras', archivo: `${RUTA_LOGROS}/13-mil-palabras.png`, tier: 'gold',
+    check: (p, s, c) => s.palabrasTotal >= 1000 },
+  { id: 'anuncioSupremo', archivo: `${RUTA_LOGROS}/15-anuncio-supremo.png`, tier: 'gold',
+    check: (p, s, c) => s.anunciosVistos >= 200 },
+  { id: 'facilCompleto', archivo: `${RUTA_LOGROS}/16-facil-completo.png`, tier: 'gold',
+    check: (p, s, c) => (c.porDificultad.facil?.total ?? 0) > 0 && c.porDificultad.facil.completados >= c.porDificultad.facil.total },
+  // Diamante — lo más difícil de conseguir, a propósito.
+  { id: 'modoExtremo', archivo: `${RUTA_LOGROS}/08-modo-extremo.png`, tier: 'diamond',
+    check: (p, s, c) => c.dificultades.has('extremo') },
+  { id: 'nivelFinal', archivo: `${RUTA_LOGROS}/17-nivel-final.png`, tier: 'diamond',
+    check: (p, s, c) => c.totalNiveles > 0 && c.completados >= c.totalNiveles },
+  { id: 'cincoMilPalabras', archivo: `${RUTA_LOGROS}/19-cinco-mil-palabras.png`, tier: 'diamond',
+    check: (p, s, c) => s.palabrasTotal >= 5000 },
+  { id: 'todasLasEstrellas', archivo: 'assets/logro-todas-estrellas.png', tier: 'diamond',
+    check: (p, s, c) => c.totalNiveles > 0 && c.totalesEstrellas >= c.totalNiveles * 3 },
+];
+const COLOR_TIER = { bronze: '#cd7f32', silver: '#c0c0c0', gold: '#ffd700', diamond: '#67e8f9' };
+
+function renderLogros() {
+  const progreso = cargarProgreso();
+  const stats = cargarStats();
+  const niveles = Object.values(catalogoNiveles);
+  const porDificultad = {};
+  ORDEN_DIFICULTADES.forEach((d) => {
+    const deEstaDificultad = niveles.filter((n) => n.dificultad === d);
+    porDificultad[d] = {
+      total: deEstaDificultad.length,
+      completados: deEstaDificultad.filter((n) => (progreso[n.id_nivel]?.mejorEstrellas ?? 0) > 0).length,
+    };
+  });
+  const contexto = {
+    completados: Object.values(progreso).filter((n) => n.completado).length,
+    totalNiveles: niveles.length,
+    totalesEstrellas: estrellasTotales(progreso),
+    porDificultad,
+    dificultades: new Set(
+      Object.keys(progreso)
+        .filter((id) => progreso[id]?.completado)
+        .map((id) => catalogoNiveles[id]?.dificultad)
+        .filter(Boolean)
+    ),
+  };
+
+  const dic = t().logros;
+  const conseguidos = LOGROS.filter((l) => l.check(progreso, stats, contexto)).length;
+  $('logrosResumen').textContent = t().logrosResumen(conseguidos, LOGROS.length);
+
+  const grid = $('logrosGrid');
+  grid.innerHTML = LOGROS.map((l) => {
+    const desbloqueado = l.check(progreso, stats, contexto);
+    const texto = dic[l.id] || { nombre: l.id, desc: '' };
+    return `
+      <div class="logro-card${desbloqueado ? '' : ' bloqueado'}" style="--tier-color:${COLOR_TIER[l.tier]}">
+        <img src="${l.archivo}" alt="${texto.nombre}" />
+        <div class="logro-nombre">${texto.nombre}</div>
+        <div class="logro-desc">${texto.desc}</div>
+        <span class="logro-tier">${l.tier}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderMapaNiveles() {
+  const niveles = Object.values(catalogoNiveles).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  const progreso = cargarProgreso();
+  const totales = estrellasTotales(progreso);
+  $('estrellasJugador').textContent = `⭐ ${totales}`;
+  renderFiltrosDificultad(niveles);
+
+  // Desbloqueo = las DOS cosas a la vez, no una u otra:
+  //  1) haber completado el nivel anterior (nunca se salta ninguno, aunque sobren estrellas)
+  //  2) tener acumuladas las estrellas que pide este nivel (obliga a jugar bien, no solo pasar de largo)
+  // Se calcula en orden porque cada nivel depende de si el anterior quedó desbloqueado Y completado.
+  const desbloqueados = niveles.map((n, i) => {
+    const anteriorCompletado = i === 0 || (progreso[niveles[i - 1].id_nivel]?.mejorEstrellas ?? 0) > 0;
+    return anteriorCompletado && totales >= (n.estrellas_para_desbloquear ?? 0);
+  });
+
+  const cont = $('mapaContainer');
+  const separacionY = 100;
+  const alto = niveles.length * separacionY + 40;
+  cont.style.height = alto + 'px';
+  const svg = $('svgCamino');
+  svg.setAttribute('viewBox', `0 0 420 ${alto}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  const puntoDe = (i) => ({
+    x: i % 2 === 0 ? 420 * 0.68 : 420 * 0.32,
+    y: alto - (i * separacionY + 50),
+  });
+  const puntos = niveles.map((_, i) => puntoDe(i));
+
+  // Un tramo curvo (carretera) por par de nodos consecutivos: tierra/arena si ya se
+  // puede caminar por ahí, apagado/verdoso si todavía está bloqueado. La curva usa
+  // control points alineados en Y con cada extremo, así entra y sale de cada ficha
+  // en vertical — los tramos empalman sin ángulos filosos, como un camino de verdad.
+  const tramos = puntos.slice(0, -1).map((p, i) => {
+    const pSig = puntos[i + 1];
+    const medioY = (p.y + pSig.y) / 2;
+    const curva = `M ${p.x} ${p.y} C ${p.x} ${medioY}, ${pSig.x} ${medioY}, ${pSig.x} ${pSig.y}`;
+    const desbloqueadoTramo = desbloqueados[i];
+    const borde = desbloqueadoTramo ? '#8e5d32' : '#5c6b5c';
+    const relleno = desbloqueadoTramo ? '#e0a265' : '#8a9a8a';
+    const lineaCentral = desbloqueadoTramo
+      ? `<path d="${curva}" fill="none" stroke="#fff8dc" stroke-width="1.5" stroke-dasharray="7 9" stroke-linecap="round" opacity="0.85" />`
+      : '';
+    return `<path d="${curva}" fill="none" stroke="${borde}" stroke-width="14" stroke-linecap="round" />
+            <path d="${curva}" fill="none" stroke="${relleno}" stroke-width="9" stroke-linecap="round" />
+            ${lineaCentral}`;
+  }).join('');
+  svg.innerHTML = tramos;
+
+  cont.querySelectorAll('.nodo').forEach((n) => n.remove());
+
+  let ultimoDesbloqueadoIdx = 0;
+  niveles.forEach((n, i) => {
+    const desbloqueado = desbloqueados[i];
+    if (desbloqueado) ultimoDesbloqueadoIdx = i;
+    const estrellas = progreso[n.id_nivel]?.mejorEstrellas ?? 0;
+    const completado = estrellas > 0;
+
+    const div = document.createElement('div');
+    div.id = 'nodo-' + n.id_nivel;
+    div.className = `nodo dificultad-${n.dificultad} ` + (!desbloqueado ? 'bloqueado' : completado ? 'completado' : 'jugable');
+    const p = puntos[i];
+    div.style.left = p.x + 'px';
+    div.style.top = p.y + 'px';
+
+    // 3 estrellas siempre visibles: llenas las conseguidas, vacías el resto.
+    // Si se consiguieron las 3, se tiñen de naranja como puntaje perfecto.
+    const estrellaImg = !desbloqueado
+      ? ''
+      : `<div class="estrellas-nodo${estrellas === 3 ? ' naranja' : ''}">${[1, 2, 3].map((k) =>
+          k <= estrellas
+            ? `<img class="llena" src="${RUTA_SPRITES}/ui/star_filled.svg" alt="estrella conseguida" />`
+            : `<img src="${RUTA_SPRITES}/ui/star_empty.svg" alt="estrella no conseguida" />`
+        ).join('')}</div>`;
+
+    const contenidoCirculo = !desbloqueado
+      ? ''
+      : n.icono
+        ? `<img class="icono-nivel" src="${RUTA_SPRITES}/icons/${n.icono}__${n.dificultad}.svg" alt="${n.titulo}" /><span class="numero-nivel">${n.orden}</span>`
+        : n.orden;
+
+    // El motivo de bloqueo puede ser cualquiera de las dos condiciones — mostrar
+    // el correcto, para no decir "Necesita X ⭐" cuando en realidad ya las tiene
+    // pero le falta pasar el nivel anterior.
+    let mensajeBloqueo = '';
+    if (!desbloqueado) {
+      const anteriorCompletado = i === 0 || (progreso[niveles[i - 1].id_nivel]?.mejorEstrellas ?? 0) > 0;
+      mensajeBloqueo = anteriorCompletado ? t().necesitaEstrellas(n.estrellas_para_desbloquear) : t().completaAnterior;
+    }
+
+    div.innerHTML = `
+      ${estrellaImg}
+      <div class="circulo">${contenidoCirculo}</div>
+      <div class="etiqueta">${desbloqueado ? n.titulo : mensajeBloqueo}</div>`;
+    if (desbloqueado) {
+      div.addEventListener('click', () => {
+        mostrarPantalla('pantallaJuego');
+        cargarNivel(n.id_nivel);
+      });
+    }
+    cont.appendChild(div);
+  });
+
+  // Guardado para poder centrar la vista ahí la próxima vez que se abra esta pantalla
+  // (mostrarPantalla se encarga del scroll real — ver más abajo). Si se renderiza
+  // estando la pantalla ya visible (cambio de idioma, volver de un nivel), también
+  // centra de una.
+  idNivelActual = niveles[ultimoDesbloqueadoIdx]?.id_nivel ?? null;
+  if (!$('pantallaNiveles').hidden) {
+    setTimeout(() => {
+      document.getElementById('nodo-' + idNivelActual)?.scrollIntoView({ block: 'center' });
+    }, 0);
+  }
+}
+
+// ---------- Estado del juego ----------
+let nivel, palabrasEncontradas, pistasRestantes, tiempoTranscurrido, intervaloTimer;
+let pistasPorAnuncio = 0, cargandoAnuncio = false;
+let arrastrando = false, celdaInicio = null, celdaFin = null;
+
+function cargarNivel(idNivel) {
+  clearInterval(intervaloTimer);
+  const base = catalogoNiveles[idNivel];
+  // Se genera una disposición NUEVA cada vez que se llama — también al Reintentar.
+  // Por eso, si no completás el nivel, la próxima vez las palabras están en otro lado.
+  const grilla = GeneradorGrilla.generarGrilla(base.palabras);
+  nivel = { ...base, ...grilla };
+
+  palabrasEncontradas = new Set();
+  pistasRestantes = nivel.pistas_maximas_gratis;
+  pistasPorAnuncio = 0;
+  tiempoTranscurrido = 0;
+
+  $('badgeDificultad').textContent = t().dificultad[nivel.dificultad].toUpperCase();
+  $('badgeDificultad').style.background = COLORES_DIFICULTAD[nivel.dificultad];
+  $('etiquetaNumeroNivel').textContent = t().nivelNumero(nivel.orden);
+  $('etiquetaCategoria').textContent = nivel.categoria;
+  $('overlayFinal').classList.remove('visible');
+
+  renderGrilla();
+  renderListaPalabras();
+  renderAyuda();
+  actualizarTimer();
+  intervaloTimer = setInterval(tick, 1000);
+}
+
+function renderGrilla() {
+  const cont = $('grilla');
+  cont.innerHTML = '';
+
+  // Tamaño de celda calculado para que la grilla entre en la pantalla — sin esto,
+  // una grilla de muchas columnas (24x24 en extremo) o un celular angosto se corta.
+  const GAP = 3, PADDING_GRILLA = 20, MARGEN_PANTALLA = 40;
+  const anchoDisponible = Math.min(window.innerWidth - MARGEN_PANTALLA, 560);
+  const tamanoCrudo = (anchoDisponible - PADDING_GRILLA - (nivel.columnas - 1) * GAP) / nivel.columnas;
+  const tamanoCelda = Math.max(16, Math.min(40, Math.floor(tamanoCrudo)));
+  const fuenteCelda = Math.max(9, Math.round(tamanoCelda * 0.45));
+
+  cont.style.setProperty('--celda-tam', tamanoCelda + 'px');
+  cont.style.setProperty('--celda-fuente', fuenteCelda + 'px');
+  cont.style.gridTemplateColumns = `repeat(${nivel.columnas}, ${tamanoCelda}px)`;
+
+  for (let f = 0; f < nivel.filas; f++) {
+    for (let c = 0; c < nivel.columnas; c++) {
+      const div = document.createElement('div');
+      div.className = 'celda';
+      div.textContent = nivel.letras[f][c];
+      div.dataset.f = f;
+      div.dataset.c = c;
+      cont.appendChild(div);
+    }
+  }
+}
+window.addEventListener('resize', () => { if (nivel) renderGrilla(); });
+
+function renderListaPalabras() {
+  const ul = $('listaPalabras');
+  ul.innerHTML = '';
+  nivel.palabras_clave.forEach((p) => {
+    const li = document.createElement('li');
+    const encontrada = palabrasEncontradas.has(p.palabra);
+    li.textContent = p.palabra;
+    li.className = encontrada ? 'encontrada' : '';
+    ul.appendChild(li);
+  });
+}
+
+function renderAyuda() {
+  const zona = $('zonaAyuda');
+  if (nivel.dificultad === 'extremo') {
+    zona.innerHTML = `<p class="nota-extremo">${t().notaExtremo}</p>`;
+    return;
+  }
+  zona.innerHTML = `<button id="btnPista"></button>`;
+  actualizarBotonPista();
+  $('btnPista').addEventListener('click', usarPista);
+}
+
+function actualizarBotonPista() {
+  const btn = $('btnPista');
+  if (!btn) return;
+  btn.disabled = cargandoAnuncio;
+  if (cargandoAnuncio) {
+    btn.textContent = t().cargandoAnuncio;
+  } else if (pistasRestantes > 0) {
+    btn.textContent = t().pista(pistasRestantes);
+  } else if (pistasPorAnuncio === 0) {
+    btn.textContent = t().pistaAnuncioChico;
+  } else {
+    btn.textContent = t().pistaAnuncioGrande;
+  }
+}
+
+function revelarPistaEnGrilla() {
+  const pendientes = nivel.palabras_clave.filter((p) => !palabrasEncontradas.has(p.palabra));
+  if (!pendientes.length) return false;
+  const elegida = pendientes[Math.floor(Math.random() * pendientes.length)];
+  const celda = document.querySelector(`.celda[data-f="${elegida.fila_inicio}"][data-c="${elegida.columna_inicio}"]`);
+  celda.classList.add('pista');
+  setTimeout(() => celda.classList.remove('pista'), 1200);
+  return true;
+}
+
+async function usarPista() {
+  if (cargandoAnuncio) return;
+  if (pistasRestantes > 0) {
+    if (!revelarPistaEnGrilla()) return;
+    pistasRestantes--;
+    registrarPistaUsada();
+    actualizarBotonPista();
+    return;
+  }
+  const tipo = pistasPorAnuncio === 0 ? 'chico' : 'grande';
+  cargandoAnuncio = true;
+  actualizarBotonPista();
+  const completo = await mostrarAnuncioRecompensado(tipo);
+  cargandoAnuncio = false;
+  if (completo) {
+    pistasPorAnuncio++;
+    registrarAnuncioVisto();
+    if (revelarPistaEnGrilla()) registrarPistaUsada();
+  } else {
+    alert(t().anuncioFallo);
+  }
+  actualizarBotonPista();
+}
+
+// ---------- Timer ----------
+// Cronómetro que CUENTA HACIA ARRIBA (nunca hace perder el nivel) — cuánto tiempo
+// tardaste define las estrellas al terminar (ver calcularEstrellas), no al revés.
+function tick() {
+  tiempoTranscurrido++;
+  actualizarTimer();
+}
+function actualizarTimer() {
+  const m = Math.floor(tiempoTranscurrido / 60).toString().padStart(2, '0');
+  const s = (tiempoTranscurrido % 60).toString().padStart(2, '0');
+  $('etiquetaTimer').textContent = `⏱ ${m}:${s}`;
+  // Pasado el 80% del tiempo de referencia del nivel ya no se puede sacar 3 estrellas
+  // (ver calcularEstrellas) — el cambio a rojo avisa eso, sin implicar que se pierde nada.
+  const limite = nivel.tiempo_limite_segundos;
+  $('etiquetaTimer').classList.toggle('critico', limite != null && tiempoTranscurrido > limite * 0.8);
+}
+
+// ---------- Selección de palabras (mouse + touch vía Pointer Events) ----------
+function celdaEnPunto(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el && el.classList.contains('celda') ? el : null;
+}
+function limpiarSeleccionVisual() {
+  document.querySelectorAll('.celda.seleccionando').forEach((c) => c.classList.remove('seleccionando'));
+}
+function caminoEntre(f0, c0, f1, c1) {
+  const df = f1 - f0, dc = c1 - c0;
+  const esRecto = df === 0 || dc === 0 || Math.abs(df) === Math.abs(dc);
+  if (!esRecto) return null;
+  const pasos = Math.max(Math.abs(df), Math.abs(dc));
+  const pasoF = pasos === 0 ? 0 : df / pasos;
+  const pasoC = pasos === 0 ? 0 : dc / pasos;
+  const celdas = [];
+  for (let i = 0; i <= pasos; i++) celdas.push({ f: f0 + pasoF * i, c: c0 + pasoC * i });
+  return celdas;
+}
+function onPointerDown(e) {
+  if ($('pantallaJuego').hidden) return;
+  const celda = celdaEnPunto(e.clientX, e.clientY);
+  if (!celda) return;
+  arrastrando = true;
+  celdaInicio = { f: +celda.dataset.f, c: +celda.dataset.c };
+  celdaFin = celdaInicio;
+  limpiarSeleccionVisual();
+  celda.classList.add('seleccionando');
+}
+function onPointerMove(e) {
+  if (!arrastrando) return;
+  const celda = celdaEnPunto(e.clientX, e.clientY);
+  if (!celda) return;
+  const f = +celda.dataset.f, c = +celda.dataset.c;
+  if (f === celdaFin.f && c === celdaFin.c) return;
+  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, f, c);
+  if (!camino) return;
+  celdaFin = { f, c };
+  limpiarSeleccionVisual();
+  camino.forEach(({ f, c }) => {
+    document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.add('seleccionando');
+  });
+}
+function onPointerUp() {
+  if (!arrastrando) return;
+  arrastrando = false;
+  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, celdaFin.f, celdaFin.c);
+  limpiarSeleccionVisual();
+  if (!camino || camino.length < 2) return;
+  const texto = camino.map(({ f, c }) => nivel.letras[f][c]).join('');
+  const textoInverso = texto.split('').reverse().join('');
+  const encontrada = nivel.palabras_clave.find(
+    (p) => !palabrasEncontradas.has(p.palabra) && (p.palabra === texto || p.palabra === textoInverso)
+  );
+  if (!encontrada) return;
+  palabrasEncontradas.add(encontrada.palabra);
+  registrarPalabraEncontrada();
+  const colorIndice = (palabrasEncontradas.size - 1) % 4;
+  camino.forEach(({ f, c }) => {
+    document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.add(`encontrada-${colorIndice}`);
+  });
+  renderListaPalabras();
+  if (palabrasEncontradas.size === nivel.palabras_clave.length) {
+    clearInterval(intervaloTimer);
+    finalizarNivel();
+  }
+}
+document.addEventListener('pointerdown', onPointerDown);
+document.addEventListener('pointermove', onPointerMove);
+document.addEventListener('pointerup', onPointerUp);
+
+// ---------- Fin de nivel + cálculo de estrellas (misma fórmula que 07-mapa-niveles-y-progreso.md) ----------
+function calcularEstrellas(pistasUsadas, tiempoTranscurridoSeg) {
+  const limite = nivel.tiempo_limite_segundos;
+  const sinLimite = limite == null;
+  const porcentajeUsado = sinLimite ? 0 : tiempoTranscurridoSeg / limite;
+  if (pistasUsadas === 0 && porcentajeUsado <= 0.5) return 3;
+  if (pistasUsadas <= 1 && porcentajeUsado <= 0.8) return 2;
+  return 1;
+}
+// Nivel siguiente en orden dentro del catálogo completo (no el filtrado del mapa).
+function siguienteNivelDe(idNivel) {
+  const todos = Object.values(catalogoNiveles).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  const idx = todos.findIndex((n) => n.id_nivel === idNivel);
+  return idx >= 0 ? (todos[idx + 1] ?? null) : null;
+}
+
+function finalizarNivel() {
+  const overlay = $('overlayFinal');
+  $('btnSiguienteNivel').hidden = true;
+  const pistasUsadas = (nivel.pistas_maximas_gratis - pistasRestantes) + pistasPorAnuncio;
+  const estrellas = calcularEstrellas(pistasUsadas, tiempoTranscurrido ?? 0);
+  registrarResultado(nivel.id_nivel, estrellas);
+  registrarSiSinPistas(pistasUsadas);
+  $('tituloFinal').textContent = t().nivelCompletado;
+  const contEstrellas = $('estrellasFinal');
+  contEstrellas.className = `estrellas-final${estrellas === 3 ? ' naranja' : ''}`;
+  contEstrellas.innerHTML = [1, 2, 3].map((k) =>
+    k <= estrellas
+      ? `<img class="llena" src="${RUTA_SPRITES}/ui/star_filled.svg" alt="" />`
+      : `<img src="${RUTA_SPRITES}/ui/star_empty.svg" alt="" />`
+  ).join('');
+  $('detalleFinal').textContent = t().detalleFinal(pistasUsadas, tiempoTranscurrido ?? '—');
+
+  // El botón "Siguiente Nivel" solo aparece si de verdad se puede jugar ya —
+  // acabamos de completar este nivel, así que la única condición que falta
+  // chequear es el umbral de estrellas del siguiente.
+  const siguiente = siguienteNivelDe(nivel.id_nivel);
+  if (siguiente) {
+    const totalesActualizados = estrellasTotales(cargarProgreso());
+    $('btnSiguienteNivel').hidden = totalesActualizados < (siguiente.estrellas_para_desbloquear ?? 0);
+  }
+  overlay.classList.add('visible');
+}
+
+$('btnReintentar').addEventListener('click', () => cargarNivel(nivel.id_nivel));
+$('btnSiguienteNivel').addEventListener('click', () => {
+  const siguiente = siguienteNivelDe(nivel.id_nivel);
+  if (!siguiente) return;
+  $('overlayFinal').classList.remove('visible');
+  cargarNivel(siguiente.id_nivel);
+});
+
+cargarCredencialesGuardadas();
+cargarBotonesMenu().then(aplicarIdioma);
+cargarContenidoReal();
+</script>
+</body>
+</html>

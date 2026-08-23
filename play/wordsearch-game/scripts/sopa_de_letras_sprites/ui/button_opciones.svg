@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="420" height="100">
+  <defs>
+    <linearGradient id="btn_OPCIONES" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7b4fe0"/>
+      <stop offset="100%" stop-color="#5330a8"/>
+    </linearGradient>
+    <linearGradient id="btn_OPCIONES_hi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="8" width="412" height="90" rx="50.0" fill="#140f2e" opacity="0.35"/>
+  <rect x="4" y="4" width="412" height="90" rx="50.0" fill="url(#btn_OPCIONES)" stroke="#5330a8" stroke-width="3"/>
+  <rect x="10" y="9" width="400" height="45.0" rx="45.0" fill="url(#btn_OPCIONES_hi)"/>
+  <text x="210.0" y="54.0" font-family="Verdana, Arial, sans-serif" font-size="34.0" font-weight="700"
+        text-anchor="middle" fill="#ffffff" stroke="#00000030" stroke-width="1">OPCIONES</text>
+</svg>

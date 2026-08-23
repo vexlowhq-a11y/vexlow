@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Word Search — VexlowHQ Games</title>
-<meta name="description" content="A clean, fast word search — pick Easy through Expert (or Numbers), play in English or Spanish, and race the clock.">
+<meta name="description" content="100 hand-picked levels across 4 difficulties — drag to find every word, unlock the next level, and collect achievements along the way.">
+<style>
+  .ws-embed-wrap { max-width: 480px; margin: 24px auto; }
+  .ws-embed-frame { width: 100%; height: 850px; border: none; border-radius: 16px; display: block; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+  @media (max-width: 600px) { .ws-embed-frame { height: 100vh; border-radius: 0; } }
+</style>
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
@@ -138,99 +143,28 @@
 
     <article class="article-page">
       <h1>🔤 Word Search</h1>
-      <p class="play-intro">Pick a difficulty, drag to select words in any direction, and race the clock. Play in English or Spanish.</p>
+      <p class="play-intro">100 hand-picked levels across 4 difficulties — drag to find every word, unlock the next level, and collect achievements along the way.</p>
 
-      <div class="dash-wrap ws-wrap">
-        <div class="dash-hud">
-          <span id="wordsearchTimer">Time: 00:00</span>
-          <span id="wordsearchBest">Best: --:--</span>
-          <button type="button" id="wordsearchHintBtn" class="ws-btn">Hint (3)</button>
-          <button type="button" id="wordsearchGiveUpBtn" class="ws-btn">Give Up</button>
-          <button type="button" id="wordsearchNewGameBtn" class="ws-btn">New Game</button>
-          <button type="button" id="wordsearchSettingsBtn" class="ws-btn">Settings</button>
-        </div>
-
-        <div class="ws-board">
-          <div class="ws-grid-wrap"><div id="wordsearchGrid" class="ws-grid"></div></div>
-          <div class="ws-words-wrap"><ul id="wordsearchWordList" class="ws-word-list"></ul></div>
-        </div>
-      </div>
-
-      <div class="dash-name-modal" id="wordsearchStartModal">
-        <div class="dash-name-card">
-          <h3>🔤 Word Search</h3>
-          <p id="wordsearchStartHint">Choose a difficulty to start</p>
-          <div class="ws-lang-toggle">
-            <button type="button" id="wordsearchLangEn" class="ws-lang-btn active">English</button>
-            <button type="button" id="wordsearchLangEs" class="ws-lang-btn">Español</button>
-          </div>
-          <div class="ws-difficulty-grid" id="wordsearchDifficultyButtons">
-            <button type="button" class="ws-difficulty-btn" data-difficulty="easy">Easy</button>
-            <button type="button" class="ws-difficulty-btn" data-difficulty="medium">Medium</button>
-            <button type="button" class="ws-difficulty-btn" data-difficulty="hard">Hard</button>
-            <button type="button" class="ws-difficulty-btn" data-difficulty="expert">Expert</button>
-            <button type="button" class="ws-difficulty-btn" data-difficulty="numbers">Numbers</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-name-modal hidden" id="wordsearchWinModal">
-        <div class="dash-name-card">
-          <h3>🎉 You solved it!</h3>
-          <p>Your time: <strong id="wordsearchWinTime">00:00</strong></p>
-          <button type="button" id="wordsearchWinPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
-        </div>
-      </div>
-
-      <div class="dash-name-modal hidden" id="wordsearchRevealedModal">
-        <div class="dash-name-card">
-          <h3>👀 Puzzle revealed</h3>
-          <p>Better luck next time — every word is shown on the grid.</p>
-          <button type="button" id="wordsearchRevealedPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
-        </div>
-      </div>
-
-      <div class="dash-name-modal hidden" id="wordsearchNameModal">
-        <div class="dash-name-card">
-          <h3>🏆 Enter your name</h3>
-          <p>This is what shows up on the Word Search leaderboard.</p>
-          <input type="text" id="wordsearchNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
-          <div class="dash-name-actions">
-            <button type="button" id="wordsearchNameSkip" class="dash-name-skip">Skip</button>
-            <button type="button" id="wordsearchNameSave" class="dash-name-save">Save &amp; Play</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-name-modal hidden" id="wordsearchAdBreak">
-        <div class="dash-name-card">
-          <h3>⏸️ Quick break</h3>
-          <button type="button" id="wordsearchAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
-        </div>
-      </div>
-
-      <div class="dash-leaderboard">
-        <h3>🏆 Best Times</h3>
-        <ol class="dash-leaderboard-list" id="wordsearchLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
-        <p class="dash-lb-you" id="wordsearchYouRank" hidden></p>
+      <div class="ws-embed-wrap">
+        <iframe src="wordsearch-game/index.html" class="ws-embed-frame" title="Word Search game" loading="lazy"></iframe>
       </div>
 
       <section class="game-guide">
         <h2>How to play</h2>
-        <p>Pick a difficulty and language from the start screen — grid size and word count scale up from Easy to Expert, and Numbers mode swaps letters for digit sequences. Click or tap a letter and drag in a straight line (horizontal, vertical, or diagonal, either direction) to select a word. A correct match locks in with its own color and gets struck off the list; the clock keeps running until every word is found.</p>
+        <p>Pick a level from the map — levels unlock as you complete the ones before them and collect enough stars. Click or tap a letter and drag in a straight line (horizontal, vertical, or diagonal, either direction) to select a word. A correct match locks in with its own color and gets struck off the list. Solve it fast and hint-free for the full 3 stars.</p>
         <h2>Tips &amp; strategy</h2>
         <ul>
           <li>Scan for uncommon letters first (Q, X, Z, J) — they narrow down where a word could start much faster than scanning row by row.</li>
           <li>Words can run in any of the 8 directions and can be found back-to-front, so don't rule out a match just because it reads backwards.</li>
-          <li>Stuck? Hint reveals one full word's path for a few seconds (up to 3 per puzzle) without marking it found — you still have to trace it yourself.</li>
+          <li>Stars are based on how long you take and how many hints you use — the faster and cleaner you solve it, the more stars you get.</li>
         </ul>
         <h2>Tech specs</h2>
         <ul class="game-tech-specs">
-          <li><b>Type</b>Word search puzzle, timed</li>
+          <li><b>Type</b>Word search puzzle, 100 levels</li>
           <li><b>Controls</b>Mouse drag or touch drag</li>
-          <li><b>Difficulties</b>Easy, Medium, Hard, Expert, Numbers</li>
-          <li><b>Languages</b>English, Spanish</li>
-          <li><b>Scoring</b>Best time, global leaderboard per difficulty</li>
+          <li><b>Difficulties</b>Easy, Medium, Hard, Extreme</li>
+          <li><b>Interface</b>English, Spanish (word content currently in Spanish)</li>
+          <li><b>Scoring</b>Up to 3 stars per level, plus unlockable achievements</li>
         </ul>
       </section>
 
@@ -286,7 +220,5 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
-<script src="../js/wordsearch-data.js?v=1787403095"></script>
-<script src="../js/wordsearch.js?v=1787403095"></script>
 </body>
 </html>

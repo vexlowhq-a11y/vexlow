@@ -1,0 +1,1033 @@
+{
+  "icons": {
+    "frutas": {
+      "label": "Frutas",
+      "file": "icons/frutas.svg"
+    },
+    "animales": {
+      "label": "Animales (huella)",
+      "file": "icons/animales.svg"
+    },
+    "animales_salvajes": {
+      "label": "Animales salvajes",
+      "file": "icons/animales_salvajes.svg"
+    },
+    "animales_marinos": {
+      "label": "Animales marinos",
+      "file": "icons/animales_marinos.svg"
+    },
+    "colores": {
+      "label": "Colores",
+      "file": "icons/colores.svg"
+    },
+    "comida": {
+      "label": "Comida",
+      "file": "icons/comida.svg"
+    },
+    "casa": {
+      "label": "Casa",
+      "file": "icons/casa.svg"
+    },
+    "ropa": {
+      "label": "Ropa",
+      "file": "icons/ropa.svg"
+    },
+    "escuela": {
+      "label": "Escuela",
+      "file": "icons/escuela.svg"
+    },
+    "naturaleza": {
+      "label": "Naturaleza",
+      "file": "icons/naturaleza.svg"
+    },
+    "cuerpo": {
+      "label": "Cuerpo humano",
+      "file": "icons/cuerpo.svg"
+    },
+    "transporte": {
+      "label": "Transporte",
+      "file": "icons/transporte.svg"
+    },
+    "bebidas": {
+      "label": "Bebidas",
+      "file": "icons/bebidas.svg"
+    },
+    "muebles": {
+      "label": "Muebles",
+      "file": "icons/muebles.svg"
+    },
+    "clima": {
+      "label": "Clima",
+      "file": "icons/clima.svg"
+    },
+    "playa": {
+      "label": "Playa",
+      "file": "icons/playa.svg"
+    },
+    "juguetes": {
+      "label": "Juguetes",
+      "file": "icons/juguetes.svg"
+    },
+    "cocina": {
+      "label": "Cocina",
+      "file": "icons/cocina.svg"
+    },
+    "jardin": {
+      "label": "Jardin",
+      "file": "icons/jardin.svg"
+    },
+    "oficios": {
+      "label": "Oficios / Profesiones",
+      "file": "icons/oficios.svg"
+    },
+    "musica": {
+      "label": "Musica",
+      "file": "icons/musica.svg"
+    },
+    "deportes": {
+      "label": "Deportes",
+      "file": "icons/deportes.svg"
+    },
+    "espacio": {
+      "label": "Espacio",
+      "file": "icons/espacio.svg"
+    },
+    "espacio_profundo": {
+      "label": "Espacio profundo / Universo",
+      "file": "icons/espacio_profundo.svg"
+    },
+    "insectos": {
+      "label": "Insectos",
+      "file": "icons/insectos.svg"
+    },
+    "ciudad": {
+      "label": "Ciudad",
+      "file": "icons/ciudad.svg"
+    },
+    "acciones": {
+      "label": "Acciones",
+      "file": "icons/acciones.svg"
+    },
+    "objetos": {
+      "label": "Objetos",
+      "file": "icons/objetos.svg"
+    },
+    "viajes": {
+      "label": "Viajes",
+      "file": "icons/viajes.svg"
+    },
+    "ciencia": {
+      "label": "Ciencia / Ciencia avanzada",
+      "file": "icons/ciencia.svg"
+    },
+    "videojuegos": {
+      "label": "Videojuegos",
+      "file": "icons/videojuegos.svg"
+    },
+    "fantasia": {
+      "label": "Fantasia",
+      "file": "icons/fantasia.svg"
+    },
+    "herramientas": {
+      "label": "Herramientas",
+      "file": "icons/herramientas.svg"
+    },
+    "entretenimiento": {
+      "label": "Entretenimiento",
+      "file": "icons/entretenimiento.svg"
+    },
+    "tecnologia": {
+      "label": "Tecnologia",
+      "file": "icons/tecnologia.svg"
+    },
+    "astronomia": {
+      "label": "Astronomia",
+      "file": "icons/astronomia.svg"
+    },
+    "medicina": {
+      "label": "Medicina / Medicina avanzada",
+      "file": "icons/medicina.svg"
+    },
+    "ingenieria": {
+      "label": "Ingenieria / Industria",
+      "file": "icons/ingenieria.svg"
+    },
+    "programacion": {
+      "label": "Programacion",
+      "file": "icons/programacion.svg"
+    },
+    "historia": {
+      "label": "Historia",
+      "file": "icons/historia.svg"
+    },
+    "geografia": {
+      "label": "Geografia",
+      "file": "icons/geografia.svg"
+    },
+    "ciberseguridad": {
+      "label": "Ciberseguridad",
+      "file": "icons/ciberseguridad.svg"
+    },
+    "economia": {
+      "label": "Economia",
+      "file": "icons/economia.svg"
+    },
+    "arquitectura": {
+      "label": "Arquitectura",
+      "file": "icons/arquitectura.svg"
+    },
+    "fisica": {
+      "label": "Fisica",
+      "file": "icons/fisica.svg"
+    },
+    "biologia": {
+      "label": "Biologia",
+      "file": "icons/biologia.svg"
+    },
+    "robotica": {
+      "label": "Robotica",
+      "file": "icons/robotica.svg"
+    },
+    "quimica": {
+      "label": "Quimica",
+      "file": "icons/quimica.svg"
+    },
+    "medio_ambiente": {
+      "label": "Medio ambiente",
+      "file": "icons/medio_ambiente.svg"
+    },
+    "comunicacion": {
+      "label": "Comunicacion",
+      "file": "icons/comunicacion.svg"
+    },
+    "geologia": {
+      "label": "Geologia",
+      "file": "icons/geologia.svg"
+    },
+    "psicologia": {
+      "label": "Psicologia",
+      "file": "icons/psicologia.svg"
+    },
+    "inteligencia_artificial": {
+      "label": "Inteligencia artificial",
+      "file": "icons/inteligencia_artificial.svg"
+    },
+    "innovacion": {
+      "label": "Innovacion",
+      "file": "icons/innovacion.svg"
+    },
+    "desafio_final": {
+      "label": "Desafio final",
+      "file": "icons/desafio_final.svg"
+    }
+  },
+  "difficulty_colors": {
+    "facil": "#3ecf5e",
+    "medio": "#2fb6c4",
+    "dificil": "#8b5cf6",
+    "extremo": "#e8543e"
+  },
+  "niveles": [
+    {
+      "nivel": 1,
+      "dificultad": "facil",
+      "tematica": "Frutas",
+      "icono": "frutas",
+      "archivo_icono": "icons/frutas.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 2,
+      "dificultad": "facil",
+      "tematica": "Animales",
+      "icono": "animales",
+      "archivo_icono": "icons/animales.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 3,
+      "dificultad": "facil",
+      "tematica": "Colores",
+      "icono": "colores",
+      "archivo_icono": "icons/colores.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 4,
+      "dificultad": "facil",
+      "tematica": "Comida",
+      "icono": "comida",
+      "archivo_icono": "icons/comida.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 5,
+      "dificultad": "facil",
+      "tematica": "Casa",
+      "icono": "casa",
+      "archivo_icono": "icons/casa.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 6,
+      "dificultad": "facil",
+      "tematica": "Ropa",
+      "icono": "ropa",
+      "archivo_icono": "icons/ropa.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 7,
+      "dificultad": "facil",
+      "tematica": "Escuela",
+      "icono": "escuela",
+      "archivo_icono": "icons/escuela.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 8,
+      "dificultad": "facil",
+      "tematica": "Naturaleza",
+      "icono": "naturaleza",
+      "archivo_icono": "icons/naturaleza.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 9,
+      "dificultad": "facil",
+      "tematica": "Cuerpo",
+      "icono": "cuerpo",
+      "archivo_icono": "icons/cuerpo.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 10,
+      "dificultad": "facil",
+      "tematica": "Transporte",
+      "icono": "transporte",
+      "archivo_icono": "icons/transporte.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 11,
+      "dificultad": "facil",
+      "tematica": "Bebidas",
+      "icono": "bebidas",
+      "archivo_icono": "icons/bebidas.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 12,
+      "dificultad": "facil",
+      "tematica": "Muebles",
+      "icono": "muebles",
+      "archivo_icono": "icons/muebles.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 13,
+      "dificultad": "facil",
+      "tematica": "Clima",
+      "icono": "clima",
+      "archivo_icono": "icons/clima.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 14,
+      "dificultad": "facil",
+      "tematica": "Playa",
+      "icono": "playa",
+      "archivo_icono": "icons/playa.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 15,
+      "dificultad": "facil",
+      "tematica": "Juguetes",
+      "icono": "juguetes",
+      "archivo_icono": "icons/juguetes.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 16,
+      "dificultad": "facil",
+      "tematica": "Cocina",
+      "icono": "cocina",
+      "archivo_icono": "icons/cocina.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 17,
+      "dificultad": "facil",
+      "tematica": "Jardin",
+      "icono": "jardin",
+      "archivo_icono": "icons/jardin.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 18,
+      "dificultad": "facil",
+      "tematica": "Oficios",
+      "icono": "oficios",
+      "archivo_icono": "icons/oficios.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 19,
+      "dificultad": "facil",
+      "tematica": "Musica",
+      "icono": "musica",
+      "archivo_icono": "icons/musica.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 20,
+      "dificultad": "facil",
+      "tematica": "Deportes",
+      "icono": "deportes",
+      "archivo_icono": "icons/deportes.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 21,
+      "dificultad": "facil",
+      "tematica": "Espacio",
+      "icono": "espacio",
+      "archivo_icono": "icons/espacio.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 22,
+      "dificultad": "facil",
+      "tematica": "Insectos",
+      "icono": "insectos",
+      "archivo_icono": "icons/insectos.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 23,
+      "dificultad": "facil",
+      "tematica": "Ciudad",
+      "icono": "ciudad",
+      "archivo_icono": "icons/ciudad.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 24,
+      "dificultad": "facil",
+      "tematica": "Acciones",
+      "icono": "acciones",
+      "archivo_icono": "icons/acciones.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 25,
+      "dificultad": "facil",
+      "tematica": "Objetos",
+      "icono": "objetos",
+      "archivo_icono": "icons/objetos.svg",
+      "color_dificultad": "#3ecf5e"
+    },
+    {
+      "nivel": 26,
+      "dificultad": "medio",
+      "tematica": "Animales salvajes",
+      "icono": "animales_salvajes",
+      "archivo_icono": "icons/animales_salvajes.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 27,
+      "dificultad": "medio",
+      "tematica": "Frutas tropicales",
+      "icono": "frutas",
+      "archivo_icono": "icons/frutas.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 28,
+      "dificultad": "medio",
+      "tematica": "Vehiculos",
+      "icono": "transporte",
+      "archivo_icono": "icons/transporte.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 29,
+      "dificultad": "medio",
+      "tematica": "Profesiones",
+      "icono": "oficios",
+      "archivo_icono": "icons/oficios.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 30,
+      "dificultad": "medio",
+      "tematica": "Tecnologia",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 31,
+      "dificultad": "medio",
+      "tematica": "Naturaleza",
+      "icono": "naturaleza",
+      "archivo_icono": "icons/naturaleza.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 32,
+      "dificultad": "medio",
+      "tematica": "Cocina",
+      "icono": "cocina",
+      "archivo_icono": "icons/cocina.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 33,
+      "dificultad": "medio",
+      "tematica": "Deportes",
+      "icono": "deportes",
+      "archivo_icono": "icons/deportes.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 34,
+      "dificultad": "medio",
+      "tematica": "Espacio",
+      "icono": "espacio",
+      "archivo_icono": "icons/espacio.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 35,
+      "dificultad": "medio",
+      "tematica": "Musica",
+      "icono": "musica",
+      "archivo_icono": "icons/musica.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 36,
+      "dificultad": "medio",
+      "tematica": "Ropa",
+      "icono": "ropa",
+      "archivo_icono": "icons/ropa.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 37,
+      "dificultad": "medio",
+      "tematica": "Escuela",
+      "icono": "escuela",
+      "archivo_icono": "icons/escuela.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 38,
+      "dificultad": "medio",
+      "tematica": "Animales marinos",
+      "icono": "animales_marinos",
+      "archivo_icono": "icons/animales_marinos.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 39,
+      "dificultad": "medio",
+      "tematica": "Casa",
+      "icono": "casa",
+      "archivo_icono": "icons/casa.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 40,
+      "dificultad": "medio",
+      "tematica": "Viajes",
+      "icono": "viajes",
+      "archivo_icono": "icons/viajes.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 41,
+      "dificultad": "medio",
+      "tematica": "Cuerpo humano",
+      "icono": "cuerpo",
+      "archivo_icono": "icons/cuerpo.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 42,
+      "dificultad": "medio",
+      "tematica": "Ciudad",
+      "icono": "ciudad",
+      "archivo_icono": "icons/ciudad.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 43,
+      "dificultad": "medio",
+      "tematica": "Ciencia",
+      "icono": "ciencia",
+      "archivo_icono": "icons/ciencia.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 44,
+      "dificultad": "medio",
+      "tematica": "Videojuegos",
+      "icono": "videojuegos",
+      "archivo_icono": "icons/videojuegos.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 45,
+      "dificultad": "medio",
+      "tematica": "Fantasia",
+      "icono": "fantasia",
+      "archivo_icono": "icons/fantasia.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 46,
+      "dificultad": "medio",
+      "tematica": "Mar y playa",
+      "icono": "playa",
+      "archivo_icono": "icons/playa.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 47,
+      "dificultad": "medio",
+      "tematica": "Herramientas",
+      "icono": "herramientas",
+      "archivo_icono": "icons/herramientas.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 48,
+      "dificultad": "medio",
+      "tematica": "Clima",
+      "icono": "clima",
+      "archivo_icono": "icons/clima.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 49,
+      "dificultad": "medio",
+      "tematica": "Entretenimiento",
+      "icono": "entretenimiento",
+      "archivo_icono": "icons/entretenimiento.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 50,
+      "dificultad": "medio",
+      "tematica": "Computacion",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#2fb6c4"
+    },
+    {
+      "nivel": 51,
+      "dificultad": "dificil",
+      "tematica": "Ciencia",
+      "icono": "ciencia",
+      "archivo_icono": "icons/ciencia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 52,
+      "dificultad": "dificil",
+      "tematica": "Tecnologia",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 53,
+      "dificultad": "dificil",
+      "tematica": "Astronomia",
+      "icono": "astronomia",
+      "archivo_icono": "icons/astronomia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 54,
+      "dificultad": "dificil",
+      "tematica": "Medicina",
+      "icono": "medicina",
+      "archivo_icono": "icons/medicina.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 55,
+      "dificultad": "dificil",
+      "tematica": "Ingenieria",
+      "icono": "ingenieria",
+      "archivo_icono": "icons/ingenieria.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 56,
+      "dificultad": "dificil",
+      "tematica": "Programacion",
+      "icono": "programacion",
+      "archivo_icono": "icons/programacion.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 57,
+      "dificultad": "dificil",
+      "tematica": "Naturaleza",
+      "icono": "naturaleza",
+      "archivo_icono": "icons/naturaleza.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 58,
+      "dificultad": "dificil",
+      "tematica": "Historia",
+      "icono": "historia",
+      "archivo_icono": "icons/historia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 59,
+      "dificultad": "dificil",
+      "tematica": "Geografia",
+      "icono": "geografia",
+      "archivo_icono": "icons/geografia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 60,
+      "dificultad": "dificil",
+      "tematica": "Videojuegos",
+      "icono": "videojuegos",
+      "archivo_icono": "icons/videojuegos.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 61,
+      "dificultad": "dificil",
+      "tematica": "Ciberseguridad",
+      "icono": "ciberseguridad",
+      "archivo_icono": "icons/ciberseguridad.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 62,
+      "dificultad": "dificil",
+      "tematica": "Economia",
+      "icono": "economia",
+      "archivo_icono": "icons/economia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 63,
+      "dificultad": "dificil",
+      "tematica": "Arquitectura",
+      "icono": "arquitectura",
+      "archivo_icono": "icons/arquitectura.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 64,
+      "dificultad": "dificil",
+      "tematica": "Fisica",
+      "icono": "fisica",
+      "archivo_icono": "icons/fisica.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 65,
+      "dificultad": "dificil",
+      "tematica": "Biologia",
+      "icono": "biologia",
+      "archivo_icono": "icons/biologia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 66,
+      "dificultad": "dificil",
+      "tematica": "Robotica",
+      "icono": "robotica",
+      "archivo_icono": "icons/robotica.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 67,
+      "dificultad": "dificil",
+      "tematica": "Quimica",
+      "icono": "quimica",
+      "archivo_icono": "icons/quimica.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 68,
+      "dificultad": "dificil",
+      "tematica": "Medio ambiente",
+      "icono": "medio_ambiente",
+      "archivo_icono": "icons/medio_ambiente.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 69,
+      "dificultad": "dificil",
+      "tematica": "Comunicacion",
+      "icono": "comunicacion",
+      "archivo_icono": "icons/comunicacion.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 70,
+      "dificultad": "dificil",
+      "tematica": "Ingenieria informatica",
+      "icono": "ingenieria",
+      "archivo_icono": "icons/ingenieria.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 71,
+      "dificultad": "dificil",
+      "tematica": "Geologia",
+      "icono": "geologia",
+      "archivo_icono": "icons/geologia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 72,
+      "dificultad": "dificil",
+      "tematica": "Psicologia",
+      "icono": "psicologia",
+      "archivo_icono": "icons/psicologia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 73,
+      "dificultad": "dificil",
+      "tematica": "Industria",
+      "icono": "ingenieria",
+      "archivo_icono": "icons/ingenieria.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 74,
+      "dificultad": "dificil",
+      "tematica": "Inteligencia artificial",
+      "icono": "inteligencia_artificial",
+      "archivo_icono": "icons/inteligencia_artificial.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 75,
+      "dificultad": "dificil",
+      "tematica": "Tecnologia del futuro",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#8b5cf6"
+    },
+    {
+      "nivel": 76,
+      "dificultad": "extremo",
+      "tematica": "Tecnologia avanzada",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 77,
+      "dificultad": "extremo",
+      "tematica": "Astronomia",
+      "icono": "astronomia",
+      "archivo_icono": "icons/astronomia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 78,
+      "dificultad": "extremo",
+      "tematica": "Biologia",
+      "icono": "biologia",
+      "archivo_icono": "icons/biologia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 79,
+      "dificultad": "extremo",
+      "tematica": "Medicina",
+      "icono": "medicina",
+      "archivo_icono": "icons/medicina.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 80,
+      "dificultad": "extremo",
+      "tematica": "Ingenieria",
+      "icono": "ingenieria",
+      "archivo_icono": "icons/ingenieria.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 81,
+      "dificultad": "extremo",
+      "tematica": "Ciberseguridad",
+      "icono": "ciberseguridad",
+      "archivo_icono": "icons/ciberseguridad.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 82,
+      "dificultad": "extremo",
+      "tematica": "Inteligencia artificial",
+      "icono": "inteligencia_artificial",
+      "archivo_icono": "icons/inteligencia_artificial.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 83,
+      "dificultad": "extremo",
+      "tematica": "Geografia",
+      "icono": "geografia",
+      "archivo_icono": "icons/geografia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 84,
+      "dificultad": "extremo",
+      "tematica": "Historia",
+      "icono": "historia",
+      "archivo_icono": "icons/historia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 85,
+      "dificultad": "extremo",
+      "tematica": "Fisica",
+      "icono": "fisica",
+      "archivo_icono": "icons/fisica.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 86,
+      "dificultad": "extremo",
+      "tematica": "Quimica",
+      "icono": "quimica",
+      "archivo_icono": "icons/quimica.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 87,
+      "dificultad": "extremo",
+      "tematica": "Medio ambiente",
+      "icono": "medio_ambiente",
+      "archivo_icono": "icons/medio_ambiente.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 88,
+      "dificultad": "extremo",
+      "tematica": "Videojuegos",
+      "icono": "videojuegos",
+      "archivo_icono": "icons/videojuegos.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 89,
+      "dificultad": "extremo",
+      "tematica": "Arquitectura",
+      "icono": "arquitectura",
+      "archivo_icono": "icons/arquitectura.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 90,
+      "dificultad": "extremo",
+      "tematica": "Economia",
+      "icono": "economia",
+      "archivo_icono": "icons/economia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 91,
+      "dificultad": "extremo",
+      "tematica": "Psicologia",
+      "icono": "psicologia",
+      "archivo_icono": "icons/psicologia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 92,
+      "dificultad": "extremo",
+      "tematica": "Robotica",
+      "icono": "robotica",
+      "archivo_icono": "icons/robotica.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 93,
+      "dificultad": "extremo",
+      "tematica": "Espacio profundo",
+      "icono": "espacio_profundo",
+      "archivo_icono": "icons/espacio_profundo.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 94,
+      "dificultad": "extremo",
+      "tematica": "Programacion",
+      "icono": "programacion",
+      "archivo_icono": "icons/programacion.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 95,
+      "dificultad": "extremo",
+      "tematica": "Ciencia avanzada",
+      "icono": "ciencia",
+      "archivo_icono": "icons/ciencia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 96,
+      "dificultad": "extremo",
+      "tematica": "Tecnologia futurista",
+      "icono": "tecnologia",
+      "archivo_icono": "icons/tecnologia.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 97,
+      "dificultad": "extremo",
+      "tematica": "Medicina avanzada",
+      "icono": "medicina",
+      "archivo_icono": "icons/medicina.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 98,
+      "dificultad": "extremo",
+      "tematica": "Universo",
+      "icono": "espacio_profundo",
+      "archivo_icono": "icons/espacio_profundo.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 99,
+      "dificultad": "extremo",
+      "tematica": "Innovacion",
+      "icono": "innovacion",
+      "archivo_icono": "icons/innovacion.svg",
+      "color_dificultad": "#e8543e"
+    },
+    {
+      "nivel": 100,
+      "dificultad": "extremo",
+      "tematica": "Desafio final",
+      "icono": "desafio_final",
+      "archivo_icono": "icons/desafio_final.svg",
+      "color_dificultad": "#e8543e"
+    }
+  ],
+  "temáticas_sin_icono": []
+}

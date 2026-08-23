@@ -1,0 +1,1577 @@
+[
+  {
+    "nivel": 1,
+    "dificultad": "facil",
+    "tematica": "Frutas",
+    "palabras": [
+      "MANZANA",
+      "PERA",
+      "UVA",
+      "KIWI",
+      "LIMA",
+      "FRESA"
+    ]
+  },
+  {
+    "nivel": 2,
+    "dificultad": "facil",
+    "tematica": "Animales",
+    "palabras": [
+      "GATO",
+      "PERRO",
+      "RANA",
+      "PATO",
+      "LOBO",
+      "OSO"
+    ]
+  },
+  {
+    "nivel": 3,
+    "dificultad": "facil",
+    "tematica": "Colores",
+    "palabras": [
+      "ROJO",
+      "AZUL",
+      "VERDE",
+      "ROSA",
+      "GRIS",
+      "NEGRO"
+    ]
+  },
+  {
+    "nivel": 4,
+    "dificultad": "facil",
+    "tematica": "Comida",
+    "palabras": [
+      "PAN",
+      "ARROZ",
+      "SOPA",
+      "PIZZA",
+      "QUESO",
+      "TACO"
+    ]
+  },
+  {
+    "nivel": 5,
+    "dificultad": "facil",
+    "tematica": "Casa",
+    "palabras": [
+      "MESA",
+      "SILLA",
+      "CAMA",
+      "SOFA",
+      "TECHO",
+      "PUERTA"
+    ]
+  },
+  {
+    "nivel": 6,
+    "dificultad": "facil",
+    "tematica": "Ropa",
+    "palabras": [
+      "PANTALON",
+      "CAMISA",
+      "GORRA",
+      "FALDA",
+      "BOTAS",
+      "GUANTE"
+    ]
+  },
+  {
+    "nivel": 7,
+    "dificultad": "facil",
+    "tematica": "Escuela",
+    "palabras": [
+      "LIBRO",
+      "LAPIZ",
+      "REGLA",
+      "PIZARRA",
+      "CLASE",
+      "GOMA"
+    ]
+  },
+  {
+    "nivel": 8,
+    "dificultad": "facil",
+    "tematica": "Naturaleza",
+    "palabras": [
+      "FLOR",
+      "ARBOL",
+      "HOJA",
+      "RIO",
+      "LAGO",
+      "PIEDRA"
+    ]
+  },
+  {
+    "nivel": 9,
+    "dificultad": "facil",
+    "tematica": "Cuerpo",
+    "palabras": [
+      "MANO",
+      "PIE",
+      "BOCA",
+      "CARA",
+      "BRAZO",
+      "OJO"
+    ]
+  },
+  {
+    "nivel": 10,
+    "dificultad": "facil",
+    "tematica": "Transporte",
+    "palabras": [
+      "AUTO",
+      "TREN",
+      "MOTO",
+      "TAXI",
+      "BARCO",
+      "AVION"
+    ]
+  },
+  {
+    "nivel": 11,
+    "dificultad": "facil",
+    "tematica": "Bebidas",
+    "palabras": [
+      "AGUA",
+      "CAFE",
+      "TE",
+      "JUGO",
+      "LECHE",
+      "SODA"
+    ]
+  },
+  {
+    "nivel": 12,
+    "dificultad": "facil",
+    "tematica": "Muebles",
+    "palabras": [
+      "MESA",
+      "CAMA",
+      "SOFA",
+      "BANCO",
+      "ARMARIO",
+      "SILLA"
+    ]
+  },
+  {
+    "nivel": 13,
+    "dificultad": "facil",
+    "tematica": "Clima",
+    "palabras": [
+      "SOL",
+      "LLUVIA",
+      "NUBE",
+      "NIEVE",
+      "VIENTO",
+      "FRIO"
+    ]
+  },
+  {
+    "nivel": 14,
+    "dificultad": "facil",
+    "tematica": "Playa",
+    "palabras": [
+      "MAR",
+      "OLA",
+      "ARENA",
+      "SOL",
+      "ISLA",
+      "TOALLA"
+    ]
+  },
+  {
+    "nivel": 15,
+    "dificultad": "facil",
+    "tematica": "Juguetes",
+    "palabras": [
+      "DADO",
+      "BALON",
+      "MUNECA",
+      "CUBO",
+      "TREN",
+      "COMETA"
+    ]
+  },
+  {
+    "nivel": 16,
+    "dificultad": "facil",
+    "tematica": "Cocina",
+    "palabras": [
+      "VASO",
+      "TAZA",
+      "PLATO",
+      "TENEDOR",
+      "OLLA",
+      "CUCHARA"
+    ]
+  },
+  {
+    "nivel": 17,
+    "dificultad": "facil",
+    "tematica": "Jardin",
+    "palabras": [
+      "ROSA",
+      "FLOR",
+      "TULIPAN",
+      "RAMO",
+      "CESPED",
+      "MACETA"
+    ]
+  },
+  {
+    "nivel": 18,
+    "dificultad": "facil",
+    "tematica": "Oficios",
+    "palabras": [
+      "CHEF",
+      "MEDICO",
+      "PILOTO",
+      "JUEZ",
+      "ACTOR",
+      "POLICIA"
+    ]
+  },
+  {
+    "nivel": 19,
+    "dificultad": "facil",
+    "tematica": "Musica",
+    "palabras": [
+      "PIANO",
+      "VIOLIN",
+      "RITMO",
+      "NOTA",
+      "CANTO",
+      "TAMBOR"
+    ]
+  },
+  {
+    "nivel": 20,
+    "dificultad": "facil",
+    "tematica": "Deportes",
+    "palabras": [
+      "FUTBOL",
+      "TENIS",
+      "GOLF",
+      "BOXEO",
+      "RUGBY",
+      "VOLEY"
+    ]
+  },
+  {
+    "nivel": 21,
+    "dificultad": "facil",
+    "tematica": "Espacio",
+    "palabras": [
+      "LUNA",
+      "SOL",
+      "MARTE",
+      "ESTRELLA",
+      "CIELO",
+      "PLANETA"
+    ]
+  },
+  {
+    "nivel": 22,
+    "dificultad": "facil",
+    "tematica": "Insectos",
+    "palabras": [
+      "ABEJA",
+      "MOSCA",
+      "HORMIGA",
+      "POLILLA",
+      "GRILLO",
+      "TERMITA"
+    ]
+  },
+  {
+    "nivel": 23,
+    "dificultad": "facil",
+    "tematica": "Ciudad",
+    "palabras": [
+      "CALLE",
+      "PLAZA",
+      "PARQUE",
+      "TORRE",
+      "HOTEL",
+      "PUENTE"
+    ]
+  },
+  {
+    "nivel": 24,
+    "dificultad": "facil",
+    "tematica": "Acciones",
+    "palabras": [
+      "CORRER",
+      "SALTAR",
+      "COMER",
+      "DORMIR",
+      "JUGAR",
+      "NADAR"
+    ]
+  },
+  {
+    "nivel": 25,
+    "dificultad": "facil",
+    "tematica": "Objetos",
+    "palabras": [
+      "RELOJ",
+      "LLAVE",
+      "VASO",
+      "BOLSA",
+      "PAPEL",
+      "CAJA"
+    ]
+  },
+  {
+    "nivel": 26,
+    "dificultad": "medio",
+    "tematica": "Animales salvajes",
+    "palabras": [
+      "TIGRES",
+      "JIRAFA",
+      "LEOPARDO",
+      "GORILAS",
+      "ELEFANTE",
+      "PANTERA",
+      "COYOTE"
+    ]
+  },
+  {
+    "nivel": 27,
+    "dificultad": "medio",
+    "tematica": "Frutas tropicales",
+    "palabras": [
+      "BANANA",
+      "PAPAYA",
+      "MANGO",
+      "COCO",
+      "GUAYABA",
+      "ANANAS",
+      "MARACUYA"
+    ]
+  },
+  {
+    "nivel": 28,
+    "dificultad": "medio",
+    "tematica": "Vehiculos",
+    "palabras": [
+      "CAMION",
+      "AVION",
+      "SUBTE",
+      "BICICLETA",
+      "COCHE",
+      "TRACTOR",
+      "HELICOPTERO"
+    ]
+  },
+  {
+    "nivel": 29,
+    "dificultad": "medio",
+    "tematica": "Profesiones",
+    "palabras": [
+      "DOCTOR",
+      "ABOGADO",
+      "PILOTO",
+      "MUSICO",
+      "ACTORES",
+      "PINTOR",
+      "CHEF"
+    ]
+  },
+  {
+    "nivel": 30,
+    "dificultad": "medio",
+    "tematica": "Tecnologia",
+    "palabras": [
+      "TECLADO",
+      "PANTALLA",
+      "RATON",
+      "SERVIDOR",
+      "PROGRAMA",
+      "ARCHIVO",
+      "SISTEMA"
+    ]
+  },
+  {
+    "nivel": 31,
+    "dificultad": "medio",
+    "tematica": "Naturaleza",
+    "palabras": [
+      "MONTANA",
+      "BOSQUES",
+      "DESIERTO",
+      "VOLCAN",
+      "GLACIAR",
+      "CASCADA",
+      "PRADERA"
+    ]
+  },
+  {
+    "nivel": 32,
+    "dificultad": "medio",
+    "tematica": "Cocina",
+    "palabras": [
+      "SARTEN",
+      "CUCHILLO",
+      "TETERA",
+      "HORNO",
+      "PLATOS",
+      "OLLAS",
+      "BATIDOR"
+    ]
+  },
+  {
+    "nivel": 33,
+    "dificultad": "medio",
+    "tematica": "Deportes",
+    "palabras": [
+      "FUTBOL",
+      "TENISTA",
+      "CARRERA",
+      "NATACION",
+      "BOXEO",
+      "ATLETA",
+      "GIMNASIO"
+    ]
+  },
+  {
+    "nivel": 34,
+    "dificultad": "medio",
+    "tematica": "Espacio",
+    "palabras": [
+      "PLANETA",
+      "GALAXIA",
+      "ASTEROIDE",
+      "COMETA",
+      "SATELITE",
+      "COSMOS",
+      "ORBITA"
+    ]
+  },
+  {
+    "nivel": 35,
+    "dificultad": "medio",
+    "tematica": "Musica",
+    "palabras": [
+      "GUITARRA",
+      "PIANO",
+      "BATERIA",
+      "VIOLINES",
+      "MELODIA",
+      "ARMONIA",
+      "CANTANTE"
+    ]
+  },
+  {
+    "nivel": 36,
+    "dificultad": "medio",
+    "tematica": "Ropa",
+    "palabras": [
+      "CAMISAS",
+      "PANTALON",
+      "CHAQUETA",
+      "VESTIDO",
+      "ZAPATOS",
+      "CORBATA",
+      "BUFANDA"
+    ]
+  },
+  {
+    "nivel": 37,
+    "dificultad": "medio",
+    "tematica": "Escuela",
+    "palabras": [
+      "CUADERNO",
+      "MOCHILA",
+      "PROFESOR",
+      "ALUMNOS",
+      "TAREAS",
+      "CLASES",
+      "ESCUELA"
+    ]
+  },
+  {
+    "nivel": 38,
+    "dificultad": "medio",
+    "tematica": "Animales marinos",
+    "palabras": [
+      "DELFIN",
+      "BALLENA",
+      "TIBURON",
+      "MEDUSA",
+      "PULPO",
+      "LANGOSTA",
+      "CALAMAR"
+    ]
+  },
+  {
+    "nivel": 39,
+    "dificultad": "medio",
+    "tematica": "Casa",
+    "palabras": [
+      "COCINA",
+      "DORMITORIO",
+      "VENTANA",
+      "PUERTA",
+      "ESCALERA",
+      "BALCON",
+      "JARDIN"
+    ]
+  },
+  {
+    "nivel": 40,
+    "dificultad": "medio",
+    "tematica": "Viajes",
+    "palabras": [
+      "MALETA",
+      "HOTEL",
+      "TURISMO",
+      "AVION",
+      "PASAPORTE",
+      "CAMINO",
+      "MAPA"
+    ]
+  },
+  {
+    "nivel": 41,
+    "dificultad": "medio",
+    "tematica": "Cuerpo humano",
+    "palabras": [
+      "CABEZA",
+      "HOMBROS",
+      "ESTOMAGO",
+      "CEREBRO",
+      "CORAZON",
+      "PULMONES",
+      "RODILLA"
+    ]
+  },
+  {
+    "nivel": 42,
+    "dificultad": "medio",
+    "tematica": "Ciudad",
+    "palabras": [
+      "EDIFICIO",
+      "AVENIDA",
+      "MERCADO",
+      "HOSPITAL",
+      "ESCUELA",
+      "PLAZA",
+      "ESTACION"
+    ]
+  },
+  {
+    "nivel": 43,
+    "dificultad": "medio",
+    "tematica": "Ciencia",
+    "palabras": [
+      "ATOMOS",
+      "MOLECULA",
+      "ENERGIA",
+      "MATERIA",
+      "CELULA",
+      "GRAVEDAD",
+      "PLANETA"
+    ]
+  },
+  {
+    "nivel": 44,
+    "dificultad": "medio",
+    "tematica": "Videojuegos",
+    "palabras": [
+      "JUGADOR",
+      "PANTALLA",
+      "MANDO",
+      "NIVEL",
+      "MISION",
+      "PERSONAJE",
+      "PARTIDA"
+    ]
+  },
+  {
+    "nivel": 45,
+    "dificultad": "medio",
+    "tematica": "Fantasia",
+    "palabras": [
+      "DRAGON",
+      "CASTILLO",
+      "GUERRERO",
+      "HECHIZO",
+      "MAGICO",
+      "PRINCESA",
+      "TESORO"
+    ]
+  },
+  {
+    "nivel": 46,
+    "dificultad": "medio",
+    "tematica": "Mar y playa",
+    "palabras": [
+      "PLAYERO",
+      "ARENA",
+      "PALMERA",
+      "OCEANO",
+      "CARACOLA",
+      "SOMBRILLA",
+      "NAVEGAR"
+    ]
+  },
+  {
+    "nivel": 47,
+    "dificultad": "medio",
+    "tematica": "Herramientas",
+    "palabras": [
+      "MARTILLO",
+      "DESTORNILLADOR",
+      "LLAVE",
+      "TALADRO",
+      "SERRUCHO",
+      "PINZAS",
+      "TORNILLO"
+    ]
+  },
+  {
+    "nivel": 48,
+    "dificultad": "medio",
+    "tematica": "Clima",
+    "palabras": [
+      "TORMENTA",
+      "LLUVIA",
+      "TRUENO",
+      "RELAMPAGO",
+      "VIENTO",
+      "NUBLADO",
+      "HUMEDAD"
+    ]
+  },
+  {
+    "nivel": 49,
+    "dificultad": "medio",
+    "tematica": "Entretenimiento",
+    "palabras": [
+      "PELICULA",
+      "ACTORES",
+      "TEATRO",
+      "CANTANTE",
+      "SERIE",
+      "COMEDIA",
+      "MUSICAL"
+    ]
+  },
+  {
+    "nivel": 50,
+    "dificultad": "medio",
+    "tematica": "Computacion",
+    "palabras": [
+      "SOFTWARE",
+      "HARDWARE",
+      "INTERNET",
+      "NAVEGADOR",
+      "TECLADO",
+      "SERVIDOR",
+      "PROCESADOR"
+    ]
+  },
+  {
+    "nivel": 51,
+    "dificultad": "dificil",
+    "tematica": "Ciencia",
+    "palabras": [
+      "ATOMICO",
+      "MOLECULA",
+      "GRAVEDAD",
+      "BIOLOGIA",
+      "GENETICA",
+      "QUIMICA",
+      "ELECTRON",
+      "PROTEINA",
+      "CELULAR",
+      "NEURONAS"
+    ]
+  },
+  {
+    "nivel": 52,
+    "dificultad": "dificil",
+    "tematica": "Tecnologia",
+    "palabras": [
+      "SOFTWARE",
+      "HARDWARE",
+      "SERVIDOR",
+      "ALGORITMO",
+      "DATABASE",
+      "PROGRAMA",
+      "CODIGO",
+      "SISTEMAS",
+      "ROBOTICA",
+      "DIGITAL"
+    ]
+  },
+  {
+    "nivel": 53,
+    "dificultad": "dificil",
+    "tematica": "Astronomia",
+    "palabras": [
+      "GALAXIAS",
+      "ASTEROIDE",
+      "NEBULOSA",
+      "PLANETAS",
+      "SATELITE",
+      "GRAVEDAD",
+      "COSMOLOGIA",
+      "SUPERNOVA",
+      "TELESCOPIO",
+      "UNIVERSO"
+    ]
+  },
+  {
+    "nivel": 54,
+    "dificultad": "dificil",
+    "tematica": "Medicina",
+    "palabras": [
+      "ANATOMIA",
+      "CIRUGIA",
+      "DIAGNOSTICO",
+      "SINTOMAS",
+      "TERAPIA",
+      "VACUNACION",
+      "HOSPITAL",
+      "MEDICINA",
+      "CELULAS",
+      "INFECCION"
+    ]
+  },
+  {
+    "nivel": 55,
+    "dificultad": "dificil",
+    "tematica": "Ingenieria",
+    "palabras": [
+      "MECANICA",
+      "ESTRUCTURA",
+      "ROBOTICA",
+      "ELECTRICA",
+      "MATERIALES",
+      "ENERGIA",
+      "PROTOTIPO",
+      "DISENO",
+      "MAQUINARIA",
+      "CONSTRUCCION"
+    ]
+  },
+  {
+    "nivel": 56,
+    "dificultad": "dificil",
+    "tematica": "Programacion",
+    "palabras": [
+      "VARIABLE",
+      "FUNCION",
+      "OBJETOS",
+      "CLASES",
+      "HERENCIA",
+      "INTERFAZ",
+      "COMPILADOR",
+      "DEPURACION",
+      "RECURSION",
+      "FRAMEWORK"
+    ]
+  },
+  {
+    "nivel": 57,
+    "dificultad": "dificil",
+    "tematica": "Naturaleza",
+    "palabras": [
+      "ECOSISTEMA",
+      "BIODIVERSIDAD",
+      "VEGETACION",
+      "ATMOSFERA",
+      "DESERTICO",
+      "TROPICAL",
+      "OCEANICO",
+      "VOLCANICO",
+      "FORESTAL",
+      "CLIMATICO"
+    ]
+  },
+  {
+    "nivel": 58,
+    "dificultad": "dificil",
+    "tematica": "Historia",
+    "palabras": [
+      "CIVILIZACION",
+      "IMPERIO",
+      "REVOLUCION",
+      "MONARQUIA",
+      "GUERREROS",
+      "ARQUEOLOGIA",
+      "COLONIAL",
+      "MEDIEVAL",
+      "ANTIGUEDAD",
+      "HISTORICO"
+    ]
+  },
+  {
+    "nivel": 59,
+    "dificultad": "dificil",
+    "tematica": "Geografia",
+    "palabras": [
+      "CONTINENTE",
+      "CORDILLERA",
+      "ARCHIPIELAGO",
+      "PENINSULA",
+      "TERRITORIO",
+      "FRONTERA",
+      "MERIDIANO",
+      "LATITUD",
+      "LONGITUD",
+      "GEOGRAFIA"
+    ]
+  },
+  {
+    "nivel": 60,
+    "dificultad": "dificil",
+    "tematica": "Videojuegos",
+    "palabras": [
+      "PERSONAJE",
+      "PLATAFORMA",
+      "ESTRATEGIA",
+      "AVENTURA",
+      "MULTIJUGADOR",
+      "ANIMACION",
+      "GRAFICOS",
+      "MISIONES",
+      "INVENTARIO",
+      "HABILIDAD"
+    ]
+  },
+  {
+    "nivel": 61,
+    "dificultad": "dificil",
+    "tematica": "Ciberseguridad",
+    "palabras": [
+      "ENCRIPTADO",
+      "FIREWALL",
+      "MALWARE",
+      "PHISHING",
+      "AUTENTICACION",
+      "CONTRASENA",
+      "SEGURIDAD",
+      "SERVIDORES",
+      "VULNERABLE",
+      "CRIPTOGRAFIA"
+    ]
+  },
+  {
+    "nivel": 62,
+    "dificultad": "dificil",
+    "tematica": "Economia",
+    "palabras": [
+      "INVERSION",
+      "MERCADOS",
+      "INFLACION",
+      "MONETARIO",
+      "FINANZAS",
+      "EMPRESARIO",
+      "CAPITAL",
+      "NEGOCIOS",
+      "PRODUCTIVO",
+      "COMERCIO"
+    ]
+  },
+  {
+    "nivel": 63,
+    "dificultad": "dificil",
+    "tematica": "Arquitectura",
+    "palabras": [
+      "EDIFICIOS",
+      "ESTRUCTURA",
+      "FACHADA",
+      "CIMIENTO",
+      "ARQUITECTO",
+      "URBANISMO",
+      "PLANIFICAR",
+      "CONSTRUCCION",
+      "MATERIALES",
+      "GEOMETRIA"
+    ]
+  },
+  {
+    "nivel": 64,
+    "dificultad": "dificil",
+    "tematica": "Fisica",
+    "palabras": [
+      "VELOCIDAD",
+      "ACELERACION",
+      "GRAVEDAD",
+      "FRICCION",
+      "ENERGIA",
+      "MOMENTUM",
+      "PARTICULA",
+      "RADIACION",
+      "MAGNETISMO",
+      "DINAMICA"
+    ]
+  },
+  {
+    "nivel": 65,
+    "dificultad": "dificil",
+    "tematica": "Biologia",
+    "palabras": [
+      "ORGANISMO",
+      "EVOLUCION",
+      "GENETICA",
+      "CROMOSOMA",
+      "MITOCONDRIA",
+      "BACTERIAS",
+      "ECOSISTEMA",
+      "ADAPTACION",
+      "MUTACION",
+      "REPRODUCCION"
+    ]
+  },
+  {
+    "nivel": 66,
+    "dificultad": "dificil",
+    "tematica": "Robotica",
+    "palabras": [
+      "AUTOMATIZAR",
+      "SENSORES",
+      "MOTORES",
+      "ROBOTICA",
+      "PROGRAMABLE",
+      "CONTROLADOR",
+      "ACTUADOR",
+      "ELECTRONICA",
+      "MECANISMO",
+      "INTELIGENCIA"
+    ]
+  },
+  {
+    "nivel": 67,
+    "dificultad": "dificil",
+    "tematica": "Quimica",
+    "palabras": [
+      "MOLECULAR",
+      "REACCIONES",
+      "ELEMENTOS",
+      "CATALIZADOR",
+      "SOLUCIONES",
+      "ACIDEZ",
+      "OXIDACION",
+      "COMPUESTOS",
+      "ATOMIZACION",
+      "LABORATORIO"
+    ]
+  },
+  {
+    "nivel": 68,
+    "dificultad": "dificil",
+    "tematica": "Medio ambiente",
+    "palabras": [
+      "RECICLAJE",
+      "CONTAMINACION",
+      "SOSTENIBLE",
+      "ECOSISTEMA",
+      "RENOVABLE",
+      "DEFORESTACION",
+      "BIODIVERSIDAD",
+      "REUTILIZAR",
+      "EMISIONES",
+      "CONSERVACION"
+    ]
+  },
+  {
+    "nivel": 69,
+    "dificultad": "dificil",
+    "tematica": "Comunicacion",
+    "palabras": [
+      "TELEFONIA",
+      "INTERNET",
+      "MENSAJERIA",
+      "COMUNICAR",
+      "PERIODISMO",
+      "TELEVISION",
+      "RADIOFONIA",
+      "TRANSMISION",
+      "AUDIENCIA",
+      "PUBLICIDAD"
+    ]
+  },
+  {
+    "nivel": 70,
+    "dificultad": "dificil",
+    "tematica": "Ingenieria informatica",
+    "palabras": [
+      "ARQUITECTURA",
+      "MICROSERVICIO",
+      "BACKEND",
+      "FRONTEND",
+      "DATABASE",
+      "SERVIDOR",
+      "PROGRAMACION",
+      "DESARROLLO",
+      "APLICACION",
+      "SOFTWARE"
+    ]
+  },
+  {
+    "nivel": 71,
+    "dificultad": "dificil",
+    "tematica": "Geologia",
+    "palabras": [
+      "MINERALES",
+      "VOLCANICO",
+      "TECTONICA",
+      "EROSION",
+      "SEDIMENTOS",
+      "MAGMATICA",
+      "TERREMOTO",
+      "SUBDUCCION",
+      "CORTEZA",
+      "ESTRATOS"
+    ]
+  },
+  {
+    "nivel": 72,
+    "dificultad": "dificil",
+    "tematica": "Psicologia",
+    "palabras": [
+      "EMOCIONES",
+      "MEMORIA",
+      "PERCEPCION",
+      "COGNITIVO",
+      "CONDUCTA",
+      "PERSONALIDAD",
+      "MOTIVACION",
+      "APRENDIZAJE",
+      "CONCIENCIA",
+      "PSICOLOGIA"
+    ]
+  },
+  {
+    "nivel": 73,
+    "dificultad": "dificil",
+    "tematica": "Industria",
+    "palabras": [
+      "FABRICACION",
+      "PRODUCCION",
+      "MAQUINARIA",
+      "AUTOMATIZAR",
+      "LOGISTICA",
+      "OPERACIONES",
+      "MANUFACTURA",
+      "CALIDAD",
+      "PROCESAMIENTO",
+      "DISTRIBUCION"
+    ]
+  },
+  {
+    "nivel": 74,
+    "dificultad": "dificil",
+    "tematica": "Inteligencia artificial",
+    "palabras": [
+      "ALGORITMOS",
+      "NEURONALES",
+      "APRENDIZAJE",
+      "PREDICCION",
+      "MODELOS",
+      "ENTRENAMIENTO",
+      "DATOS",
+      "AUTOMATIZACION",
+      "ROBOTICA",
+      "INTELIGENCIA"
+    ]
+  },
+  {
+    "nivel": 75,
+    "dificultad": "dificil",
+    "tematica": "Tecnologia del futuro",
+    "palabras": [
+      "NANOTECNOLOGIA",
+      "BIOTECNOLOGIA",
+      "HOLOGRAFIA",
+      "AUTOMATIZACION",
+      "TELETRANSPORTE",
+      "REALIDADVIRTUAL",
+      "CIBERESPACIO",
+      "ROBOTIZACION",
+      "COMPUTACION",
+      "INNOVACION"
+    ]
+  },
+  {
+    "nivel": 76,
+    "dificultad": "extremo",
+    "tematica": "Tecnologia avanzada",
+    "palabras": [
+      "INTELIGENCIA",
+      "CIBERSEGURIDAD",
+      "AUTOMATIZACION",
+      "PROGRAMACION",
+      "CRIPTOGRAFIA",
+      "COMPUTACION",
+      "ALGORITMOS",
+      "TELECOMUNICACION",
+      "DIGITALIZACION",
+      "VIRTUALIZACION",
+      "MICROPROCESADORES",
+      "NANOTECNOLOGIA"
+    ]
+  },
+  {
+    "nivel": 77,
+    "dificultad": "extremo",
+    "tematica": "Astronomia",
+    "palabras": [
+      "ASTROFISICA",
+      "COSMOLOGIA",
+      "SUPERNOVAS",
+      "CONSTELACIONES",
+      "EXOPLANETAS",
+      "OBSERVATORIO",
+      "TELESCOPIOS",
+      "ASTEROIDES",
+      "NEBULOSAS",
+      "GALACTICO",
+      "UNIVERSALIDAD",
+      "GRAVITACIONAL"
+    ]
+  },
+  {
+    "nivel": 78,
+    "dificultad": "extremo",
+    "tematica": "Biologia",
+    "palabras": [
+      "BIODIVERSIDAD",
+      "MICROORGANISMOS",
+      "FOTOSINTESIS",
+      "REPRODUCCION",
+      "EVOLUCIONISMO",
+      "BIOTECNOLOGIA",
+      "ECOSISTEMAS",
+      "CROMOSOMAS",
+      "MITOCONDRIAS",
+      "GENETICAMENTE",
+      "BIOMOLECULAS",
+      "MICROBIOLOGIA"
+    ]
+  },
+  {
+    "nivel": 79,
+    "dificultad": "extremo",
+    "tematica": "Medicina",
+    "palabras": [
+      "CARDIOLOGIA",
+      "NEUROLOGIA",
+      "DERMATOLOGIA",
+      "ENDOCRINOLOGIA",
+      "GASTROENTEROLOGIA",
+      "DIAGNOSTICO",
+      "TRATAMIENTO",
+      "MEDICAMENTOS",
+      "INVESTIGACION",
+      "FARMACOLOGIA",
+      "EPIDEMIOLOGIA",
+      "REHABILITACION"
+    ]
+  },
+  {
+    "nivel": 80,
+    "dificultad": "extremo",
+    "tematica": "Ingenieria",
+    "palabras": [
+      "INFRAESTRUCTURA",
+      "CONSTRUCCION",
+      "MECATRONICA",
+      "ELECTROMECANICA",
+      "TERMODINAMICA",
+      "HIDRODINAMICA",
+      "AERODINAMICA",
+      "AUTOMATIZACION",
+      "TELEMETRIA",
+      "MANUFACTURA",
+      "PROTOTIPADO",
+      "SIMULACION"
+    ]
+  },
+  {
+    "nivel": 81,
+    "dificultad": "extremo",
+    "tematica": "Ciberseguridad",
+    "palabras": [
+      "CIBERSEGURIDAD",
+      "CRIPTOGRAFIA",
+      "AUTENTICACION",
+      "VULNERABILIDADES",
+      "CIBERATAQUES",
+      "ENCRIPTACION",
+      "FIREWALLS",
+      "SUPERVISION",
+      "IDENTIFICACION",
+      "PROTECCION",
+      "AUTORIZACION",
+      "INTRUSIONES"
+    ]
+  },
+  {
+    "nivel": 82,
+    "dificultad": "extremo",
+    "tematica": "Inteligencia artificial",
+    "palabras": [
+      "INTELIGENCIA",
+      "APRENDIZAJE",
+      "ENTRENAMIENTO",
+      "CLASIFICACION",
+      "RECONOCIMIENTO",
+      "PREDICCIONES",
+      "AUTOMATIZACION",
+      "GENERATIVO",
+      "PROCESAMIENTO",
+      "OPTIMIZACION",
+      "NEURONALES",
+      "TRANSFORMADORES"
+    ]
+  },
+  {
+    "nivel": 83,
+    "dificultad": "extremo",
+    "tematica": "Geografia",
+    "palabras": [
+      "CARACTERISTICAS",
+      "CONTINENTALES",
+      "ARCHIPIELAGOS",
+      "CORDILLERAS",
+      "GEOPOLITICA",
+      "DEMOGRAFIA",
+      "CARTOGRAFIA",
+      "TERRITORIALES",
+      "METROPOLITANO",
+      "DESERTIFICACION",
+      "OCEANOGRAFIA",
+      "CLIMATOLOGIA"
+    ]
+  },
+  {
+    "nivel": 84,
+    "dificultad": "extremo",
+    "tematica": "Historia",
+    "palabras": [
+      "CIVILIZACIONES",
+      "ARQUEOLOGIA",
+      "PREHISTORIA",
+      "RENACIMIENTO",
+      "COLONIZACION",
+      "INDUSTRIALIZACION",
+      "REVOLUCIONES",
+      "IMPERIALISMO",
+      "MONARQUIAS",
+      "ANTROPOLOGIA",
+      "DESCUBRIMIENTOS",
+      "INDEPENDENCIA"
+    ]
+  },
+  {
+    "nivel": 85,
+    "dificultad": "extremo",
+    "tematica": "Fisica",
+    "palabras": [
+      "ELECTROMAGNETISMO",
+      "TERMODINAMICA",
+      "MECANICACUANTICA",
+      "RELATIVIDAD",
+      "PARTICULAS",
+      "RADIACION",
+      "GRAVITACION",
+      "ACELERACION",
+      "VELOCIDADES",
+      "MAGNETISMO",
+      "SUPERCONDUCTIVIDAD",
+      "ASTROFISICA"
+    ]
+  },
+  {
+    "nivel": 86,
+    "dificultad": "extremo",
+    "tematica": "Quimica",
+    "palabras": [
+      "ELECTROQUIMICA",
+      "BIOQUIMICA",
+      "TERMOQUIMICA",
+      "CATALIZADORES",
+      "POLIMERIZACION",
+      "CRISTALIZACION",
+      "ESTEQUIOMETRIA",
+      "HIDROCARBUROS",
+      "REACTIVIDAD",
+      "COMPOSICION",
+      "MOLECULARES",
+      "SINTETIZACION"
+    ]
+  },
+  {
+    "nivel": 87,
+    "dificultad": "extremo",
+    "tematica": "Medio ambiente",
+    "palabras": [
+      "CONTAMINACION",
+      "DEFORESTACION",
+      "BIODIVERSIDAD",
+      "SOSTENIBILIDAD",
+      "REFORESTACION",
+      "CONSERVACION",
+      "RECICLAJE",
+      "ECOSISTEMAS",
+      "CALENTAMIENTO",
+      "DESERTIFICACION",
+      "REUTILIZACION",
+      "BIODEGRADABLE"
+    ]
+  },
+  {
+    "nivel": 88,
+    "dificultad": "extremo",
+    "tematica": "Videojuegos",
+    "palabras": [
+      "DESARROLLADORES",
+      "PROGRAMACION",
+      "ANIMACIONES",
+      "PERSONALIZACION",
+      "MULTIJUGADOR",
+      "EXPLORACION",
+      "EXPERIENCIA",
+      "INTERACTIVIDAD",
+      "NARRATIVA",
+      "PLATAFORMAS",
+      "COMPETITIVIDAD",
+      "RENDIMIENTO"
+    ]
+  },
+  {
+    "nivel": 89,
+    "dificultad": "extremo",
+    "tematica": "Arquitectura",
+    "palabras": [
+      "ARQUITECTURA",
+      "INFRAESTRUCTURA",
+      "URBANIZACION",
+      "CONSTRUCCIONES",
+      "ESTRUCTURACION",
+      "ARQUITECTONICO",
+      "EDIFICACIONES",
+      "PLANIFICACION",
+      "SOSTENIBILIDAD",
+      "REMODELACION",
+      "RESTAURACION",
+      "PATRIMONIAL"
+    ]
+  },
+  {
+    "nivel": 90,
+    "dificultad": "extremo",
+    "tematica": "Economia",
+    "palabras": [
+      "MACROECONOMIA",
+      "MICROECONOMIA",
+      "GLOBALIZACION",
+      "INDUSTRIALIZACION",
+      "FINANCIAMIENTO",
+      "INVERSIONISTA",
+      "PRODUCTIVIDAD",
+      "COMPETITIVIDAD",
+      "COMERCIALIZACION",
+      "EMPRENDIMIENTO",
+      "EXPORTACIONES",
+      "IMPORTACIONES"
+    ]
+  },
+  {
+    "nivel": 91,
+    "dificultad": "extremo",
+    "tematica": "Psicologia",
+    "palabras": [
+      "PERSONALIDAD",
+      "INTELIGENCIA",
+      "COMPORTAMIENTO",
+      "CONCENTRACION",
+      "MOTIVACION",
+      "APRENDIZAJE",
+      "PERCEPCION",
+      "CONCIENCIA",
+      "EMOCIONALIDAD",
+      "COGNITIVAMENTE",
+      "SUBCONSCIENTE",
+      "NEUROPSICOLOGIA"
+    ]
+  },
+  {
+    "nivel": 92,
+    "dificultad": "extremo",
+    "tematica": "Robotica",
+    "palabras": [
+      "ROBOTS",
+      "ROBOTIZACION",
+      "AUTOMATIZACION",
+      "MECATRONICA",
+      "CONTROLADORES",
+      "MICROCONTROLADORES",
+      "SENSORES",
+      "ACTUADORES",
+      "PROGRAMABLES",
+      "INTELIGENCIA",
+      "NAVEGACION",
+      "MANIPULADORES"
+    ]
+  },
+  {
+    "nivel": 93,
+    "dificultad": "extremo",
+    "tematica": "Espacio profundo",
+    "palabras": [
+      "INTERESTELAR",
+      "EXTRATERRESTRE",
+      "SUPERNOVAS",
+      "CONSTELACIONES",
+      "NEBULOSIDADES",
+      "ASTROBIOLOGIA",
+      "ASTRONOMICA",
+      "GRAVITACIONAL",
+      "COSMOLOGICOS",
+      "OBSERVATORIOS",
+      "TELESCOPICOS",
+      "EXOPLANETARIOS"
+    ]
+  },
+  {
+    "nivel": 94,
+    "dificultad": "extremo",
+    "tematica": "Programacion",
+    "palabras": [
+      "ARQUITECTURA",
+      "IMPLEMENTACION",
+      "ABSTRACCIONES",
+      "ENCAPSULAMIENTO",
+      "POLIMORFISMO",
+      "HERENCIA",
+      "COMPILADORES",
+      "DEPENDENCIAS",
+      "MICROSERVICIOS",
+      "CONCURRENCIA",
+      "ASINCRONISMO",
+      "SERIALIZACION"
+    ]
+  },
+  {
+    "nivel": 95,
+    "dificultad": "extremo",
+    "tematica": "Ciencia avanzada",
+    "palabras": [
+      "INVESTIGACION",
+      "EXPERIMENTACION",
+      "OBSERVACIONES",
+      "METODOLOGIA",
+      "DESCUBRIMIENTO",
+      "HIPOTESIS",
+      "LABORATORIOS",
+      "PUBLICACIONES",
+      "CIENTIFICOS",
+      "VALIDACION",
+      "REPRODUCIBILIDAD",
+      "INSTRUMENTACION"
+    ]
+  },
+  {
+    "nivel": 96,
+    "dificultad": "extremo",
+    "tematica": "Tecnologia futurista",
+    "palabras": [
+      "NANOTECNOLOGIA",
+      "BIOTECNOLOGIA",
+      "HOLOGRAFIA",
+      "TELETRANSPORTACION",
+      "CIBERESPACIO",
+      "REALIDADVIRTUAL",
+      "REALIDADAUMENTADA",
+      "COMPUTACIONCUANTICA",
+      "INTELIGENCIAARTIFICIAL",
+      "ROBOTIZACION",
+      "AUTOMATIZACION",
+      "NEUROTECNOLOGIA"
+    ]
+  },
+  {
+    "nivel": 97,
+    "dificultad": "extremo",
+    "tematica": "Medicina avanzada",
+    "palabras": [
+      "NEUROCIRUGIA",
+      "CARDIOVASCULAR",
+      "INMUNOLOGIA",
+      "BIOTECNOLOGIA",
+      "REGENERACION",
+      "TRASPLANTES",
+      "MICROBIOLOGIA",
+      "FARMACOGENETICA",
+      "GENOMICA",
+      "DIAGNOSTICO",
+      "EPIDEMIOLOGIA",
+      "INVESTIGACION"
+    ]
+  },
+  {
+    "nivel": 98,
+    "dificultad": "extremo",
+    "tematica": "Universo",
+    "palabras": [
+      "ASTROFOTOGRAFIA",
+      "COSMOLOGIA",
+      "ASTROBIOLOGIA",
+      "SUPERNOVAS",
+      "EXOPLANETAS",
+      "GALACTICO",
+      "INTERGALACTICO",
+      "TELESCOPIOS",
+      "OBSERVATORIOS",
+      "CONSTELACIONES",
+      "ASTRONOMIA",
+      "GRAVITACIONAL"
+    ]
+  },
+  {
+    "nivel": 99,
+    "dificultad": "extremo",
+    "tematica": "Innovacion",
+    "palabras": [
+      "INNOVACIONES",
+      "EMPRENDIMIENTO",
+      "INVESTIGACION",
+      "DESARROLLO",
+      "TRANSFORMACION",
+      "DIGITALIZACION",
+      "AUTOMATIZACION",
+      "CREATIVIDAD",
+      "TECNOLOGICOS",
+      "SOSTENIBILIDAD",
+      "EXPERIMENTACION",
+      "COLABORACION"
+    ]
+  },
+  {
+    "nivel": 100,
+    "dificultad": "extremo",
+    "tematica": "Desafio final",
+    "palabras": [
+      "INTELIGENCIAARTIFICIAL",
+      "COMPUTACIONCUANTICA",
+      "TELECOMUNICACIONES",
+      "NANOTECNOLOGIA",
+      "BIOTECNOLOGIA",
+      "CIBERSEGURIDAD",
+      "ASTROBIOLOGIA",
+      "ELECTROMAGNETISMO",
+      "NEUROTECNOLOGIA",
+      "MICROPROCESADORES",
+      "TRANSFORMACIONDIGITAL",
+      "SUPERCONDUCTIVIDAD"
+    ]
+  }
+]

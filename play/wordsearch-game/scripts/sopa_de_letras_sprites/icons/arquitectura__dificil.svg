@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <defs>
+    <radialGradient id="grad_dificil_22366" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#ded0fb" stop-opacity="0.55"/>
+      <stop offset="35%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#5b32ad"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="53" r="43" fill="#5b32ad" opacity="0.55"/>
+  <circle cx="50" cy="50" r="43" fill="url(#grad_dificil_22366)" stroke="#5b32ad" stroke-width="3"/>
+  <circle cx="50" cy="50" r="43" fill="none" stroke="#ded0fb" stroke-width="1.5" opacity="0.5"/>
+  <ellipse cx="38" cy="28" rx="20" ry="10" fill="#ffffff" opacity="0.14"/>
+  <g fill="#f4fbf8" stroke="none">
+    <path d="M22,70 L50,22 L78,70 Z" fill="none" stroke="#f4fbf8" stroke-width="4" stroke-linejoin="round"/>
+<rect x="44" y="50" width="12" height="20" rx="1"/>
+  </g>
+</svg>
