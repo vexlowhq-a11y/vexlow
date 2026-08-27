@@ -8,13 +8,13 @@
 */
 const VEXLOW_HERO = [
   {
-    "category": "entertainment",
-    "chip": "🎬 Entertainment",
-    "title": "Marvel Unveils New X-Men Cast with Major Names Attached",
-    "dek": "The highly anticipated introduction of the X-Men into the Marvel Cinematic Universe has begun, featuring a fresh cast led by talents like Inde Navarrette and Adam Driver.",
-    "image": "img/drafts/marvel-unveils-new-x-men-cast-with-major-adf1.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/entertainment/marvel-unveils-new-x-men-cast-with-major-names-attached.html"
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "Amazon Expands Nvidia Chip Order Amid Rising Demand for AI Technologies",
+    "dek": "In response to increasing demand, Amazon is set to triple its order of Nvidia GPU chips, signaling a major strengthening of their partnership that reflects broader trends in artificial intelligence.",
+    "image": "img/temas/amazon-expands-nvidia-chip-order-amid-rising-demand-for-ai-t.jpg",
+    "textColor": "auto",
+    "href": "categoria/ai/amazon-expands-nvidia-chip-order-amid-rising-demand-for-ai-t.html"
   },
   {
     "category": "gaming",
@@ -28,11 +28,11 @@ const VEXLOW_HERO = [
   {
     "category": "science",
     "chip": "🚀 Science & Space",
-    "title": "Setback for UK Space Launch as Rocket Issue Delays Orbital Mission",
-    "dek": "The first attempt at an orbital rocket launch from the UK has been postponed due to an issue identified during testing at SaxaVord Spaceport, highlighting the challenges faced by emerging spaceports.",
-    "image": "img/temas/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/science/setback-for-uk-space-launch-as-rocket-issue-delays-orbital-m.html"
+    "title": "A Satellite's Final Moments: The Heat Shield Saga",
+    "dek": "As a satellite faces its end, the challenges of heat shield technology come into sharper focus.",
+    "image": "img/drafts/a-satellite-s-final-moments-the-heat-shi-151d.png",
+    "textColor": "auto",
+    "href": "categoria/science/a-satellite-s-final-moments-the-heat-shield-saga.html"
   },
   {
     "category": "technology",
@@ -42,15 +42,6 @@ const VEXLOW_HERO = [
     "image": "img/temas/reimagining-founder-culture-a-new-approach-to-preventing-bur.jpg",
     "textColor": "#0E1116",
     "href": "categoria/technology/reimagining-founder-culture-a-new-approach-to-preventing-bur.html"
-  },
-  {
-    "category": "ai",
-    "chip": "🤖 AI",
-    "title": "OpenAI Enhances Model Safeguards Following Hugging Face Security Incident",
-    "dek": "In response to a recent breach at Hugging Face, OpenAI has implemented new measures to strengthen the monitoring and security of its AI models throughout the development process.",
-    "image": "img/temas/openai-enhances-model-safeguards-following-hugging-face-secu.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/ai/openai-enhances-model-safeguards-following-hugging-face-secu.html"
   },
   {
     "category": "ai",
