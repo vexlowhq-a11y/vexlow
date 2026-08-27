@@ -25,13 +25,13 @@
     "4": {
       "storiesDone": [
         0
-      ]
+      ],
+      "type": "carousel",
+      "mediaId": "18104896429929674",
+      "completedAt": "2026-08-27T00:49:45.494Z"
     },
     "5": {
-      "storiesDone": [
-        2,
-        1
-      ]
+      "storiesDone": []
     }
   }
 }
