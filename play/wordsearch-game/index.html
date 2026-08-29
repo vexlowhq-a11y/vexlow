@@ -1248,8 +1248,11 @@ function revelarPistaEnGrilla() {
   if (!pendientes.length) return false;
   const elegida = pendientes[Math.floor(Math.random() * pendientes.length)];
   const celda = document.querySelector(`.celda[data-f="${elegida.fila_inicio}"][data-c="${elegida.columna_inicio}"]`);
+  // Antes se sacaba sola a los 1.2s — en la app, mientras se muestra el anuncio
+  // recompensado (que tapa el juego varios segundos) ese tiempo se cumple igual, y al
+  // volver del anuncio la pista ya había desaparecido. Ahora se queda marcada hasta
+  // que esa palabra se encuentra de verdad (se saca en confirmarSiCoincide).
   celda.classList.add('pista');
-  setTimeout(() => celda.classList.remove('pista'), 1200);
   return true;
 }
 
@@ -1364,6 +1367,9 @@ function confirmarSiCoincide(camino) {
   registrarPalabraEncontrada();
   const colorIndice = (palabrasEncontradas.size - 1) % 4;
   camino.forEach(({ f, c }) => {
+    // Por si esta palabra tenía la pista marcada (ver revelarPistaEnGrilla): se saca acá
+    // para que tome el color de encontrada en vez de quedarse amarilla (.pista es !important).
+    document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.remove('pista');
     document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.add(`encontrada-${colorIndice}`);
   });
   renderListaPalabras();
