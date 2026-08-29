@@ -1172,8 +1172,13 @@ function renderGrilla() {
   const GAP = 3, PADDING_GRILLA = 20, MARGEN_PANTALLA = 40;
   const anchoDisponible = Math.min(window.innerWidth - MARGEN_PANTALLA, 560);
   const tamanoCrudo = (anchoDisponible - PADDING_GRILLA - (nivel.columnas - 1) * GAP) / nivel.columnas;
-  const tamanoCelda = Math.max(16, Math.min(40, Math.floor(tamanoCrudo)));
-  const fuenteCelda = Math.max(9, Math.round(tamanoCelda * 0.45));
+  // Antes el piso era 16px fijo: en grillas grandes (extremo puede llegar a 24x24) sobre
+  // pantallas angostas eso obligaba celdas más anchas de lo que entraba, y la grilla se
+  // salía del recuadro azul hacia afuera (fondo oscuro) obligando a hacer zoom manual para
+  // verla entera. Al usar Math.floor sin forzar hacia arriba, SIEMPRE entra en pantalla,
+  // aunque en el peor caso (grillas enormes en celulares chicos) las celdas queden chicas.
+  const tamanoCelda = Math.max(4, Math.min(40, Math.floor(tamanoCrudo)));
+  const fuenteCelda = Math.max(7, Math.round(tamanoCelda * 0.45));
 
   cont.style.setProperty('--celda-tam', tamanoCelda + 'px');
   cont.style.setProperty('--celda-fuente', fuenteCelda + 'px');
@@ -1282,12 +1287,49 @@ function actualizarTimer() {
 }
 
 // ---------- Selección de palabras (mouse + touch vía Pointer Events) ----------
-function celdaEnPunto(x, y) {
-  const el = document.elementFromPoint(x, y);
-  return el && el.classList.contains('celda') ? el : null;
+// Antes se usaba document.elementFromPoint(x, y), que exige tocar el píxel exacto de
+// la celda: con celdas chicas (extremo, o cualquier grilla grande en un celular) el
+// dedo se corre un poco y el toque cae en el gap o en la celda de al lado/arriba, y
+// la selección se pierde o salta de fila. Acá en cambio se calcula matemáticamente
+// la celda MÁS CERCANA a la coordenada tocada — siempre resuelve a algo razonable
+// aunque el dedo no esté exactamente sobre la letra.
+let direccionBloqueada = null; // {df, dc} una vez que el arrastre define una línea recta
+
+function medidasGrilla() {
+  const cont = $('grilla');
+  const rect = cont.getBoundingClientRect();
+  const estilo = getComputedStyle(cont);
+  const tam = parseFloat(estilo.getPropertyValue('--celda-tam')) || 40;
+  const gap = parseFloat(estilo.gap) || 0;
+  const padding = parseFloat(estilo.paddingLeft) || 0;
+  return { rect, tam, gap, padding, paso: tam + gap };
+}
+function celdaDesdeCoordenadas(x, y) {
+  const { rect, tam, padding, paso } = medidasGrilla();
+  const c = Math.round((x - rect.left - padding - tam / 2) / paso);
+  const f = Math.round((y - rect.top - padding - tam / 2) / paso);
+  return {
+    f: Math.max(0, Math.min(nivel.filas - 1, f)),
+    c: Math.max(0, Math.min(nivel.columnas - 1, c)),
+  };
+}
+// Cuántos pasos se pueden dar en la dirección (df, dc) desde (f, c) sin salir de la grilla.
+function pasosMaximos(f, c, df, dc) {
+  let max = Infinity;
+  if (df > 0) max = Math.min(max, Math.floor((nivel.filas - 1 - f) / df));
+  if (df < 0) max = Math.min(max, Math.floor(f / -df));
+  if (dc > 0) max = Math.min(max, Math.floor((nivel.columnas - 1 - c) / dc));
+  if (dc < 0) max = Math.min(max, Math.floor(c / -dc));
+  return Number.isFinite(max) ? Math.max(0, max) : 0;
 }
 function limpiarSeleccionVisual() {
   document.querySelectorAll('.celda.seleccionando').forEach((c) => c.classList.remove('seleccionando'));
+}
+function marcarCamino(camino) {
+  limpiarSeleccionVisual();
+  camino.forEach(({ f, c }) => {
+    document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.add('seleccionando');
+  });
 }
 function caminoEntre(f0, c0, f1, c1) {
   const df = f1 - f0, dc = c1 - c0;
@@ -1300,42 +1342,16 @@ function caminoEntre(f0, c0, f1, c1) {
   for (let i = 0; i <= pasos; i++) celdas.push({ f: f0 + pasoF * i, c: c0 + pasoC * i });
   return celdas;
 }
-function onPointerDown(e) {
-  if ($('pantallaJuego').hidden) return;
-  const celda = celdaEnPunto(e.clientX, e.clientY);
-  if (!celda) return;
-  arrastrando = true;
-  celdaInicio = { f: +celda.dataset.f, c: +celda.dataset.c };
-  celdaFin = celdaInicio;
-  limpiarSeleccionVisual();
-  celda.classList.add('seleccionando');
-}
-function onPointerMove(e) {
-  if (!arrastrando) return;
-  const celda = celdaEnPunto(e.clientX, e.clientY);
-  if (!celda) return;
-  const f = +celda.dataset.f, c = +celda.dataset.c;
-  if (f === celdaFin.f && c === celdaFin.c) return;
-  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, f, c);
-  if (!camino) return;
-  celdaFin = { f, c };
-  limpiarSeleccionVisual();
-  camino.forEach(({ f, c }) => {
-    document.querySelector(`.celda[data-f="${f}"][data-c="${c}"]`)?.classList.add('seleccionando');
-  });
-}
-function onPointerUp() {
-  if (!arrastrando) return;
-  arrastrando = false;
-  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, celdaFin.f, celdaFin.c);
-  limpiarSeleccionVisual();
-  if (!camino || camino.length < 2) return;
+// Confirma la palabra si el camino coincide con alguna pendiente — se usa tanto
+// apenas se completa el trazo (sin soltar el dedo) como al soltar, por las dudas.
+function confirmarSiCoincide(camino) {
+  if (!camino || camino.length < 2) return false;
   const texto = camino.map(({ f, c }) => nivel.letras[f][c]).join('');
   const textoInverso = texto.split('').reverse().join('');
   const encontrada = nivel.palabras_clave.find(
     (p) => !palabrasEncontradas.has(p.palabra) && (p.palabra === texto || p.palabra === textoInverso)
   );
-  if (!encontrada) return;
+  if (!encontrada) return false;
   palabrasEncontradas.add(encontrada.palabra);
   registrarPalabraEncontrada();
   const colorIndice = (palabrasEncontradas.size - 1) % 4;
@@ -1347,6 +1363,63 @@ function onPointerUp() {
     clearInterval(intervaloTimer);
     finalizarNivel();
   }
+  return true;
+}
+function onPointerDown(e) {
+  if ($('pantallaJuego').hidden) return;
+  const { rect } = medidasGrilla();
+  if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
+  arrastrando = true;
+  direccionBloqueada = null;
+  celdaInicio = celdaDesdeCoordenadas(e.clientX, e.clientY);
+  celdaFin = celdaInicio;
+  marcarCamino([celdaInicio]);
+}
+function onPointerMove(e) {
+  if (!arrastrando) return;
+  let f, c;
+  if (!direccionBloqueada) {
+    // Todavía no se definió una línea: seguir la celda más cercana al dedo tal cual.
+    const cand = celdaDesdeCoordenadas(e.clientX, e.clientY);
+    if (cand.f === celdaInicio.f && cand.c === celdaInicio.c) return;
+    const camino = caminoEntre(celdaInicio.f, celdaInicio.c, cand.f, cand.c);
+    if (!camino) return; // el primer movimiento define la dirección: si no es recto, esperar
+    const pasos = camino.length - 1;
+    direccionBloqueada = { df: (cand.f - celdaInicio.f) / pasos, dc: (cand.c - celdaInicio.c) / pasos };
+    f = cand.f; c = cand.c;
+  } else {
+    // Línea ya fijada (horizontal/vertical/diagonal): en vez de recalcular la celda
+    // cruda bajo el dedo, se proyecta el punto tocado sobre esa línea. Así, si el
+    // dedo se corre un poco para el costado, la fila/columna elegida no cambia —
+    // solo avanza o retrocede a lo largo de la palabra que se está armando.
+    const { rect, tam, padding, paso } = medidasGrilla();
+    const origenX = rect.left + padding + tam / 2 + celdaInicio.c * paso;
+    const origenY = rect.top + padding + tam / 2 + celdaInicio.f * paso;
+    const dirX = direccionBloqueada.dc * paso, dirY = direccionBloqueada.df * paso;
+    const largo2 = dirX * dirX + dirY * dirY;
+    const proyeccion = ((e.clientX - origenX) * dirX + (e.clientY - origenY) * dirY) / largo2;
+    const max = pasosMaximos(celdaInicio.f, celdaInicio.c, direccionBloqueada.df, direccionBloqueada.dc);
+    const pasos = Math.max(0, Math.min(max, Math.round(proyeccion)));
+    f = celdaInicio.f + direccionBloqueada.df * pasos;
+    c = celdaInicio.c + direccionBloqueada.dc * pasos;
+  }
+  if (f === celdaFin.f && c === celdaFin.c) return;
+  celdaFin = { f, c };
+  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, celdaFin.f, celdaFin.c);
+  marcarCamino(camino);
+  // Si el trazo ya arma una palabra pendiente, se confirma en el acto — no hace
+  // falta soltar el dedo, así un mal soltado sobre el final ya no arruina el intento.
+  if (confirmarSiCoincide(camino)) {
+    arrastrando = false;
+    limpiarSeleccionVisual();
+  }
+}
+function onPointerUp() {
+  if (!arrastrando) return;
+  arrastrando = false;
+  const camino = caminoEntre(celdaInicio.f, celdaInicio.c, celdaFin.f, celdaFin.c);
+  limpiarSeleccionVisual();
+  confirmarSiCoincide(camino);
 }
 document.addEventListener('pointerdown', onPointerDown);
 document.addEventListener('pointermove', onPointerMove);
