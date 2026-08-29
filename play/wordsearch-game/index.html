@@ -1040,7 +1040,15 @@ function renderMapaNiveles() {
   svg.setAttribute('viewBox', `0 0 420 ${alto}`);
   svg.setAttribute('preserveAspectRatio', 'none');
 
+  // xPct es el porcentaje real del ancho del contenedor (para los nodos <div>) y x son
+  // las mismas unidades pero dentro del sistema de coordenadas del SVG (0-420, fijo).
+  // El SVG se reescala solo al ancho real gracias a preserveAspectRatio="none", pero un
+  // <div> con left en PÍXELES no — por eso antes, en una pantalla angosta (celular),
+  // el camino se veía bien pero los círculos quedaban corridos hacia el borde: se
+  // calculaban con un ancho de referencia de 420px que en la compu suele coincidir con
+  // el ancho real del contenedor, pero en un celular es mucho más angosto.
   const puntoDe = (i) => ({
+    xPct: i % 2 === 0 ? 68 : 32,
     x: i % 2 === 0 ? 420 * 0.68 : 420 * 0.32,
     y: alto - (i * separacionY + 50),
   });
@@ -1079,7 +1087,7 @@ function renderMapaNiveles() {
     div.id = 'nodo-' + n.id_nivel;
     div.className = `nodo dificultad-${n.dificultad} ` + (!desbloqueado ? 'bloqueado' : completado ? 'completado' : 'jugable');
     const p = puntos[i];
-    div.style.left = p.x + 'px';
+    div.style.left = p.xPct + '%';
     div.style.top = p.y + 'px';
 
     // 3 estrellas siempre visibles: llenas las conseguidas, vacías el resto.
