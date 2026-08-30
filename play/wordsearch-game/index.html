@@ -473,6 +473,9 @@ const ADMOB = {
   appId: 'ca-app-pub-9714873159823978~2129698219',
   rewardedInterstitial: 'ca-app-pub-9714873159823978/5274841506', // anuncio "chico" — 1ra pista extra
   rewarded: 'ca-app-pub-9714873159823978/4564289864', // anuncio "grande" — 2da pista extra en adelante
+  // ID de PRUEBA oficial de Google para Intersticial normal (no recompensado) — hay que
+  // crear un anuncio de tipo "Intersticial" en AdMob y reemplazar este valor por el real.
+  interstitial: 'ca-app-pub-3940256099942544/1033173712',
   testing: true, // ⚠️ dejar en true hasta que la cuenta de AdMob esté aprobada (revisión ~24-48hs) y probada
 };
 const CapAdMob = window.Capacitor?.Plugins?.AdMob ?? null;
@@ -510,6 +513,19 @@ async function mostrarAnuncioRecompensado(tipo) {
   } catch (e) {
     console.error('No se pudo mostrar el anuncio', e);
     return false;
+  }
+}
+
+// Anuncio intersticial normal (sin recompensa) que se muestra cada 10 niveles jugados
+// (ver registrarNivelCompletado) — no interrumpe nada del juego en sí, se dispara recién
+// al salir de la pantalla de "nivel completado" (Siguiente/Reintentar/Mapa).
+async function mostrarAnuncioInterstitial() {
+  if (!CapAdMob) return;
+  try {
+    await CapAdMob.prepareInterstitial({ adId: ADMOB.interstitial, isTesting: ADMOB.testing });
+    await CapAdMob.showInterstitial();
+  } catch (e) {
+    console.error('No se pudo mostrar el anuncio intersticial', e);
   }
 }
 
@@ -726,11 +742,11 @@ $('btnLogros').addEventListener('click', () => {
   mostrarPantalla('pantallaLogros');
   renderLogros();
 });
-$('btnVolverMapa').addEventListener('click', () => {
+$('btnVolverMapa').addEventListener('click', () => salirDeNivelCompletado(() => {
   $('overlayFinal').classList.remove('visible');
   clearInterval(intervaloTimer);
   mostrarPantalla('pantallaNiveles');
-});
+}));
 
 // ---------- Opciones (solo UI por ahora, ver nota en pantalla) ----------
 $('inputVolumen').value = localStorage.getItem('sopa_opt_volumen') ?? 80;
@@ -834,7 +850,7 @@ function registrarResultado(idNivel, estrellas) {
 
 // ---------- Estadísticas acumuladas (para los Logros) ----------
 const CLAVE_STATS = 'sopa_stats';
-const STATS_POR_DEFECTO = { palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0 };
+const STATS_POR_DEFECTO = { palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0, nivelesCompletados: 0 };
 function cargarStats() {
   try { return { ...STATS_POR_DEFECTO, ...JSON.parse(localStorage.getItem(CLAVE_STATS)) }; }
   catch { return { ...STATS_POR_DEFECTO }; }
@@ -861,6 +877,13 @@ function registrarAnuncioVisto() {
   const s = cargarStats();
   s.anunciosVistos++;
   guardarStats(s);
+}
+// Devuelve el total acumulado para poder chequear "cada 10" sin leer stats dos veces.
+function registrarNivelCompletado() {
+  const s = cargarStats();
+  s.nivelesCompletados++;
+  guardarStats(s);
+  return s.nivelesCompletados;
 }
 
 // ---------- Conexión a Supabase opcional (mismo patrón que 03-admin-panel/admin.js) ----------
@@ -1141,9 +1164,10 @@ function renderMapaNiveles() {
 }
 
 // ---------- Estado del juego ----------
-let nivel, palabrasEncontradas, pistasRestantes, tiempoTranscurrido, intervaloTimer;
+let nivel, palabrasEncontradas, tiempoTranscurrido, intervaloTimer;
 let pistasPorAnuncio = 0, cargandoAnuncio = false;
 let arrastrando = false, celdaInicio = null, celdaFin = null;
+let pendienteInterstitial = false; // se pone en true al completar un nivel múltiplo de 10
 
 function cargarNivel(idNivel) {
   clearInterval(intervaloTimer);
@@ -1154,8 +1178,7 @@ function cargarNivel(idNivel) {
   nivel = { ...base, ...grilla };
 
   palabrasEncontradas = new Set();
-  pistasRestantes = nivel.pistas_maximas_gratis;
-  pistasPorAnuncio = 0;
+  pistasPorAnuncio = 0; // ya no hay pistas gratis: toda pista se consigue viendo un anuncio
   tiempoTranscurrido = 0;
 
   $('badgeDificultad').textContent = t().dificultad[nivel.dificultad].toUpperCase();
@@ -1234,8 +1257,6 @@ function actualizarBotonPista() {
   btn.disabled = cargandoAnuncio;
   if (cargandoAnuncio) {
     btn.textContent = t().cargandoAnuncio;
-  } else if (pistasRestantes > 0) {
-    btn.textContent = t().pista(pistasRestantes);
   } else if (pistasPorAnuncio === 0) {
     btn.textContent = t().pistaAnuncioChico;
   } else {
@@ -1258,13 +1279,6 @@ function revelarPistaEnGrilla() {
 
 async function usarPista() {
   if (cargandoAnuncio) return;
-  if (pistasRestantes > 0) {
-    if (!revelarPistaEnGrilla()) return;
-    pistasRestantes--;
-    registrarPistaUsada();
-    actualizarBotonPista();
-    return;
-  }
   const tipo = pistasPorAnuncio === 0 ? 'chico' : 'grande';
   cargandoAnuncio = true;
   actualizarBotonPista();
@@ -1458,10 +1472,14 @@ function siguienteNivelDe(idNivel) {
 function finalizarNivel() {
   const overlay = $('overlayFinal');
   $('btnSiguienteNivel').hidden = true;
-  const pistasUsadas = (nivel.pistas_maximas_gratis - pistasRestantes) + pistasPorAnuncio;
+  const pistasUsadas = pistasPorAnuncio; // ya no hay pistas gratis: todas son "por anuncio"
   const estrellas = calcularEstrellas(pistasUsadas, tiempoTranscurrido ?? 0);
   registrarResultado(nivel.id_nivel, estrellas);
   registrarSiSinPistas(pistasUsadas);
+  // Cada 10 niveles jugados (completados) se muestra un intersticial — recién al SALIR
+  // de esta pantalla (ver salirDeNivelCompletado), no ahora, para no tapar la animación
+  // de estrellas apenas se termina el nivel.
+  pendienteInterstitial = registrarNivelCompletado() % 10 === 0;
   $('tituloFinal').textContent = t().nivelCompletado;
   const contEstrellas = $('estrellasFinal');
   contEstrellas.className = `estrellas-final${estrellas === 3 ? ' naranja' : ''}`;
@@ -1483,13 +1501,24 @@ function finalizarNivel() {
   overlay.classList.add('visible');
 }
 
-$('btnReintentar').addEventListener('click', () => cargarNivel(nivel.id_nivel));
-$('btnSiguienteNivel').addEventListener('click', () => {
+// Punto único de salida de la pantalla de "nivel completado": si tocó intersticial
+// (cada 10 niveles, ver finalizarNivel) se muestra acá, recién al irse, antes de
+// ejecutar la acción real (reintentar / siguiente nivel / volver al mapa).
+async function salirDeNivelCompletado(accion) {
+  if (pendienteInterstitial) {
+    pendienteInterstitial = false;
+    await mostrarAnuncioInterstitial();
+  }
+  accion();
+}
+
+$('btnReintentar').addEventListener('click', () => salirDeNivelCompletado(() => cargarNivel(nivel.id_nivel)));
+$('btnSiguienteNivel').addEventListener('click', () => salirDeNivelCompletado(() => {
   const siguiente = siguienteNivelDe(nivel.id_nivel);
   if (!siguiente) return;
   $('overlayFinal').classList.remove('visible');
   cargarNivel(siguiente.id_nivel);
-});
+}));
 
 cargarCredencialesGuardadas();
 cargarBotonesMenu().then(aplicarIdioma);
