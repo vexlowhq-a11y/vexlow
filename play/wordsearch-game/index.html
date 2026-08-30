@@ -144,23 +144,6 @@
     flex: 1; min-height: 0; overflow-y: auto; border-radius: 12px;
     background-color: #4bb85c;
   }
-  /* Mascota del mapa de niveles: flota fija en la esquina (no se mueve al scrollear el
-     mapa, porque NO es hija de .mapa-scroll) y usa una tira de sprites propia por etapa
-     de crecimiento — cada .png trae una cantidad de cuadros distinta, por eso el ancho,
-     alto y cantidad de cuadros se fijan por variables CSS desde JS (ver actualizarMascota). */
-  .mascota-mapa {
-    position: absolute; right: 14px; bottom: 14px; z-index: 5; pointer-events: none;
-    width: var(--mascota-ancho, 90px); height: var(--mascota-alto, 90px);
-    background-repeat: no-repeat;
-    background-size: calc(var(--mascota-frames, 1) * var(--mascota-ancho, 90px)) var(--mascota-alto, 90px);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
-    animation-name: mascota-idle;
-    animation-iteration-count: infinite;
-  }
-  @keyframes mascota-idle {
-    from { background-position-x: 0; }
-    to   { background-position-x: calc(-1 * var(--mascota-frames, 1) * var(--mascota-ancho, 90px)); }
-  }
   .mapa-container {
     position: relative; max-width: 420px; margin: 0 auto; padding: 20px 0 60px;
     background-color: #5fcf6e;
@@ -423,7 +406,6 @@
       <svg class="camino" id="svgCamino"></svg>
     </div>
   </div>
-  <div class="mascota-mapa" id="mascotaMapa" aria-hidden="true"></div>
   <div class="avanzado-supabase" id="avanzadoSupabase" hidden>
     <span data-i18n-html="avanzadoHtml">
       <strong>Avanzado:</strong> conectar a Supabase para traer niveles publicados ahí
@@ -939,42 +921,6 @@ $('btnCargarPublicados').addEventListener('click', cargarNivelesDesdeSupabase);
 const COLORES_DIFICULTAD = { facil: '#3ecf5e', medio: '#2fb6c4', dificil: '#8b5cf6', extremo: '#e8543e' };
 const ORDEN_DIFICULTADES = ['facil', 'medio', 'dificil', 'extremo'];
 
-// ---------- Mascota del mapa (dragón que va creciendo con el progreso) ----------
-// Los .png de assets/mascota/ son tiras de sprites recortadas y realineadas a mano
-// (el material original traía cuadros de ancho y cantidad totalmente distintos por
-// archivo) — por eso cada etapa trae su propio frames/w/h en vez de asumir un grid fijo.
-const MASCOTA_RUTA = 'assets/mascota';
-const MASCOTA_ALTO_PX = 90;
-const MASCOTA_ETAPAS = [
-  { hasta: 20,  archivo: '00-20.png',   frames: 3, w: 560, h: 644 },
-  { hasta: 40,  archivo: '21-40.png',   frames: 4, w: 491, h: 604 },
-  { hasta: 60,  archivo: '41-60.png',   frames: 6, w: 338, h: 461 },
-  { hasta: 80,  archivo: '61-80.png',   frames: 6, w: 345, h: 471 },
-  { hasta: 90,  archivo: '81-90.png',   frames: 4, w: 507, h: 520 },
-  { hasta: 100, archivo: '91-100.png',  frames: 4, w: 539, h: 518 },
-];
-const MASCOTA_DORMIDA = { archivo: 'dormido.png', frames: 2, w: 948, h: 597 };
-
-// ordenMaxCompletado: el número de nivel (orden) más alto que el jugador ya completó —
-// como no se puede saltear niveles (ver desbloqueo en renderMapaNiveles), esto equivale
-// a "cuántos niveles jugó en total", que es la escala que usan los nombres de archivo.
-function actualizarMascota(ordenMaxCompletado) {
-  const el = $('mascotaMapa');
-  if (!el) return;
-  const etapa = ordenMaxCompletado === 0
-    ? MASCOTA_DORMIDA
-    : (MASCOTA_ETAPAS.find((e) => ordenMaxCompletado <= e.hasta) ?? MASCOTA_ETAPAS[MASCOTA_ETAPAS.length - 1]);
-  const ancho = Math.round((etapa.w / etapa.h) * MASCOTA_ALTO_PX);
-  el.style.setProperty('--mascota-frames', etapa.frames);
-  el.style.setProperty('--mascota-ancho', ancho + 'px');
-  el.style.setProperty('--mascota-alto', MASCOTA_ALTO_PX + 'px');
-  el.style.backgroundImage = `url('${MASCOTA_RUTA}/${etapa.archivo}')`;
-  // Un cuadro cada ~0.45s — más cuadros (etapas del medio) da un ciclo más largo, no
-  // una animación más rápida, así todas las etapas se sienten con el mismo ritmo.
-  el.style.animationDuration = (etapa.frames * 0.45) + 's';
-  el.style.animationTimingFunction = `steps(${etapa.frames})`;
-}
-
 function renderFiltrosDificultad(niveles) {
   const cont = $('filtrosDificultad');
   cont.innerHTML = '';
@@ -1099,10 +1045,6 @@ function renderMapaNiveles() {
   const totales = estrellasTotales(progreso);
   $('estrellasJugador').textContent = `⭐ ${totales}`;
   renderFiltrosDificultad(niveles);
-  const ordenMaxCompletado = niveles.reduce(
-    (max, n) => (progreso[n.id_nivel]?.mejorEstrellas ?? 0) > 0 ? Math.max(max, n.orden ?? 0) : max, 0
-  );
-  actualizarMascota(ordenMaxCompletado);
 
   // Desbloqueo = las DOS cosas a la vez, no una u otra:
   //  1) haber completado el nivel anterior (nunca se salta ninguno, aunque sobren estrellas)
