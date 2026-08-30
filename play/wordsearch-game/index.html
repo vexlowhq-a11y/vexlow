@@ -548,7 +548,6 @@ const IDIOMAS = {
     creditosTitulo: 'Créditos',
     creditosTexto: 'Sopa de Letras — un juego de VexlowHQ.<br />Diseño, contenido y desarrollo: vos 🙂<br />Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).',
     politica: 'Política de privacidad',
-    alertaPolitica: 'Acá iría el link a tu política de privacidad ya publicada — es obligatoria para Google Play y la App Store (ver 06-web-a-movil.md).',
     seleccionaNivel: 'Seleccioná un nivel',
     avanzadoHtml: '<strong>Avanzado:</strong> conectar a Supabase para traer niveles publicados ahí (si no, se usa el contenido local de <code>scripts/contenido-niveles.json</code>).',
     conectar: 'Conectar', cargarPublicados: 'Cargar publicados',
@@ -608,7 +607,6 @@ const IDIOMAS = {
     creditosTitulo: 'Credits',
     creditosTexto: 'Word Search — a VexlowHQ game.<br />Design, content and development: you 🙂<br />Prototype generated as part of the architecture design (see <code>README.md</code>).',
     politica: 'Privacy Policy',
-    alertaPolitica: 'This would link to your published privacy policy — required by both Google Play and the App Store (see 06-web-a-movil.md).',
     seleccionaNivel: 'Select a level',
     avanzadoHtml: '<strong>Advanced:</strong> connect to Supabase to pull published levels from there (otherwise it uses the local content from <code>scripts/contenido-niveles.json</code>).',
     conectar: 'Connect', cargarPublicados: 'Load published',
@@ -762,7 +760,7 @@ $('inputIdioma').addEventListener('change', (e) => {
   aplicarIdioma();
 });
 
-$('btnPolitica').addEventListener('click', () => alert(t().alertaPolitica));
+$('btnPolitica').addEventListener('click', () => window.open('https://vexlowhq.com/word-search-privacy.html', '_system'));
 
 // ---------- Contenido: 100 niveles reales desde scripts/contenido-niveles.json ----------
 // La grilla NO se guarda — se genera al jugar con generarGrilla(). Por eso alcanza con
