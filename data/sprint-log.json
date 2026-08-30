@@ -39,7 +39,10 @@
     "6": {
       "storiesDone": [
         0
-      ]
+      ],
+      "type": "carousel",
+      "mediaId": "18119003107909031",
+      "completedAt": "2026-08-27T23:30:13.852Z"
     }
   }
 }

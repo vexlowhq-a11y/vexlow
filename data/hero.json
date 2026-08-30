@@ -1,14 +1,5 @@
 [
   {
-    "category": "ai",
-    "chip": "🤖 AI",
-    "title": "Amazon Expands Nvidia Chip Order Amid Rising Demand for AI Technologies",
-    "dek": "In response to increasing demand, Amazon is set to triple its order of Nvidia GPU chips, signaling a major strengthening of their partnership that reflects broader trends in artificial intelligence.",
-    "image": "img/temas/amazon-expands-nvidia-chip-order-amid-rising-demand-for-ai-t.jpg",
-    "textColor": "auto",
-    "href": "categoria/ai/amazon-expands-nvidia-chip-order-amid-rising-demand-for-ai-t.html"
-  },
-  {
     "category": "gaming",
     "chip": "🎮 Gaming",
     "title": "Riot Games Halts Development of League of Legends Fighting Game 2XKO",
@@ -18,6 +9,15 @@
     "href": "categoria/gaming/riot-games-halts-development-of-league-of-legends-fighting-g.html"
   },
   {
+    "category": "ai",
+    "chip": "🤖 AI",
+    "title": "Neocloud Lambda's $1 Billion Loan Reflects the Ongoing Surge in AI Investment",
+    "dek": "Neocloud Lambda has secured a substantial $1 billion loan aimed at acquiring Nvidia AI chips, which will then be leased to Microsoft. This financial move highlights the escalating costs and investments surrounding the AI boom.",
+    "image": "img/temas/neocloud-lambda-s-1-billion-loan-reflects-the-ongoing-surge-.jpg",
+    "textColor": "auto",
+    "href": "categoria/ai/neocloud-lambda-s-1-billion-loan-reflects-the-ongoing-surge-.html"
+  },
+  {
     "category": "science",
     "chip": "🚀 Science & Space",
     "title": "A Satellite's Final Moments: The Heat Shield Saga",
@@ -25,6 +25,15 @@
     "image": "img/drafts/a-satellite-s-final-moments-the-heat-shi-151d.png",
     "textColor": "auto",
     "href": "categoria/science/a-satellite-s-final-moments-the-heat-shield-saga.html"
+  },
+  {
+    "category": "science",
+    "chip": "🚀 Science & Space",
+    "title": "Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump",
+    "dek": "The astronauts of NASA's Artemis II mission, who journeyed around the moon in April, have been awarded the prestigious Congressional Space Medal of Honor, recognizing their contributions to space exploration.",
+    "image": "img/drafts/artemis-ii-astronauts-honored-with-congr-7ace.jpg",
+    "textColor": "auto",
+    "href": "categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"
   },
   {
     "category": "technology",
