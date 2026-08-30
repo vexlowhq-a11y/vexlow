@@ -15,6 +15,12 @@
     --color-extremo: #e8543e; --color-extremo-oscuro: #b93326;
   }
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  /* CAUSA REAL del bug histórico de "Siguiente Nivel": varios botones (.btn-nivel-final,
+     .btn-anuncio-final) fijan display:flex, que en la cascada le gana a la regla por
+     defecto del navegador [hidden]{display:none} — el atributo `hidden` quedaba puesto
+     bien por JS, pero el botón se seguía viendo (y se podía tocar) igual. Esta regla
+     global garantiza que `hidden` siempre gane, sea cual sea el display que fije la clase. */
+  [hidden] { display: none !important; }
   html, body {
     margin: 0; padding: 0; height: 100%; overflow: hidden;
     background: #0f172a; color: #e2e8f0;
@@ -323,6 +329,20 @@
     box-shadow: 0 4px 0 #14507f, 0 8px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
   }
   .btn-nivel-siguiente:active { box-shadow: 0 1px 0 #14507f; }
+  .mensaje-desbloqueo {
+    font-size: 0.82rem; color: #fbbf24; background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 8px 10px; margin-top: 10px;
+  }
+  .mensaje-desbloqueo.completado { color: #4ade80; background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); }
+  .btn-anuncio-final {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    margin-top: 10px; padding: 10px 14px; border-radius: 12px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #fbbf24, #d97706); color: #1e293b;
+    font-size: 0.85rem; font-weight: 700;
+    box-shadow: 0 3px 0 #92400e, inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn-anuncio-final:active { box-shadow: 0 1px 0 #92400e; transform: translateY(2px); }
+  .btn-anuncio-final:disabled { background: #334155; color: #64748b; cursor: not-allowed; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -449,6 +469,9 @@
     <div id="tituloFinal">¡Nivel completado!</div>
     <div class="estrellas-final" id="estrellasFinal"></div>
     <div id="detalleFinal" style="font-size:0.85rem;color:#94a3b8;"></div>
+    <div id="mensajeDesbloqueo" class="mensaje-desbloqueo" hidden></div>
+    <button class="btn-anuncio-final" id="btnMejorarEstrella" hidden></button>
+    <button class="btn-anuncio-final" id="btnAyudaDesbloqueo" hidden></button>
     <div class="fila-botones">
       <button class="btn-nivel-final btn-nivel-siguiente" id="btnSiguienteNivel" hidden data-i18n="siguienteNivelBoton">Siguiente Nivel</button>
       <button class="btn-nivel-final btn-nivel-reintentar" id="btnReintentar" data-i18n="reintentarBoton">Reintentar</button>
@@ -464,70 +487,150 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const $ = (id) => document.getElementById(id);
 const RUTA_SPRITES = 'scripts/sopa_de_letras_sprites';
 
-// ---------- AdMob (pistas por anuncio) ----------
-// IDs de PRUEBA oficiales de Google — seguros para probar sin arriesgar la cuenta real.
-// Cuando exista la cuenta de AdMob (vexlowhq@gmail.com), reemplazar estos 3 valores y
-// pasar `testing` a false. No usar banner/interstitial común para esto: Google prohíbe
-// dar una recompensa (una pista) a cambio de un formato que no sea "Rewarded".
-const ADMOB = {
-  appId: 'ca-app-pub-9714873159823978~2129698219',
-  rewardedInterstitial: 'ca-app-pub-9714873159823978/5274841506', // anuncio "chico" — 1ra pista extra
-  rewarded: 'ca-app-pub-9714873159823978/4564289864', // anuncio "grande" — 2da pista extra en adelante
-  // ID de PRUEBA oficial de Google para Intersticial normal (no recompensado) — hay que
-  // crear un anuncio de tipo "Intersticial" en AdMob y reemplazar este valor por el real.
-  interstitial: 'ca-app-pub-3940256099942544/1033173712',
-  testing: true, // ⚠️ dejar en true hasta que la cuenta de AdMob esté aprobada (revisión ~24-48hs) y probada
-};
-const CapAdMob = window.Capacitor?.Plugins?.AdMob ?? null;
-if (CapAdMob) {
-  CapAdMob.initialize({ initializeForTesting: ADMOB.testing }).catch((e) => console.error('AdMob init falló', e));
-}
+// ---------- Configuración de anuncios (AdMob) ----------
+// ⚠️ Dejar en true hasta que la cuenta de AdMob esté aprobada (revisión ~24-48hs) y
+// probada — con true, todos los formatos piden explícitamente un anuncio de PRUEBA a
+// Google (isTesting), sin arriesgar la cuenta real aunque el ID de abajo sea uno real.
+const ADS_TEST_MODE = true;
 
-// Muestra un anuncio recompensado y devuelve true si el usuario lo completó.
-// `tipo` es 'chico' (Rewarded Interstitial) o 'grande' (Rewarded video clásico).
+// IDs reales de la cuenta de AdMob (vexlowhq@gmail.com) — ya en uso para las pistas.
+const APP_AD_ID_ANDROID = 'ca-app-pub-9714873159823978~2129698219';
+const REWARDED_HINT_AD_ID = 'ca-app-pub-9714873159823978/5274841506'; // pista, 1er anuncio (Rewarded Interstitial)
+const REWARDED_HINT_AD_ID_GRANDE = 'ca-app-pub-9714873159823978/4564289864'; // pista, 2do anuncio en adelante (Rewarded video)
+// Estos tres formatos son NUEVOS — todavía no existe un anuncio creado para ellos en
+// AdMob. Usan el ID de PRUEBA oficial de Google (no un ID inventado) hasta que crees el
+// anuncio real correspondiente y reemplaces el valor acá.
+const REWARDED_STAR_AD_ID = 'ca-app-pub-3940256099942544/5224354917'; // TODO: reemplazar — mejora de 1 a 2 estrellas
+const REWARDED_DAILY_HELP_AD_ID = 'ca-app-pub-3940256099942544/5224354917'; // TODO: reemplazar — estrella de ayuda diaria
+const INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712'; // TODO: reemplazar — intersticial cada 10 niveles
+const BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111'; // TODO: reemplazar — no se usa mientras ENABLE_BANNER_ADS sea false
+
+// Reglas de los intersticiales moderados (ver AdManager.intentarIntersticial).
+const INTERSTITIAL_NIVEL_MINIMO = 4; // no antes de completar este nivel
+const INTERSTITIAL_CADA_N_NIVELES = 5;
+const INTERSTITIAL_COOLDOWN_MS = 120 * 1000; // mínimo entre dos intersticiales
+const PROTECCION_TRAS_RECOMPENSADO_MS = 90 * 1000; // no mostrar un intersticial pegado a un recompensado
+
+// Banner: desactivado por defecto — cambiar a true más adelante para activarlo sin
+// tocar el resto del juego (ver AdManager.actualizarBanner, llamado desde mostrarPantalla).
+const ENABLE_BANNER_ADS = false;
+const PANTALLAS_CON_BANNER = ['pantallaNiveles', 'pantallaLogros', 'pantallaOpciones'];
+
 const ES_NATIVO = window.Capacitor?.getPlatform && window.Capacitor.getPlatform() !== 'web';
 
-async function mostrarAnuncioRecompensado(tipo) {
-  if (!CapAdMob) {
-    // No estamos dentro de la app nativa (ej. probando en un navegador de escritorio):
-    // no hay forma de mostrar un anuncio real, así que se concede la pista igual para no trabar la demo.
-    console.warn('AdMob no disponible en este entorno — se concede la pista sin anuncio (solo pasa fuera del APK).');
-    return true;
-  }
-  const prepararFn = tipo === 'chico' ? 'prepareRewardInterstitialAd' : 'prepareRewardVideoAd';
-  const mostrarFn = tipo === 'chico' ? 'showRewardInterstitialAd' : 'showRewardVideoAd';
-  const adId = tipo === 'chico' ? ADMOB.rewardedInterstitial : ADMOB.rewarded;
-  try {
-    await CapAdMob[prepararFn]({ adId, isTesting: ADMOB.testing });
-    await CapAdMob[mostrarFn]();
-    // La promesa de "mostrar" ya resuelve cuando se gana la recompensa (así lo
-    // documenta el plugin), pero en el APK real puede resolver un instante ANTES
-    // de que el anuncio termine de cerrarse del todo en pantalla. Sin esta pausa la
-    // pista se revela mientras el anuncio todavía tapa la pantalla y el jugador no
-    // llega a verla. Se probó escuchando el evento nativo de cierre en vez de esta
-    // pausa fija, pero en un dispositivo real terminó rompiendo la selección de
-    // palabras del juego (efecto secundario no esperado) — se revirtió a esto, que
-    // es más simple y no toca nada más del estado del juego.
-    if (ES_NATIVO) await new Promise((r) => setTimeout(r, 1200));
-    return true;
-  } catch (e) {
-    console.error('No se pudo mostrar el anuncio', e);
-    return false;
-  }
-}
+// ---------- AdManager: único punto de contacto con AdMob ----------
+// Todo el juego pasa por acá para mostrar un anuncio — nada más en el archivo llama a
+// CapAdMob directo. Centraliza inicialización, estado de carga, y las reglas anti-abuso
+// (cooldowns y la protección entre recompensados e intersticiales).
+const AdManager = (() => {
+  const CapAdMob = window.Capacitor?.Plugins?.AdMob ?? null;
+  let inicializado = false;
+  let cargandoRecompensado = false;
+  let bannerVisible = false;
 
-// Anuncio intersticial normal (sin recompensa) que se muestra cada 10 niveles jugados
-// (ver registrarNivelCompletado) — no interrumpe nada del juego en sí, se dispara recién
-// al salir de la pantalla de "nivel completado" (Siguiente/Reintentar/Mapa).
-async function mostrarAnuncioInterstitial() {
-  if (!CapAdMob) return;
-  try {
-    await CapAdMob.prepareInterstitial({ adId: ADMOB.interstitial, isTesting: ADMOB.testing });
-    await CapAdMob.showInterstitial();
-  } catch (e) {
-    console.error('No se pudo mostrar el anuncio intersticial', e);
+  function init() {
+    if (inicializado) return;
+    inicializado = true;
+    if (ADS_TEST_MODE) console.log('[AdManager] modo de prueba activo — no se muestran anuncios reales.');
+    if (!CapAdMob) return;
+    CapAdMob.initialize({ initializeForTesting: ADS_TEST_MODE }).catch((e) => console.error('[AdManager] initialize falló', e));
   }
-}
+
+  function disponible() { return !!CapAdMob; }
+  function estaCargandoRecompensado() { return cargandoRecompensado; }
+
+  function marcarRecompensaMostrada() {
+    const s = cargarStats();
+    s.ultimoRecompensadoEn = Date.now();
+    guardarStats(s);
+  }
+  function protegidoPorRecompensadoReciente() {
+    const s = cargarStats();
+    return Date.now() - (s.ultimoRecompensadoEn || 0) < PROTECCION_TRAS_RECOMPENSADO_MS;
+  }
+
+  // Muestra un anuncio recompensado y devuelve true solo si el usuario recibió la
+  // recompensa confirmada por AdMob. `formato` es 'interstitial' (Rewarded Interstitial)
+  // o 'video' (Rewarded video clásico) — cada placement ya sabe cuál usar.
+  async function mostrarRecompensado(adId, formato) {
+    if (!adId) { console.error('[AdManager] falta el ID de anuncio.'); return false; }
+    if (cargandoRecompensado) return false; // evita solicitudes simultáneas
+    if (!CapAdMob) {
+      // Fuera de la app nativa (navegador de escritorio) no hay forma de mostrar un
+      // anuncio real — se concede la recompensa igual para no trabar la demo/web.
+      console.warn('[AdManager] AdMob no disponible en este entorno — se concede la recompensa sin anuncio.');
+      return true;
+    }
+    cargandoRecompensado = true;
+    const prepararFn = formato === 'interstitial' ? 'prepareRewardInterstitialAd' : 'prepareRewardVideoAd';
+    const mostrarFn = formato === 'interstitial' ? 'showRewardInterstitialAd' : 'showRewardVideoAd';
+    try {
+      await CapAdMob[prepararFn]({ adId, isTesting: ADS_TEST_MODE });
+      await CapAdMob[mostrarFn]();
+      // La promesa de "mostrar" ya resuelve cuando se gana la recompensa (así lo
+      // documenta el plugin), pero en el APK real puede resolver un instante ANTES de
+      // que el anuncio termine de cerrarse del todo en pantalla. Sin esta pausa la
+      // recompensa se revela mientras el anuncio todavía tapa la pantalla. Se probó
+      // escuchando el evento nativo de cierre en vez de esta pausa fija, pero en un
+      // dispositivo real terminó rompiendo la selección de palabras del juego (efecto
+      // secundario no esperado) — se revirtió a esto, que es más simple.
+      if (ES_NATIVO) await new Promise((r) => setTimeout(r, 1200));
+      marcarRecompensaMostrada();
+      return true;
+    } catch (e) {
+      console.error('[AdManager] no se pudo mostrar el anuncio recompensado', e);
+      return false;
+    } finally {
+      cargandoRecompensado = false;
+    }
+  }
+
+  async function mostrarInterstitial() {
+    if (!CapAdMob) return false;
+    try {
+      await CapAdMob.prepareInterstitial({ adId: INTERSTITIAL_AD_ID, isTesting: ADS_TEST_MODE });
+      await CapAdMob.showInterstitial();
+      const s = cargarStats();
+      s.ultimoIntersticialEn = Date.now();
+      guardarStats(s);
+      return true;
+    } catch (e) {
+      console.error('[AdManager] no se pudo mostrar el anuncio intersticial', e);
+      return false;
+    }
+  }
+
+  // Decide si corresponde un intersticial ACÁ mismo, y lo muestra si es así. Se llama
+  // una sola vez por nivel completado, recién al SALIR de la pantalla de victoria (ver
+  // salirDeNivelCompletado) — nunca durante el tablero, nunca sobre el resultado.
+  async function intentarIntersticial(nivelesCompletadosTotal) {
+    if (nivelesCompletadosTotal < INTERSTITIAL_NIVEL_MINIMO) return;
+    if ((nivelesCompletadosTotal - INTERSTITIAL_NIVEL_MINIMO) % INTERSTITIAL_CADA_N_NIVELES !== 0) return;
+    const s = cargarStats();
+    if (Date.now() - (s.ultimoIntersticialEn || 0) < INTERSTITIAL_COOLDOWN_MS) return;
+    if (protegidoPorRecompensadoReciente()) return;
+    await mostrarInterstitial();
+  }
+
+  // Banner: no-op mientras ENABLE_BANNER_ADS sea false — con eso alcanza para dejarlo
+  // desactivado sin tocar nada más. Cuando se active, solo aparece en las pantallas de
+  // PANTALLAS_CON_BANNER, nunca durante una partida ni sobre la pantalla de victoria.
+  function actualizarBanner(idPantalla) {
+    if (!ENABLE_BANNER_ADS || !CapAdMob) return;
+    const corresponde = PANTALLAS_CON_BANNER.includes(idPantalla);
+    if (corresponde && !bannerVisible) {
+      bannerVisible = true;
+      CapAdMob.showBanner({ adId: BANNER_AD_ID, isTesting: ADS_TEST_MODE, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER' })
+        .catch((e) => { console.error('[AdManager] no se pudo mostrar el banner', e); bannerVisible = false; });
+    } else if (!corresponde && bannerVisible) {
+      bannerVisible = false;
+      CapAdMob.hideBanner().catch((e) => console.error('[AdManager] no se pudo ocultar el banner', e));
+    }
+  }
+
+  return { init, disponible, estaCargandoRecompensado, mostrarRecompensado, intentarIntersticial, actualizarBanner };
+})();
+AdManager.init();
 
 // ---------- Idioma / i18n ----------
 // Traduce toda la UI del juego (menú, mapa, pantalla de juego). Los NOMBRES de los
@@ -563,6 +666,10 @@ const IDIOMAS = {
     nivelCompletado: '¡Nivel completado!',
     siguienteNivelBoton: 'Siguiente Nivel',
     detalleFinal: (a, b) => `Pistas usadas: ${a} · Tiempo: ${b}s`,
+    necesitaMasEstrellas: (n) => `Necesitás ${n} estrella${n === 1 ? '' : 's'} más para desbloquear el siguiente nivel`,
+    juegoCompletado: '¡Completaste los 100 niveles! 🎉',
+    botonMejorarEstrella: '📺 Ver anuncio y mejorar a 2 estrellas',
+    botonAyudaDiaria: '📺 Ver anuncio y obtener 1 estrella de ayuda',
     conectando: 'Conectado. Click en "Cargar publicados" para traerlos.',
     errorConexion: (msg) => `Error: ${msg}`,
     sinPublicados: 'Conectado, pero no hay niveles publicados todavía.',
@@ -622,6 +729,10 @@ const IDIOMAS = {
     nivelCompletado: 'Level complete!',
     siguienteNivelBoton: 'Next Level',
     detalleFinal: (a, b) => `Hints used: ${a} · Time: ${b}s`,
+    necesitaMasEstrellas: (n) => `You need ${n} more star${n === 1 ? '' : 's'} to unlock the next level`,
+    juegoCompletado: 'You completed all 100 levels! 🎉',
+    botonMejorarEstrella: '📺 Watch ad and upgrade to 2 stars',
+    botonAyudaDiaria: '📺 Watch ad for 1 bonus star',
     conectando: 'Connected. Click "Load published" to fetch them.',
     errorConexion: (msg) => `Error: ${msg}`,
     sinPublicados: 'Connected, but there are no published levels yet.',
@@ -693,6 +804,7 @@ function aplicarIdioma() {
 // ---------- Navegación entre pantallas ----------
 function mostrarPantalla(id) {
   document.querySelectorAll('.pantalla').forEach((p) => (p.hidden = p.id !== id));
+  AdManager.actualizarBanner(id);
   if (id === 'pantallaNiveles') {
     // Siempre repintar al entrar al mapa — si no, cualquier camino que se salte esta
     // pantalla (como "Siguiente Nivel", que va directo al próximo nivel sin pasar por
@@ -832,23 +944,101 @@ async function cargarContenidoReal() {
 
 // ---------- Progreso del jugador (local, ver 07-mapa-niveles-y-progreso.md) ----------
 const CLAVE_PROGRESO = 'sopa_progreso';
-function cargarProgreso() {
-  try { return JSON.parse(localStorage.getItem(CLAVE_PROGRESO)) || {}; } catch { return {}; }
+const VERSION_GUARDADO_ACTUAL = 2; // ver migrarProgreso() — sube cada vez que cambia el formato
+
+// Sanea una entrada de progreso individual: nunca confiar en que localStorage tenga el
+// formato esperado (se puede corromper a mano, con una versión vieja de la app, o con
+// una edición manual). mejorEstrellas siempre queda como un entero entre 0 y 3.
+function sanearEntradaProgreso(entrada) {
+  if (!entrada || typeof entrada !== 'object') return { completado: false, mejorEstrellas: 0, mejoraAnuncioUsada: false };
+  const crudo = Number(entrada.mejorEstrellas);
+  const estrellas = Number.isFinite(crudo) ? Math.max(0, Math.min(3, Math.round(crudo))) : 0;
+  return {
+    completado: !!entrada.completado || estrellas > 0,
+    mejorEstrellas: estrellas,
+    mejoraAnuncioUsada: !!entrada.mejoraAnuncioUsada, // ver sección "mejorar 1→2 estrellas con anuncio"
+  };
 }
-function guardarProgreso(p) { localStorage.setItem(CLAVE_PROGRESO, JSON.stringify(p)); }
+
+// Migra el objeto guardado a la versión actual sin perder progreso existente. Si en el
+// futuro se agregan campos nuevos, inicializarlos acá con valores seguros — nunca pisar
+// ni reiniciar lo que ya estaba guardado. Se guarda un respaldo antes de tocar nada.
+function migrarProgreso(datos) {
+  if (!datos || typeof datos !== 'object' || Array.isArray(datos)) return { version: VERSION_GUARDADO_ACTUAL, niveles: {} };
+  // Formato viejo (sin versión): el objeto ENTERO era { idNivel: {...} }. A partir de la
+  // v2 se envuelve en { version, niveles } para poder seguir migrando en el futuro sin
+  // ambigüedad sobre qué forma tiene el objeto guardado.
+  const esFormatoViejo = datos.version === undefined && datos.niveles === undefined;
+  const version = esFormatoViejo ? 1 : (Number(datos.version) || 1);
+  const nivelesCrudos = esFormatoViejo ? datos : (datos.niveles ?? {});
+  if (version < VERSION_GUARDADO_ACTUAL) {
+    try { localStorage.setItem(CLAVE_PROGRESO + '_respaldo_v' + version, JSON.stringify(datos)); } catch {}
+  }
+  const niveles = {};
+  for (const [id, entrada] of Object.entries(nivelesCrudos)) {
+    if (typeof id !== 'string' || !id) continue;
+    niveles[id] = sanearEntradaProgreso(entrada);
+  }
+  return { version: VERSION_GUARDADO_ACTUAL, niveles };
+}
+
+function cargarProgreso() {
+  let crudo;
+  try { crudo = JSON.parse(localStorage.getItem(CLAVE_PROGRESO)); } catch { crudo = null; }
+  return migrarProgreso(crudo).niveles;
+}
+function guardarProgreso(niveles) {
+  localStorage.setItem(CLAVE_PROGRESO, JSON.stringify({ version: VERSION_GUARDADO_ACTUAL, niveles }));
+}
 function estrellasTotales(progreso) {
   return Object.values(progreso).reduce((s, n) => s + (n.mejorEstrellas || 0), 0);
 }
 function registrarResultado(idNivel, estrellas) {
   const progreso = cargarProgreso();
-  const anterior = progreso[idNivel]?.mejorEstrellas ?? 0;
-  progreso[idNivel] = { completado: true, mejorEstrellas: Math.max(anterior, estrellas) };
+  const anteriorEntrada = progreso[idNivel] ?? { mejorEstrellas: 0, mejoraAnuncioUsada: false };
+  progreso[idNivel] = {
+    completado: true,
+    mejorEstrellas: Math.max(anteriorEntrada.mejorEstrellas, Math.max(0, Math.min(3, Math.round(estrellas) || 0))),
+    mejoraAnuncioUsada: anteriorEntrada.mejoraAnuncioUsada, // no se toca acá — solo la pone en true pedirMejoraEstrella
+  };
   guardarProgreso(progreso);
+}
+
+// ---------- Desbloqueo de niveles (única fuente de verdad) ----------
+// TODA decisión de "¿se puede entrar a este nivel?" pasa por acá — el mapa, el botón
+// "Siguiente Nivel" y cargarNivel() usan las mismas funciones. Antes cargarNivel() no
+// validaba nada: alcanzaba con llamarla directo (consola, o cualquier botón mal
+// calculado) para entrar a un nivel bloqueado, aunque el mapa lo mostrara bloqueado bien.
+function todosLosNivelesOrdenados() {
+  return Object.values(catalogoNiveles).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+}
+// Devuelve el motivo estructurado, no solo true/false, para que el mapa y la pantalla de
+// victoria puedan mostrar el mensaje correcto sin recalcular la razón por su cuenta.
+function estadoDesbloqueo(idNivel, progreso) {
+  const todos = todosLosNivelesOrdenados();
+  const idx = todos.findIndex((n) => n.id_nivel === idNivel);
+  if (idx === -1) return { desbloqueado: false, motivo: 'inexistente' }; // nivel inexistente o fuera de rango
+  if (idx === 0) return { desbloqueado: true, motivo: 'ok' }; // el primer nivel siempre está desbloqueado
+  const anterior = todos[idx - 1];
+  const anteriorCompletado = (progreso[anterior.id_nivel]?.mejorEstrellas ?? 0) > 0;
+  if (!anteriorCompletado) return { desbloqueado: false, motivo: 'completaAnterior' };
+  const totales = estrellasTotales(progreso);
+  const requeridas = todos[idx].estrellas_para_desbloquear ?? 0;
+  if (totales < requeridas) return { desbloqueado: false, motivo: 'faltanEstrellas', requeridas, faltan: requeridas - totales };
+  return { desbloqueado: true, motivo: 'ok' };
+}
+function estaDesbloqueado(idNivel, progreso) {
+  return estadoDesbloqueo(idNivel, progreso).desbloqueado;
 }
 
 // ---------- Estadísticas acumuladas (para los Logros) ----------
 const CLAVE_STATS = 'sopa_stats';
-const STATS_POR_DEFECTO = { palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0, nivelesCompletados: 0 };
+const STATS_POR_DEFECTO = {
+  palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0, nivelesCompletados: 0,
+  ultimoRecompensadoEn: 0, // ver AdManager — protección de 90s antes de un intersticial
+  ultimoIntersticialEn: 0, // ver AdManager — cooldown de 120s entre intersticiales
+  ultimaAyudaDiariaEn: 0, // ver pedirAyudaDiaria — máximo 1 cada 24hs
+};
 function cargarStats() {
   try { return { ...STATS_POR_DEFECTO, ...JSON.parse(localStorage.getItem(CLAVE_STATS)) }; }
   catch { return { ...STATS_POR_DEFECTO }; }
@@ -1044,14 +1234,10 @@ function renderMapaNiveles() {
   $('estrellasJugador').textContent = `⭐ ${totales}`;
   renderFiltrosDificultad(niveles);
 
-  // Desbloqueo = las DOS cosas a la vez, no una u otra:
-  //  1) haber completado el nivel anterior (nunca se salta ninguno, aunque sobren estrellas)
-  //  2) tener acumuladas las estrellas que pide este nivel (obliga a jugar bien, no solo pasar de largo)
-  // Se calcula en orden porque cada nivel depende de si el anterior quedó desbloqueado Y completado.
-  const desbloqueados = niveles.map((n, i) => {
-    const anteriorCompletado = i === 0 || (progreso[niveles[i - 1].id_nivel]?.mejorEstrellas ?? 0) > 0;
-    return anteriorCompletado && totales >= (n.estrellas_para_desbloquear ?? 0);
-  });
+  // Estado de cada nodo calculado por la única fuente de verdad (ver estadoDesbloqueo) —
+  // el mapa nunca decide por su cuenta si algo está desbloqueado.
+  const estados = niveles.map((n) => estadoDesbloqueo(n.id_nivel, progreso));
+  const desbloqueados = estados.map((e) => e.desbloqueado);
 
   const cont = $('mapaContainer');
   const separacionY = 100;
@@ -1127,14 +1313,11 @@ function renderMapaNiveles() {
         ? `<img class="icono-nivel" src="${RUTA_SPRITES}/icons/${n.icono}__${n.dificultad}.svg" alt="${n.titulo}" /><span class="numero-nivel">${n.orden}</span>`
         : n.orden;
 
-    // El motivo de bloqueo puede ser cualquiera de las dos condiciones — mostrar
-    // el correcto, para no decir "Necesita X ⭐" cuando en realidad ya las tiene
-    // pero le falta pasar el nivel anterior.
-    let mensajeBloqueo = '';
-    if (!desbloqueado) {
-      const anteriorCompletado = i === 0 || (progreso[niveles[i - 1].id_nivel]?.mejorEstrellas ?? 0) > 0;
-      mensajeBloqueo = anteriorCompletado ? t().necesitaEstrellas(n.estrellas_para_desbloquear) : t().completaAnterior;
-    }
+    // El motivo de bloqueo viene de la misma llamada a estadoDesbloqueo de arriba — nunca
+    // se recalcula aparte, así el mensaje siempre coincide con la razón real.
+    const mensajeBloqueo = desbloqueado
+      ? ''
+      : (estados[i].motivo === 'completaAnterior' ? t().completaAnterior : t().necesitaEstrellas(estados[i].requeridas ?? n.estrellas_para_desbloquear));
 
     div.innerHTML = `
       ${estrellaImg}
@@ -1165,9 +1348,23 @@ function renderMapaNiveles() {
 let nivel, palabrasEncontradas, tiempoTranscurrido, intervaloTimer;
 let pistasPorAnuncio = 0, cargandoAnuncio = false;
 let arrastrando = false, celdaInicio = null, celdaFin = null;
-let pendienteInterstitial = false; // se pone en true al completar un nivel múltiplo de 10
+// Total de niveles completados hasta este resultado (para AdManager.intentarIntersticial),
+// o null si esta salida de la pantalla de victoria no corresponde a un nivel recién
+// terminado (no debería pasar, pero es más seguro que asumirlo).
+let nivelesCompletadosParaIntersticial = null;
+let ultimoResultadoEstrellas = 0; // estrellas CRUDAS de este intento (no el mejor guardado)
+let cargandoMejoraEstrella = false, cargandoAyudaDiaria = false;
+let transicionandoNivel = false; // evita doble click en Siguiente/Reintentar/Mapa mientras se procesa
 
 function cargarNivel(idNivel) {
+  // Guardado real, no solo visual: aunque algo llame a cargarNivel con un id bloqueado
+  // (un botón mal calculado, la consola, o un valor manipulado), acá se corta igual.
+  if (!estaDesbloqueado(idNivel, cargarProgreso())) {
+    console.warn(`cargarNivel: "${idNivel}" está bloqueado, se ignora la llamada.`);
+    mostrarPantalla('pantallaNiveles');
+    renderMapaNiveles();
+    return;
+  }
   clearInterval(intervaloTimer);
   const base = catalogoNiveles[idNivel];
   // Se genera una disposición NUEVA cada vez que se llama — también al Reintentar.
@@ -1276,11 +1473,13 @@ function revelarPistaEnGrilla() {
 }
 
 async function usarPista() {
-  if (cargandoAnuncio) return;
-  const tipo = pistasPorAnuncio === 0 ? 'chico' : 'grande';
+  if (cargandoAnuncio || AdManager.estaCargandoRecompensado()) return;
+  const esChico = pistasPorAnuncio === 0;
+  const adId = esChico ? REWARDED_HINT_AD_ID : REWARDED_HINT_AD_ID_GRANDE;
+  const formato = esChico ? 'interstitial' : 'video';
   cargandoAnuncio = true;
   actualizarBotonPista();
-  const completo = await mostrarAnuncioRecompensado(tipo);
+  const completo = await AdManager.mostrarRecompensado(adId, formato);
   cargandoAnuncio = false;
   if (completo) {
     pistasPorAnuncio++;
@@ -1467,18 +1666,7 @@ function siguienteNivelDe(idNivel) {
   return idx >= 0 ? (todos[idx + 1] ?? null) : null;
 }
 
-function finalizarNivel() {
-  const overlay = $('overlayFinal');
-  $('btnSiguienteNivel').hidden = true;
-  const pistasUsadas = pistasPorAnuncio; // ya no hay pistas gratis: todas son "por anuncio"
-  const estrellas = calcularEstrellas(pistasUsadas, tiempoTranscurrido ?? 0);
-  registrarResultado(nivel.id_nivel, estrellas);
-  registrarSiSinPistas(pistasUsadas);
-  // Cada 10 niveles jugados (completados) se muestra un intersticial — recién al SALIR
-  // de esta pantalla (ver salirDeNivelCompletado), no ahora, para no tapar la animación
-  // de estrellas apenas se termina el nivel.
-  pendienteInterstitial = registrarNivelCompletado() % 10 === 0;
-  $('tituloFinal').textContent = t().nivelCompletado;
+function renderEstrellasFinal(estrellas) {
   const contEstrellas = $('estrellasFinal');
   contEstrellas.className = `estrellas-final${estrellas === 3 ? ' naranja' : ''}`;
   contEstrellas.innerHTML = [1, 2, 3].map((k) =>
@@ -1486,28 +1674,158 @@ function finalizarNivel() {
       ? `<img class="llena" src="${RUTA_SPRITES}/ui/star_filled.svg" alt="" />`
       : `<img src="${RUTA_SPRITES}/ui/star_empty.svg" alt="" />`
   ).join('');
-  $('detalleFinal').textContent = t().detalleFinal(pistasUsadas, tiempoTranscurrido ?? '—');
+}
 
-  // El botón "Siguiente Nivel" solo aparece si de verdad se puede jugar ya —
-  // acabamos de completar este nivel, así que la única condición que falta
-  // chequear es el umbral de estrellas del siguiente.
+// El primer nivel completado (por orden) que quedó con menos de 2 estrellas — candidato
+// para la estrella de ayuda diaria (sección 4). null si no hay ninguno así.
+function buscarNivelParaAyudaDiaria(progreso) {
+  return todosLosNivelesOrdenados().find((n) => {
+    const e = progreso[n.id_nivel];
+    return e && e.completado && e.mejorEstrellas < 2;
+  }) ?? null;
+}
+
+// Recalcula TODA la pantalla de "nivel completado" a partir del progreso guardado —
+// se llama al terminar el nivel, y de nuevo después de CUALQUIER recompensa de anuncio
+// (mejora de estrella o ayuda diaria), porque cualquiera de las dos puede cambiar si el
+// siguiente nivel ya quedó desbloqueado.
+function actualizarPantallaVictoria() {
+  const progreso = cargarProgreso();
   const siguiente = siguienteNivelDe(nivel.id_nivel);
-  if (siguiente) {
-    const totalesActualizados = estrellasTotales(cargarProgreso());
-    $('btnSiguienteNivel').hidden = totalesActualizados < (siguiente.estrellas_para_desbloquear ?? 0);
+  const entradaActual = progreso[nivel.id_nivel] ?? { mejorEstrellas: 0, mejoraAnuncioUsada: false };
+  const mensajeEl = $('mensajeDesbloqueo');
+
+  if (!siguiente) {
+    // Se acaba de completar el último nivel del juego — no hay "siguiente" que ofrecer.
+    $('btnSiguienteNivel').hidden = true;
+    mensajeEl.hidden = false;
+    mensajeEl.className = 'mensaje-desbloqueo completado';
+    mensajeEl.textContent = t().juegoCompletado;
+  } else {
+    const estado = estadoDesbloqueo(siguiente.id_nivel, progreso);
+    $('btnSiguienteNivel').hidden = !estado.desbloqueado;
+    mensajeEl.hidden = estado.desbloqueado;
+    if (!estado.desbloqueado) {
+      mensajeEl.className = 'mensaje-desbloqueo';
+      mensajeEl.textContent = t().necesitaMasEstrellas(estado.faltan ?? 0);
+    }
   }
+
+  // Mejorar de 1 a 2 estrellas — solo si ESTE resultado dio justo 1 estrella cruda, el
+  // nivel no tenía ya 2 o 3 guardadas de antes, y todavía no se usó en este nivel.
+  const btnMejora = $('btnMejorarEstrella');
+  const puedeMejorar = ultimoResultadoEstrellas === 1 && entradaActual.mejorEstrellas < 2 && !entradaActual.mejoraAnuncioUsada;
+  btnMejora.hidden = !puedeMejorar;
+  if (puedeMejorar) {
+    btnMejora.disabled = cargandoMejoraEstrella || AdManager.estaCargandoRecompensado();
+    btnMejora.textContent = cargandoMejoraEstrella ? t().cargandoAnuncio : t().botonMejorarEstrella;
+  }
+
+  // Ayuda diaria — solo si el siguiente nivel sigue bloqueado, existe un nivel anterior
+  // candidato (completado con menos de 2 estrellas), y no se usó en las últimas 24hs.
+  const btnAyuda = $('btnAyudaDesbloqueo');
+  const siguienteSigueBloqueado = !!siguiente && !estadoDesbloqueo(siguiente.id_nivel, progreso).desbloqueado;
+  const candidatoAyuda = siguienteSigueBloqueado ? buscarNivelParaAyudaDiaria(progreso) : null;
+  const ayudaDisponiblePorTiempo = Date.now() - (cargarStats().ultimaAyudaDiariaEn || 0) >= 24 * 60 * 60 * 1000;
+  const puedeUsarAyuda = !!candidatoAyuda && ayudaDisponiblePorTiempo;
+  btnAyuda.hidden = !puedeUsarAyuda;
+  if (puedeUsarAyuda) {
+    btnAyuda.disabled = cargandoAyudaDiaria || AdManager.estaCargandoRecompensado();
+    btnAyuda.textContent = cargandoAyudaDiaria ? t().cargandoAnuncio : t().botonAyudaDiaria;
+  }
+}
+
+async function pedirMejoraEstrella() {
+  if (cargandoMejoraEstrella || AdManager.estaCargandoRecompensado()) return;
+  // Revalida contra el progreso actual, no contra lo que decía el botón al pintarse —
+  // así ni forzando el botón visible desde afuera se puede gastar la mejora dos veces.
+  const entradaPrevia = cargarProgreso()[nivel.id_nivel] ?? { mejorEstrellas: 0, mejoraAnuncioUsada: false };
+  if (ultimoResultadoEstrellas !== 1 || entradaPrevia.mejorEstrellas >= 2 || entradaPrevia.mejoraAnuncioUsada) return;
+  cargandoMejoraEstrella = true;
+  actualizarPantallaVictoria();
+  const completo = await AdManager.mostrarRecompensado(REWARDED_STAR_AD_ID, 'video');
+  cargandoMejoraEstrella = false;
+  if (completo) {
+    const progreso = cargarProgreso();
+    const entrada = progreso[nivel.id_nivel] ?? { mejorEstrellas: 0, mejoraAnuncioUsada: false };
+    // Nunca entrega la 3ra estrella ni pisa un valor ya mejor que 2 (no debería pasar
+    // dado el chequeo en actualizarPantallaVictoria, pero es más seguro no asumirlo).
+    progreso[nivel.id_nivel] = { ...entrada, completado: true, mejorEstrellas: Math.max(entrada.mejorEstrellas, 2), mejoraAnuncioUsada: true };
+    guardarProgreso(progreso);
+    renderEstrellasFinal(2);
+  } else {
+    alert(t().anuncioFallo);
+  }
+  actualizarPantallaVictoria();
+}
+
+async function pedirAyudaDiaria() {
+  if (cargandoAyudaDiaria || AdManager.estaCargandoRecompensado()) return;
+  // Se recalcula el candidato acá (no se reutiliza el de la última renderización) por
+  // si el progreso cambió mientras tanto — nunca confiar en un estado ya viejo.
+  const candidato = buscarNivelParaAyudaDiaria(cargarProgreso());
+  if (!candidato) return;
+  cargandoAyudaDiaria = true;
+  actualizarPantallaVictoria();
+  const completo = await AdManager.mostrarRecompensado(REWARDED_DAILY_HELP_AD_ID, 'video');
+  cargandoAyudaDiaria = false;
+  if (completo) {
+    const progreso = cargarProgreso();
+    const entrada = progreso[candidato.id_nivel];
+    if (entrada && entrada.mejorEstrellas < 2) {
+      entrada.mejorEstrellas = Math.min(2, entrada.mejorEstrellas + 1); // 0→1 o 1→2, nunca a 3
+      guardarProgreso(progreso);
+    }
+    const s = cargarStats();
+    s.ultimaAyudaDiariaEn = Date.now();
+    guardarStats(s);
+  } else {
+    alert(t().anuncioFallo);
+  }
+  actualizarPantallaVictoria();
+}
+$('btnMejorarEstrella').addEventListener('click', pedirMejoraEstrella);
+$('btnAyudaDesbloqueo').addEventListener('click', pedirAyudaDiaria);
+
+function finalizarNivel() {
+  const overlay = $('overlayFinal');
+  $('btnSiguienteNivel').hidden = true;
+  $('btnMejorarEstrella').hidden = true;
+  $('btnAyudaDesbloqueo').hidden = true;
+  $('mensajeDesbloqueo').hidden = true;
+  const pistasUsadas = pistasPorAnuncio; // ya no hay pistas gratis: todas son "por anuncio"
+  const estrellas = calcularEstrellas(pistasUsadas, tiempoTranscurrido ?? 0);
+  ultimoResultadoEstrellas = estrellas;
+  registrarResultado(nivel.id_nivel, estrellas);
+  registrarSiSinPistas(pistasUsadas);
+  // El intersticial moderado (sección 5) se evalúa recién al SALIR de esta pantalla (ver
+  // salirDeNivelCompletado), nunca ahora, para no tapar la animación de estrellas.
+  nivelesCompletadosParaIntersticial = registrarNivelCompletado();
+  $('tituloFinal').textContent = t().nivelCompletado;
+  renderEstrellasFinal(estrellas);
+  $('detalleFinal').textContent = t().detalleFinal(pistasUsadas, tiempoTranscurrido ?? '—');
+  actualizarPantallaVictoria();
   overlay.classList.add('visible');
 }
 
-// Punto único de salida de la pantalla de "nivel completado": si tocó intersticial
-// (cada 10 niveles, ver finalizarNivel) se muestra acá, recién al irse, antes de
-// ejecutar la acción real (reintentar / siguiente nivel / volver al mapa).
+// Punto único de salida de la pantalla de "nivel completado": evalúa el intersticial
+// moderado (ver AdManager.intentarIntersticial) recién al irse, antes de ejecutar la
+// acción real (reintentar / siguiente nivel / volver al mapa). El guardado contra doble
+// click evita que tocar el botón dos veces seguidas dispare la acción (y el intersticial)
+// más de una vez.
 async function salirDeNivelCompletado(accion) {
-  if (pendienteInterstitial) {
-    pendienteInterstitial = false;
-    await mostrarAnuncioInterstitial();
+  if (transicionandoNivel) return;
+  transicionandoNivel = true;
+  try {
+    if (nivelesCompletadosParaIntersticial !== null) {
+      const total = nivelesCompletadosParaIntersticial;
+      nivelesCompletadosParaIntersticial = null;
+      await AdManager.intentarIntersticial(total);
+    }
+    accion();
+  } finally {
+    transicionandoNivel = false;
   }
-  accion();
 }
 
 $('btnReintentar').addEventListener('click', () => salirDeNivelCompletado(() => cargarNivel(nivel.id_nivel)));
