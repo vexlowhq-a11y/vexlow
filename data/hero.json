@@ -9,6 +9,15 @@
     "href": "categoria/gaming/riot-games-halts-development-of-league-of-legends-fighting-g.html"
   },
   {
+    "category": "science",
+    "chip": "🚀 Science & Space",
+    "title": "Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump",
+    "dek": "The astronauts of NASA's Artemis II mission, who journeyed around the moon in April, have been awarded the prestigious Congressional Space Medal of Honor, recognizing their contributions to space exploration.",
+    "image": "img/drafts/artemis-ii-astronauts-honored-with-congr-7ace.jpg",
+    "textColor": "auto",
+    "href": "categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"
+  },
+  {
     "category": "ai",
     "chip": "🤖 AI",
     "title": "Neocloud Lambda's $1 Billion Loan Reflects the Ongoing Surge in AI Investment",
@@ -25,15 +34,6 @@
     "image": "img/drafts/a-satellite-s-final-moments-the-heat-shi-151d.png",
     "textColor": "auto",
     "href": "categoria/science/a-satellite-s-final-moments-the-heat-shield-saga.html"
-  },
-  {
-    "category": "science",
-    "chip": "🚀 Science & Space",
-    "title": "Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump",
-    "dek": "The astronauts of NASA's Artemis II mission, who journeyed around the moon in April, have been awarded the prestigious Congressional Space Medal of Honor, recognizing their contributions to space exploration.",
-    "image": "img/drafts/artemis-ii-astronauts-honored-with-congr-7ace.jpg",
-    "textColor": "auto",
-    "href": "categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"
   },
   {
     "category": "technology",
