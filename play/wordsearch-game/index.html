@@ -1389,12 +1389,9 @@ function cargarNivel(idNivel) {
   intervaloTimer = setInterval(tick, 1000);
 }
 
-function renderGrilla() {
-  const cont = $('grilla');
-  cont.innerHTML = '';
-
-  // Tamaño de celda calculado para que la grilla entre en la pantalla — sin esto,
-  // una grilla de muchas columnas (24x24 en extremo) o un celular angosto se corta.
+// Tamaño de celda calculado para que la grilla entre en la pantalla — sin esto, una
+// grilla de muchas columnas (24x24 en extremo) o un celular angosto se corta.
+function calcularTamanoCelda() {
   const GAP = 3, PADDING_GRILLA = 20, MARGEN_PANTALLA = 40;
   const anchoDisponible = Math.min(window.innerWidth - MARGEN_PANTALLA, 560);
   const tamanoCrudo = (anchoDisponible - PADDING_GRILLA - (nivel.columnas - 1) * GAP) / nivel.columnas;
@@ -1405,10 +1402,27 @@ function renderGrilla() {
   // aunque en el peor caso (grillas enormes en celulares chicos) las celdas queden chicas.
   const tamanoCelda = Math.max(4, Math.min(40, Math.floor(tamanoCrudo)));
   const fuenteCelda = Math.max(7, Math.round(tamanoCelda * 0.45));
+  return { tamanoCelda, fuenteCelda };
+}
 
+// Solo ajusta el TAMAÑO visual de las celdas ya existentes — nunca las reconstruye.
+// Antes esto lo hacía renderGrilla() entero, y como corre en cada evento "resize" de la
+// ventana (que en la app nativa se dispara con solo abrir o cerrar un anuncio encima del
+// WebView, sin que el nivel haya cambiado), cualquier pista marcada o palabra ya
+// encontrada se borraba de golpe al volver de ver un anuncio.
+function ajustarTamanoCelda() {
+  if (!nivel) return;
+  const cont = $('grilla');
+  const { tamanoCelda, fuenteCelda } = calcularTamanoCelda();
   cont.style.setProperty('--celda-tam', tamanoCelda + 'px');
   cont.style.setProperty('--celda-fuente', fuenteCelda + 'px');
   cont.style.gridTemplateColumns = `repeat(${nivel.columnas}, ${tamanoCelda}px)`;
+}
+
+function renderGrilla() {
+  const cont = $('grilla');
+  cont.innerHTML = '';
+  ajustarTamanoCelda();
 
   for (let f = 0; f < nivel.filas; f++) {
     for (let c = 0; c < nivel.columnas; c++) {
@@ -1421,7 +1435,7 @@ function renderGrilla() {
     }
   }
 }
-window.addEventListener('resize', () => { if (nivel) renderGrilla(); });
+window.addEventListener('resize', ajustarTamanoCelda);
 
 function renderListaPalabras() {
   const ul = $('listaPalabras');
