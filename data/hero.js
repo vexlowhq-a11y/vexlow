@@ -22,7 +22,7 @@ const VEXLOW_HERO = [
     "title": "Neocloud Lambda's $1 Billion Loan Reflects the Ongoing Surge in AI Investment",
     "dek": "Neocloud Lambda has secured a substantial $1 billion loan aimed at acquiring Nvidia AI chips, which will then be leased to Microsoft. This financial move highlights the escalating costs and investments surrounding the AI boom.",
     "image": "img/temas/neocloud-lambda-s-1-billion-loan-reflects-the-ongoing-surge-.jpg",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/ai/neocloud-lambda-s-1-billion-loan-reflects-the-ongoing-surge-.html"
   },
   {
@@ -31,7 +31,7 @@ const VEXLOW_HERO = [
     "title": "Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump",
     "dek": "The astronauts of NASA's Artemis II mission, who journeyed around the moon in April, have been awarded the prestigious Congressional Space Medal of Honor, recognizing their contributions to space exploration.",
     "image": "img/drafts/artemis-ii-astronauts-honored-with-congr-7ace.jpg",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"
   },
   {
@@ -40,7 +40,7 @@ const VEXLOW_HERO = [
     "title": "A Satellite's Final Moments: The Heat Shield Saga",
     "dek": "As a satellite faces its end, the challenges of heat shield technology come into sharper focus.",
     "image": "img/drafts/a-satellite-s-final-moments-the-heat-shi-151d.png",
-    "textColor": "auto",
+    "textColor": "#0E1116",
     "href": "categoria/science/a-satellite-s-final-moments-the-heat-shield-saga.html"
   },
   {
