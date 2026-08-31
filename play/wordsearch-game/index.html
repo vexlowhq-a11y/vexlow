@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<title>Demo — Sopa de letras</title>
+<title>Word Search</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root {
@@ -350,7 +350,7 @@
 <!-- ===================== MENÚ PRINCIPAL ===================== -->
 <div class="pantalla" id="pantallaMenu">
   <div class="menu-lienzo">
-    <div class="titulo-juego">SOPA DE LETRAS</div>
+    <div class="titulo-juego">WORD SEARCH</div>
     <div class="subtitulo-juego" data-i18n="subtitulo">100 niveles · 4 dificultades</div>
     <div class="menu-botones">
       <button class="boton-sprite" id="btnJugar" data-i18n-aria="ariaJugar" aria-label="Jugar"></button>
@@ -390,7 +390,7 @@
   <div class="panel-secundario">
     <h2 data-i18n="creditosTitulo">Créditos</h2>
     <p class="creditos-texto" data-i18n-html="creditosTexto">
-      Sopa de Letras — un juego de VexlowHQ.<br />
+      Word Search — un juego de VexlowHQ.<br />
       Diseño, contenido y desarrollo: vos 🙂<br />
       Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).
     </p>
@@ -471,7 +471,6 @@
     <div id="detalleFinal" style="font-size:0.85rem;color:#94a3b8;"></div>
     <div id="mensajeDesbloqueo" class="mensaje-desbloqueo" hidden></div>
     <button class="btn-anuncio-final" id="btnMejorarEstrella" hidden></button>
-    <button class="btn-anuncio-final" id="btnAyudaDesbloqueo" hidden></button>
     <div class="fila-botones">
       <button class="btn-nivel-final btn-nivel-siguiente" id="btnSiguienteNivel" hidden data-i18n="siguienteNivelBoton">Siguiente Nivel</button>
       <button class="btn-nivel-final btn-nivel-reintentar" id="btnReintentar" data-i18n="reintentarBoton">Reintentar</button>
@@ -501,9 +500,8 @@ const REWARDED_HINT_AD_ID_GRANDE = 'ca-app-pub-9714873159823978/4564289864'; // 
 // AdMob. Usan el ID de PRUEBA oficial de Google (no un ID inventado) hasta que crees el
 // anuncio real correspondiente y reemplaces el valor acá.
 const REWARDED_STAR_AD_ID = 'ca-app-pub-3940256099942544/5224354917'; // TODO: reemplazar — mejora de 1 a 2 estrellas
-const REWARDED_DAILY_HELP_AD_ID = 'ca-app-pub-3940256099942544/5224354917'; // TODO: reemplazar — estrella de ayuda diaria
-const INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712'; // TODO: reemplazar — intersticial cada 10 niveles
-const BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111'; // TODO: reemplazar — no se usa mientras ENABLE_BANNER_ADS sea false
+const INTERSTITIAL_AD_ID = 'ca-app-pub-3940256099942544/1033173712'; // TODO: reemplazar — intersticial moderado (ver reglas abajo)
+const BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111'; // TODO: reemplazar — banner fijo del mapa de niveles
 
 // Reglas de los intersticiales moderados (ver AdManager.intentarIntersticial).
 const INTERSTITIAL_NIVEL_MINIMO = 4; // no antes de completar este nivel
@@ -513,8 +511,10 @@ const PROTECCION_TRAS_RECOMPENSADO_MS = 90 * 1000; // no mostrar un intersticial
 
 // Banner: desactivado por defecto — cambiar a true más adelante para activarlo sin
 // tocar el resto del juego (ver AdManager.actualizarBanner, llamado desde mostrarPantalla).
-const ENABLE_BANNER_ADS = false;
-const PANTALLAS_CON_BANNER = ['pantallaNiveles', 'pantallaLogros', 'pantallaOpciones'];
+const ENABLE_BANNER_ADS = true;
+// Solo en el mapa de niveles, como se pidió — agregar más ids acá para mostrarlo
+// también en otras pantallas (logros, opciones, etc.).
+const PANTALLAS_CON_BANNER = ['pantallaNiveles'];
 
 const ES_NATIVO = window.Capacitor?.getPlatform && window.Capacitor.getPlatform() !== 'web';
 
@@ -649,7 +649,7 @@ const IDIOMAS = {
     reiniciarBoton: 'Reiniciar progreso', reiniciarConfirmar: '¿Seguro? Se van a borrar todos los niveles completados, estrellas y logros. Esta acción no se puede deshacer.',
     reiniciarHecho: 'Progreso reiniciado. ¡A empezar de nuevo!',
     creditosTitulo: 'Créditos',
-    creditosTexto: 'Sopa de Letras — un juego de VexlowHQ.<br />Diseño, contenido y desarrollo: vos 🙂<br />Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).',
+    creditosTexto: 'Word Search — un juego de VexlowHQ.<br />Diseño, contenido y desarrollo: vos 🙂<br />Prototipo generado como parte del diseño de arquitectura (ver <code>README.md</code>).',
     politica: 'Política de privacidad',
     seleccionaNivel: 'Seleccioná un nivel',
     avanzadoHtml: '<strong>Avanzado:</strong> conectar a Supabase para traer niveles publicados ahí (si no, se usa el contenido local de <code>scripts/contenido-niveles.json</code>).',
@@ -669,7 +669,6 @@ const IDIOMAS = {
     necesitaMasEstrellas: (n) => `Necesitás ${n} estrella${n === 1 ? '' : 's'} más para desbloquear el siguiente nivel`,
     juegoCompletado: '¡Completaste los 100 niveles! 🎉',
     botonMejorarEstrella: '📺 Ver anuncio y mejorar a 2 estrellas',
-    botonAyudaDiaria: '📺 Ver anuncio y obtener 1 estrella de ayuda',
     conectando: 'Conectado. Click en "Cargar publicados" para traerlos.',
     errorConexion: (msg) => `Error: ${msg}`,
     sinPublicados: 'Conectado, pero no hay niveles publicados todavía.',
@@ -732,7 +731,6 @@ const IDIOMAS = {
     necesitaMasEstrellas: (n) => `You need ${n} more star${n === 1 ? '' : 's'} to unlock the next level`,
     juegoCompletado: 'You completed all 100 levels! 🎉',
     botonMejorarEstrella: '📺 Watch ad and upgrade to 2 stars',
-    botonAyudaDiaria: '📺 Watch ad for 1 bonus star',
     conectando: 'Connected. Click "Load published" to fetch them.',
     errorConexion: (msg) => `Error: ${msg}`,
     sinPublicados: 'Connected, but there are no published levels yet.',
@@ -1037,7 +1035,6 @@ const STATS_POR_DEFECTO = {
   palabrasTotal: 0, pistasTotal: 0, algunoSinPistas: false, perfectosContador: 0, anunciosVistos: 0, nivelesCompletados: 0,
   ultimoRecompensadoEn: 0, // ver AdManager — protección de 90s antes de un intersticial
   ultimoIntersticialEn: 0, // ver AdManager — cooldown de 120s entre intersticiales
-  ultimaAyudaDiariaEn: 0, // ver pedirAyudaDiaria — máximo 1 cada 24hs
 };
 function cargarStats() {
   try { return { ...STATS_POR_DEFECTO, ...JSON.parse(localStorage.getItem(CLAVE_STATS)) }; }
@@ -1353,7 +1350,7 @@ let arrastrando = false, celdaInicio = null, celdaFin = null;
 // terminado (no debería pasar, pero es más seguro que asumirlo).
 let nivelesCompletadosParaIntersticial = null;
 let ultimoResultadoEstrellas = 0; // estrellas CRUDAS de este intento (no el mejor guardado)
-let cargandoMejoraEstrella = false, cargandoAyudaDiaria = false;
+let cargandoMejoraEstrella = false;
 let transicionandoNivel = false; // evita doble click en Siguiente/Reintentar/Mapa mientras se procesa
 
 function cargarNivel(idNivel) {
@@ -1614,34 +1611,38 @@ function onPointerDown(e) {
   celdaFin = celdaInicio;
   marcarCamino([celdaInicio]);
 }
+// Los 8 sentidos posibles como [dc, df], en orden de ángulo (0°, 45°, 90°... horario).
+const OCHO_DIRECCIONES = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+
 function onPointerMove(e) {
   if (!arrastrando) return;
-  let f, c;
+  const { rect, tam, padding, paso } = medidasGrilla();
+  const origenX = rect.left + padding + tam / 2 + celdaInicio.c * paso;
+  const origenY = rect.top + padding + tam / 2 + celdaInicio.f * paso;
   if (!direccionBloqueada) {
-    // Todavía no se definió una línea: seguir la celda más cercana al dedo tal cual.
-    const cand = celdaDesdeCoordenadas(e.clientX, e.clientY);
-    if (cand.f === celdaInicio.f && cand.c === celdaInicio.c) return;
-    const camino = caminoEntre(celdaInicio.f, celdaInicio.c, cand.f, cand.c);
-    if (!camino) return; // el primer movimiento define la dirección: si no es recto, esperar
-    const pasos = camino.length - 1;
-    direccionBloqueada = { df: (cand.f - celdaInicio.f) / pasos, dc: (cand.c - celdaInicio.c) / pasos };
-    f = cand.f; c = cand.c;
-  } else {
-    // Línea ya fijada (horizontal/vertical/diagonal): en vez de recalcular la celda
-    // cruda bajo el dedo, se proyecta el punto tocado sobre esa línea. Así, si el
-    // dedo se corre un poco para el costado, la fila/columna elegida no cambia —
-    // solo avanza o retrocede a lo largo de la palabra que se está armando.
-    const { rect, tam, padding, paso } = medidasGrilla();
-    const origenX = rect.left + padding + tam / 2 + celdaInicio.c * paso;
-    const origenY = rect.top + padding + tam / 2 + celdaInicio.f * paso;
-    const dirX = direccionBloqueada.dc * paso, dirY = direccionBloqueada.df * paso;
-    const largo2 = dirX * dirX + dirY * dirY;
-    const proyeccion = ((e.clientX - origenX) * dirX + (e.clientY - origenY) * dirY) / largo2;
-    const max = pasosMaximos(celdaInicio.f, celdaInicio.c, direccionBloqueada.df, direccionBloqueada.dc);
-    const pasos = Math.max(0, Math.min(max, Math.round(proyeccion)));
-    f = celdaInicio.f + direccionBloqueada.df * pasos;
-    c = celdaInicio.c + direccionBloqueada.dc * pasos;
+    const dx = e.clientX - origenX, dy = e.clientY - origenY;
+    // Antes, para fijar una dirección, se exigía que la PRIMER celda tocada después del
+    // inicio quedara perfectamente en línea recta (para diagonal, que la fila y la
+    // columna avanzaran exactamente lo mismo) — con el dedo eso casi nunca pasa a la
+    // primera en diagonal (sí es fácil en horizontal/vertical), así que armar una
+    // palabra diagonal costaba mucho más que una horizontal o vertical. Ahora se mide
+    // el ÁNGULO del arrastre desde el inicio y se redondea al más cercano de los 8
+    // sentidos posibles — funciona igual de bien para los 8, diagonales incluidas.
+    if (Math.hypot(dx, dy) < paso * 0.5) return; // todavía muy cerca del origen para saber el ángulo
+    const indice = (Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8 + 8) % 8;
+    const [dc, df] = OCHO_DIRECCIONES[indice];
+    direccionBloqueada = { df, dc };
   }
+  // Se proyecta el punto tocado sobre la línea ya fijada en vez de mirar la celda cruda
+  // bajo el dedo. Así, si el dedo se corre un poco para el costado, la fila/columna
+  // elegida no cambia — solo avanza o retrocede a lo largo de la palabra que se arma.
+  const dirX = direccionBloqueada.dc * paso, dirY = direccionBloqueada.df * paso;
+  const largo2 = dirX * dirX + dirY * dirY;
+  const proyeccion = ((e.clientX - origenX) * dirX + (e.clientY - origenY) * dirY) / largo2;
+  const max = pasosMaximos(celdaInicio.f, celdaInicio.c, direccionBloqueada.df, direccionBloqueada.dc);
+  const pasos = Math.max(0, Math.min(max, Math.round(proyeccion)));
+  const f = celdaInicio.f + direccionBloqueada.df * pasos;
+  const c = celdaInicio.c + direccionBloqueada.dc * pasos;
   if (f === celdaFin.f && c === celdaFin.c) return;
   celdaFin = { f, c };
   const camino = caminoEntre(celdaInicio.f, celdaInicio.c, celdaFin.f, celdaFin.c);
@@ -1692,13 +1693,6 @@ function renderEstrellasFinal(estrellas) {
 
 // El primer nivel completado (por orden) que quedó con menos de 2 estrellas — candidato
 // para la estrella de ayuda diaria (sección 4). null si no hay ninguno así.
-function buscarNivelParaAyudaDiaria(progreso) {
-  return todosLosNivelesOrdenados().find((n) => {
-    const e = progreso[n.id_nivel];
-    return e && e.completado && e.mejorEstrellas < 2;
-  }) ?? null;
-}
-
 // Recalcula TODA la pantalla de "nivel completado" a partir del progreso guardado —
 // se llama al terminar el nivel, y de nuevo después de CUALQUIER recompensa de anuncio
 // (mejora de estrella o ayuda diaria), porque cualquiera de las dos puede cambiar si el
@@ -1734,19 +1728,6 @@ function actualizarPantallaVictoria() {
     btnMejora.disabled = cargandoMejoraEstrella || AdManager.estaCargandoRecompensado();
     btnMejora.textContent = cargandoMejoraEstrella ? t().cargandoAnuncio : t().botonMejorarEstrella;
   }
-
-  // Ayuda diaria — solo si el siguiente nivel sigue bloqueado, existe un nivel anterior
-  // candidato (completado con menos de 2 estrellas), y no se usó en las últimas 24hs.
-  const btnAyuda = $('btnAyudaDesbloqueo');
-  const siguienteSigueBloqueado = !!siguiente && !estadoDesbloqueo(siguiente.id_nivel, progreso).desbloqueado;
-  const candidatoAyuda = siguienteSigueBloqueado ? buscarNivelParaAyudaDiaria(progreso) : null;
-  const ayudaDisponiblePorTiempo = Date.now() - (cargarStats().ultimaAyudaDiariaEn || 0) >= 24 * 60 * 60 * 1000;
-  const puedeUsarAyuda = !!candidatoAyuda && ayudaDisponiblePorTiempo;
-  btnAyuda.hidden = !puedeUsarAyuda;
-  if (puedeUsarAyuda) {
-    btnAyuda.disabled = cargandoAyudaDiaria || AdManager.estaCargandoRecompensado();
-    btnAyuda.textContent = cargandoAyudaDiaria ? t().cargandoAnuncio : t().botonAyudaDiaria;
-  }
 }
 
 async function pedirMejoraEstrella() {
@@ -1773,39 +1754,12 @@ async function pedirMejoraEstrella() {
   actualizarPantallaVictoria();
 }
 
-async function pedirAyudaDiaria() {
-  if (cargandoAyudaDiaria || AdManager.estaCargandoRecompensado()) return;
-  // Se recalcula el candidato acá (no se reutiliza el de la última renderización) por
-  // si el progreso cambió mientras tanto — nunca confiar en un estado ya viejo.
-  const candidato = buscarNivelParaAyudaDiaria(cargarProgreso());
-  if (!candidato) return;
-  cargandoAyudaDiaria = true;
-  actualizarPantallaVictoria();
-  const completo = await AdManager.mostrarRecompensado(REWARDED_DAILY_HELP_AD_ID, 'video');
-  cargandoAyudaDiaria = false;
-  if (completo) {
-    const progreso = cargarProgreso();
-    const entrada = progreso[candidato.id_nivel];
-    if (entrada && entrada.mejorEstrellas < 2) {
-      entrada.mejorEstrellas = Math.min(2, entrada.mejorEstrellas + 1); // 0→1 o 1→2, nunca a 3
-      guardarProgreso(progreso);
-    }
-    const s = cargarStats();
-    s.ultimaAyudaDiariaEn = Date.now();
-    guardarStats(s);
-  } else {
-    alert(t().anuncioFallo);
-  }
-  actualizarPantallaVictoria();
-}
 $('btnMejorarEstrella').addEventListener('click', pedirMejoraEstrella);
-$('btnAyudaDesbloqueo').addEventListener('click', pedirAyudaDiaria);
 
 function finalizarNivel() {
   const overlay = $('overlayFinal');
   $('btnSiguienteNivel').hidden = true;
   $('btnMejorarEstrella').hidden = true;
-  $('btnAyudaDesbloqueo').hidden = true;
   $('mensajeDesbloqueo').hidden = true;
   const pistasUsadas = pistasPorAnuncio; // ya no hay pistas gratis: todas son "por anuncio"
   const estrellas = calcularEstrellas(pistasUsadas, tiempoTranscurrido ?? 0);
