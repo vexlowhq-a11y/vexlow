@@ -149,6 +149,11 @@
   .mapa-scroll {
     flex: 1; min-height: 0; overflow-y: auto; border-radius: 12px;
     background-color: #4bb85c;
+    /* El banner de AdMob es un overlay nativo FIJO en la pantalla — no empuja ni
+       resiza el WebView solo. Sin este espacio de más, tapaba el nodo del nivel 1 (el
+       más abajo del mapa). --banner-alto lo fija AdManager con la altura real que
+       reporta el plugin apenas el banner carga (ver actualizarBanner). */
+    padding-bottom: var(--banner-alto, 0px);
   }
   .mapa-container {
     position: relative; max-width: 420px; margin: 0 auto; padding: 20px 0 60px;
@@ -532,6 +537,17 @@ const AdManager = (() => {
     if (ADS_TEST_MODE) console.log('[AdManager] modo de prueba activo — no se muestran anuncios reales.');
     if (!CapAdMob) return;
     CapAdMob.initialize({ initializeForTesting: ADS_TEST_MODE }).catch((e) => console.error('[AdManager] initialize falló', e));
+    // El banner es un overlay nativo FIJO en pantalla — no empuja ni resiza el WebView
+    // solo, así que taparía lo que tenga debajo (le pasó al nivel 1 del mapa) si no le
+    // reservamos ese espacio nosotros. El plugin avisa la altura real una vez que carga
+    // (varía según ancho de pantalla, tipo de anuncio, etc.) — se guarda en la variable
+    // CSS --banner-alto, que .mapa-scroll usa como padding-bottom (ver esa regla).
+    CapAdMob.addListener('bannerAdSizeChanged', (info) => {
+      document.documentElement.style.setProperty('--banner-alto', (info?.height || 0) + 'px');
+    });
+    CapAdMob.addListener('bannerAdFailedToLoad', () => {
+      document.documentElement.style.setProperty('--banner-alto', '0px');
+    });
   }
 
   function disponible() { return !!CapAdMob; }
@@ -622,6 +638,7 @@ const AdManager = (() => {
         .catch((e) => { console.error('[AdManager] no se pudo mostrar el banner', e); bannerVisible = false; });
     } else if (!corresponde && bannerVisible) {
       bannerVisible = false;
+      document.documentElement.style.setProperty('--banner-alto', '0px');
       CapAdMob.hideBanner().catch((e) => console.error('[AdManager] no se pudo ocultar el banner', e));
     }
   }
