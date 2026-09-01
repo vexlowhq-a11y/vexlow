@@ -31,7 +31,11 @@
      ADENTRO de sí misma, nunca empuja el documento entero. */
   .pantalla[hidden] { display: none; }
   .pantalla {
-    position: fixed; inset: 0; padding: 20px; overflow-y: auto;
+    /* El borde inferior se achica --banner-alto (0 si no hay banner) en vez de que el
+       banner flote como overlay encima del contenido — así queda una franja real del
+       fondo oscuro de la app (no un parche de otro color) donde vive el banner, y toda
+       la UI (no solo el mapa) queda arriba de esa franja, prolijo. Ver AdManager. */
+    position: fixed; inset: 0 0 var(--banner-alto, 0px) 0; padding: 20px; overflow-y: auto;
     display: flex; flex-direction: column;
   }
   h1 { font-size: 1.15rem; margin: 0 0 12px; }
@@ -149,11 +153,6 @@
   .mapa-scroll {
     flex: 1; min-height: 0; overflow-y: auto; border-radius: 12px;
     background-color: #4bb85c;
-    /* El banner de AdMob es un overlay nativo FIJO en la pantalla — no empuja ni
-       resiza el WebView solo. Sin este espacio de más, tapaba el nodo del nivel 1 (el
-       más abajo del mapa). --banner-alto lo fija AdManager con la altura real que
-       reporta el plugin apenas el banner carga (ver actualizarBanner). */
-    padding-bottom: var(--banner-alto, 0px);
   }
   .mapa-container {
     position: relative; max-width: 420px; margin: 0 auto; padding: 20px 0 60px;
