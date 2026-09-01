@@ -633,7 +633,12 @@ const AdManager = (() => {
     const corresponde = PANTALLAS_CON_BANNER.includes(idPantalla);
     if (corresponde && !bannerVisible) {
       bannerVisible = true;
-      CapAdMob.showBanner({ adId: BANNER_AD_ID, isTesting: ADS_TEST_MODE, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER' })
+      // BANNER (tamaño fijo, no ADAPTIVE_BANNER): el adaptativo reserva un contenedor
+      // más alto de lo que el anuncio termina ocupando de verdad (se nota más con
+      // anuncios de prueba, que son un 320x50 fijo dentro de un contenedor más alto) —
+      // eso dejaba un hueco vacío entre el anuncio y el borde de la pantalla, porque
+      // --banner-alto reservaba el contenedor entero, no lo que realmente se veía.
+      CapAdMob.showBanner({ adId: BANNER_AD_ID, isTesting: ADS_TEST_MODE, adSize: 'BANNER', position: 'BOTTOM_CENTER' })
         .catch((e) => { console.error('[AdManager] no se pudo mostrar el banner', e); bannerVisible = false; });
     } else if (!corresponde && bannerVisible) {
       bannerVisible = false;
