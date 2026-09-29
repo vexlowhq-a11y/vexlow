@@ -2187,7 +2187,7 @@
     'Fuchsia Devil', 'Honey', 'Sapphire', 'Lavender', 'Mint', 'Magenta Storm', 'Citrine Devil', 'Indigo'
   ];
   var SKIN_RARITIES = ['basico', 'raro', 'epico', 'legendario', 'especial'];
-  var SKIN_RARITY_LABEL = { basico: 'BÁSICO', raro: 'RARO', epico: 'ÉPICO', legendario: 'LEGENDARIO', especial: 'ESPECIAL' };
+  var SKIN_RARITY_LABEL = { basico: 'COMMON', raro: 'RARE', epico: 'EPIC', legendario: 'LEGENDARY', especial: 'SPECIAL' };
   function skinRarity(index) { return SKIN_RARITIES[Math.min(4, Math.floor(index / 8))]; }
   function skinPrice(index) {
     // index 0-based; skin_01 (index 0) siempre viene desbloqueado.
@@ -2226,7 +2226,7 @@
     // actual/último jugado (currentLevelIndex, ya sincronizado con
     // "best" desde selectLevel()): su número, sus estrellas propias
     // (no el total) y su mejor % completado.
-    if (homeLvlEl) homeLvlEl.textContent = 'NIVEL ' + (currentLevelIndex + 1);
+    if (homeLvlEl) homeLvlEl.textContent = 'LEVEL ' + (currentLevelIndex + 1);
     if (homeLvlStarsEl) {
       var lvlStars = starsFor(currentLevelId());
       var row = '';
@@ -2275,9 +2275,9 @@
     if (skinPreviewName) skinPreviewName.textContent = (SKIN_NAMES[previewedSkinIndex] || id).toUpperCase();
     if (skinPreviewRarity) skinPreviewRarity.textContent = SKIN_RARITY_LABEL[skinRarity(previewedSkinIndex)];
     if (skinEquipBtn) {
-      if (isActive) { skinEquipBtn.textContent = '✔ EQUIPADO'; skinEquipBtn.className = 'gravity-equip-btn equipped'; }
-      else if (owned) { skinEquipBtn.textContent = 'EQUIPAR'; skinEquipBtn.className = 'gravity-equip-btn'; }
-      else { skinEquipBtn.textContent = '🔒 BLOQUEADO'; skinEquipBtn.className = 'gravity-equip-btn locked'; }
+      if (isActive) { skinEquipBtn.textContent = '✔ EQUIPPED'; skinEquipBtn.className = 'gravity-equip-btn equipped'; }
+      else if (owned) { skinEquipBtn.textContent = 'EQUIP'; skinEquipBtn.className = 'gravity-equip-btn'; }
+      else { skinEquipBtn.textContent = '🔒 LOCKED'; skinEquipBtn.className = 'gravity-equip-btn locked'; }
     }
   }
 

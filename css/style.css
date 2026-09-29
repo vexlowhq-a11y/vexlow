@@ -602,6 +602,7 @@ main { min-width: 0; padding: 26px 32px 90px; }
 }
 .dash-hud {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap; row-gap: 6px;
   margin-top: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-muted);
 }
 .dash-mute {
@@ -1091,21 +1092,34 @@ main { min-width: 0; padding: 26px 32px 90px; }
 .hero-dots {
   display: flex;
   justify-content: center;
-  gap: 9px;
+  gap: 4px;
   margin-top: 16px;
 }
 .hero-dot {
+  /* Visible dot stays 9px (::before) but the actual tap target is 24x24px,
+     meeting the WCAG 2.5.8 / Lighthouse target-size minimum without
+     changing how the carousel indicator looks. */
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+.hero-dot::before {
+  content: '';
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  border: none;
   background: var(--border);
-  padding: 0;
-  cursor: pointer;
   transition: background .15s ease, transform .15s ease;
 }
-.hero-dot:hover { background: var(--text-muted); }
-.hero-dot.active { background: var(--blue-fill); transform: scale(1.25); }
+.hero-dot:hover::before { background: var(--text-muted); }
+.hero-dot.active::before { background: var(--blue-fill); transform: scale(1.25); }
 
 /* Chips / badges */
 .chip {

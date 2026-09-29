@@ -103,7 +103,15 @@ function pngToJpeg(pngPath, jpegPath) {
 }
 
 // article: { title, categoryLabel, topic-related label si hay, slug }
-// Devuelve la ruta relativa (ej. "img/temas/mi-articulo.jpg") o null.
+// Devuelve { path, prompt, tool, model, generatedAt } o null si no se
+// generó nada (generación deshabilitada o sin API key -- ver
+// admin/pipeline.js, que no lo trata como error). Desde el registro
+// obligatorio de procedencia (sept. 2026): antes solo se devolvía la
+// ruta ("img/temas/mi-articulo.jpg") -- ahora se devuelve también el
+// resto del registro de generación en el momento mismo en que se genera,
+// para que quede grabado en el artículo (imageTool/imageModel/
+// imageGeneratedAt/imagePrompt) y no dependa de reconstruirlo después,
+// que es exactamente lo que no se pudo hacer con las imágenes viejas.
 async function generateCoverImage(article, cfg, topicLabel) {
   var imgCfg = (cfg && cfg.imageGeneration) || {};
   if (!imgCfg.enabled) return null;
@@ -125,12 +133,19 @@ async function generateCoverImage(article, cfg, topicLabel) {
   var pngPath = path.join(IMG_TEMAS_DIR, article.slug + '.png');
   var jpegPath = path.join(IMG_TEMAS_DIR, article.slug + '.jpg');
 
+  var model = imgCfg.model || 'gpt-image-1.5';
   try {
-    var b64 = await callOpenAIImageWithRetry(apiKey, imgCfg.model || 'gpt-image-1.5', imgCfg.quality || 'low', imgCfg.size || '1536x1024', prompt);
+    var b64 = await callOpenAIImageWithRetry(apiKey, model, imgCfg.quality || 'low', imgCfg.size || '1536x1024', prompt);
     fs.writeFileSync(pngPath, Buffer.from(b64, 'base64'));
     await pngToJpeg(pngPath, jpegPath);
     fs.unlinkSync(pngPath);
-    return 'img/temas/' + article.slug + '.jpg';
+    return {
+      path: 'img/temas/' + article.slug + '.jpg',
+      prompt: prompt,
+      tool: 'openai-images-api',
+      model: model,
+      generatedAt: new Date().toISOString()
+    };
   } catch (e) {
     try { if (fs.existsSync(pngPath)) fs.unlinkSync(pngPath); } catch (e2) {}
     throw e;

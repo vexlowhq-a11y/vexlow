@@ -10,14 +10,74 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<link rel="canonical" href="https://vexlowhq.com/privacy.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VexlowHQ">
+<meta property="og:title" content="Privacy — VexlowHQ">
+<meta property="og:description" content="What information we collect and how we use it.">
+<meta property="og:url" content="https://vexlowhq.com/privacy.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Privacy — VexlowHQ">
+<meta name="twitter:description" content="What information we collect and how we use it.">
+<!-- CONSENT_ADS_BLOCK:START -->
 <script>
+  /* Google Consent Mode v2 -- unica inicializacion de dataLayer/gtag de toda
+     la pagina. Consentimiento por defecto: denegado para TODAS las
+     regiones (postura conservadora mientras no se confirme que la CMP
+     publicada en AdSense esta integrada y funcionando en produccion),
+     hasta que el usuario decida vía la CMP.
+
+     Modo preview local (auditoria 2026-09-12): en localhost/127.0.0.1 no
+     se cargan externamente gtag.js, el script de AdSense (adsbygoogle)
+     ni Funding Choices/googlefc (bloqueo a nivel de solicitud de red -- los <script src>
+     reales nunca se insertan en el DOM -- no un ocultamiento visual con
+     CSS) para no ensuciar Analytics ni gastar cuota de anuncios con
+     trafico de desarrollo. En cualquier otro hostname (produccion,
+     previews de Vercel, etc.) el comportamiento no cambia: se sigue
+     cargando todo exactamente igual que antes. */
+  window.VEXLOW_PREVIEW_LOCAL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
   gtag('js', new Date());
   gtag('config', 'G-20Z63KYZ3K');
+  window.vexlowReopenConsentPreferences = function () {
+    if (window.googlefc && typeof window.googlefc.showRevocationMessage === 'function') {
+      window.googlefc.showRevocationMessage();
+    } else {
+      alert('Las preferencias de privacidad no estan disponibles en este momento. Mientras tanto, VexlowHQ no carga cookies de anuncios ni de analitica de personalizacion sin tu consentimiento.');
+    }
+  };
+  window.vexlowLoadExternalScript = function (src, crossOrigin) {
+    if (window.VEXLOW_PREVIEW_LOCAL) return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = src;
+    if (crossOrigin) { s.crossOrigin = crossOrigin; }
+    document.head.appendChild(s);
+  };
+  if (window.VEXLOW_PREVIEW_LOCAL) {
+    console.log('[VexlowHQ Preview] Ads, CMP and Analytics disabled on localhost');
+  } else {
+    window.vexlowLoadExternalScript('https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K');
+  }
 </script>
+<!-- Estado (2026-09-11): CMP publicada en AdSense (mensaje "European
+     regulations message - vexlowhq.com", Estado: Publicado, ingles + 31
+     idiomas, ultima modificacion 2026-08-15). Pendiente: verificar
+     posterior al deploy que `window.googlefc` se inyecta correctamente y
+     que conecta con las llamadas gtag('consent', 'update', ...) de arriba
+     (procedimiento completo en verificacion-consentimiento-post-activacion.md).
+     Hasta confirmar esa prueba, Consent Mode se queda en el valor por
+     defecto "denied" de arriba para todas las regiones cada vez que
+     `window.googlefc` no este presente. -->
+<!-- CONSENT_ADS_BLOCK:END -->
 </head>
 <body data-static-slug="privacy">
 
@@ -77,19 +137,13 @@
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="categoria/science/index.html" data-cat="science"><span class="ic">🚀</span>Science &amp; Space</a>
-        </div>
-      </div>
-
-      <div class="cat-item">
-        <div class="cat-row">
           <a class="cat-link" href="categoria/gaming/index.html" data-cat="gaming"><span class="ic">🎮</span>Gaming</a>
         </div>
       </div>
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Entertainment</a>
+          <a class="cat-link" href="categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Movies, TV &amp; Anime</a>
         </div>
       </div>
 
@@ -112,13 +166,20 @@
         <button type="button" class="filter-chip active" data-filter="all">All</button>
         <button type="button" class="filter-chip" data-filter="ai">🤖 AI</button>
         <button type="button" class="filter-chip" data-filter="technology">💻 Technology</button>
-        <button type="button" class="filter-chip" data-filter="science">🚀 Science &amp; Space</button>
         <button type="button" class="filter-chip" data-filter="gaming">🎮 Gaming</button>
-        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Entertainment</button>
+        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Movies, TV &amp; Anime</button>
         <button type="button" class="filter-chip" data-filter="sports">⚽ Sports</button>
         <button type="button" class="filter-chip" data-filter="business">💰 Business</button>
       </div>
-      <div class="latest-list" id="latestList"></div>
+      <div class="latest-list" id="latestList"><a class="latest-item" href="categoria/business/nscale-welcomes-former-openai-executive-fidji-simo-to-its-bo.html"><span class="ic">💰</span><div class="txt"><span class="ttl">Nscale Appoints Former OpenAI Executive Fidji Simo to Its Board Amid Reported IPO Preparations</span><div class="meta">Business · September 13, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/technology/the-dawn-of-the-ternus-era-what-s-next-for-apple.html"><span class="ic">💻</span><div class="txt"><span class="ttl">The Dawn of the Ternus Era: What’s Next for Apple?</span><div class="meta">Technology · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/ai/xdof-nears-1-2-billion-valuation-as-series-b-funding-talks-c.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">XDOF Nears $1.2 Billion Valuation as Series B Funding Talks Commence</span><div class="meta">AI · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/ai/clipto-the-ai-startup-pioneering-video-search-with-a-250-mil.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Clipto: The AI Startup Pioneering Video Search with a $250 Million Valuation</span><div class="meta">AI · September 2, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/ai/nvidia-s-strategic-investment-in-mediatek-a-move-to-secure-a.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Nvidia&#x27;s Strategic Investment in MediaTek: A Move to Secure AI Chip Dominance</span><div class="meta">AI · September 2, 2026 · 8 min</div></div></a>
+<a class="latest-item" href="categoria/science/inauguration-of-nasa-s-deep-space-station-23-marks-new-era-i.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Inauguration of NASA&#x27;s Deep Space Station 23 Marks New Era in Space Communication</span><div class="meta">Science &amp; Space · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/ai/pentagon-develops-its-own-ai-tools-including-chatgpt-and-gro.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Pentagon Adds ChatGPT and Grok to Its GenAI.mil Platform</span><div class="meta">AI · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump</span><div class="meta">Science &amp; Space · August 30, 2026 · 8 min</div></div></a>
+</div>
     </nav>
 
     <div class="sidebar-footer">
@@ -142,14 +203,14 @@
       <h2>Information we collect</h2>
       <p>VexlowHQ doesn't require you to register or create an account to read our content. We don't collect personal data directly, beyond the standard technical information any website receives from a visit (like browser type or the page you came from).</p>
       <h2>Cookies and advertising</h2>
-      <p>We use first-party and third-party cookies to run the site and to show advertising. In particular, we use or may use Google AdSense, which uses cookies to serve ads based on your prior visits to this and other websites.</p>
+      <p>We use first-party and third-party cookies to run the site and to show advertising. We use Google Analytics (GA4) to measure aggregate traffic and understand how the site is used, and we use or may use Google AdSense, which uses cookies to serve ads based on your prior visits to this and other websites.</p>
       <ul>
         <li>Essential cookies: needed for the site to work correctly.</li>
         <li>Analytics cookies: help us understand how the site is used, in aggregate and anonymously.</li>
         <li>Advertising cookies: used by Google AdSense and other providers to show relevant ads.</li>
       </ul>
-      <h2>Your choices</h2>
-      <p>You can delete or block cookies from your browser settings at any time. You can also manage Google's personalized advertising at <a href="https://adssettings.google.com" target="_blank" rel="noopener">adssettings.google.com</a>.</p>
+      <h2>Consent Mode and your choices</h2>
+      <p>VexlowHQ uses Google's Consent Mode, which is set to deny ad storage, ad personalization, and analytics storage by default for every visitor, unless and until you explicitly grant consent through our consent banner. Our consent management platform is published and active in Google AdSense; its integration with this site is being verified following our most recent deployment. Until that verification is complete, no advertising or analytics cookies that require consent are set. Once verified, you'll be able to review or withdraw your consent at any time using the "Privacy Preferences" link in the site footer. You can also delete or block cookies from your browser settings at any time, and manage Google's personalized advertising at <a href="https://adssettings.google.com" target="_blank" rel="noopener">adssettings.google.com</a>.</p>
       <h2>Changes to this policy</h2>
       <p>We may update this privacy policy from time to time. We'll post any significant changes on this same page.</p>
       <h2>Contact</h2>
@@ -168,12 +229,11 @@
           <a href="categoria/trending/index.html">Trending</a>
           <a href="categoria/ai/index.html">AI</a>
           <a href="categoria/technology/index.html">Technology</a>
-          <a href="categoria/science/index.html">Science &amp; Space</a>
+          <a href="categoria/gaming/index.html">Gaming</a>
         </div>
         <div class="footer-col">
           <h4>More categories</h4>
-          <a href="categoria/gaming/index.html">Gaming</a>
-          <a href="categoria/entertainment/index.html">Entertainment</a>
+          <a href="categoria/entertainment/index.html">Movies, TV &amp; Anime</a>
           <a href="categoria/sports/index.html">Sports</a>
           <a href="categoria/business/index.html">Business</a>
         </div>
@@ -190,6 +250,7 @@
           <a href="privacy.html">Privacy</a>
           <a href="terms.html">Terms</a>
           <a href="cookies.html">Cookies</a>
+          <a href="#" id="vexlow-consent-preferences-link" onclick="if(window.vexlowReopenConsentPreferences){vexlowReopenConsentPreferences();}return false;">Privacy Preferences</a>
         </div>
       </div>
       <div class="footer-bottom">

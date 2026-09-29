@@ -10,14 +10,67 @@
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<link rel="canonical" href="https://vexlowhq.com/play/gravity.html">
+<!-- CONSENT_ADS_BLOCK:START -->
 <script>
+  /* Google Consent Mode v2 -- unica inicializacion de dataLayer/gtag de toda
+     la pagina. Consentimiento por defecto: denegado para TODAS las
+     regiones (postura conservadora mientras no se confirme que la CMP
+     publicada en AdSense esta integrada y funcionando en produccion),
+     hasta que el usuario decida vía la CMP.
+
+     Modo preview local (auditoria 2026-09-12): en localhost/127.0.0.1 no
+     se cargan externamente gtag.js, el script de AdSense (adsbygoogle)
+     ni Funding Choices/googlefc (bloqueo a nivel de solicitud de red -- los <script src>
+     reales nunca se insertan en el DOM -- no un ocultamiento visual con
+     CSS) para no ensuciar Analytics ni gastar cuota de anuncios con
+     trafico de desarrollo. En cualquier otro hostname (produccion,
+     previews de Vercel, etc.) el comportamiento no cambia: se sigue
+     cargando todo exactamente igual que antes. */
+  window.VEXLOW_PREVIEW_LOCAL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
   gtag('js', new Date());
   gtag('config', 'G-20Z63KYZ3K');
+  window.vexlowReopenConsentPreferences = function () {
+    if (window.googlefc && typeof window.googlefc.showRevocationMessage === 'function') {
+      window.googlefc.showRevocationMessage();
+    } else {
+      alert('Las preferencias de privacidad no estan disponibles en este momento. Mientras tanto, VexlowHQ no carga cookies de anuncios ni de analitica de personalizacion sin tu consentimiento.');
+    }
+  };
+  window.vexlowLoadExternalScript = function (src, crossOrigin) {
+    if (window.VEXLOW_PREVIEW_LOCAL) return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = src;
+    if (crossOrigin) { s.crossOrigin = crossOrigin; }
+    document.head.appendChild(s);
+  };
+  if (window.VEXLOW_PREVIEW_LOCAL) {
+    console.log('[VexlowHQ Preview] Ads, CMP and Analytics disabled on localhost');
+  } else {
+    window.vexlowLoadExternalScript('https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K');
+  }
 </script>
+<!-- Estado (2026-09-11): CMP publicada en AdSense (mensaje "European
+     regulations message - vexlowhq.com", Estado: Publicado, ingles + 31
+     idiomas, ultima modificacion 2026-08-15). Pendiente: verificar
+     posterior al deploy que `window.googlefc` se inyecta correctamente y
+     que conecta con las llamadas gtag('consent', 'update', ...) de arriba
+     (procedimiento completo en verificacion-consentimiento-post-activacion.md).
+     Hasta confirmar esa prueba, Consent Mode se queda en el valor por
+     defecto "denied" de arriba para todas las regiones cada vez que
+     `window.googlefc` no este presente. -->
+<script>window.vexlowLoadExternalScript('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978', 'anonymous');</script>
+<!-- CONSENT_ADS_BLOCK:END -->
 </head>
 <body data-static-slug="play">
 
@@ -77,19 +130,13 @@
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="../categoria/science/index.html" data-cat="science"><span class="ic">🚀</span>Science &amp; Space</a>
-        </div>
-      </div>
-
-      <div class="cat-item">
-        <div class="cat-row">
           <a class="cat-link" href="../categoria/gaming/index.html" data-cat="gaming"><span class="ic">🎮</span>Gaming</a>
         </div>
       </div>
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="../categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Entertainment</a>
+          <a class="cat-link" href="../categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Movies, TV &amp; Anime</a>
         </div>
       </div>
 
@@ -112,13 +159,20 @@
         <button type="button" class="filter-chip active" data-filter="all">All</button>
         <button type="button" class="filter-chip" data-filter="ai">🤖 AI</button>
         <button type="button" class="filter-chip" data-filter="technology">💻 Technology</button>
-        <button type="button" class="filter-chip" data-filter="science">🚀 Science &amp; Space</button>
         <button type="button" class="filter-chip" data-filter="gaming">🎮 Gaming</button>
-        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Entertainment</button>
+        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Movies, TV &amp; Anime</button>
         <button type="button" class="filter-chip" data-filter="sports">⚽ Sports</button>
         <button type="button" class="filter-chip" data-filter="business">💰 Business</button>
       </div>
-      <div class="latest-list" id="latestList"></div>
+      <div class="latest-list" id="latestList"><a class="latest-item" href="../categoria/business/nscale-welcomes-former-openai-executive-fidji-simo-to-its-bo.html"><span class="ic">💰</span><div class="txt"><span class="ttl">Nscale Appoints Former OpenAI Executive Fidji Simo to Its Board Amid Reported IPO Preparations</span><div class="meta">Business · September 13, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/technology/the-dawn-of-the-ternus-era-what-s-next-for-apple.html"><span class="ic">💻</span><div class="txt"><span class="ttl">The Dawn of the Ternus Era: What’s Next for Apple?</span><div class="meta">Technology · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/xdof-nears-1-2-billion-valuation-as-series-b-funding-talks-c.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">XDOF Nears $1.2 Billion Valuation as Series B Funding Talks Commence</span><div class="meta">AI · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/clipto-the-ai-startup-pioneering-video-search-with-a-250-mil.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Clipto: The AI Startup Pioneering Video Search with a $250 Million Valuation</span><div class="meta">AI · September 2, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/nvidia-s-strategic-investment-in-mediatek-a-move-to-secure-a.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Nvidia&#x27;s Strategic Investment in MediaTek: A Move to Secure AI Chip Dominance</span><div class="meta">AI · September 2, 2026 · 8 min</div></div></a>
+<a class="latest-item" href="../categoria/science/inauguration-of-nasa-s-deep-space-station-23-marks-new-era-i.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Inauguration of NASA&#x27;s Deep Space Station 23 Marks New Era in Space Communication</span><div class="meta">Science &amp; Space · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/pentagon-develops-its-own-ai-tools-including-chatgpt-and-gro.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Pentagon Adds ChatGPT and Grok to Its GenAI.mil Platform</span><div class="meta">AI · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump</span><div class="meta">Science &amp; Space · August 30, 2026 · 8 min</div></div></a>
+</div>
     </nav>
 
     <div class="sidebar-footer">
@@ -180,23 +234,23 @@
           <div class="gravity-home-bottombar">
             <div class="gravity-stats-pill">
               <span class="gravity-stat gravity-stat-stars">⭐ <b id="gravityHomeStars">0/30</b></span>
-              <span class="gravity-stat gravity-stat-coins">🪙 <b id="gravityHomeCoins">0</b><button type="button" class="gravity-stat-add" id="gravityHomeCoinsAdd" aria-label="Conseguir más monedas">+</button></span>
-              <span class="gravity-stat gravity-stat-diamonds">💎 <b id="gravityHomeDiamonds">0</b><button type="button" class="gravity-stat-add" id="gravityHomeDiamondsAdd" aria-label="Conseguir más diamantes">+</button></span>
+              <span class="gravity-stat gravity-stat-coins">🪙 <b id="gravityHomeCoins">0</b><button type="button" class="gravity-stat-add" id="gravityHomeCoinsAdd" aria-label="Get more coins">+</button></span>
+              <span class="gravity-stat gravity-stat-diamonds">💎 <b id="gravityHomeDiamonds">0</b><button type="button" class="gravity-stat-add" id="gravityHomeDiamondsAdd" aria-label="Get more diamonds">+</button></span>
             </div>
             <div class="gravity-bottombar-row">
               <button type="button" class="gravity-level-card" id="gravityHomePlayBtn">
                 <span class="gravity-level-card-top">
-                  <span class="gravity-level-card-num" id="gravityHomeLvl">NIVEL 1</span>
+                  <span class="gravity-level-card-num" id="gravityHomeLvl">LEVEL 1</span>
                   <span class="gravity-level-card-stars" id="gravityHomeLvlStars">☆☆☆</span>
                 </span>
-                <span class="gravity-level-card-pct">TOTAL DEL NIVEL <b id="gravityHomeLvlPct">0%</b></span>
+                <span class="gravity-level-card-pct">LEVEL PROGRESS <b id="gravityHomeLvlPct">0%</b></span>
                 <span class="gravity-player-progress-bar"><span class="gravity-player-progress-fill" id="gravityHomeProgressFill"></span></span>
               </button>
               <button type="button" class="gravity-navtab active" id="gravityHomeHomeTab" aria-label="Home">
                 <span class="gravity-navtab-icon">🏠</span><span>HOME</span>
               </button>
-              <button type="button" class="gravity-navtab" id="gravityHomeLevelsBtn" aria-label="Seleccionar nivel">
-                <span class="gravity-navtab-icon">🗺️</span><span>NIVELES</span>
+              <button type="button" class="gravity-navtab" id="gravityHomeLevelsBtn" aria-label="Select level">
+                <span class="gravity-navtab-icon">🗺️</span><span>LEVELS</span>
               </button>
               <button type="button" class="gravity-navtab" id="gravityHomeSkinsBtn" aria-label="Skin">
                 <span class="gravity-navtab-icon">🧑‍🚀</span><span>SKIN</span>
@@ -210,7 +264,7 @@
         <div class="dash-name-card gravity-select-card gravity-level-card">
           <div class="gravity-screen-topbar">
             <button type="button" id="gravityLevelSelectClose" class="gravity-back-btn" aria-label="Back">◀</button>
-            <h3>SELECCIONAR NIVEL</h3>
+            <h3>SELECT LEVEL</h3>
             <span class="gravity-chip" id="gravityLevelStarsChip">⭐ 0/30</span>
           </div>
           <div class="gravity-select-grid" id="gravityLevelGrid"></div>
@@ -221,27 +275,27 @@
         <div class="dash-name-card gravity-select-card gravity-skin-card">
           <div class="gravity-screen-topbar">
             <button type="button" id="gravitySkinSelectClose" class="gravity-back-btn" aria-label="Back">◀</button>
-            <h3 id="gravitySkinScreenTitle">SELECCIONAR SKIN</h3>
+            <h3 id="gravitySkinScreenTitle">SELECT SKIN</h3>
             <span class="gravity-chip" id="gravitySkinWalletLine">🪙 0 💎 0</span>
           </div>
           <div class="gravity-skin-tabs">
-            <button type="button" class="gravity-tab active" id="gravitySkinTabCollection">COLECCIÓN</button>
-            <button type="button" class="gravity-tab" id="gravitySkinTabShop">TIENDA</button>
+            <button type="button" class="gravity-tab active" id="gravitySkinTabCollection">COLLECTION</button>
+            <button type="button" class="gravity-tab" id="gravitySkinTabShop">SHOP</button>
           </div>
           <div class="gravity-skin-rarities" id="gravitySkinRarities">
-            <button type="button" class="gravity-rarity-tab active" data-rarity="all">TODOS</button>
-            <button type="button" class="gravity-rarity-tab" data-rarity="basico">BÁSICOS</button>
-            <button type="button" class="gravity-rarity-tab" data-rarity="raro">RAROS</button>
-            <button type="button" class="gravity-rarity-tab" data-rarity="epico">ÉPICOS</button>
-            <button type="button" class="gravity-rarity-tab" data-rarity="legendario">LEGENDARIOS</button>
-            <button type="button" class="gravity-rarity-tab" data-rarity="especial">ESPECIALES</button>
+            <button type="button" class="gravity-rarity-tab active" data-rarity="all">ALL</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="basico">COMMON</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="raro">RARE</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="epico">EPIC</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="legendario">LEGENDARY</button>
+            <button type="button" class="gravity-rarity-tab" data-rarity="especial">SPECIAL</button>
           </div>
           <div class="gravity-skin-body">
             <div class="gravity-skin-preview" id="gravitySkinPreviewPanel">
               <div class="gravity-skin-preview-img"><img id="gravitySkinPreviewImg" src="../img/gravitycover/sliced/skin_01.png" alt=""></div>
               <strong id="gravitySkinPreviewName">NEON CLASSIC</strong>
-              <span class="gravity-rarity-tag" id="gravitySkinPreviewRarity">BÁSICO</span>
-              <button type="button" class="gravity-equip-btn" id="gravitySkinEquipBtn">EQUIPADO</button>
+              <span class="gravity-rarity-tag" id="gravitySkinPreviewRarity">COMMON</span>
+              <button type="button" class="gravity-equip-btn" id="gravitySkinEquipBtn">EQUIPPED</button>
             </div>
             <div class="gravity-select-grid gravity-skin-grid" id="gravitySkinGrid"></div>
           </div>
@@ -250,7 +304,7 @@
 
       <div class="dash-name-modal hidden" id="gravityNameModal">
         <div class="dash-name-card">
-          <h3>🏆 Enter your name</h3>
+          <h2>🏆 Enter your name</h2>
           <p>This is what shows up on the Gravity Flip leaderboard.</p>
           <input type="text" id="gravityNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
           <div class="dash-name-actions">
@@ -262,13 +316,13 @@
 
       <div class="dash-name-modal hidden" id="gravityAdBreak">
         <div class="dash-name-card">
-          <h3>⏸️ Quick break</h3>
+          <h2>⏸️ Quick break</h2>
           <button type="button" id="gravityAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
         </div>
       </div>
 
       <div class="dash-leaderboard">
-        <h3>🏆 Top Scores</h3>
+        <h2>🏆 Top Scores</h2>
         <ol class="dash-leaderboard-list" id="gravityLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
         <p class="dash-lb-you" id="gravityYouRank" hidden></p>
       </div>
@@ -308,12 +362,11 @@
           <a href="../categoria/trending/index.html">Trending</a>
           <a href="../categoria/ai/index.html">AI</a>
           <a href="../categoria/technology/index.html">Technology</a>
-          <a href="../categoria/science/index.html">Science &amp; Space</a>
+          <a href="../categoria/gaming/index.html">Gaming</a>
         </div>
         <div class="footer-col">
           <h4>More categories</h4>
-          <a href="../categoria/gaming/index.html">Gaming</a>
-          <a href="../categoria/entertainment/index.html">Entertainment</a>
+          <a href="../categoria/entertainment/index.html">Movies, TV &amp; Anime</a>
           <a href="../categoria/sports/index.html">Sports</a>
           <a href="../categoria/business/index.html">Business</a>
         </div>
@@ -330,6 +383,7 @@
           <a href="../privacy.html">Privacy</a>
           <a href="../terms.html">Terms</a>
           <a href="../cookies.html">Cookies</a>
+          <a href="#" id="vexlow-consent-preferences-link" onclick="if(window.vexlowReopenConsentPreferences){vexlowReopenConsentPreferences();}return false;">Privacy Preferences</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -345,6 +399,6 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
-<script src="../js/gravity.js?v=1787403095"></script>
+<script src="../js/gravity.js?v=1c76a6e167"></script>
 </body>
 </html>

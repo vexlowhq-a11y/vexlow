@@ -4,25 +4,73 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Word Search — VexlowHQ Games</title>
-<meta name="description" content="100 hand-picked levels across 4 difficulties — drag to find every word, unlock the next level, and collect achievements along the way.">
-<style>
-  .ws-embed-wrap { max-width: 480px; margin: 24px auto; }
-  .ws-embed-frame { width: 100%; height: 850px; border: none; border-radius: 16px; display: block; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
-  @media (max-width: 600px) { .ws-embed-frame { height: 100vh; border-radius: 0; } }
-</style>
+<meta name="description" content="A clean, fast word search — pick Easy through Expert (or Numbers), play in English or Spanish, and race the clock.">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<link rel="canonical" href="https://vexlowhq.com/play/wordsearch.html">
+<!-- CONSENT_ADS_BLOCK:START -->
 <script>
+  /* Google Consent Mode v2 -- unica inicializacion de dataLayer/gtag de toda
+     la pagina. Consentimiento por defecto: denegado para TODAS las
+     regiones (postura conservadora mientras no se confirme que la CMP
+     publicada en AdSense esta integrada y funcionando en produccion),
+     hasta que el usuario decida vía la CMP.
+
+     Modo preview local (auditoria 2026-09-12): en localhost/127.0.0.1 no
+     se cargan externamente gtag.js, el script de AdSense (adsbygoogle)
+     ni Funding Choices/googlefc (bloqueo a nivel de solicitud de red -- los <script src>
+     reales nunca se insertan en el DOM -- no un ocultamiento visual con
+     CSS) para no ensuciar Analytics ni gastar cuota de anuncios con
+     trafico de desarrollo. En cualquier otro hostname (produccion,
+     previews de Vercel, etc.) el comportamiento no cambia: se sigue
+     cargando todo exactamente igual que antes. */
+  window.VEXLOW_PREVIEW_LOCAL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
   gtag('js', new Date());
   gtag('config', 'G-20Z63KYZ3K');
+  window.vexlowReopenConsentPreferences = function () {
+    if (window.googlefc && typeof window.googlefc.showRevocationMessage === 'function') {
+      window.googlefc.showRevocationMessage();
+    } else {
+      alert('Las preferencias de privacidad no estan disponibles en este momento. Mientras tanto, VexlowHQ no carga cookies de anuncios ni de analitica de personalizacion sin tu consentimiento.');
+    }
+  };
+  window.vexlowLoadExternalScript = function (src, crossOrigin) {
+    if (window.VEXLOW_PREVIEW_LOCAL) return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = src;
+    if (crossOrigin) { s.crossOrigin = crossOrigin; }
+    document.head.appendChild(s);
+  };
+  if (window.VEXLOW_PREVIEW_LOCAL) {
+    console.log('[VexlowHQ Preview] Ads, CMP and Analytics disabled on localhost');
+  } else {
+    window.vexlowLoadExternalScript('https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K');
+  }
 </script>
+<!-- Estado (2026-09-11): CMP publicada en AdSense (mensaje "European
+     regulations message - vexlowhq.com", Estado: Publicado, ingles + 31
+     idiomas, ultima modificacion 2026-08-15). Pendiente: verificar
+     posterior al deploy que `window.googlefc` se inyecta correctamente y
+     que conecta con las llamadas gtag('consent', 'update', ...) de arriba
+     (procedimiento completo en verificacion-consentimiento-post-activacion.md).
+     Hasta confirmar esa prueba, Consent Mode se queda en el valor por
+     defecto "denied" de arriba para todas las regiones cada vez que
+     `window.googlefc` no este presente. -->
+<script>window.vexlowLoadExternalScript('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978', 'anonymous');</script>
+<!-- CONSENT_ADS_BLOCK:END -->
 </head>
 <body data-static-slug="play">
 
@@ -82,19 +130,13 @@
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="../categoria/science/index.html" data-cat="science"><span class="ic">🚀</span>Science &amp; Space</a>
-        </div>
-      </div>
-
-      <div class="cat-item">
-        <div class="cat-row">
           <a class="cat-link" href="../categoria/gaming/index.html" data-cat="gaming"><span class="ic">🎮</span>Gaming</a>
         </div>
       </div>
 
       <div class="cat-item">
         <div class="cat-row">
-          <a class="cat-link" href="../categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Entertainment</a>
+          <a class="cat-link" href="../categoria/entertainment/index.html" data-cat="entertainment"><span class="ic">🎬</span>Movies, TV &amp; Anime</a>
         </div>
       </div>
 
@@ -117,13 +159,20 @@
         <button type="button" class="filter-chip active" data-filter="all">All</button>
         <button type="button" class="filter-chip" data-filter="ai">🤖 AI</button>
         <button type="button" class="filter-chip" data-filter="technology">💻 Technology</button>
-        <button type="button" class="filter-chip" data-filter="science">🚀 Science &amp; Space</button>
         <button type="button" class="filter-chip" data-filter="gaming">🎮 Gaming</button>
-        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Entertainment</button>
+        <button type="button" class="filter-chip" data-filter="entertainment">🎬 Movies, TV &amp; Anime</button>
         <button type="button" class="filter-chip" data-filter="sports">⚽ Sports</button>
         <button type="button" class="filter-chip" data-filter="business">💰 Business</button>
       </div>
-      <div class="latest-list" id="latestList"></div>
+      <div class="latest-list" id="latestList"><a class="latest-item" href="../categoria/business/nscale-welcomes-former-openai-executive-fidji-simo-to-its-bo.html"><span class="ic">💰</span><div class="txt"><span class="ttl">Nscale Appoints Former OpenAI Executive Fidji Simo to Its Board Amid Reported IPO Preparations</span><div class="meta">Business · September 13, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/technology/the-dawn-of-the-ternus-era-what-s-next-for-apple.html"><span class="ic">💻</span><div class="txt"><span class="ttl">The Dawn of the Ternus Era: What’s Next for Apple?</span><div class="meta">Technology · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/xdof-nears-1-2-billion-valuation-as-series-b-funding-talks-c.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">XDOF Nears $1.2 Billion Valuation as Series B Funding Talks Commence</span><div class="meta">AI · September 5, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/clipto-the-ai-startup-pioneering-video-search-with-a-250-mil.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Clipto: The AI Startup Pioneering Video Search with a $250 Million Valuation</span><div class="meta">AI · September 2, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/nvidia-s-strategic-investment-in-mediatek-a-move-to-secure-a.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Nvidia&#x27;s Strategic Investment in MediaTek: A Move to Secure AI Chip Dominance</span><div class="meta">AI · September 2, 2026 · 8 min</div></div></a>
+<a class="latest-item" href="../categoria/science/inauguration-of-nasa-s-deep-space-station-23-marks-new-era-i.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Inauguration of NASA&#x27;s Deep Space Station 23 Marks New Era in Space Communication</span><div class="meta">Science &amp; Space · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/ai/pentagon-develops-its-own-ai-tools-including-chatgpt-and-gro.html"><span class="ic">🤖</span><div class="txt"><span class="ttl">Pentagon Adds ChatGPT and Grok to Its GenAI.mil Platform</span><div class="meta">AI · August 31, 2026 · 7 min</div></div></a>
+<a class="latest-item" href="../categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"><span class="ic">🚀</span><div class="txt"><span class="ttl">Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump</span><div class="meta">Science &amp; Space · August 30, 2026 · 8 min</div></div></a>
+</div>
     </nav>
 
     <div class="sidebar-footer">
@@ -143,28 +192,99 @@
 
     <article class="article-page">
       <h1>🔤 Word Search</h1>
-      <p class="play-intro">100 hand-picked levels across 4 difficulties — drag to find every word, unlock the next level, and collect achievements along the way.</p>
+      <p class="play-intro">Pick a difficulty, drag to select words in any direction, and race the clock. Play in English or Spanish.</p>
 
-      <div class="ws-embed-wrap">
-        <iframe src="wordsearch-game/index.html" class="ws-embed-frame" title="Word Search game" loading="lazy"></iframe>
+      <div class="dash-wrap ws-wrap">
+        <div class="dash-hud">
+          <span id="wordsearchTimer">Time: 00:00</span>
+          <span id="wordsearchBest">Best: --:--</span>
+          <button type="button" id="wordsearchHintBtn" class="ws-btn">Hint (3)</button>
+          <button type="button" id="wordsearchGiveUpBtn" class="ws-btn">Give Up</button>
+          <button type="button" id="wordsearchNewGameBtn" class="ws-btn">New Game</button>
+          <button type="button" id="wordsearchSettingsBtn" class="ws-btn">Settings</button>
+        </div>
+
+        <div class="ws-board">
+          <div class="ws-grid-wrap"><div id="wordsearchGrid" class="ws-grid"></div></div>
+          <div class="ws-words-wrap"><ul id="wordsearchWordList" class="ws-word-list"></ul></div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal" id="wordsearchStartModal">
+        <div class="dash-name-card">
+          <h3>🔤 Word Search</h3>
+          <p id="wordsearchStartHint">Choose a difficulty to start</p>
+          <div class="ws-lang-toggle">
+            <button type="button" id="wordsearchLangEn" class="ws-lang-btn active">English</button>
+            <button type="button" id="wordsearchLangEs" class="ws-lang-btn">Español</button>
+          </div>
+          <div class="ws-difficulty-grid" id="wordsearchDifficultyButtons">
+            <button type="button" class="ws-difficulty-btn" data-difficulty="easy">Easy</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="medium">Medium</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="hard">Hard</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="expert">Expert</button>
+            <button type="button" class="ws-difficulty-btn" data-difficulty="numbers">Numbers</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchWinModal">
+        <div class="dash-name-card">
+          <h3>🎉 You solved it!</h3>
+          <p>Your time: <strong id="wordsearchWinTime">00:00</strong></p>
+          <button type="button" id="wordsearchWinPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchRevealedModal">
+        <div class="dash-name-card">
+          <h3>👀 Puzzle revealed</h3>
+          <p>Better luck next time — every word is shown on the grid.</p>
+          <button type="button" id="wordsearchRevealedPlayAgain" class="dash-name-save" style="width:100%;">Play Again</button>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchNameModal">
+        <div class="dash-name-card">
+          <h2>🏆 Enter your name</h2>
+          <p>This is what shows up on the Word Search leaderboard.</p>
+          <input type="text" id="wordsearchNameInput" class="dash-name-input" maxlength="14" placeholder="Player" autocomplete="off">
+          <div class="dash-name-actions">
+            <button type="button" id="wordsearchNameSkip" class="dash-name-skip">Skip</button>
+            <button type="button" id="wordsearchNameSave" class="dash-name-save">Save &amp; Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-name-modal hidden" id="wordsearchAdBreak">
+        <div class="dash-name-card">
+          <h2>⏸️ Quick break</h2>
+          <button type="button" id="wordsearchAdBreakContinue" class="dash-name-save" style="width:100%;">Continue ▶</button>
+        </div>
+      </div>
+
+      <div class="dash-leaderboard">
+        <h3>🏆 Best Times</h3>
+        <ol class="dash-leaderboard-list" id="wordsearchLeaderboardList"><li class="dash-lb-empty">Loading…</li></ol>
+        <p class="dash-lb-you" id="wordsearchYouRank" hidden></p>
       </div>
 
       <section class="game-guide">
         <h2>How to play</h2>
-        <p>Pick a level from the map — levels unlock as you complete the ones before them and collect enough stars. Click or tap a letter and drag in a straight line (horizontal, vertical, or diagonal, either direction) to select a word. A correct match locks in with its own color and gets struck off the list. Solve it fast and hint-free for the full 3 stars.</p>
+        <p>Pick a difficulty and language from the start screen — grid size and word count scale up from Easy to Expert, and Numbers mode swaps letters for digit sequences. Click or tap a letter and drag in a straight line (horizontal, vertical, or diagonal, either direction) to select a word. A correct match locks in with its own color and gets struck off the list; the clock keeps running until every word is found.</p>
         <h2>Tips &amp; strategy</h2>
         <ul>
           <li>Scan for uncommon letters first (Q, X, Z, J) — they narrow down where a word could start much faster than scanning row by row.</li>
           <li>Words can run in any of the 8 directions and can be found back-to-front, so don't rule out a match just because it reads backwards.</li>
-          <li>Stars are based on how long you take and how many hints you use — the faster and cleaner you solve it, the more stars you get.</li>
+          <li>Stuck? Hint reveals one full word's path for a few seconds (up to 3 per puzzle) without marking it found — you still have to trace it yourself.</li>
         </ul>
         <h2>Tech specs</h2>
         <ul class="game-tech-specs">
-          <li><b>Type</b>Word search puzzle, 100 levels</li>
+          <li><b>Type</b>Word search puzzle, timed</li>
           <li><b>Controls</b>Mouse drag or touch drag</li>
-          <li><b>Difficulties</b>Easy, Medium, Hard, Extreme</li>
-          <li><b>Interface</b>English, Spanish (word content currently in Spanish)</li>
-          <li><b>Scoring</b>Up to 3 stars per level, plus unlockable achievements</li>
+          <li><b>Difficulties</b>Easy, Medium, Hard, Expert, Numbers</li>
+          <li><b>Languages</b>English, Spanish</li>
+          <li><b>Scoring</b>Best time, global leaderboard per difficulty</li>
         </ul>
       </section>
 
@@ -183,12 +303,11 @@
           <a href="../categoria/trending/index.html">Trending</a>
           <a href="../categoria/ai/index.html">AI</a>
           <a href="../categoria/technology/index.html">Technology</a>
-          <a href="../categoria/science/index.html">Science &amp; Space</a>
+          <a href="../categoria/gaming/index.html">Gaming</a>
         </div>
         <div class="footer-col">
           <h4>More categories</h4>
-          <a href="../categoria/gaming/index.html">Gaming</a>
-          <a href="../categoria/entertainment/index.html">Entertainment</a>
+          <a href="../categoria/entertainment/index.html">Movies, TV &amp; Anime</a>
           <a href="../categoria/sports/index.html">Sports</a>
           <a href="../categoria/business/index.html">Business</a>
         </div>
@@ -205,6 +324,7 @@
           <a href="../privacy.html">Privacy</a>
           <a href="../terms.html">Terms</a>
           <a href="../cookies.html">Cookies</a>
+          <a href="#" id="vexlow-consent-preferences-link" onclick="if(window.vexlowReopenConsentPreferences){vexlowReopenConsentPreferences();}return false;">Privacy Preferences</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -220,5 +340,7 @@
 
 <script src="../data/articulos.js"></script>
 <script src="../js/script.js"></script>
+<script src="../js/wordsearch-data.js?v=cb32a2fc3c"></script>
+<script src="../js/wordsearch.js?v=cb32a2fc3c"></script>
 </body>
 </html>

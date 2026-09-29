@@ -23,7 +23,8 @@
     "label": "Science & Space",
     "icon": "🚀",
     "description": "NASA, SpaceX, discoveries, medicine, and nature.",
-    "imgFolder": "science-space"
+    "imgFolder": "science-space",
+    "retiredForNewContent": true
   },
   {
     "slug": "gaming",
@@ -33,9 +34,9 @@
   },
   {
     "slug": "entertainment",
-    "label": "Entertainment",
+    "label": "Movies, TV & Anime",
     "icon": "🎬",
-    "description": "Movies, TV series, streaming, music, and celebrities."
+    "description": "Movies, TV series, streaming (Netflix, Disney+, Max, Prime Video, Hulu, Peacock, Paramount+, Apple TV+), anime (Crunchyroll, HIDIVE), and celebrities."
   },
   {
     "slug": "sports",
@@ -48,5 +49,19 @@
     "label": "Business",
     "icon": "💰",
     "description": "Startups, cryptocurrency, investing, marketing, and the world of business."
+  },
+  {
+    "slug": "cybersecurity",
+    "label": "Cybersecurity",
+    "icon": "🛡️",
+    "description": "Data breaches, vulnerabilities, privacy, and how to stay safe online.",
+    "publicMinArticles": 3
+  },
+  {
+    "slug": "guides",
+    "label": "Guides",
+    "icon": "📘",
+    "description": "Step-by-step how-tos and explainers to get the most out of your tech.",
+    "publicMinArticles": 3
   }
 ]

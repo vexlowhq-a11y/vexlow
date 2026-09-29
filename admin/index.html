@@ -111,6 +111,19 @@
     <form class="admin-form" id="articleForm">
       <h3 id="articleFormTitle">Agregar artículo</h3>
       <div class="form-grid">
+        <label class="span-2" style="background:var(--surface-2,#f4f4f5);padding:10px 12px;border-radius:6px;">Estado de publicación (obligatorio — gobierna si esto llega a hacerse público; no tiene nada que ver con el campo "Nota editorial interna" de más abajo)
+          <select id="articleStatus" required>
+            <option value="draft">Borrador (draft) — incompleto, no genera página, no se valida</option>
+            <option value="review">En revisión (review) — completo, esperando revisión humana, todavía no publicado</option>
+            <option value="approved">Aprobado (approved) — revisado y autorizado, todavía no publicado</option>
+            <option value="published">Publicado (published) — pasa todos los controles y genera la página pública</option>
+            <option value="redirected">Redirección (redirected) — esta URL pasa a redirigir a otro artículo ya existente</option>
+          </select>
+        </label>
+        <p class="admin-hint span-2">Una noticia nueva nunca debería pasar directo de una búsqueda RSS o de una redacción con IA a "Publicado" — dejala en "Borrador" o "En revisión" hasta haber confirmado vos mismo fuentes, imagen y exactitud (ver el check al final del formulario).</p>
+        <label class="span-2" id="articleRedirectToWrap" hidden>Redirige a (formato categoria/slug — ej. technology/nombre-del-articulo-destino)
+          <input type="text" id="articleRedirectTo" placeholder="technology/nombre-del-articulo-destino">
+        </label>
         <label>Categoría
           <select id="articleCategory" required></select>
         </label>
@@ -123,10 +136,91 @@
         <label class="span-2">Resumen (dek — aparece debajo del título)
           <textarea id="articleDek" rows="2" placeholder="Uno o dos renglones que resuman la noticia"></textarea>
         </label>
+        <label class="span-2">Fuentes — fuente principal: URL (obligatoria para publicar; si el artículo vino de un borrador de RSS ya se carga sola)
+          <input type="text" id="articleSourceUrl" placeholder="https://ejemplo.com/nota-original o comunicado oficial">
+        </label>
+        <div class="span-2" style="display:flex;gap:8px;align-items:center;margin:-8px 0 0;">
+          <button type="button" class="btn-secondary" id="articleCheckSourceBtn">Verificar fuente</button>
+          <span class="admin-hint" id="articleCheckSourceStatus"></span>
+        </div>
+        <label class="span-2">Fuentes — fuente principal: nombre del medio
+          <input type="text" id="articleSourceTitle" placeholder="Ej: Reuters, Bloomberg, TechCrunch, comunicado oficial de la empresa">
+        </label>
+        <div class="span-2" id="articleAdditionalSourcesWrap">
+          <span class="admin-hint" style="display:block;margin:0 0 6px;">Fuentes adicionales (opcional — para datos de contexto que vienen de otro medio distinto de la fuente principal)</span>
+          <div id="articleAdditionalSourcesList"></div>
+          <button type="button" class="btn-secondary" id="articleAddSourceBtn">+ Agregar fuente adicional</button>
+        </div>
+        <div class="span-2" id="articleQuickReviewCard" hidden style="background:var(--surface-2,#f4f4f5);padding:10px 12px;border-radius:6px;">
+          <strong style="display:block;margin-bottom:6px;">Ficha de revisión rápida</strong>
+          <span class="admin-hint" style="display:block;margin-bottom:6px;">Se completa sola cuando el artículo viene de un borrador de RSS; en un artículo cargado a mano puede quedar incompleta.</span>
+          <div id="articleQuickReviewBody" style="font-size:.92em;line-height:1.5;"></div>
+        </div>
         <label class="span-2">Imagen destacada (se muestra en la nota y en las tarjetas — si no subís nada, se usa el ícono de la categoría)
           <input type="file" id="articleImageUpload" accept="image/*">
           <span class="admin-hint" id="articleImageStatus">Sin imagen (usa el ícono de la categoría).</span>
           <button type="button" class="btn-secondary" id="articleImageRemoveBtn" hidden>Quitar imagen</button>
+        </label>
+        <div class="span-2" id="articleImagePreviewWrap" hidden style="margin:-6px 0 6px;">
+          <img id="articleImagePreviewImg" style="max-width:220px;max-height:130px;border-radius:6px;display:block;object-fit:cover;">
+          <span class="admin-hint" id="articleImagePreviewInfo"></span>
+        </div>
+        <p class="admin-hint span-2" style="background:var(--surface-2,#f4f4f5);padding:8px 10px;border-radius:6px;">
+          ⚠️ Antes de subir una imagen, revisá que NO tenga: rostros reconocibles de personas reales, logotipos o marcas como elemento principal, personajes protegidos (Marvel/DC/Nintendo/etc.), imitación deliberada del estilo de un artista vivo, ni texto legible generado por IA.
+        </p>
+        <label class="span-2">Origen de la imagen
+          <select id="articleImageOrigin">
+            <option value="">— Elegir —</option>
+            <option value="ai-generated">Generada con IA</option>
+            <option value="own-original">Propia / original de VexlowHQ (no generada con IA)</option>
+            <option value="public-domain">Dominio público</option>
+            <option value="cc0">Creative Commons CC0</option>
+            <option value="cc-by">Creative Commons CC-BY</option>
+            <option value="cc-by-sa">Creative Commons CC-BY-SA</option>
+            <option value="editorial-permission-verified">Permiso editorial verificado (prensa, kit oficial, etc.)</option>
+          </select>
+        </label>
+        <label class="span-2">Licencia de la imagen
+          <select id="articleImageLicense">
+            <option value="">— Elegir un origen primero —</option>
+          </select>
+        </label>
+        <label class="span-2">Crédito de la imagen (se muestra en la página si tiene texto)
+          <input type="text" id="articleImageCredit" placeholder="Ej: AI-generated image created for VexlowHQ, NASA, etc.">
+        </label>
+        <div id="articleImageAiFields" hidden>
+          <label>Herramienta usada
+            <input type="text" id="articleImageTool" placeholder="Ej: OpenAI Images API, Midjourney, etc.">
+          </label>
+          <label>Modelo
+            <input type="text" id="articleImageModel" placeholder="Ej: gpt-image-1.5">
+          </label>
+          <label>Fecha de generación
+            <input type="date" id="articleImageGeneratedAt">
+          </label>
+          <label class="span-2">Prompt usado
+            <textarea id="articleImagePrompt" rows="3" placeholder="Pegá acá el prompt exacto que generó la imagen"></textarea>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="articleImageHumanEdited">
+            La imagen fue retocada a mano después de generarla
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="articleImageOwnerAttestation">
+            Declaro (Leonardo Beltrán) que fue generada con IA específicamente para VexlowHQ y no descargada de un medio externo
+          </label>
+        </div>
+        <div id="articleImageAttributionFields" hidden>
+          <label class="span-2">Fuente / autor de la imagen (obligatorio para esta licencia — nunca "Google", "RSS", "prensa" ni "Internet")
+            <input type="text" id="articleImageSource" placeholder="Ej: NASA, Rockstar Games, etc.">
+          </label>
+          <label class="span-2">URL de la fuente (obligatoria para esta licencia)
+            <input type="text" id="articleImageSourceUrlInput" placeholder="https://ejemplo.com/fuente-original">
+          </label>
+        </div>
+        <label class="span-2 checkbox-label">
+          <input type="checkbox" id="articleImageReuseAuthorized">
+          Esta imagen se reutiliza a propósito en otro(s) artículo(s) (ej. imagen institucional propia) — autorizado explícitamente
         </label>
         <label class="span-2">Video destacado (opcional — pegá un link de YouTube o de embed de otro reproductor como Vimeo/JWPlayer; si cargás video, se muestra en vez de la imagen)
           <input type="text" id="articleVideoUrl" placeholder="https://www.youtube.com/watch?v=... o un link de embed">
@@ -140,6 +234,22 @@
         <label class="span-2 checkbox-label">
           <input type="checkbox" id="articleTrending">
           Marcar como Trending ⭐ (aparece en Trending y en el Top 5 del inicio)
+        </label>
+        <label class="span-2 checkbox-label">
+          <input type="checkbox" id="articleNoindex">
+          No indexar todavía (noindex,follow) — la página sigue publicada y navegable, pero se pide a Google que no la indexe ni aparece en sitemap.xml. Usalo mientras el artículo está en revisión editorial.
+        </label>
+        <label class="span-2" id="articleNoindexReasonWrap">Motivo del noindex (nota interna, no se publica en la página)
+          <input type="text" id="articleNoindexReason" placeholder="Ej: sin fuentes verificables, en verificación de hechos, pendiente de reescritura">
+        </label>
+        <label>Fecha de actualización (opcional — se muestra como "Updated ..." junto a la fecha de publicación, sin cambiarla)
+          <input type="date" id="articleUpdatedDate">
+        </label>
+        <label class="span-2">Nota de corrección (opcional — se publica en la página, en un recuadro debajo del título)
+          <input type="text" id="articleCorrectionNote" placeholder="Ej: Corregido el nombre del fundador de la banda y la fecha del anuncio.">
+        </label>
+        <label class="span-2">Nota editorial interna (legado — campo de texto libre, distinto del "Estado de publicación" de arriba; opcional, nunca se publica en la página; si tiene texto, el artículo queda excluido del Trending, Latest Posts y los rieles por categoría de la portada, aunque siga siendo accesible desde su categoría)
+          <input type="text" id="articleEditorialStatus" placeholder="Ej: Pendiente — contenido comercial sin prueba propia">
         </label>
         <label class="span-2">Cuerpo del artículo (dejalo vacío si solo querés que aparezca en el listado sin página propia)
           <textarea id="articleBody" rows="12" placeholder="Escribí el artículo acá. Separá los párrafos con una línea en blanco.
@@ -158,8 +268,22 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
         </div>
       </div>
       <p class="admin-hint" id="articlePreviewLink"></p>
+
+      <div class="admin-hint span-2" id="articleChecklist" style="background:var(--surface-2,#f4f4f5);border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+        <strong>Antes de publicar, revisá:</strong>
+        <ul id="articleChecklistList" style="margin:6px 0 0 18px;padding:0;list-style:none;"></ul>
+      </div>
+
+      <label class="span-2 checkbox-label" id="articleEditorialApprovalWrap">
+        <input type="checkbox" id="articleEditorialApproval">
+        He revisado las fuentes, los derechos de imagen y la exactitud del artículo.
+      </label>
+
+      <div class="admin-hint" id="articleWarningsBox" hidden style="background:#fff8e1;color:#7a5b00;border-radius:6px;padding:10px 12px;margin-bottom:10px;"></div>
+      <div class="admin-hint" id="articleValidationErrors" hidden style="background:#fdecea;color:#611a15;border-radius:6px;padding:10px 12px;margin-bottom:10px;"></div>
       <div class="form-actions">
-        <button type="submit" class="btn-primary">Guardar artículo</button>
+        <button type="submit" class="btn-primary" id="articleSubmitBtn">Guardar artículo</button>
+        <button type="button" class="btn-secondary" id="articleSaveDraftBtn" title="Guarda el artículo tal cual está, sin validar ni publicar página propia -- para retomarlo después">Guardar como borrador incompleto</button>
         <button type="button" class="btn-secondary" id="articleCancelBtn" hidden>Cancelar edición</button>
         <button type="button" class="btn-secondary" id="regenerateBtn">Regenerar sitio</button>
       </div>
@@ -168,14 +292,58 @@ Para meter una imagen extra en medio del texto, usá el botón de abajo (se inse
 
   <!-- ============ BORRADORES SUGERIDOS ============ -->
   <section class="admin-panel" id="panel-drafts">
-    <p class="admin-lede">Busca titulares recientes en feeds RSS de noticias (configurados en <code>admin/feeds.json</code>) y redacta un artículo original para cada uno con IA — nunca copia el texto de la fuente. Quedan acá como borrador: revisalos, editalos si hace falta, y usá "Usar este borrador" para pasarlos al formulario de "Últimas publicadas" y publicarlos.</p>
+    <p class="admin-lede">Consulta Google Trends (Estados Unidos) para detectar temas recientes y virales, exige dos fuentes periodísticas independientes por cada uno, y redacta un artículo original con IA para los mejores candidatos — nunca copia el texto de la fuente. Si Google Trends no responde, usa como respaldo los feeds RSS configurados en <code>admin/feeds.json</code>. Quedan acá como borrador: revisalos, editalos si hace falta, y usá "Usar este borrador" para pasarlos al formulario de "Últimas publicadas" y publicarlos.</p>
 
     <div class="form-actions" style="margin-bottom: 20px;">
       <button type="button" class="btn-primary" id="fetchDraftsBtn">Buscar noticias nuevas</button>
-      <span class="admin-hint" id="draftsFetchStatus"></span>
+      <span class="admin-hint" id="draftsFetchStatus">Modo Google Trends (Estados Unidos), con el RSS configurado como respaldo si Trends no responde — nunca inventa tendencias, fuentes ni volumen de búsqueda.</span>
+    </div>
+
+    <!-- Pipeline de 2 fases / control de costos (pedido de Leonardo,
+         2026-09-23): resumen de la última corrida -- nunca se muestra nada
+         acá hasta después de buscar (ver admin.js renderCostSummary). -->
+    <div class="admin-hint" id="draftsCostSummary" hidden style="background:#f4f6f8;border-radius:6px;padding:10px 12px;margin-bottom:14px;display:block;"></div>
+
+    <!-- Puntuación editorial (2026-09-20): los resultados quedan ordenados
+         Listos > Requieren revisión > Descartados (y por puntaje dentro de
+         cada grupo, ver renderDraftsList en admin.js) -- estos botones solo
+         FILTRAN qué se muestra, nunca cambian el orden ni el cálculo. -->
+    <div class="form-actions" id="draftsFilterBar" style="margin-bottom: 14px; gap: 8px;">
+      <span class="admin-hint">Filtrar:</span>
+      <button type="button" class="btn-secondary draft-filter-btn" data-tier="listo" id="draftsFilterListo">✅ Solo listos</button>
+      <button type="button" class="btn-secondary draft-filter-btn" data-tier="revisar" id="draftsFilterRevisar">⚠️ Requieren revisión</button>
+      <button type="button" class="btn-secondary draft-filter-btn" data-tier="descartar" id="draftsFilterDescartar">⛔ Descartados</button>
     </div>
 
     <div class="admin-list" id="draftsList"></div>
+
+    <!-- Modo secundario opcional (requisito 20, pedido de Leonardo,
+         2026-09-23): candidatos de una sola fuente que la fase 1 encontró
+         pero NUNCA redactó automáticamente -- solo para revisión manual.
+         Título/resumen del RSS/enlace, nada más (nunca se convierten en
+         borrador solos). -->
+    <div class="form-actions" style="margin-top: 22px; margin-bottom: 8px;">
+      <label class="admin-hint" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="draftsShowSingleSource">
+        Mostrar candidatos con una sola fuente (no se redactan solos -- para revisar a mano)
+      </label>
+    </div>
+    <div class="admin-list" id="draftsSingleSourceList" hidden></div>
+
+    <!-- Fantasy/apuestas (pedido de Leonardo, 2026-09-27, punto 1): consejos
+         individuales de alineación/selección (start/sit, waiver wire, best
+         bets, etc.) que la fase 1 detectó y NUNCA redactó automáticamente --
+         nunca excluye la categoría Sports entera, solo estos candidatos
+         puntuales. Mismo criterio que la lista de una sola fuente de arriba:
+         solo título/resumen/enlace, para revisar a mano si Leonardo quiere
+         redactarlo él mismo. -->
+    <div class="form-actions" style="margin-top: 14px; margin-bottom: 8px;">
+      <label class="admin-hint" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="draftsShowFantasyBetting">
+        Mostrar candidatos de fantasy/apuestas -- no redactado automáticamente (0 llamadas de IA)
+      </label>
+    </div>
+    <div class="admin-list" id="draftsFantasyBettingList" hidden></div>
   </section>
 
   <!-- ============ CATEGORÍAS ============ -->

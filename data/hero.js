@@ -12,7 +12,7 @@ const VEXLOW_HERO = [
     "chip": "🎮 Gaming",
     "title": "Riot Games Halts Development of League of Legends Fighting Game 2XKO",
     "dek": "Riot Games announces it is winding down development on 2XKO, the free-to-play fighting game set in the League of Legends universe, citing low player retention as a key factor.",
-    "image": "img/drafts/riot-games-halts-development-of-league-o-f442.jpg",
+    "image": "img/temas/riot-games-halts-development-of-league-of-legends-fighting-g.jpg",
     "textColor": "#0E1116",
     "href": "categoria/gaming/riot-games-halts-development-of-league-of-legends-fighting-g.html"
   },
@@ -30,7 +30,7 @@ const VEXLOW_HERO = [
     "chip": "🚀 Science & Space",
     "title": "Artemis II Astronauts Honored with Congressional Space Medal of Honor by President Trump",
     "dek": "The astronauts of NASA's Artemis II mission, who journeyed around the moon in April, have been awarded the prestigious Congressional Space Medal of Honor, recognizing their contributions to space exploration.",
-    "image": "img/drafts/artemis-ii-astronauts-honored-with-congr-7ace.jpg",
+    "image": "img/temas/artemis-ii-astronauts-honored-with-congressional-space-medal.jpg",
     "textColor": "#0E1116",
     "href": "categoria/science/artemis-ii-astronauts-honored-with-congressional-space-medal.html"
   },
@@ -39,18 +39,9 @@ const VEXLOW_HERO = [
     "chip": "🚀 Science & Space",
     "title": "A Satellite's Final Moments: The Heat Shield Saga",
     "dek": "As a satellite faces its end, the challenges of heat shield technology come into sharper focus.",
-    "image": "img/drafts/a-satellite-s-final-moments-the-heat-shi-151d.png",
+    "image": "",
     "textColor": "#0E1116",
     "href": "categoria/science/a-satellite-s-final-moments-the-heat-shield-saga.html"
-  },
-  {
-    "category": "technology",
-    "chip": "💻 Technology",
-    "title": "Reimagining Founder Culture: A New Approach to Preventing Burnout",
-    "dek": "In London, a unique founder house is shifting paradigms by focusing on work-life balance to combat burnout among startup leaders.",
-    "image": "img/temas/reimagining-founder-culture-a-new-approach-to-preventing-bur.jpg",
-    "textColor": "#0E1116",
-    "href": "categoria/technology/reimagining-founder-culture-a-new-approach-to-preventing-bur.html"
   },
   {
     "category": "ai",

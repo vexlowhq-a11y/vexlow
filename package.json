@@ -1,6 +1,10 @@
 {
   "name": "vexlowhq",
   "private": true,
+  "scripts": {
+    "validate:publish": "node admin/validate-publish.js",
+    "test:parity": "node admin/test-parity.js"
+  },
   "dependencies": {
     "redis": "^4.7.0"
   },

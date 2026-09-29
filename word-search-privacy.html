@@ -10,14 +10,42 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
 <script>
+  /* Google Consent Mode v2 -- unica inicializacion de dataLayer/gtag de toda
+     la pagina. Consentimiento por defecto: denegado para TODAS las
+     regiones (postura conservadora mientras no se confirme que la CMP
+     publicada en AdSense esta integrada y funcionando en produccion),
+     hasta que el usuario decida vía la CMP. */
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
   gtag('js', new Date());
   gtag('config', 'G-20Z63KYZ3K');
+  window.vexlowReopenConsentPreferences = function () {
+    if (window.googlefc && typeof window.googlefc.showRevocationMessage === 'function') {
+      window.googlefc.showRevocationMessage();
+    } else {
+      alert('Las preferencias de privacidad no estan disponibles en este momento. Mientras tanto, VexlowHQ no carga cookies de anuncios ni de analitica de personalizacion sin tu consentimiento.');
+    }
+  };
 </script>
+<!-- Estado (2026-09-11): CMP publicada en AdSense (mensaje "European
+     regulations message - vexlowhq.com", Estado: Publicado, ingles + 31
+     idiomas, ultima modificacion 2026-08-15). Pendiente: verificar
+     posterior al deploy que `window.googlefc` se inyecta correctamente y
+     que conecta con las llamadas gtag('consent', 'update', ...) de arriba
+     (procedimiento completo en verificacion-consentimiento-post-activacion.md).
+     Hasta confirmar esa prueba, Consent Mode se queda en el valor por
+     defecto "denied" de arriba para todas las regiones cada vez que
+     `window.googlefc` no este presente. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-20Z63KYZ3K"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9714873159823978" crossorigin="anonymous"></script>
 </head>
 <body data-static-slug="word-search-privacy">
 
@@ -202,6 +230,7 @@
           <a href="privacy.html">Privacy</a>
           <a href="terms.html">Terms</a>
           <a href="cookies.html">Cookies</a>
+          <a href="#" id="vexlow-consent-preferences-link" onclick="if(window.vexlowReopenConsentPreferences){vexlowReopenConsentPreferences();}return false;">Privacy Preferences</a>
         </div>
       </div>
       <div class="footer-bottom">

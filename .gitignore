@@ -15,3 +15,35 @@ node_modules/
 
 # Documentos internos de estrategia — no van al repo público
 docs/
+
+# Informes/backups internos generados en el trabajo con Claude — no son
+# parte del sitio ni del panel, no deben quedar en el repo público
+Claude outputs/
+
+# Blindaje del panel post-incidente 2026-09-13 (admin/articles-store.js):
+# backups automáticos de articulos.json, papelera de artículos borrados y
+# log de operaciones. Son estado operativo local del panel, no contenido
+# del sitio ni código -- no deben versionarse (crecen con el uso, y el log
+# registra actividad editorial que no hace falta en el historial de git).
+data/backups/
+data/trash.json
+admin/ops-log.jsonl
+_trash/
+
+# Caché técnica de "Buscar noticias nuevas" (pedido de Leonardo, 2026-09-23,
+# verificación previa a sincronizar 2026-09-24): solo motivo de descarte +
+# fecha por URL, con vencimiento de 24hs -- el mismo tipo de estado
+# operativo local que data/backups/ y data/trash.json de arriba, nunca
+# contenido del sitio ni del panel. No debe versionarse.
+data/candidate-cache.json
+
+# Auditoría 2026-09-13 (segmento de las 2 imágenes en advertencia de
+# validate:publish): img/drafts/ es una ruta de trabajo LOCAL para
+# prompts/candidatos de imagen todavía sin asignar a un artículo -- nunca
+# debería llegar a versionarse ni publicarse. Antes no estaba excluida, así
+# que cualquier imagen ahí (asignada a un artículo o no) terminaba
+# desplegada como archivo estático en producción. Las imágenes ya en uso
+# por un artículo publicado se migran a img/temas/ (o la carpeta que
+# corresponda) como parte del flujo normal -- lo que queda en img/drafts/
+# es, por definición, todavía no publicable.
+img/drafts/

@@ -119,7 +119,8 @@
       dot.type = 'button';
       dot.className = 'hero-dot' + (idx === 0 ? ' active' : '');
       dot.setAttribute('data-slide', idx);
-      dot.setAttribute('aria-label', 'Destacado ' + (idx + 1));
+      dot.setAttribute('role', 'tab');
+      dot.setAttribute('aria-label', 'Featured story ' + (idx + 1));
       dot.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
       heroDots.appendChild(dot);
     });
@@ -290,8 +291,34 @@
     return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
   }
 
+  // Artículos marcados "noindex" desde el panel (auditoría editorial en curso,
+  // sin fuentes suficientes todavía, etc.) no deben aparecer en ninguna
+  // superficie pública del sitio -- ni en portada, categorías, Latest,
+  // Trending ni en el buscador interno. Su página sigue existiendo
+  // (navegable si alguien tiene el link directo) pero no se promueve.
+  //
+  // Incidente 2026-09-13 ("146 con Moonshot repetido"): este filtro NO
+  // miraba el estado editorial (`status`) del artículo -- así que un
+  // borrador/revisión/aprobado guardado desde el panel (nunca pensado
+  // para ser público) SÍ aparecía acá mientras existiera en
+  // articulos.js, aunque nunca tuviera página HTML propia ni entrada en
+  // el sitemap. admin/server.js ya filtra articulos.js para que solo
+  // lleve published/redirected (ver generateArticulosJs), pero este
+  // chequeo se agrega igual como segunda capa -- mismo criterio que
+  // admin/article-status.js effectiveStatus(): sin `status` reconocido
+  // ni draftIncomplete, se trata como 'published' (así los artículos
+  // reales de antes de este esquema, que nunca tuvieron `status`, no
+  // cambian de comportamiento).
+  function publiclyListable(a) {
+    if (a.noindex) return false;
+    var status = (a.status === 'draft' || a.status === 'review' || a.status === 'approved' || a.status === 'published' || a.status === 'redirected')
+      ? a.status
+      : (a.draftIncomplete ? 'draft' : 'published');
+    return status === 'published' || status === 'redirected';
+  }
+
   function articlesSortedByDate() {
-    return VEXLOW_ARTICLES.slice().sort(function (a, b) {
+    return VEXLOW_ARTICLES.filter(publiclyListable).sort(function (a, b) {
       return new Date(b.date) - new Date(a.date);
     });
   }
@@ -429,6 +456,11 @@
       var emptyMsg = pageTopic ? T.noArticlesInTopic : T.noArticlesInCategory;
       categoryGrid.innerHTML = '<p class="latest-empty">' + emptyMsg + '</p>';
     } else {
+      // El HTML inicial ya viene con estas tarjetas server-side (ver
+      // admin/generate_pages.py y admin/pagegen.js) para que un
+      // rastreador que no ejecuta JS vea contenido real -- hay que
+      // limpiar antes de repintar, si no quedan duplicadas.
+      categoryGrid.innerHTML = '';
       pageItems.forEach(function (a) {
         categoryGrid.appendChild(buildCard(a, { showCategory: pageCategory === 'trending' }));
       });
@@ -470,6 +502,10 @@
   var trendStrip = document.getElementById('trendStrip');
   if (trendStrip && typeof VEXLOW_ARTICLES !== 'undefined') {
     var top5 = trendingArticles().slice(0, 5);
+    // El HTML inicial ya trae estas tarjetas server-side (ver
+    // admin/generate_pages.py / admin/pagegen.js) -- limpiar antes de
+    // repintar, si no quedan duplicadas.
+    trendStrip.innerHTML = '';
     top5.forEach(function (a, i) {
       var card = document.createElement('a');
       card.className = 'trend-card';
@@ -525,6 +561,8 @@
         railEl.innerHTML = '<p class="latest-empty">' + T.noArticlesInCategoryRail + '</p>';
         return;
       }
+      // Idem: ya viene poblado server-side, limpiar antes de repintar.
+      railEl.innerHTML = '';
       items.forEach(function (a) { railEl.appendChild(buildCard(a)); });
     });
   }
@@ -546,9 +584,11 @@
         return;
       }
       var matches = VEXLOW_ARTICLES.filter(function (a) {
-        return normalizeSearch(a.title).indexOf(q) !== -1 ||
+        return publiclyListable(a) && (
+          normalizeSearch(a.title).indexOf(q) !== -1 ||
           normalizeSearch(a.dek).indexOf(q) !== -1 ||
-          normalizeSearch(a.categoryLabel || a.category).indexOf(q) !== -1;
+          normalizeSearch(a.categoryLabel || a.category).indexOf(q) !== -1
+        );
       }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); }).slice(0, 8);
 
       siteSearchResults.innerHTML = '';

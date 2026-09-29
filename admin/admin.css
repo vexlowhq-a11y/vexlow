@@ -98,6 +98,10 @@ body { padding: 0; }
 .admin-bulk-count { font-size: 12px; color: var(--text-muted); }
 .btn-secondary.danger { color: #E5484D; border-color: rgba(229, 72, 77, .35); }
 .btn-secondary.danger:hover { background: rgba(229, 72, 77, .1); }
+/* Puntuación editorial (2026-09-20): filtros por clasificación en
+   "Borradores sugeridos" -- mismo patrón visual que .gravity-objtype-filter
+   para el estado activo/seleccionado. */
+.draft-filter-btn.active { border-color: var(--blue-fill); background: var(--blue-tint); color: var(--blue); }
 .admin-item .bulk-select { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
 
 /* ---- Insertar imagen suelta en el cuerpo del artículo ---- */
@@ -212,6 +216,20 @@ body { padding: 0; }
 .admin-item .item-actions button:hover,
 .admin-item .item-actions a:hover { border-color: var(--text-muted); }
 .admin-item .item-actions button.danger { color: #E5484D; }
+/* Auditoría 2026-09-13: sin esta regla, un botón con disabled=true real
+   seguía viéndose idéntico a uno habilitado (mismo color, mismo cursor) --
+   el atributo estaba pero no se notaba. gris/apagado + cursor not-allowed,
+   sin depender de que cada botón deshabilitado traiga su propio estilo
+   inline. :disabled ya alcanza sin ningún JS adicional -- se aplica solo
+   con el atributo disabled real del navegador. */
+.admin-item .item-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.admin-item .item-actions button:disabled:hover { border-color: var(--border); }
 .admin-empty { font-size: 13px; color: var(--text-muted); padding: 16px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-m); }
 
 /* ---- Form ---- */

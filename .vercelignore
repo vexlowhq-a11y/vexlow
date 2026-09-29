@@ -1,0 +1,34 @@
+# El panel de administración solo se usa en local (node admin/server.js).
+# Nunca debe quedar publicado como archivos estáticos accesibles en producción.
+admin/
+
+# Lanzadores locales del panel y su documentación: no son parte del sitio
+# público y no deben quedar accesibles como archivos estáticos en producción.
+INICIAR-PANEL-VEXLOWHQ.bat
+ABRIR-PANEL-VEXLOWHQ.bat
+LEEME-PANEL-ADMIN.md
+
+# Informes/backups internos generados en el trabajo con Claude — no son
+# parte del sitio, no deben quedar publicados
+Claude outputs/
+
+# Blindaje del panel post-incidente 2026-09-13: backups automáticos de
+# articulos.json, papelera de artículos borrados y log de operaciones.
+# admin/ ya está excluido arriba (cubre admin/ops-log.jsonl); estos son los
+# que quedan fuera de admin/.
+data/backups/
+data/trash.json
+_trash/
+
+# Caché técnica de "Buscar noticias nuevas" (pedido de Leonardo, 2026-09-23,
+# verificación previa a sincronizar 2026-09-24): mismo criterio que
+# data/backups/ y data/trash.json de arriba -- estado operativo local del
+# panel, nunca debe quedar accesible como archivo estático en producción.
+data/candidate-cache.json
+
+# Auditoría 2026-09-13: img/drafts/ es una ruta de trabajo local para
+# prompts/candidatos de imagen todavía sin asignar a un artículo -- nunca
+# debe quedar accesible como archivo estático en producción (ver la nota
+# más larga en .gitignore). Las imágenes ya asignadas a un artículo
+# publicado se migran a img/temas/ como parte del flujo normal.
+img/drafts/

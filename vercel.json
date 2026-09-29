@@ -1,0 +1,50 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/categoria/sports/lebron-james-future-remains-uncertain-as-rich-paul-confirms-.html",
+      "destination": "/categoria/sports/lebron-james-makes-surprise-move-to-philadelphia-a-new-chapt.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/sports/a-new-era-for-lebron-james-weighing-legacy-against-longevity.html",
+      "destination": "/categoria/sports/lebron-james-makes-surprise-move-to-philadelphia-a-new-chapt.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/ai/understanding-the-hugging-face-ai-security-breach-through-a-.html",
+      "destination": "/categoria/ai/examining-the-lessons-from-the-openai-hack-on-hugging-face.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/science/spacex-makes-waves-in-recent-space-developments.html",
+      "destination": "/categoria/science/spacex-s-starship-flight-13-a-milestone-in-reentry-capabilit.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/sports/dodgers-shake-up-mlb-with-skubal-trade.html",
+      "destination": "/categoria/sports/tarik-skubal-joins-the-dodgers-analyzing-the-trade-deadline-.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/science/nasa-s-roman-space-telescope-prepares-for-upcoming-launch.html",
+      "destination": "/categoria/science/nasa-prepares-for-launch-of-nancy-grace-roman-space-telescop.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/science/spacex-prepares-for-launch-of-nasa-s-roman-space-telescope.html",
+      "destination": "/categoria/science/nasa-prepares-for-launch-of-nancy-grace-roman-space-telescop.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/entertainment/antitrust-showdown-paramount-s-urgent-demand-for-november-tr.html",
+      "destination": "/categoria/business/antitrust-showdown-paramount-s-urgent-demand-for-november-tr.html",
+      "permanent": true
+    },
+    {
+      "source": "/categoria/entertainment/peacock-partners-with-youtube-to-enhance-content-access-thro.html",
+      "destination": "/categoria/business/peacock-partners-with-youtube-to-enhance-content-access-thro.html",
+      "permanent": true
+    }
+  ]
+}

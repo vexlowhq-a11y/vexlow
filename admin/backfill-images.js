@@ -53,11 +53,27 @@ async function main() {
   for (var i = 0; i < pending.length; i++) {
     var a = pending[i];
     try {
-      var imagePath = await imageGen.generateCoverImage(a, draftCfg, null);
-      if (imagePath) {
-        a.image = imagePath;
+      var generated = await imageGen.generateCoverImage(a, draftCfg, null);
+      if (generated) {
+        // Registro obligatorio de procedencia (sept. 2026): se completan
+        // los mismos campos que fetchNewDrafts() en admin/pipeline.js --
+        // este script llama al mismo proceso real de generación, así que
+        // tiene el mismo registro verificable (herramienta/modelo/fecha/
+        // prompt) disponible en el momento.
+        a.image = generated.path;
+        a.imageLicense = 'ai-generated-commercial-use';
+        a.imageOrigin = 'ai-generated';
+        a.imageTool = generated.tool;
+        a.imageModel = generated.model;
+        a.imageGeneratedAt = generated.generatedAt;
+        a.imagePrompt = generated.prompt;
+        a.imageHumanEdited = false;
+        a.imageOwnerAttestation = true;
+        a.imageSourceUrl = null;
+        a.imageSource = a.imageSource || '';
+        a.imageCredit = a.imageCredit || 'AI-generated image created for VexlowHQ';
         done++;
-        console.log('- [' + a.category + '] ' + a.title.slice(0, 55) + '  ->  ' + imagePath);
+        console.log('- [' + a.category + '] ' + a.title.slice(0, 55) + '  ->  ' + generated.path);
         // Guardar después de CADA imagen (no solo al final): si el
         // proceso se corta a mitad de camino (timeout, Ctrl+C, etc.)
         // no se pierde el gasto ya hecho en las que sí terminaron.
