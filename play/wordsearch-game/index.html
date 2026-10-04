@@ -497,10 +497,11 @@ const $ = (id) => document.getElementById(id);
 const RUTA_SPRITES = 'scripts/sopa_de_letras_sprites';
 
 // ---------- Configuración de anuncios (AdMob) ----------
-// ⚠️ Dejar en true hasta que la cuenta de AdMob esté aprobada (revisión ~24-48hs) y
-// probada — con true, todos los formatos piden explícitamente un anuncio de PRUEBA a
-// Google (isTesting), sin arriesgar la cuenta real aunque el ID de abajo sea uno real.
-const ADS_TEST_MODE = true;
+// true = todos los formatos piden explícitamente un anuncio de PRUEBA a Google
+// (isTesting), sin arriesgar la cuenta. false = anuncios reales (cuenta de AdMob ya
+// aprobada, 2026-10-04). Mientras se prueba en un celular propio con esto en false,
+// NO tocar los anuncios reales: Google puede marcarlo como tráfico inválido.
+const ADS_TEST_MODE = false;
 
 // IDs reales de la cuenta de AdMob (vexlowhq@gmail.com) — ya en uso para las pistas.
 const APP_AD_ID_ANDROID = 'ca-app-pub-9714873159823978~2129698219';
